@@ -3,6 +3,10 @@
 A personal website for Daniel Yoon, hosted free on GitHub Pages.
 Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and edits the files by hand.
 
+## Start here
+
+- At the start of a new session, read `HANDOFF.md`: who the owner is, how he likes to work, the workarounds for this environment, and where each project stands.
+
 ## Rules for working here
 
 - Explain every change in plain words a beginner can follow: what changed, why, and how to check it.
