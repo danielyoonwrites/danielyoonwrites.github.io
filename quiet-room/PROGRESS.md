@@ -15,7 +15,8 @@ Last updated: October 24, 2026
 - Firebase JavaScript SDK 13.1.0 from the CDN, modular API (Firebase docs and npm, October 2026).
 - Room name: "Quiet room" (sentence case on the page). Chosen October 24 over "Study room" and "Work room."
 - Line under the title, written by the owner (October 24): "A quiet place to read, study, or work alongside friends. No notifications, no games, no distractions."
-- Proposed small words for step 1 (owner can change them in the pull request): rule line "Adults only (18+). Please keep this link within the group."; footer "Made by Daniel Yoon" linking to https://danielyoonwrites.github.io; until joining works, "The room opens soon."
+- No age rule on the page (October 24): the owner decided it isn't needed, since people can't communicate. Revisit if chat is ever added. Open: whether to keep a line asking people to keep the link within the group.
+- Proposed small words for step 1 (owner can change them in the pull request): footer "Made by Daniel Yoon" linking to https://danielyoonwrites.github.io; until joining works, "The room opens soon."
 - Remember each person's name, avatar and activity in their own browser (not the database), so returning on the same browser is one tap. Proposed October 24; the owner didn't object. Anonymous sign-in keeps the same account on the same browser; a new device, private window, cleared data or (on iPhone Safari) about 7 days of Safari use without visiting means a new account.
 - Stale seats (proposed, not yet approved by the owner): each seat stores `online` and `lastSeen`; Firebase's `onDisconnect` marks it offline with the server time ("stepped away"); every browser hides seats away more than 15 minutes; the rules let anyone signed in delete a seat only when it has been away more than 15 minutes by the server's clock. Everything else about a seat can only be changed by its owner.
 
