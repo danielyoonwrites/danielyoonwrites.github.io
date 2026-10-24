@@ -45,7 +45,8 @@ Only one pull request at a time from the branch: wait for a merge before startin
 
 https://danielyoonwrites.github.io. Rules and design in `CLAUDE.md`.
 
-- Pages: Home (`index.html`), Writing (`writing.html`), About (`about.html`), one stylesheet (`style.css`).
+- Pages: Home (`index.html`), Writing (`writing.html`), Projects (`projects.html`), About (`about.html`), one stylesheet (`style.css`). The menu has no Home link; the name goes Home.
+- Projects page: shows how each app was thought through. Each project has a friendly line, then "How I built it" (what I wanted, the problem, what I decided, the trade-off). Add each new app there.
 - Design: "Moon jar," the same look as his Substack: porcelain background, ink text, celadon links and buttons, stone small print, glaze lines; Libre Baskerville, never bold; sentence case, no exclamation marks, no emoji. Never show his kids' faces, names or schools.
 - Words: Home and About were written by Dan and must be used exactly (see `CLAUDE.md`).
 - Writing page:
@@ -53,7 +54,7 @@ https://danielyoonwrites.github.io. Rules and design in `CLAUDE.md`.
   - "Latest posts": the 4 newest Substack posts, filled in automatically before every publish and once a day at 14:17 UTC by `scripts/latest-posts.js`, through Jina Reader. If that fails, a fallback link shows.
   - Newsletter section with a celadon Subscribe button (Substack's embed form clashed with the design).
 - GitHub turns off the daily run after 60 days without repository activity; re-enable it in the Actions tab.
-- Ideas not done: skip post openings that start with "Disclaimer"; a Projects page linking the apps.
+- Ideas not done: skip post openings that start with "Disclaimer"; a bigger app that shows Dan's architecture skills (parked October 24, 2026, until the Projects page is merged).
 
 
 ## Project 2: Quiet room (paused after step 1)
