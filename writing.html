@@ -81,14 +81,17 @@
       </ol>
     </section>
 
-    <!-- Latest posts. Each visitor's browser fills this list with the 4 newest posts
-         from Substack (see scripts/latest-posts.js). The line inside the list
-         shows only if the posts can't be loaded. -->
+    <!-- Latest posts. Once a day, and on every merge, GitHub fills this list with the
+         4 newest posts from Substack before publishing (see scripts/latest-posts.js).
+         Don't edit between the two LATEST POSTS lines: changes there get replaced.
+         The line between them shows only if the posts can't be loaded. -->
     <section class="latest">
       <p class="label">Fresh from the newsletter</p>
       <h2>Latest posts</h2>
-      <ul class="post-list" id="latest-posts">
+      <ul class="post-list">
+        <!-- LATEST POSTS START -->
         <li class="post"><p>See the newest posts on <a href="https://thingsdandoes.substack.com/archive">The Shy Korean</a>.</p></li>
+        <!-- LATEST POSTS END -->
       </ul>
       <p><a href="https://thingsdandoes.substack.com">Read all posts on Substack</a></p>
     </section>
@@ -110,9 +113,6 @@
     <p><a href="https://www.instagram.com/theshykoreandad/">Instagram</a></p>
     <p class="small-print">© 2026 Daniel Yoon</p>
   </footer>
-
-  <!-- Loads "Latest posts" from Substack -->
-  <script src="scripts/latest-posts.js" defer></script>
 
 </body>
 </html>

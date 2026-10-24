@@ -1,11 +1,14 @@
-# Publishes the website with GitHub Pages.
-# Runs when a change is merged into main, and whenever you click "Run workflow" in the Actions tab.
+# Publishes the website with GitHub Pages, with the newest Substack posts added.
+# Runs when a change is merged into main, once a day (to pick up new posts),
+# and whenever you click "Run workflow" in the Actions tab.
 
 name: Publish site
 
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: "17 14 * * *" # every day at 14:17 UTC (7:17 a.m. in California during daylight time)
   workflow_dispatch:
 
 permissions:
@@ -19,14 +22,17 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
+  # Part 1: get the files ready, with the latest posts added
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Get the website files
         uses: actions/checkout@v4
+
+      - name: Add the latest Substack posts
+        run: node scripts/latest-posts.js
+        # If the posts can't be loaded, still publish the site with the fallback link
+        continue-on-error: true
 
       - name: Set up GitHub Pages
         uses: actions/configure-pages@v5
@@ -36,6 +42,15 @@ jobs:
         with:
           path: .
 
+  # Part 2: publish (only from main; on other branches this part is skipped)
+  publish:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Publish
         id: deployment
         uses: actions/deploy-pages@v4
