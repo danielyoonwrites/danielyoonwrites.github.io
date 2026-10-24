@@ -19,8 +19,13 @@ Plain HTML and CSS. The owner is a beginner and edits the files by hand.
 
 ## Content
 
-- Keep the site general, like the Substack: writing, family life, the shy Korean voice.
-- Pastor work can be mentioned, lightly: a line or two (for example on the About page), not the focus of any page. The owner may add more pastor and Christian writing later.
+- The voice is like the Substack: writing, family life, the shy Korean voice.
+- Readers: millennial Asian Christians. Faith is part of what the site is about.
+- Pastor work is mentioned lightly (for example on the About page), not the focus of any page. Never word it so it sounds like just a job.
+
+Words already chosen (use them exactly)
+- Home: "Korean American dad. Professional overthinker, amateur life-enjoyer, tired parent of two toddlers. A millennial Asian Christian writing the things we usually don’t say out loud."
+- About, first lines: "I’m Daniel Yoon, a Korean American husband, father, and pastor. I’m still learning what each one asks of me. Writing is where I work it out."
 
 ## Links
 
