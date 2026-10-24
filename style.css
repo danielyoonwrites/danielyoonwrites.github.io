@@ -193,6 +193,24 @@ h2 a {
   border-top: 1px solid var(--glaze);
 }
 
+/* About page: sections with a thin line above */
+.about-section {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--glaze);
+}
+
+/* A simple list of links, no bullets */
+.link-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link-list li {
+  margin: 0 0 0.5rem;
+}
+
 /* The opening words on the Home page, a little larger */
 .intro {
   margin: 0;
