@@ -14,15 +14,21 @@ jobs:
             echo "chars: $(wc -c < /tmp/page.txt)"
             grep -i -o -E ".{0,220}($3).{0,220}" /tmp/page.txt | head -12
           }
-          get "FTC DNC FAQ" "https://consumer.ftc.gov/articles/national-do-not-call-registry-faqs" "1-888-382-1222|31 days|72 hours|expire|TTY|scammer"
-          get "FTC block calls" "https://consumer.ftc.gov/articles/how-block-unwanted-calls" "carrier|Silence Unknown|Call Screen|Smart Call|press|button"
-          get "FTC spam texts" "https://consumer.ftc.gov/articles/how-recognize-and-report-spam-text-messages" "7726"
-          get "FTC robocalls" "https://consumer.ftc.gov/articles/robocalls" "press|hang up|caller ID|report"
-          get "T-Mobile scams" "https://www.t-mobile.com/support/plans-features/help-with-scams-spam-and-fraud" "#662#|#632#|Scam Block|free"
-          get "Verizon Call Filter FAQ" "https://www.verizon.com/support/call-filter-faqs/" "free|Verizon Protect|Services|Manage|spam filter|My Verizon"
-          get "AT&T ActiveArmor" "https://www.att.com/support/article/wireless/KM1147710/" "free|block|spam|fraud|voicemail"
-          get "Apple screen calls" "https://support.apple.com/guide/iphone/screen-and-block-calls-iphe4b3f7823/ios" "Unknown Callers|Silence|Ask Reason|Settings|Apps|Phone"
-          get "Google caller ID spam" "https://support.google.com/phoneapp/answer/3459196?hl=en" "Caller ID|spam|Call Screen|Settings|More"
-          get "Samsung Smart Call" "https://www.samsung.com/us/support/answer/ANS10003438/" "Caller ID and spam|Block spam|scam|Settings|More options"
-          get "DROP" "https://privacy.ca.gov/drop/" "10 minutes|500|broker|delete|August|45 days"
-          get "DROP help" "https://privacy.ca.gov/drop/help-with-drop/" "another California|on behalf|DROP ID|8-digit|eight|date of birth|email|Login.gov|Identity Gateway|phone"
+          ctx() {  # $1 = label, $2 = url, $3 = words; prints whole lines around matches
+            echo; echo "################ $1"; echo "URL: $2"
+            curl -sS -m 40 -H "X-Return-Format: text" "https://r.jina.ai/$2" -o /tmp/page.txt || true
+            echo "chars: $(wc -c < /tmp/page.txt)"
+            grep -i -n -E -B1 -A4 "$3" /tmp/page.txt | cut -c1-400 | head -40
+          }
+          ctx "T-Mobile scams" "https://www.t-mobile.com/support/plans-features/help-with-scams-spam-and-fraud" "662|632|postpaid|T-Life"
+          ctx "T-Mobile block calls" "https://www.t-mobile.com/support/plans-features/block-unwanted-calls" "662|632|Scam Block"
+          ctx "Verizon spam filter" "https://www.verizon.com/support/knowledge-base-217615/" "Verizon Protect|Services|Call Filter|Manage|spam filter|free"
+          ctx "Verizon Call Filter how to" "https://www.verizon.com/support/how-to-use-call-filter/" "free|Verizon Protect|Services|Manage"
+          ctx "AT&T ActiveArmor free" "https://www.att.com/support/article/wireless/KM1147710/" "free|no extra|cost|download"
+          ctx "Apple screen calls" "https://support.apple.com/guide/iphone/screen-and-block-calls-iphe4b3f7823/ios" "Unknown|Silence|Ask Reason|Screen"
+          ctx "Samsung Smart Call (direct)" "https://www.samsung.com/us/support/answer/ANS10003438/" "Caller ID|spam|scam|Block"
+          ctx "Samsung call settings" "https://www.samsung.com/us/support/answer/ANS10007266/" "Caller ID|spam|scam|Block"
+          ctx "DROP home" "https://privacy.ca.gov/drop/" "minute|3 easy steps|step"
+          ctx "DROP consumer site" "https://consumer.drop.privacy.ca.gov/" "minute|another|behalf|date of birth|email|required"
+          ctx "DROP help" "https://privacy.ca.gov/drop/help-with-drop/" "another|behalf|someone else|date of birth|required|minute"
+          ctx "DROP flyer" "https://privacy.ca.gov/wp-content/uploads/sites/357/2026/03/DROP-Flyer.pdf" "minute|500|600|step|date of birth"
