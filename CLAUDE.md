@@ -19,10 +19,9 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
 
 ## Publishing and Latest posts
 
-- GitHub Pages publishes through the workflow `.github/workflows/publish.yml` (Pages source: GitHub Actions). It runs on every merge to main, once a day, and on "Run workflow".
-- Before publishing, `scripts/latest-posts.js` fills the "Latest posts" list on `writing.html` with the 4 newest posts from the Substack feed. It changes only the published copy, never the file in the repository.
-- Don't edit between the `LATEST POSTS START` and `LATEST POSTS END` lines. The text there is the fallback if the feed can't be reached.
-- GitHub turns off scheduled workflows after 60 days without repository activity; turn it back on in the Actions tab.
+- GitHub Pages publishes through the workflow `.github/workflows/publish.yml` (Pages source: GitHub Actions). It runs on every merge to main and on "Run workflow".
+- "Latest posts" on `writing.html` is filled in each visitor's browser by `scripts/latest-posts.js`. It tries the Substack feed directly, then the AllOrigins relay, then rss2json, and keeps the fallback link if all fail. Open `writing.html?debug` to see which way worked.
+- Why in the browser: Substack's Cloudflare protection blocks GitHub's computers from reading the feed (tested October 2026). Claude's sessions can't open Substack either.
 
 ## Content
 
