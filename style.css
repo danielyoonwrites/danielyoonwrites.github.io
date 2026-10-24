@@ -147,28 +147,50 @@ h1 a {
   border-radius: 0;
 }
 
-/* Featured posts: a thin line above, then one post per row */
-.posts {
-  margin-top: 2.5rem;
-  padding-top: 2rem;
+/* Section titles, like "The Shy Korean" */
+h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.375rem;
+  line-height: 1.35;
+}
+
+h2 a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* Featured posts: one post per block, thin lines between */
+.post-list {
+  margin: 1.5rem 0 1.5rem;
+  padding: 0;
+  list-style: none;
   border-top: 1px solid var(--glaze);
 }
 
-.post-list {
-  margin: 0 0 1.5rem;
-  padding: 0;
-  list-style: none;
-}
-
-.post-list li {
-  padding: 1rem 0;
+.post {
+  padding: 1.75rem 0;
   border-bottom: 1px solid var(--glaze);
-  font-size: 1.125rem;
-  line-height: 1.45;
 }
 
-.post-list a {
+/* Opening lines of a post, in italic */
+.post-excerpt {
+  margin: 0 0 0.75rem;
+  font-style: italic;
+}
+
+/* "Read on Substack" under each post, in the small label style */
+.read-link {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
   text-decoration: none;
+}
+
+/* The newsletter section after the posts: a thin line above */
+.newsletter {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--glaze);
 }
 
 /* The opening words on the Home page, a little larger */
