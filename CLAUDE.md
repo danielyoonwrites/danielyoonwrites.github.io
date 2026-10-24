@@ -1,13 +1,13 @@
 # Daniel Yoon personal site
 
 A personal website for Daniel Yoon, hosted free on GitHub Pages.
-Plain HTML and CSS. The owner is a beginner and edits the files by hand.
+Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and edits the files by hand.
 
 ## Rules for working here
 
 - Explain every change in plain words a beginner can follow: what changed, why, and how to check it.
 - One small change per pull request.
-- No build tools: no npm, no frameworks, no generators, no JavaScript unless asked for.
+- No build tools: no npm, no frameworks, no generators.
 - Keep the code simple and commented so the owner can edit it later.
 - Every page must look good on a phone first, then on a computer.
 
