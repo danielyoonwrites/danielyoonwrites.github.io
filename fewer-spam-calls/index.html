@@ -19,12 +19,13 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;1,400&display=swap">
 
   <!-- The guide's own look: Moon jar colors, bigger text for easy reading -->
-  <link rel="stylesheet" href="style.css">
+  <!-- The "?v=2" makes phones load the newest copy. Raise the number whenever style.css or guide.js changes. -->
+  <link rel="stylesheet" href="style.css?v=2">
 
   <!-- Marks the page as "JavaScript on", so it shows one screen at a time.
        Without JavaScript, every step shows on one page instead. -->
   <script>document.documentElement.classList.add('js');</script>
-  <script src="guide.js" defer></script>
+  <script src="guide.js?v=2" defer></script>
 </head>
 <body>
 
@@ -197,33 +198,33 @@
       <h2 tabindex="-1">You’re all set</h2>
       <p>You’ll still get a spam call now and then, but fewer of them.</p>
       <button class="choice" data-restart>Start over</button>
+
+      <!-- Where every fact comes from. Update these when the facts are checked again. -->
+      <details class="sources">
+        <summary>Where this comes from (last checked October 24, 2026)</summary>
+        <ul>
+          <li><a href="https://consumer.ftc.gov/articles/national-do-not-call-registry-faqs">FTC: National Do Not Call Registry FAQs</a></li>
+          <li><a href="https://consumer.ftc.gov/articles/how-block-unwanted-calls">FTC: How to block unwanted calls</a></li>
+          <li><a href="https://consumer.ftc.gov/articles/how-recognize-and-report-spam-text-messages">FTC: How to recognize and report spam text messages</a></li>
+          <li><a href="https://www.fcc.gov/call-blocking">FCC: Call blocking tools and resources</a></li>
+          <li><a href="https://www.t-mobile.com/support/plans-features/help-with-scams-spam-and-fraud">T-Mobile: Help with scams and spam</a></li>
+          <li><a href="https://www.verizon.com/support/call-filter-faqs/">Verizon: Call Filter FAQs</a></li>
+          <li><a href="https://www.att.com/support/article/wireless/KM1147710/">AT&amp;T: Use the ActiveArmor app</a></li>
+          <li><a href="https://support.apple.com/guide/iphone/screen-and-block-calls-iphe4b3f7823/ios">Apple: Screen and block calls on iPhone</a></li>
+          <li><a href="https://support.google.com/phoneapp/answer/3459196">Google: Use caller ID and spam protection</a></li>
+          <li><a href="https://www.samsung.com/us/support/answer/ANS10003438/">Samsung: Block spam calls with Smart Call</a></li>
+          <li><a href="https://privacy.ca.gov/drop/">California: Delete Request and Opt-out Platform (DROP)</a></li>
+          <li><a href="https://privacy.ca.gov/drop/help-with-drop/">California: Help with DROP</a></li>
+        </ul>
+      </details>
+
+      <!-- Small link back to the website -->
+      <p class="made-by"><a href="https://danielyoonwrites.github.io">Made by Daniel Yoon</a></p>
     </section>
 
 
-    <!-- Where every fact comes from. Update these when the facts are checked again. -->
-    <details class="sources">
-      <summary>Where this comes from (last checked October 24, 2026)</summary>
-      <ul>
-        <li><a href="https://consumer.ftc.gov/articles/national-do-not-call-registry-faqs">FTC: National Do Not Call Registry FAQs</a></li>
-        <li><a href="https://consumer.ftc.gov/articles/how-block-unwanted-calls">FTC: How to block unwanted calls</a></li>
-        <li><a href="https://consumer.ftc.gov/articles/how-recognize-and-report-spam-text-messages">FTC: How to recognize and report spam text messages</a></li>
-        <li><a href="https://www.fcc.gov/call-blocking">FCC: Call blocking tools and resources</a></li>
-        <li><a href="https://www.t-mobile.com/support/plans-features/help-with-scams-spam-and-fraud">T-Mobile: Help with scams and spam</a></li>
-        <li><a href="https://www.verizon.com/support/call-filter-faqs/">Verizon: Call Filter FAQs</a></li>
-        <li><a href="https://www.att.com/support/article/wireless/KM1147710/">AT&amp;T: Use the ActiveArmor app</a></li>
-        <li><a href="https://support.apple.com/guide/iphone/screen-and-block-calls-iphe4b3f7823/ios">Apple: Screen and block calls on iPhone</a></li>
-        <li><a href="https://support.google.com/phoneapp/answer/3459196">Google: Use caller ID and spam protection</a></li>
-        <li><a href="https://www.samsung.com/us/support/answer/ANS10003438/">Samsung: Block spam calls with Smart Call</a></li>
-        <li><a href="https://privacy.ca.gov/drop/">California: Delete Request and Opt-out Platform (DROP)</a></li>
-        <li><a href="https://privacy.ca.gov/drop/help-with-drop/">California: Help with DROP</a></li>
-      </ul>
-    </details>
   </main>
 
-  <!-- Small link back to the website -->
-  <footer>
-    <p><a href="https://danielyoonwrites.github.io">Made by Daniel Yoon</a></p>
-  </footer>
 
 </body>
 </html>

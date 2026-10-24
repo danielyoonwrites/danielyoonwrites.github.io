@@ -151,7 +151,7 @@ strong {
 
 /* "Not sure?" help under the questions */
 .hint {
-  margin: 1.25rem 0 0;
+  margin: 1.5rem 0 0;
   font-size: 0.85rem;
   color: var(--stone);
 }
@@ -159,54 +159,94 @@ strong {
 
 /* ---------- Buttons ---------- */
 
-/* Shared: big, easy to tap, square corners */
+/* Shared: easy to tap, square corners, the page's own font */
 button {
   display: block;
   width: 100%;
-  min-height: 3rem;          /* 60 pixels tall */
-  margin: 0 0 0.75rem;
-  padding: 0.75rem 1rem;
+  margin: 0;
   border-radius: 0;
   font-family: inherit;
-  font-size: 1rem;
   text-align: left;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Answer buttons: celadon outline */
+/* Answer choices: a list with thin lines between, like "Start here"
+   on the website's Writing page, with a small arrow on the right */
+.choices {
+  border-top: 1px solid var(--glaze);
+}
+
 .choice {
-  border: 1px solid var(--celadon);
+  position: relative;
+  min-height: 3.25rem;         /* about 65 pixels tall */
+  padding: 0.9rem 2rem 0.9rem 0;
+  border: none;
+  border-bottom: 1px solid var(--glaze);
   background: transparent;
+  color: var(--ink);
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+.choice::after {
+  content: "→" / "";  /* the / "" part keeps screen readers from reading arrows aloud */
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--celadon);
 }
 
-/* "Done, next step": solid celadon */
-.next {
-  margin-top: 1.75rem;
-  border: 1px solid var(--celadon);
-  background: var(--celadon);
-  color: var(--porcelain);
+.choice:hover,
+.choice:active {
+  color: var(--celadon);
 }
 
-/* "Back": quiet text button */
+/* "Done, next step": like the website's Subscribe button */
+.next {
+  min-height: 3.25rem;
+  margin-top: 2rem;
+  padding: 0.9rem 1.25rem;
+  border: none;
+  background: var(--celadon);
+  color: var(--porcelain);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.next::after {
+  content: "  →" / "";
+}
+
+/* "Back": a small quiet label */
 .back {
-  min-height: 2.5rem;
-  margin-top: 0.5rem;
-  padding-left: 0;
+  width: auto;
+  min-height: 2.75rem;
+  margin-top: 1rem;
+  padding: 0.5rem 0;
   border: none;
   background: transparent;
   color: var(--stone);
-  font-size: 0.85rem;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
+.back::before {
+  content: "←  " / "";
+}
+
+/* "Start over" on the last screen sits in its own little list */
+#finished .choice {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--glaze);
+}
 
 /* ---------- Sources ---------- */
 .sources {
   margin-top: 2.5rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--glaze);
   font-size: 0.75rem;
   color: var(--stone);
 }
@@ -225,15 +265,10 @@ button {
 }
 
 
-/* ---------- Footer ---------- */
-footer {
-  padding: 1.25rem 0 2.5rem;
-  border-top: 1px solid var(--glaze);
+/* "Made by Daniel Yoon" on the last screen */
+.made-by {
+  margin: 1.5rem 0 0;
   font-size: 0.75rem;
-}
-
-footer p {
-  margin: 0;
 }
 
 /* Without JavaScript the buttons can't do anything, so hide them */

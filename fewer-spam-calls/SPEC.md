@@ -22,7 +22,9 @@ Changed October 24, 2026, after the owner read the first version: a full checkli
 - Then "You're all set," with "Start over."
 - Every step is trimmed to the essentials. Calling the Do Not Call number comes first, since it's easier than signing up online.
 - Nothing is saved or sent anywhere. The page never asks for a phone number. No tracking.
-- Sources sit in a fold-out "Where this comes from" at the bottom, with the "last checked" date.
+- Nothing below the buttons while answering or stepping through. The sources (a fold-out "Where this comes from," with the "last checked" date) and "Made by Daniel Yoon" appear only on the last screen.
+- Buttons match the website (changed October 24, 2026, after the owner found the first buttons ugly): answers look like the Writing page's "Start here" list, with thin lines and a small arrow; "Done, next step" looks like the website's Subscribe button; "Back" is a small gray label.
+- File links end in `?v=2` so phones load new copies right away. GitHub Pages lets browsers keep files for 10 minutes (`cache-control: max-age=600`, checked October 24, 2026). Raise the number whenever `style.css` or `guide.js` changes.
 - Without JavaScript, every step shows on one page.
 
 ## The steps
