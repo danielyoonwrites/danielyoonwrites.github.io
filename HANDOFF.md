@@ -23,9 +23,11 @@ This repository is public. Keep personal details out of this file.
 
 1. Claude works on the branch it's given (this session used `claude/clever-brown-sqiwin`) and restarts it from `main` after each merge: `git fetch origin main && git checkout -B <branch> origin/main`.
 2. Claude opens a pull request with a plain-words description and a "How to check it" list.
+   Right after opening it, Claude subscribes to the pull request's activity (`subscribe_pr_activity`), so the merge wakes the session. Dan should never have to say "it merged."
 3. Dan reviews and merges on GitHub (Conversation tab, Merge pull request, Confirm merge).
 4. GitHub Actions publishes the site (workflow `.github/workflows/publish.yml`; GitHub Pages source is set to "GitHub Actions"). It takes a minute or two; check for a green mark next to **main** at https://github.com/danielyoonwrites/danielyoonwrites.github.io/actions
 5. Dan checks on his phone.
+6. When the merge wakes the session, Claude does the follow-up on its own: checks that the publish run on main succeeded, restarts the branch from main, updates the project's page in Dan's Master Notes (Notion), then tells Dan in one short message. Auto mode only skips permission prompts; it doesn't let Claude see GitHub between messages, and each new session has to subscribe again.
 
 Only one pull request at a time from the branch: wait for a merge before starting the next one, or the new work lands in the open pull request.
 
@@ -46,7 +48,8 @@ Only one pull request at a time from the branch: wait for a merge before startin
 https://danielyoonwrites.github.io. Rules and design in `CLAUDE.md`.
 
 - Pages: Home (`index.html`), Writing (`writing.html`), Projects (`projects.html`), About (`about.html`), one stylesheet (`style.css`). The menu has no Home link; the name goes Home.
-- Projects page: shows how each app was thought through. Each project has a friendly line, then "How I built it" (what I wanted, the problem, what I decided, the trade-off). Add each new app there.
+- Projects page: all projects first, short, then a separate "How I built it" section of fold-outs (what I wanted, the problem, what I decided, the trade-off). Never mix the notes into the list, since they hide the next project. Add each new app to both parts.
+- Dan's rule: keep pages short on a phone, with tabs or fold-outs instead of long lists. The Writing page has two tabs, "Start here" and "Latest".
 - Design: "Moon jar," the same look as his Substack: porcelain background, ink text, celadon links and buttons, stone small print, glaze lines; Libre Baskerville, never bold; sentence case, no exclamation marks, no emoji. Never show his kids' faces, names or schools.
 - Words: Home and About were written by Dan and must be used exactly (see `CLAUDE.md`).
 - Writing page:
@@ -80,7 +83,7 @@ https://danielyoonwrites.github.io/fewer-spam-calls. A guide for anyone in the U
 
 ## Pull requests so far
 
-1-3: the website's `CLAUDE.md` and content rules. 4: Home page. 5-9: Writing page (Substack, Subscribe button, featured posts, opening lines). 10: allow JavaScript. 11: About page. 12: polish and sharing previews. 13-16: automatic Latest posts (three approaches failed because of Substack's Cloudflare; the fourth, through Jina Reader on GitHub, works). 17-19: Quiet room spec, decisions, step 1. 20-24: Fewer spam calls (spec, first version, questions-first redesign, button and caching fixes, full fact check).
+1-3: the website's `CLAUDE.md` and content rules. 4: Home page. 5-9: Writing page (Substack, Subscribe button, featured posts, opening lines). 10: allow JavaScript. 11: About page. 12: polish and sharing previews. 13-16: automatic Latest posts (three approaches failed because of Substack's Cloudflare; the fourth, through Jina Reader on GitHub, works). 17-19: Quiet room spec, decisions, step 1. 20-24: Fewer spam calls (spec, first version, questions-first redesign, button and caching fixes, full fact check). 25: this handoff file. 26: Projects page.
 
 
 ## Starting a new session

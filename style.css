@@ -177,10 +177,16 @@ h2 a {
   border-bottom: 1px solid var(--glaze);
 }
 
-/* Opening lines of a post, in italic */
+/* Opening lines of a post, in italic. They stop after 3 lines with "…",
+   so a list of posts stays short on a phone. */
 .post-excerpt {
   margin: 0 0 0.75rem;
   font-style: italic;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
 }
 
 /* "Read on Substack" under each post, in the small label style */
@@ -211,12 +217,120 @@ h3 a {
   color: var(--stone);
 }
 
-/* Latest posts and the newsletter: a thin line above each */
-.latest,
+/* "How I built it" on Projects: some space above. The project list's
+   last line already separates it, so it needs no line of its own. */
+.projects-notes {
+  margin-top: 2.5rem;
+}
+
+/* The newsletter: a thin line above */
 .newsletter {
   margin-top: 3rem;
   padding-top: 2rem;
   border-top: 1px solid var(--glaze);
+}
+
+/* ---------- Tabs ----------
+   One part of a page at a time, so readers don't scroll far (see tabs.js).
+   Without JavaScript the tab buttons stay hidden and every part shows. */
+.tab-list {
+  display: none;              /* tabs.js shows it by adding "tabs-ready" */
+  flex-wrap: wrap;
+  gap: 0 1.5rem;
+  margin: 0 0 0.5rem;
+  border-bottom: 1px solid var(--glaze);
+}
+
+.tabs-ready .tab-list {
+  display: flex;
+}
+
+/* Each tab looks like a small label; the open one is celadon and underlined */
+.tab-list button {
+  margin: 0 0 -1px;           /* the underline sits on the thin line */
+  padding: 0.9rem 0;          /* tall enough to tap easily */
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--stone);
+  font-family: inherit;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+
+.tab-list button[aria-selected="true"] {
+  color: var(--celadon);
+  border-bottom-color: var(--celadon);
+}
+
+.tab-list button:focus-visible {
+  outline: 2px solid var(--celadon);
+  outline-offset: 3px;
+}
+
+/* Inside a tab, the list needs no line on top (the tabs already have one) */
+.tab-panel .post-list {
+  margin-top: 0;
+  border-top: 0;
+}
+
+/* ...and no line under the last post (the newsletter below has its own) */
+.tab-panel .post:last-child {
+  border-bottom: 0;
+}
+
+/* A part's own title shows only when there are no tabs (the tab already names it) */
+.tabs-ready .panel-title {
+  display: none;
+}
+
+/* ---------- Fold-outs ----------
+   A name you tap to open or close a short note, like "How I built it" on Projects.
+   It's HTML's own <details> and <summary>, so it works without JavaScript. */
+.fold-list {
+  border-top: 1px solid var(--glaze);
+}
+
+.fold {
+  border-bottom: 1px solid var(--glaze);
+}
+
+.fold summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 1.1rem 0;          /* tall enough to tap easily */
+  font-size: 1.375rem;
+  line-height: 1.35;
+  cursor: pointer;
+  list-style: none;           /* hides the browser's own small triangle */
+}
+
+.fold summary::-webkit-details-marker {
+  display: none;              /* the same, for Safari */
+}
+
+/* A celadon + when closed, − when open */
+.fold summary::after {
+  content: "+";
+  color: var(--celadon);
+}
+
+.fold[open] summary::after {
+  content: "−";
+}
+
+.fold summary:focus-visible {
+  outline: 2px solid var(--celadon);
+  outline-offset: 3px;
+}
+
+.fold p:last-child {
+  margin-bottom: 1.5rem;
 }
 
 /* About page: sections with a thin line above */
