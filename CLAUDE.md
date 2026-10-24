@@ -16,6 +16,7 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
 - Version 1: Home (`index.html`), Writing (`writing.html`), About (`about.html`).
 - Later: Projects (`projects.html`) for small web apps.
 - One shared stylesheet: `style.css`.
+- `quiet-room/` is a separate web app with its own `CLAUDE.md` and `SPEC.md`.
 
 ## Publishing and Latest posts
 
