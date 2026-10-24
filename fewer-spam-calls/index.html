@@ -5,11 +5,11 @@
   <!-- Makes the page fit phone screens instead of showing a tiny desktop page -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fewer spam calls</title>
-  <meta name="description" content="Five free steps that cut down robocalls and spam calls, written so anyone can follow them.">
+  <meta name="description" content="Answer three quick questions and get simple, free steps to cut down robocalls and spam calls.">
 
   <!-- What shows when the link is shared in a message -->
   <meta property="og:title" content="Fewer spam calls">
-  <meta property="og:description" content="Five free steps that cut down robocalls and spam calls, written so anyone can follow them.">
+  <meta property="og:description" content="Answer three quick questions and get simple, free steps to cut down robocalls and spam calls.">
   <meta property="og:url" content="https://danielyoonwrites.github.io/fewer-spam-calls/">
   <meta property="og:type" content="website">
 
@@ -20,142 +20,189 @@
 
   <!-- The guide's own look: Moon jar colors, bigger text for easy reading -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- Marks the page as "JavaScript on", so it shows one screen at a time.
+       Without JavaScript, every step shows on one page instead. -->
+  <script>document.documentElement.classList.add('js');</script>
+  <script src="guide.js" defer></script>
 </head>
 <body>
 
   <main>
     <h1>Fewer spam calls</h1>
-    <p class="intro">Five free steps that cut down robocalls and spam calls. Nothing stops them all, but these help.</p>
-    <!-- Change this date whenever the facts are checked again (see SPEC.md) -->
-    <p class="checked">Last checked: October 24, 2026</p>
+    <p class="intro">Answer three quick questions. Then we’ll show you a few free steps, one at a time.</p>
 
-    <!-- The steps. Parts only for one phone, carrier or state have data-phone,
-         data-carrier or data-state, so the choices (added later) can hide them. -->
-    <ol class="steps">
 
-      <!-- Step 1 -->
-      <li class="step">
-        <h2>Join the Do Not Call list</h2>
-        <ul>
-          <li>It’s free, and you only do it once. It never expires.</li>
-          <li>Online: go to <a href="https://www.donotcall.gov">DoNotCall.gov</a> and register your phone number.</li>
-          <li>Or call <a href="tel:18883821222">1-888-382-1222</a> from the phone you want to add. (TTY: <a href="tel:18662904236">1-866-290-4236</a>)</li>
-          <li>If you sign up online, you’ll get an email. Open it and click the link within 72 hours.</li>
-          <li>Sales calls can take up to 31 days to stop.</li>
-        </ul>
-        <p class="aside">Good to know: this stops honest companies. Scammers ignore it, so keep going with the next steps.</p>
-        <p class="aside">Watch out: an email saying your registration is “expiring” is a scam.</p>
-      </li>
+    <!-- ============ The three questions ============ -->
 
-      <!-- Step 2 -->
-      <li class="step">
-        <h2>Turn on your phone company’s free spam blocking</h2>
+    <section class="screen" id="question-phone" data-screen>
+      <p class="progress">Question 1 of 3</p>
+      <h2 tabindex="-1">What kind of phone do you have?</h2>
+      <div class="choices">
+        <button class="choice" data-question="phone" data-answer="iphone">iPhone</button>
+        <button class="choice" data-question="phone" data-answer="samsung">Samsung Galaxy</button>
+        <button class="choice" data-question="phone" data-answer="android">Another Android phone, like a Pixel</button>
+        <button class="choice" data-question="phone" data-answer="unsure">I’m not sure</button>
+      </div>
+      <p class="hint">Not sure? Look at the back of your phone. An apple logo means iPhone. The word “Samsung” means Samsung Galaxy.</p>
+    </section>
 
-        <div class="option" data-carrier="tmobile">
-          <h3>T-Mobile</h3>
-          <ul>
-            <li>Open your Phone app and dial <strong>#662#</strong>, then press call.</li>
-            <li>That turns on Scam Block. To turn it off, dial <strong>#632#</strong>.</li>
-            <li>Once in a while, it may block a call you wanted.</li>
-          </ul>
-        </div>
+    <section class="screen" id="question-carrier" data-screen>
+      <p class="progress">Question 2 of 3</p>
+      <h2 tabindex="-1">Which phone company do you pay?</h2>
+      <div class="choices">
+        <button class="choice" data-question="carrier" data-answer="tmobile">T-Mobile</button>
+        <button class="choice" data-question="carrier" data-answer="verizon">Verizon</button>
+        <button class="choice" data-question="carrier" data-answer="att">AT&amp;T</button>
+        <button class="choice" data-question="carrier" data-answer="other">Another company, or I’m not sure</button>
+      </div>
+      <p class="hint">It’s the company on your phone bill.</p>
+      <button class="back" data-back>Back</button>
+    </section>
 
-        <div class="option" data-carrier="verizon">
-          <h3>Verizon</h3>
-          <ul>
-            <li>Verizon’s spam blocking is called Call Filter. The basic version is free.</li>
-            <li>Open the Verizon Protect app. Tap Services, then Call Filter, then Manage.</li>
-            <li>Turn on the spam filter.</li>
-            <li>No app? In the My Verizon app, go to Settings &amp; preferences, then Call Filter.</li>
-          </ul>
-        </div>
+    <section class="screen" id="question-state" data-screen>
+      <p class="progress">Question 3 of 3</p>
+      <h2 tabindex="-1">Do you live in California?</h2>
+      <div class="choices">
+        <button class="choice" data-question="state" data-answer="california">Yes</button>
+        <button class="choice" data-question="state" data-answer="other">No</button>
+      </div>
+      <button class="back" data-back>Back</button>
+    </section>
 
-        <div class="option" data-carrier="att">
-          <h3>AT&amp;T</h3>
-          <ul>
-            <li>Download the free AT&amp;T ActiveArmor app.</li>
-            <li>It blocks fraud calls on its own.</li>
-            <li>In the app, choose to block spam calls or send them to voicemail.</li>
-          </ul>
-        </div>
 
-        <div class="option" data-carrier="other">
-          <h3>Another phone company</h3>
-          <ul>
-            <li>Call your phone company and ask: “Do you have free spam call blocking? Can you turn it on for me?”</li>
-          </ul>
-        </div>
-      </li>
+    <!-- ============ The steps ============
+         Each step is one screen. A step with data-phone, data-carrier or data-state
+         only shows for people who chose that answer. -->
 
-      <!-- Step 3. iPhone steps follow Apple's guide for iOS 26; check them on iOS 27 (SPEC.md build step 4). -->
-      <li class="step">
-        <h2>Turn on your phone’s own call screening</h2>
+    <section class="screen step" data-screen data-step>
+      <p class="progress"></p>
+      <h2 tabindex="-1">Join the Do Not Call list</h2>
+      <ul>
+        <li>It’s free. You only do it once.</li>
+        <li>From this phone, call <a href="tel:18883821222">1-888-382-1222</a> and follow the recording.</li>
+        <li>Or sign up at <a href="https://www.donotcall.gov">DoNotCall.gov</a>.</li>
+        <li>Sales calls can take up to 31 days to stop.</li>
+      </ul>
+      <p class="aside">Scammers ignore this list, so keep going.</p>
+    </section>
 
-        <div class="option" data-phone="iphone">
-          <h3>iPhone</h3>
-          <ul>
-            <li>First, save your doctor, pharmacy and family as contacts, so their calls still ring.</li>
-            <li>Open Settings. Tap Apps, then Phone.</li>
-            <li>Find the setting for unknown callers and choose one:
-              <ul>
-                <li>“Ask Reason for Calling”: your iPhone asks callers you don’t know why they’re calling before it rings.</li>
-                <li>“Silence”: calls from numbers you don’t know go quietly to voicemail.</li>
-              </ul>
-            </li>
-          </ul>
-        </div>
+    <section class="screen step" data-screen data-step data-carrier="tmobile">
+      <p class="progress"></p>
+      <h2 tabindex="-1">Turn on T-Mobile’s free Scam Block</h2>
+      <ul>
+        <li>Open your Phone app.</li>
+        <li>Dial <strong>#662#</strong> and press call.</li>
+        <li>That’s it. To turn it off later, dial <strong>#632#</strong>.</li>
+      </ul>
+    </section>
 
-        <div class="option" data-phone="android">
-          <h3>Android, with Google’s Phone app (like a Pixel)</h3>
-          <ul>
-            <li>Open the Phone app. Tap More (the three dots), then Settings.</li>
-            <li>Tap Caller ID &amp; spam. On some phones it’s called Spam and Call Screen.</li>
-            <li>Turn on spam filtering, or Call Screen if you see it.</li>
-          </ul>
-        </div>
+    <section class="screen step" data-screen data-step data-carrier="verizon">
+      <p class="progress"></p>
+      <h2 tabindex="-1">Turn on Verizon’s free Call Filter</h2>
+      <ul>
+        <li>Open the Verizon Protect app.</li>
+        <li>Tap Services, then Call Filter, then Manage.</li>
+        <li>Turn on the spam filter.</li>
+      </ul>
+      <p class="aside">No app? In the My Verizon app, go to Settings &amp; preferences, then Call Filter.</p>
+    </section>
 
-        <div class="option" data-phone="android">
-          <h3>Samsung Galaxy</h3>
-          <ul>
-            <li>Open the Phone app. Tap the three dots, then Settings.</li>
-            <li>Tap Caller ID and spam protection, and turn it on.</li>
-            <li>Turn on Block spam and scam calls.</li>
-          </ul>
-        </div>
-      </li>
+    <section class="screen step" data-screen data-step data-carrier="att">
+      <p class="progress"></p>
+      <h2 tabindex="-1">Get AT&amp;T’s free ActiveArmor app</h2>
+      <ul>
+        <li>Download the AT&amp;T ActiveArmor app. It’s free.</li>
+        <li>It blocks fraud calls on its own.</li>
+        <li>In the app, choose to block spam calls.</li>
+      </ul>
+    </section>
 
-      <!-- Step 4 -->
-      <li class="step" data-state="california">
-        <h2>Live in California? Use DROP</h2>
-        <ul>
-          <li>DROP is a free tool from the State of California.</li>
-          <li>One request asks over 500 data brokers (companies that buy and sell personal information) to delete yours. Your number gets passed around less.</li>
-          <li>Go to <a href="https://privacy.ca.gov/drop/">privacy.ca.gov/drop</a>. It takes about 10 minutes.</li>
-          <li>First you confirm you live in California. Then you enter your name, date of birth and email. Add your phone numbers too.</li>
-          <li>Write down your 8-digit DROP ID, so you can check on your request later.</li>
-          <li>Helping a parent? In some cases, you can send a request for another California resident.</li>
-        </ul>
-        <p class="aside">Good to know: DROP won’t stop scammers who dial random numbers, but it helps keep your number from spreading.</p>
-      </li>
+    <section class="screen step" data-screen data-step data-carrier="other">
+      <p class="progress"></p>
+      <h2 tabindex="-1">Ask your phone company</h2>
+      <ul>
+        <li>Call your phone company. The number is on your bill.</li>
+        <li>Ask: “Do you have free spam call blocking? Can you turn it on for me?”</li>
+      </ul>
+    </section>
 
-      <!-- Step 5 -->
-      <li class="step">
-        <h2>When a spam call gets through</h2>
-        <ul>
-          <li>Hang up.</li>
-          <li>Don’t press any buttons, even if it says “press 1 to be removed.”</li>
-          <li>Don’t trust caller ID. Scammers can fake any number.</li>
-          <li>Report the call at <a href="https://www.donotcall.gov">DoNotCall.gov</a>.</li>
-          <li>Lost money? Report it at <a href="https://reportfraud.ftc.gov">ReportFraud.ftc.gov</a>.</li>
-          <li>Spam text? Forward it to <strong>7726</strong>.</li>
-        </ul>
-      </li>
+    <!-- iPhone steps follow Apple's guide for iOS 26; check them on iOS 27 (SPEC.md build step 4). -->
+    <section class="screen step" data-screen data-step data-phone="iphone">
+      <p class="progress"></p>
+      <h2 tabindex="-1">Quiet unknown callers on your iPhone</h2>
+      <ul>
+        <li>First, save your doctor, pharmacy and family as contacts, so they still ring.</li>
+        <li>Open Settings. Tap Apps, then Phone.</li>
+        <li>Find unknown callers and choose “Silence.” Their calls go to voicemail.</li>
+      </ul>
+    </section>
 
-    </ol>
+    <section class="screen step" data-screen data-step data-phone="samsung">
+      <p class="progress"></p>
+      <h2 tabindex="-1">Turn on spam blocking on your Samsung</h2>
+      <ul>
+        <li>Open the Phone app.</li>
+        <li>Tap the three dots, then Settings.</li>
+        <li>Tap Caller ID and spam protection, and turn it on.</li>
+        <li>Turn on Block spam and scam calls.</li>
+      </ul>
+    </section>
+
+    <section class="screen step" data-screen data-step data-phone="android">
+      <p class="progress"></p>
+      <h2 tabindex="-1">Turn on spam filtering on your phone</h2>
+      <ul>
+        <li>Open the Phone app.</li>
+        <li>Tap the three dots, then Settings.</li>
+        <li>Tap Caller ID &amp; spam. (It may say Spam and Call Screen.)</li>
+        <li>Turn on spam filtering, or Call Screen.</li>
+      </ul>
+    </section>
+
+    <section class="screen step" data-screen data-step data-state="california">
+      <p class="progress"></p>
+      <h2 tabindex="-1">Use California’s free DROP tool</h2>
+      <ul>
+        <li>It asks over 500 companies that sell personal information to delete yours.</li>
+        <li>Go to <a href="https://privacy.ca.gov/drop/">privacy.ca.gov/drop</a>. It takes about 10 minutes.</li>
+        <li>You’ll need your name, date of birth and email. Add your phone number too.</li>
+        <li>Write down the 8-digit DROP ID it gives you.</li>
+      </ul>
+      <p class="aside">Helping a parent? Sometimes you can send a request for them.</p>
+    </section>
+
+    <section class="screen step" data-screen data-step>
+      <p class="progress"></p>
+      <h2 tabindex="-1">When a spam call gets through</h2>
+      <ul>
+        <li>Hang up.</li>
+        <li>Don’t press any buttons, even “press 1 to be removed.”</li>
+        <li>Don’t trust caller ID. Scammers fake numbers.</li>
+        <li>Spam text? Forward it to <strong>7726</strong>.</li>
+      </ul>
+      <p class="aside">Want to report a call? Use <a href="https://www.donotcall.gov">DoNotCall.gov</a>. Lost money? Use <a href="https://reportfraud.ftc.gov">ReportFraud.ftc.gov</a>.</p>
+    </section>
+
+    <!-- Buttons under each step -->
+    <nav class="step-buttons" aria-label="Steps">
+      <button class="next" data-next>Done, next step</button>
+      <button class="back" data-back>Back</button>
+    </nav>
+
+
+    <!-- ============ The end ============ -->
+
+    <section class="screen" id="finished" data-screen>
+      <h2 tabindex="-1">You’re all set</h2>
+      <p>You’ll still get a spam call now and then, but fewer of them.</p>
+      <button class="choice" data-restart>Start over</button>
+    </section>
+
 
     <!-- Where every fact comes from. Update these when the facts are checked again. -->
-    <section class="sources">
-      <h2>Sources</h2>
+    <details class="sources">
+      <summary>Where this comes from (last checked October 24, 2026)</summary>
       <ul>
         <li><a href="https://consumer.ftc.gov/articles/national-do-not-call-registry-faqs">FTC: National Do Not Call Registry FAQs</a></li>
         <li><a href="https://consumer.ftc.gov/articles/how-block-unwanted-calls">FTC: How to block unwanted calls</a></li>
@@ -170,7 +217,7 @@
         <li><a href="https://privacy.ca.gov/drop/">California: Delete Request and Opt-out Platform (DROP)</a></li>
         <li><a href="https://privacy.ca.gov/drop/help-with-drop/">California: Help with DROP</a></li>
       </ul>
-    </section>
+    </details>
   </main>
 
   <!-- Small link back to the website -->
