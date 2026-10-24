@@ -20,8 +20,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;1,400&family=Nanum+Myeongjo:wght@800&display=swap">
 
-  <!-- The shared look for every page: colors, fonts, spacing -->
-  <link rel="stylesheet" href="style.css">
+  <!-- The shared look for every page: colors, fonts, spacing.
+       Raise the ?v= number on every page whenever style.css changes,
+       so phones load the new copy right away instead of a saved old one. -->
+  <link rel="stylesheet" href="style.css?v=2">
+
+  <!-- Tabs: shows one list at a time (see tabs.js). Raise ?v= when tabs.js changes. -->
+  <script src="tabs.js?v=1" defer></script>
 </head>
 <body>
 
@@ -42,59 +47,71 @@
   <!-- The main part of the page. Edit the words here. -->
   <main>
 
-    <!-- Featured posts, shown first so readers see what they can read -->
+    <!-- Posts in two tabs, so readers see four posts at a time instead of a long page:
+         "Start here" (hand-picked) and "Latest" (filled in automatically).
+         The tabs come from tabs.js; without it, both lists show one after the other. -->
     <section>
-      <p class="label">From The Shy Korean</p>
-      <h1>Start here</h1>
+      <h1 class="label">Writing from The Shy Korean</h1>
 
-      <!-- To add a post: copy one whole <li class="post"> ... </li> block,
-           then change the number, the two links, the title and the opening lines. -->
-      <ol class="post-list">
+      <div class="tabs">
+        <div class="tab-list" role="tablist" aria-label="Posts">
+          <button type="button" role="tab" id="tab-start-here" aria-controls="start-here">Start here</button>
+          <button type="button" role="tab" id="tab-latest" aria-controls="latest">Latest</button>
+        </div>
 
-        <li class="post">
-          <p class="label">01 · Most read</p>
-          <h2><a href="https://thingsdandoes.substack.com/p/relearning-wonder">Relearning wonder</a></h2>
-          <p class="post-excerpt">Recently while my wife was putting balm on our daughter’s face, our daughter was fixated with the lid from the container. She stared at it from multiple angles, flipped it upside down, grabbed it in many different ways, and would not give it back: she was captivated.</p>
-          <a class="read-link" href="https://thingsdandoes.substack.com/p/relearning-wonder">Read on Substack</a>
-        </li>
+        <!-- Tab 1: hand-picked posts -->
+        <div class="tab-panel" id="start-here" role="tabpanel" aria-labelledby="tab-start-here">
+          <h2 class="panel-title">Start here</h2>
 
-        <li class="post">
-          <p class="label">02</p>
-          <h2><a href="https://thingsdandoes.substack.com/p/joy-for-the-overthinker">When an overthinker examines life</a></h2>
-          <p class="post-excerpt">“The unexamined life is not worth living.” Socrates (according to Plato). This is one of the most famous quotes in philosophy … I personally agree with Socrates.</p>
-          <a class="read-link" href="https://thingsdandoes.substack.com/p/joy-for-the-overthinker">Read on Substack</a>
-        </li>
+          <!-- To add a post: copy one whole <li class="post"> ... </li> block,
+               then change the number, the two links, the title and the opening lines. -->
+          <ol class="post-list">
 
-        <li class="post">
-          <p class="label">03</p>
-          <h2><a href="https://thingsdandoes.substack.com/p/letting-go-of-the-life-you-love-so">Letting go of the life you love so you can love life</a></h2>
-          <p class="post-excerpt">I have been thinking about what I wrote in my previous post, “When an overthinker examines life,” specifically about what it would mean to examine life like a poet rather than a logician.</p>
-          <a class="read-link" href="https://thingsdandoes.substack.com/p/letting-go-of-the-life-you-love-so">Read on Substack</a>
-        </li>
+            <li class="post">
+              <p class="label">01 · Most read</p>
+              <h3><a href="https://thingsdandoes.substack.com/p/relearning-wonder">Relearning wonder</a></h3>
+              <p class="post-excerpt">Recently while my wife was putting balm on our daughter’s face, our daughter was fixated with the lid from the container. She stared at it from multiple angles, flipped it upside down, grabbed it in many different ways, and would not give it back: she was captivated.</p>
+              <a class="read-link" href="https://thingsdandoes.substack.com/p/relearning-wonder">Read on Substack</a>
+            </li>
 
-        <li class="post">
-          <p class="label">04</p>
-          <h2><a href="https://thingsdandoes.substack.com/p/the-first-step-to-growth-is-believing">The first step to growth is believing you can grow</a></h2>
-          <p class="post-excerpt">Chances are in this self-help saturated day and age you have heard of “growth mindset” vs “fixed mindset” …</p>
-          <a class="read-link" href="https://thingsdandoes.substack.com/p/the-first-step-to-growth-is-believing">Read on Substack</a>
-        </li>
+            <li class="post">
+              <p class="label">02</p>
+              <h3><a href="https://thingsdandoes.substack.com/p/joy-for-the-overthinker">When an overthinker examines life</a></h3>
+              <p class="post-excerpt">“The unexamined life is not worth living.” Socrates (according to Plato). This is one of the most famous quotes in philosophy … I personally agree with Socrates.</p>
+              <a class="read-link" href="https://thingsdandoes.substack.com/p/joy-for-the-overthinker">Read on Substack</a>
+            </li>
 
-      </ol>
-    </section>
+            <li class="post">
+              <p class="label">03</p>
+              <h3><a href="https://thingsdandoes.substack.com/p/letting-go-of-the-life-you-love-so">Letting go of the life you love so you can love life</a></h3>
+              <p class="post-excerpt">I have been thinking about what I wrote in my previous post, “When an overthinker examines life,” specifically about what it would mean to examine life like a poet rather than a logician.</p>
+              <a class="read-link" href="https://thingsdandoes.substack.com/p/letting-go-of-the-life-you-love-so">Read on Substack</a>
+            </li>
 
-    <!-- Latest posts. Once a day, and on every merge, GitHub fills this list with the
-         4 newest posts from Substack before publishing (see scripts/latest-posts.js).
-         Don't edit between the two LATEST POSTS lines: changes there get replaced.
-         The line between them shows only if the posts can't be loaded. -->
-    <section class="latest">
-      <p class="label">Fresh from the newsletter</p>
-      <h2>Latest posts</h2>
-      <ul class="post-list">
-        <!-- LATEST POSTS START -->
-        <li class="post"><p>See the newest posts on <a href="https://thingsdandoes.substack.com/archive">The Shy Korean</a>.</p></li>
-        <!-- LATEST POSTS END -->
-      </ul>
-      <p><a href="https://thingsdandoes.substack.com">Read all posts on Substack</a></p>
+            <li class="post">
+              <p class="label">04</p>
+              <h3><a href="https://thingsdandoes.substack.com/p/the-first-step-to-growth-is-believing">The first step to growth is believing you can grow</a></h3>
+              <p class="post-excerpt">Chances are in this self-help saturated day and age you have heard of “growth mindset” vs “fixed mindset” …</p>
+              <a class="read-link" href="https://thingsdandoes.substack.com/p/the-first-step-to-growth-is-believing">Read on Substack</a>
+            </li>
+
+          </ol>
+        </div>
+
+        <!-- Tab 2: Latest posts. Once a day, and on every merge, GitHub fills this list with the
+             4 newest posts from Substack before publishing (see scripts/latest-posts.js).
+             Don't edit between the two LATEST POSTS lines: changes there get replaced.
+             The line between them shows only if the posts can't be loaded. -->
+        <div class="tab-panel" id="latest" role="tabpanel" aria-labelledby="tab-latest">
+          <h2 class="panel-title">Latest posts</h2>
+          <ul class="post-list">
+            <!-- LATEST POSTS START -->
+            <li class="post"><p>See the newest posts on <a href="https://thingsdandoes.substack.com/archive">The Shy Korean</a>.</p></li>
+            <!-- LATEST POSTS END -->
+          </ul>
+          <p><a href="https://thingsdandoes.substack.com">Read all posts on Substack</a></p>
+        </div>
+      </div>
     </section>
 
     <!-- The Substack newsletter, after the posts -->
