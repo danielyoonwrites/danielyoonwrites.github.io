@@ -1,0 +1,137 @@
+/* ============================================================
+   Daniel Yoon: shared styles for every page
+   Design system: "Moon jar" (matches the Substack)
+   ============================================================ */
+
+
+/* ---------- Colors ----------
+   Change a color here and it changes everywhere. */
+:root {
+  --porcelain: #F1EFEA; /* background of every page */
+  --ink: #1E1C1A;       /* main text */
+  --celadon: #386F61;   /* links, buttons, small labels */
+  --stone: #6B655C;     /* dates, captions, small print */
+  --glaze: #DCE6DF;     /* thin divider lines only */
+}
+
+
+/* ---------- The whole page ---------- */
+
+/* 112.5% of the phone's normal text size is 18 pixels for most people.
+   Every "rem" size below is measured from this. */
+html {
+  font-size: 112.5%;
+}
+
+body {
+  margin: 0 auto;
+  max-width: 36em;     /* keeps lines short enough to read comfortably */
+  padding: 0 1.25rem;  /* space at the left and right edges on phones */
+  background: var(--porcelain);
+  color: var(--ink);
+  font-family: "Libre Baskerville", Georgia, serif;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* Never bold, not even headings */
+h1, h2, h3, h4, strong, b {
+  font-weight: 400;
+}
+
+/* Images fill the column and keep square corners */
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 0;
+}
+
+/* Korean text: wrap it like <span class="korean">윤</span> */
+.korean {
+  font-family: "Nanum Myeongjo", serif;
+  font-weight: 800;
+}
+
+
+/* ---------- Links ---------- */
+a {
+  color: var(--celadon);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+/* A clear outline when someone moves through links with a keyboard */
+a:focus-visible {
+  outline: 2px solid var(--celadon);
+  outline-offset: 3px;
+}
+
+
+/* ---------- Header ---------- */
+.site-header {
+  padding: 2rem 0 1.25rem;
+  border-bottom: 1px solid var(--glaze);
+}
+
+/* The name is the logo: Regular, never italic, in ink */
+.site-name {
+  font-size: 1.375rem;
+  font-style: normal;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* The menu uses the "small label" style */
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav a {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+}
+
+/* The page you're on gets a thin underline */
+nav a[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.4em;
+}
+
+
+/* ---------- Main part of the page ---------- */
+main {
+  padding: 3rem 0;
+}
+
+/* The opening words on the Home page, a little larger */
+.intro {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.55;
+}
+
+
+/* ---------- Footer ---------- */
+.site-footer {
+  padding: 1.25rem 0 2.5rem;
+  border-top: 1px solid var(--glaze);
+}
+
+.site-footer p {
+  margin: 0 0 0.5rem;
+}
+
+/* Small print: dates, captions, the copyright line */
+.small-print {
+  font-size: 0.8125rem;
+  color: var(--stone);
+}
