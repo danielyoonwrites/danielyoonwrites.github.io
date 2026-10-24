@@ -70,7 +70,7 @@ Same Moon jar design as the website (see the website's `CLAUDE.md`), with these 
 
 ## Build plan (one pull request each, each with a check the owner does)
 
-1. This spec, plus `CLAUDE.md` for the folder. Check: read it.
-2. The page with the full checklist, sources and "last checked" date, no choices yet. Check: read it on a phone; tap every link.
+1. This spec, plus `CLAUDE.md` for the folder. Check: read it. (Merged, pull request 20.)
+2. The page with the full checklist, sources and "last checked" date, no choices yet. Check: read it on a phone; tap every link. (Built October 24, 2026; parts for one phone, carrier or state are already tagged so step 3 can hide them.)
 3. The three optional choices, and print styles. Check: try each choice on a phone; print preview.
 4. Final pass: recheck every fact, and check the iPhone steps on a real iPhone. Check: follow the steps for your own phone and carrier.
