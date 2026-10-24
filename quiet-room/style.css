@@ -1,0 +1,95 @@
+/* ============================================================
+   Quiet room: styles
+   Design system: "Moon jar" (same as danielyoonwrites.github.io)
+   ============================================================ */
+
+
+/* ---------- Colors ----------
+   Change a color here and it changes everywhere. */
+:root {
+  --porcelain: #F1EFEA; /* background */
+  --ink: #1E1C1A;       /* main text */
+  --celadon: #386F61;   /* links, buttons, small labels */
+  --stone: #6B655C;     /* times, small print */
+  --glaze: #DCE6DF;     /* thin divider lines only */
+}
+
+
+/* ---------- The whole page ---------- */
+
+/* 112.5% of the phone's normal text size is 18 pixels for most people.
+   Every "rem" size below is measured from this. */
+html {
+  font-size: 112.5%;
+}
+
+body {
+  margin: 0 auto;
+  max-width: 36em;     /* keeps lines short enough to read comfortably */
+  padding: 0 1.25rem;  /* space at the left and right edges on phones */
+  background: var(--porcelain);
+  color: var(--ink);
+  font-family: "Libre Baskerville", Georgia, serif;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* Never bold, not even headings */
+h1, h2, h3, strong, b {
+  font-weight: 400;
+}
+
+/* Asks newer browsers to avoid a single word alone on the last line */
+p, h1 {
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--celadon);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--celadon);
+  outline-offset: 3px;
+}
+
+
+/* ---------- Main part ---------- */
+main {
+  padding: 3.5rem 0 3rem;
+}
+
+h1 {
+  margin: 0 0 1rem;
+  font-size: 2rem;
+  line-height: 1.25;
+}
+
+/* The line under the title */
+.intro {
+  margin: 0 0 2.5rem;
+  font-size: 1.125rem;
+}
+
+/* Quiet notes like "The room opens soon." */
+.note {
+  margin: 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--glaze);
+  color: var(--stone);
+  font-style: italic;
+}
+
+
+/* ---------- Footer ---------- */
+footer {
+  padding: 1.25rem 0 2.5rem;
+  border-top: 1px solid var(--glaze);
+  font-size: 0.8125rem;
+}
+
+footer p {
+  margin: 0;
+}

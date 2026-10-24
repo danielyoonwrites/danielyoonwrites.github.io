@@ -28,7 +28,8 @@ What's different: nothing punishes you for leaving the tab or app, nothing pings
 - Track what you got done with the app, like chapters read or minutes studied. To think through first: it means storing more than Stage 1 does; keep it personal so it never becomes a ranking; and with anonymous sign-in it would stay on one browser, so keeping it across devices needs real accounts.
 
 ## Safety and privacy
-- Private link only. Room rule shown on the page: adults only (18+). If the link leaks, I make a new room.
+- Private link only. If the link leaks, I make a new room.
+- No age rule on the page (decided October 24, 2026): people can't communicate, so it isn't needed now. Revisit if chat or anything that lets people contact each other is ever added.
 - Store only display name, avatar choice, what they're doing, status and times.
 - Database rules: each person can change only their own seat.
 
