@@ -54,5 +54,5 @@ Answered:
 
 ## Next
 
-- Owner: check and merge the step 1 pull request.
+- Paused after step 1 (merged in pull request 19, October 24) while the owner builds a small side project, `fewer-spam-calls/`. Pick up here when he's ready.
 - Then step 2: draw the six blob avatars in Moon jar colors only. Fix from the sketch: no near-white fill, give Sleepy open eyes, smooth Scarf's bottom edge. Show previews before the pull request.

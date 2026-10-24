@@ -17,6 +17,7 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
 - Later: Projects (`projects.html`) for small web apps.
 - One shared stylesheet: `style.css`.
 - `quiet-room/` is a separate web app with its own `CLAUDE.md` and `SPEC.md`.
+- `fewer-spam-calls/` is a one-page guide with its own `CLAUDE.md` and `SPEC.md`.
 
 ## Publishing and Latest posts
 
