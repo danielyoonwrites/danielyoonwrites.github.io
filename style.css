@@ -34,6 +34,11 @@ body {
   line-height: 1.6;
 }
 
+/* Asks newer browsers to avoid a single word alone on the last line */
+p, h1, h2 {
+  text-wrap: pretty;
+}
+
 /* Never bold, not even headings */
 h1, h2, h3, h4, strong, b {
   font-weight: 400;
