@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Makes the page fit phone screens instead of showing a tiny desktop page -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The name in the browser tab, and the summary search engines show -->
+  <title>Writing · Daniel Yoon</title>
+  <meta name="description" content="The Shy Korean, Daniel Yoon’s newsletter on Substack, and other writing.">
+
+  <!-- Fonts from Google Fonts: Libre Baskerville (Regular and Italic) for English,
+       Nanum Myeongjo ExtraBold for any Korean -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;1,400&family=Nanum+Myeongjo:wght@800&display=swap">
+
+  <!-- The shared look for every page: colors, fonts, spacing -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Header: the same on every page. Copy it as is into new pages. -->
+  <header class="site-header">
+    <a class="site-name" href="index.html">Daniel Yoon</a>
+    <nav>
+      <ul>
+        <!-- aria-current="page" marks the page you're on. Move it to the matching link on each page. -->
+        <li><a href="index.html">Home</a></li>
+        <li><a href="writing.html" aria-current="page">Writing</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- The main part of the page. Edit the words here. -->
+  <main>
+
+    <!-- The Substack newsletter -->
+    <section>
+      <p class="label">Newsletter</p>
+      <h1><a href="https://thingsdandoes.substack.com">The Shy Korean</a></h1>
+      <p>My newsletter on Substack. Sign up below to get new posts by email.</p>
+
+      <!-- Substack's own signup form. Substack controls what's inside the box.
+           The width is set to 100% so it fits on phones. -->
+      <iframe class="signup-form" src="https://thingsdandoes.substack.com/embed" title="Sign up for The Shy Korean" height="320"></iframe>
+
+      <p><a href="https://thingsdandoes.substack.com">Read The Shy Korean on Substack</a></p>
+    </section>
+
+  </main>
+
+  <!-- Footer: the same on every page -->
+  <footer class="site-footer">
+    <p><a href="https://www.instagram.com/theshykoreandad/">Instagram</a></p>
+    <p class="small-print">© 2026 Daniel Yoon</p>
+  </footer>
+
+</body>
+</html>
