@@ -19,9 +19,11 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
 
 ## Publishing and Latest posts
 
-- GitHub Pages publishes through the workflow `.github/workflows/publish.yml` (Pages source: GitHub Actions). It runs on every merge to main and on "Run workflow".
-- "Latest posts" on `writing.html` is filled in each visitor's browser by `scripts/latest-posts.js`. It reads Substack's post list through Jina Reader (r.jina.ai, with the header `X-Return-Format: text`), then the full feed through Jina, then the feed directly, and keeps the fallback link if all fail. AllOrigins, rss2json, codetabs and corsproxy.io were tested and don't work. Open `writing.html?debug` to see which way worked.
-- Why in the browser: Substack's Cloudflare protection blocks GitHub's computers from reading the feed (tested October 2026). Claude's sessions can't open Substack either.
+- GitHub Pages publishes through the workflow `.github/workflows/publish.yml` (Pages source: GitHub Actions). It runs on every merge to main, once a day, and on "Run workflow". On other branches the publish step is skipped, so the build can be tested safely.
+- Before publishing, `scripts/latest-posts.js` fills "Latest posts" on `writing.html` with the 4 newest posts. It reads Substack's post list through Jina Reader (r.jina.ai, header `X-Return-Format: text`), then the feed through Jina. It changes only the published copy, never the file in the repository.
+- Don't edit between the `LATEST POSTS START` and `LATEST POSTS END` lines. The text there is the fallback if the posts can't be loaded.
+- What was tested (October 2026): Substack's Cloudflare blocks GitHub's computers and Claude's sessions. Jina Reader works from GitHub but answers 401 to visitors' browsers without a key. AllOrigins, rss2json, codetabs and corsproxy.io don't work.
+- GitHub turns off scheduled workflows after 60 days without repository activity; turn it back on in the Actions tab.
 
 ## Content
 
