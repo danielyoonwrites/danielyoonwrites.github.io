@@ -7,7 +7,7 @@ Last updated: October 24, 2026
 ## Where we are
 
 - Planning. No app code yet.
-- Pull request 17 adds `SPEC.md`, `CLAUDE.md` and this file.
+- `SPEC.md`, `CLAUDE.md` and this file are merged (pull request 17).
 
 ## Decisions
 
@@ -17,7 +17,7 @@ Last updated: October 24, 2026
 
 ## Build plan (one pull request per step, each with a check the owner does)
 
-1. Page with no live features: room name, quiet hour, 18+ rule, link back to the website
+1. Page with no live features: room name, 18+ rule, link back to the website
 2. Six original avatar drawings
 3. Firebase setup in the console, walked through step by step; database in locked mode
 4. Security rules and tests, before any feature uses them
@@ -31,9 +31,12 @@ Last updated: October 24, 2026
 
 ## Open questions (ask one at a time)
 
-1. Weekly quiet hour: keep it? If so, which night, time and time zone. (Asked October 24; the owner asked what it means.)
-2. The room's name.
-3. The words on the page.
+1. The room's name.
+2. The words on the page.
+
+Answered:
+- Weekly quiet hour: not needed yet (October 24). Moved to "Ideas for later" in `SPEC.md`.
+- New idea from the owner: tracking what you got done (chapters read, minutes studied). Added to "Ideas for later", not Stage 1.
 
 ## Facts checked (October 2026)
 
@@ -43,4 +46,4 @@ Last updated: October 24, 2026
 
 ## Next
 
-- Owner: merge pull request 17, then answer the quiet hour question.
+- Owner: answer the room name question.

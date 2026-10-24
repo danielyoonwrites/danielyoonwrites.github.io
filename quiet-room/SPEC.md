@@ -15,13 +15,17 @@ What's different: nothing punishes you for leaving the tab or app, nothing pings
 - Optional personal timer: 25 or 50 minutes, or none.
 - See everyone in the room live.
 - If someone's connection drops, their avatar shows "stepped away" and keeps the seat for 15 minutes.
-- The weekly quiet hour (I'll choose the night and time) is shown on the page, so people overlap. The room stays open the rest of the week.
+- The room is open any time.
 - No sound, notifications, chat, coins, rankings, ads or tracking.
 - Works in a browser on laptops and phones.
 - A small link back to my website, danielyoonwrites.github.io, at the bottom.
 
 ## Not in Stage 1
 - Chat or a lounge, an avatar builder, more rooms, public rooms, real accounts (only anonymous sign-in for now), background sound.
+
+## Ideas for later
+- A weekly quiet hour shown on the page, so people overlap (decided October 24, 2026: not needed yet).
+- Track what you got done with the app, like chapters read or minutes studied. To think through first: it means storing more than Stage 1 does; keep it personal so it never becomes a ranking; and with anonymous sign-in it would stay on one browser, so keeping it across devices needs real accounts.
 
 ## Safety and privacy
 - Private link only. Room rule shown on the page: adults only (18+). If the link leaks, I make a new room.
