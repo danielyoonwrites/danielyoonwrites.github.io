@@ -171,36 +171,50 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Answer choices: a list with thin lines between, like "Start here"
-   on the website's Writing page, with a small arrow on the right */
-.choices {
-  border-top: 1px solid var(--glaze);
-}
-
+/* Answer choices: square buttons with a thin celadon outline
+   and a small arrow on the right. When tapped, they fill with celadon. */
 .choice {
   position: relative;
   min-height: 3.25rem;         /* about 65 pixels tall */
-  padding: 0.9rem 2rem 0.9rem 0;
-  border: none;
-  border-bottom: 1px solid var(--glaze);
-  background: transparent;
+  margin: 0 0 0.75rem;
+  padding: 0.9rem 2.5rem 0.9rem 1.1rem;
+  border: 1px solid var(--celadon);
+  background: var(--porcelain);
   color: var(--ink);
   font-size: 1.05rem;
   line-height: 1.35;
+  transition: background-color 0.15s, color 0.15s;
 }
 
 .choice::after {
   content: "→" / "";  /* the / "" part keeps screen readers from reading arrows aloud */
   position: absolute;
-  right: 0.25rem;
+  right: 1rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--celadon);
 }
 
-.choice:hover,
+/* Fills while pressed. On computers it also fills when the mouse is over it;
+   phones skip that part so the color doesn't stay stuck after a tap. */
 .choice:active {
-  color: var(--celadon);
+  background: var(--celadon);
+  color: var(--porcelain);
+}
+
+.choice:active::after {
+  color: var(--porcelain);
+}
+
+@media (hover: hover) {
+  .choice:hover {
+    background: var(--celadon);
+    color: var(--porcelain);
+  }
+
+  .choice:hover::after {
+    color: var(--porcelain);
+  }
 }
 
 /* "Done, next step": like the website's Subscribe button */
@@ -238,10 +252,9 @@ button {
   content: "←  " / "";
 }
 
-/* "Start over" on the last screen sits in its own little list */
+/* "Start over" on the last screen */
 #finished .choice {
   margin-top: 1.5rem;
-  border-top: 1px solid var(--glaze);
 }
 
 /* ---------- Sources ---------- */
