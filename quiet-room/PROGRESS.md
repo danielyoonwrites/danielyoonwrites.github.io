@@ -23,7 +23,7 @@ Last updated: October 24, 2026
 
 ## Build plan (one pull request per step, each with a check the owner does)
 
-1. Page with no live features: room name, 18+ rule, link back to the website
+1. Page with no live features: room name, the line under it, "The room opens soon," link back to the website
 2. Six original avatar drawings
 3. Firebase setup in the console, walked through step by step; database in locked mode
 4. Security rules and tests, before any feature uses them
