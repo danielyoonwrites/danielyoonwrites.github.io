@@ -30,7 +30,7 @@ Words already chosen (use them exactly)
 ## Links
 
 - Substack, The Shy Korean: https://thingsdandoes.substack.com
-  Use Substack's own embed signup form (iframe, from Substack Settings → Growth features). Set its width to 100% so it fits on phones.
+  Sign up with a celadon Subscribe button linking to https://thingsdandoes.substack.com/subscribe. Don't use Substack's embed form: its white box and gold button can't be restyled and clash with the design.
 - Instagram: https://www.instagram.com/theshykoreandad/
 
 ## Design system: "Moon jar" (matches the Substack)
