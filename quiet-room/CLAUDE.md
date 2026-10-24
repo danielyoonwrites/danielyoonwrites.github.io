@@ -2,6 +2,11 @@
 
 A shared, calm study room for the owner's young adults group. It lives in this folder and is published at https://danielyoonwrites.github.io/quiet-room. The full spec is in `SPEC.md`. The owner is a beginner building his first web app and wants to learn as we go.
 
+## Start here
+
+- At the start of every session, read `SPEC.md` and `PROGRESS.md`, then continue from "Next" in `PROGRESS.md`.
+- Update `PROGRESS.md` in every pull request: where we are, decisions, answered and open questions, next step.
+
 ## Rules for working here
 
 - Explain every change in plain words for a beginner: what changed, why, and how to check it.
