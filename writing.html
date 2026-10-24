@@ -81,15 +81,14 @@
       </ol>
     </section>
 
-    <!-- Latest posts, updated by hand when a new post goes up on Substack.
-         To add one: copy a whole <li class="post"> ... </li> block to the top of the list,
-         change the date, the two links, the title and the opening lines,
-         then delete the last block so the list keeps 4 posts. -->
+    <!-- Latest posts. Each visitor's browser fills this list with the 4 newest posts
+         from Substack (see scripts/latest-posts.js). The line inside the list
+         shows only if the posts can't be loaded. -->
     <section class="latest">
       <p class="label">Fresh from the newsletter</p>
       <h2>Latest posts</h2>
-      <ul class="post-list">
-        <!-- Posts go here, newest first -->
+      <ul class="post-list" id="latest-posts">
+        <li class="post"><p>See the newest posts on <a href="https://thingsdandoes.substack.com/archive">The Shy Korean</a>.</p></li>
       </ul>
       <p><a href="https://thingsdandoes.substack.com">Read all posts on Substack</a></p>
     </section>
@@ -111,6 +110,9 @@
     <p><a href="https://www.instagram.com/theshykoreandad/">Instagram</a></p>
     <p class="small-print">© 2026 Daniel Yoon</p>
   </footer>
+
+  <!-- Loads "Latest posts" from Substack -->
+  <script src="scripts/latest-posts.js" defer></script>
 
 </body>
 </html>

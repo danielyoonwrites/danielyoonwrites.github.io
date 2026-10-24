@@ -20,8 +20,8 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
 ## Publishing and Latest posts
 
 - GitHub Pages publishes through the workflow `.github/workflows/publish.yml` (Pages source: GitHub Actions). It runs on every merge to main and on "Run workflow".
-- "Latest posts" on `writing.html` is updated by hand. Substack's Cloudflare protection blocks GitHub's computers from reading the feed (tested October 2026), and Claude's sessions can't open Substack either.
-- When the owner sends a new post (title, link, date, opening lines): add it to the top of "Latest posts" in the same format as the others (date, title, opening lines trimmed to about 30 words with "…", Read on Substack), then remove the oldest so the list keeps 4. Remove tracking codes like `?r=` from links.
+- "Latest posts" on `writing.html` is filled in each visitor's browser by `scripts/latest-posts.js`. It tries the Substack feed directly, then the AllOrigins relay, then rss2json, and keeps the fallback link if all fail. Open `writing.html?debug` to see which way worked.
+- Why in the browser: Substack's Cloudflare protection blocks GitHub's computers from reading the feed (tested October 2026). Claude's sessions can't open Substack either.
 
 ## Content
 
