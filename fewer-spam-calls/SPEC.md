@@ -29,22 +29,22 @@ Changed October 24, 2026, after the owner read the first version: a full checkli
 
 ## The steps
 
-Facts checked October 24, 2026, from search results of official pages (sources below). Recheck before each update.
+Facts rechecked October 24, 2026 by opening each official page from GitHub (through Jina Reader) and reading the exact lines. Recheck before each update.
 
-1. **Join the Do Not Call Registry.** Free. At DoNotCall.gov, or call 1-888-382-1222 (TTY 1-866-290-4236) from the phone you want to register. Online sign-up sends an email you must confirm within 72 hours. Your number is on the list the next day, but sales calls can take up to 31 days to stop. Registration never expires. It stops law-abiding telemarketers, not scammers. Warning: emails saying your registration is expiring are fake.
-2. **Turn on your carrier's free spam blocking.**
-   - T-Mobile: dial #662# to turn on Scam Block (free; #632# turns it off). It may block a call you wanted.
-   - Verizon: Call Filter is free. In the Verizon Protect app: Services, Call Filter, Manage, then turn on the spam filter. Or in My Verizon: Settings & preferences, Call Filter.
-   - AT&T: the free ActiveArmor app blocks fraud calls automatically and can block spam calls or send them to voicemail.
-   - Another carrier: call your phone company and ask about free spam blocking (FCC advice).
-3. **Turn on your phone's own call screening.**
-   - iPhone: Settings, Apps, Phone, then choose how to handle unknown callers: "Ask Reason for Calling" or "Silence." (Apple's page describes iOS 26; check the exact path on iOS 27 when building.) Tip: save your doctor, pharmacy and family as contacts first, so their calls still ring.
-   - Android with Google's Phone app (for example Pixel): Phone app, More, Settings, Caller ID & spam or Spam and Call Screen, then turn on spam filtering or Call Screen.
-   - Samsung Galaxy: Phone app, the three dots, Settings, Caller ID and spam protection, then Block spam and scam calls.
-4. **Californians: use DROP.** At privacy.ca.gov/drop. One free request asks all registered data brokers (over 500) to delete your information, which makes your number less widely sold. About 10 minutes. You confirm you live in California through the California Identity Gateway (or Login.gov if you already have an account). Required: name, date of birth, email; add your phone numbers too. Keep your 8-digit DROP ID to check on it later. Brokers have had to process requests since August 1, 2026, checking every 45 days. In some cases you can submit a request for another California resident, like a parent. It reduces how far your number spreads; it won't stop scammers who dial random numbers.
-5. **When one gets through.** Hang up. Don't press any buttons, even "to be removed." Caller ID can be faked. Report the call at DoNotCall.gov (or ReportFraud.ftc.gov if you lost money). Forward spam texts to 7726.
+1. **Join the Do Not Call list.** Free. Call 1-888-382-1222 (TTY 1-866-290-4236) from the phone you want to register, or use DoNotCall.gov. Online sign-up needs an email link clicked within 72 hours. Up to 31 days for sales calls to stop. Never expires. Doesn't stop scammers. (FTC, confirmed.)
+2. **Phone company's spam blocking.**
+   - T-Mobile: "Dial #662# from your T-Mobile device" turns on Scam Block; also in the free T-Life app (postpaid). Scam ID and Scam Block are free. (T-Mobile, confirmed.) The "#632# to turn off" code was not found on T-Mobile's pages and was removed.
+   - Verizon: Verizon Protect app, Services, Call Filter, Manage, Spam & category filters, Spam filter switch. Devices that can't use the app use My Verizon. (Verizon, confirmed.) "Free" comes from Verizon's FAQ as quoted in search results.
+   - AT&T: ActiveArmor app; fraud calls are blocked automatically; on the Calls tab, spam calls can be allowed, blocked or sent to voicemail. (AT&T, confirmed.) "Free" comes from AT&T pages in search results.
+   - Another company: call your phone company and ask (FCC advice).
+3. **Phone's own call screening.**
+   - iPhone: Settings, Apps, Phone; unknown callers: Never, Ask Reason for Calling, or Silence (sent to voicemail). (Apple's current guide, confirmed.) The guide shows "Silence" only, to keep it simple.
+   - Google's Phone app: More options, Settings, Caller ID and spam; turn on "See caller ID & spam" and "Filter spam calls." Phones with automatic Call Screen block spam there instead. (Google, confirmed.)
+   - Samsung: Phone app, three dots, Settings, Caller ID and spam protection, Block spam and scam calls. NOT confirmed directly: Samsung blocked the page reader; based on search results of Samsung's Smart Call page. Recheck.
+4. **California DROP.** privacy.ca.gov/drop. One request to over 600 registered data brokers (DROP's home page; an older March 2026 flyer says 500). Three steps: verify you live in California, create a profile, submit. Asks for information such as name, date of birth and email; only some is required. 8-digit DROP ID; keep it private. You may submit for someone else with their permission, after verifying their residency. Brokers process at least every 45 days starting August 1, 2026; status updates can take up to 90 days. (California, confirmed.) "About 10 minutes" was not found on DROP's pages and was removed.
+5. **When one gets through.** Hang up. Don't press a number (it can lead to more robocalls). Caller ID is easy to fake. Report at DoNotCall.gov; if you lost money, ReportFraud.ftc.gov. Forward spam texts to 7726. (FTC, confirmed.)
 
-## Sources (opened as search results October 24, 2026)
+## Sources (opened October 24, 2026)
 
 - FTC: National Do Not Call Registry FAQs, https://consumer.ftc.gov/articles/national-do-not-call-registry-faqs
 - FTC: How to block unwanted calls, https://consumer.ftc.gov/articles/how-block-unwanted-calls
@@ -57,6 +57,10 @@ Facts checked October 24, 2026, from search results of official pages (sources b
 - Google: Use caller ID and spam protection, https://support.google.com/phoneapp/answer/3459196
 - Samsung: Block spam calls with Smart Call, https://www.samsung.com/us/support/answer/ANS10003438/
 - California: DROP, https://privacy.ca.gov/drop/ and Help with DROP, https://privacy.ca.gov/drop/help-with-drop/
+- California: DROP sign-up and terms, https://consumer.drop.privacy.ca.gov/
+- FTC: Robocalls, https://consumer.ftc.gov/articles/robocalls
+- T-Mobile: Block unwanted calls, https://www.t-mobile.com/support/plans-features/block-unwanted-calls
+- Verizon: Enable spam filter, https://www.verizon.com/support/knowledge-base-217615/
 
 ## Design
 
@@ -78,4 +82,4 @@ Same Moon jar design as the website (see the website's `CLAUDE.md`), with these 
 1. This spec, plus `CLAUDE.md` for the folder. Check: read it. (Merged, pull request 20.)
 2. The page with the full checklist, sources and "last checked" date, no choices yet. Check: read it on a phone; tap every link. (Built October 24, 2026; parts for one phone, carrier or state are already tagged so step 3 can hide them.)
 3. Questions first, then one step at a time (replaced the optional choices; built October 24, 2026). Check: go through it on a phone with your own answers, then with "I'm not sure."
-4. Final pass: recheck every fact, and check the iPhone steps on a real iPhone. Check: follow the steps for your own phone and carrier.
+4. Final pass: recheck every fact, and check the iPhone steps on a real iPhone. Check: follow the steps for your own phone and carrier. (Facts rechecked October 24, 2026; Samsung still to confirm.)

@@ -1,34 +1,56 @@
-# TEMPORARY test version on Claude's branch only. Not for merging.
+# Publishes the website with GitHub Pages, with the newest Substack posts added.
+# Runs when a change is merged into main, once a day (to pick up new posts),
+# and whenever you click "Run workflow" in the Actions tab.
+
 name: Publish site
+
 on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 14 * * *" # every day at 14:17 UTC (7:17 a.m. in California during daylight time)
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one publish at a time
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
-  fact-check:
+  # Part 1: get the files ready, with the latest posts added
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Open each source and pull the key lines
-        run: |
-          get() {  # $1 = label, $2 = url, $3 = words to look for
-            echo; echo "################ $1"; echo "URL: $2"
-            curl -sS -m 40 -H "X-Return-Format: text" "https://r.jina.ai/$2" -o /tmp/page.txt || true
-            echo "chars: $(wc -c < /tmp/page.txt)"
-            grep -i -o -E ".{0,220}($3).{0,220}" /tmp/page.txt | head -12
-          }
-          ctx() {  # $1 = label, $2 = url, $3 = words; prints whole lines around matches
-            echo; echo "################ $1"; echo "URL: $2"
-            curl -sS -m 40 -H "X-Return-Format: text" "https://r.jina.ai/$2" -o /tmp/page.txt || true
-            echo "chars: $(wc -c < /tmp/page.txt)"
-            grep -i -n -E -B1 -A4 "$3" /tmp/page.txt | cut -c1-400 | head -40
-          }
-          ctx "T-Mobile scams" "https://www.t-mobile.com/support/plans-features/help-with-scams-spam-and-fraud" "662|632|postpaid|T-Life"
-          ctx "T-Mobile block calls" "https://www.t-mobile.com/support/plans-features/block-unwanted-calls" "662|632|Scam Block"
-          ctx "Verizon spam filter" "https://www.verizon.com/support/knowledge-base-217615/" "Verizon Protect|Services|Call Filter|Manage|spam filter|free"
-          ctx "Verizon Call Filter how to" "https://www.verizon.com/support/how-to-use-call-filter/" "free|Verizon Protect|Services|Manage"
-          ctx "AT&T ActiveArmor free" "https://www.att.com/support/article/wireless/KM1147710/" "free|no extra|cost|download"
-          ctx "Apple screen calls" "https://support.apple.com/guide/iphone/screen-and-block-calls-iphe4b3f7823/ios" "Unknown|Silence|Ask Reason|Screen"
-          ctx "Samsung Smart Call (direct)" "https://www.samsung.com/us/support/answer/ANS10003438/" "Caller ID|spam|scam|Block"
-          ctx "Samsung call settings" "https://www.samsung.com/us/support/answer/ANS10007266/" "Caller ID|spam|scam|Block"
-          ctx "DROP home" "https://privacy.ca.gov/drop/" "minute|3 easy steps|step"
-          ctx "DROP consumer site" "https://consumer.drop.privacy.ca.gov/" "minute|another|behalf|date of birth|email|required"
-          ctx "DROP help" "https://privacy.ca.gov/drop/help-with-drop/" "another|behalf|someone else|date of birth|required|minute"
-          ctx "DROP flyer" "https://privacy.ca.gov/wp-content/uploads/sites/357/2026/03/DROP-Flyer.pdf" "minute|500|600|step|date of birth"
+      - name: Get the website files
+        uses: actions/checkout@v4
+
+      - name: Add the latest Substack posts
+        run: node scripts/latest-posts.js
+        # If the posts can't be loaded, still publish the site with the fallback link
+        continue-on-error: true
+
+      - name: Set up GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Package the website
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  # Part 2: publish (only from main; on other branches this part is skipped)
+  publish:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish
+        id: deployment
+        uses: actions/deploy-pages@v4
