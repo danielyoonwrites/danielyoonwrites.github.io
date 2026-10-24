@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Makes the page fit phone screens instead of showing a tiny desktop page -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The name in the browser tab, and the summary search engines show -->
+  <title>Projects · Daniel Yoon</title>
+  <meta name="description" content="Small tools Daniel Yoon makes for the people around him: what each one does, and how he built it.">
+
+  <!-- What shows when the link is shared in a message or on social media -->
+  <meta property="og:title" content="Projects · Daniel Yoon">
+  <meta property="og:description" content="Small tools Daniel Yoon makes for the people around him: what each one does, and how he built it.">
+  <meta property="og:url" content="https://danielyoonwrites.github.io/projects.html">
+  <meta property="og:type" content="website">
+
+  <!-- Fonts from Google Fonts: Libre Baskerville (Regular and Italic) for English,
+       Nanum Myeongjo ExtraBold for any Korean -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;1,400&family=Nanum+Myeongjo:wght@800&display=swap">
+
+  <!-- The shared look for every page: colors, fonts, spacing -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Header: the same on every page. Copy it as is into new pages. -->
+  <header class="site-header">
+    <a class="site-name" href="index.html">Daniel Yoon</a>
+    <nav>
+      <ul>
+        <!-- aria-current="page" marks the page you’re on. Move it to the matching link on each page.
+             There is no Home link: the name "Daniel Yoon" above goes to Home. -->
+        <li><a href="writing.html">Writing</a></li>
+        <li><a href="projects.html" aria-current="page">Projects</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- The main part of the page. Edit the words here. -->
+  <main>
+
+    <section>
+      <h1 class="label">Projects</h1>
+      <p class="intro">Small tools I make for the people around me. I plan each one, decide what it does and what it leaves out, and build it with AI.</p>
+
+      <!-- One project per block, with the same look as the post lists on the Writing page.
+           To add a project: copy one whole <li class="post"> ... </li> block and change the words.
+           Each block has: a small label, the name, one friendly line for everyone,
+           then a short "How I built it" note for anyone curious about the thinking. -->
+      <ul class="post-list">
+
+        <li class="post">
+          <p class="label">Guide</p>
+          <h2><a href="fewer-spam-calls/">Fewer spam calls</a></h2>
+          <p class="post-excerpt">A step-by-step guide to fewer robocalls and spam calls, written so a grandparent could follow it.</p>
+          <p class="label">How I built it</p>
+          <p><em>The problem:</em> My first version was one long checklist, and it was too much for seniors.</p>
+          <p><em>What I decided:</em> Ask three questions first (your phone, your phone company, and whether you live in California), then show only the steps that fit, one per screen. Every fact comes from an official page, and it never asks for your phone number.</p>
+          <p><em>The trade-off:</em> Phone menus change often, so every step has to be checked again each time the guide changes.</p>
+          <a class="read-link" href="fewer-spam-calls/">Open the guide</a>
+        </li>
+
+        <li class="post">
+          <p class="label">Website</p>
+          <h2>This website</h2>
+          <p class="post-excerpt">Where my writing lives, in the same quiet look as my newsletter.</p>
+          <p class="label">How I built it</p>
+          <p><em>The problem:</em> I wanted my newest Substack posts on the Writing page without updating it by hand. But Substack’s security blocks GitHub’s computers, which publish this site, and the first three approaches failed.</p>
+          <p><em>What I decided:</em> Go through a reading service called Jina Reader. Each time the site is published, and once a day, GitHub reads my post list through it and adds the four newest. If that fails, the page shows a link to my Substack instead, so it never looks broken.</p>
+          <p><em>The trade-off:</em> A new post can take up to a day to show up.</p>
+          <a class="read-link" href="writing.html">See the Writing page</a>
+        </li>
+
+        <!-- No link on purpose: the room is shared by private link with the group only -->
+        <li class="post">
+          <p class="label">Web app · In progress</p>
+          <h2>Quiet room</h2>
+          <p class="post-excerpt">A quiet place to read, study, or work alongside friends. No notifications, no games, no distractions.</p>
+          <p class="post-date">Step 1 of 11 is done. Made for a group from my church and shared with them by private link, so there’s no link here.</p>
+          <p class="label">How I’m building it</p>
+          <p><em>The goal:</em> Company while you read or study, without pings, games, or anything that punishes you for leaving.</p>
+          <p><em>What I decided:</em> You set your own status, like Focusing or On a break, and the app never checks what you’re doing. The first version leaves out chat, rankings, sound and real accounts.</p>
+          <p><em>The trade-off:</em> It runs on trust, which fits a room of friends.</p>
+        </li>
+
+      </ul>
+
+      <p class="small-print">The plans and code for all of these are public on <a href="https://github.com/danielyoonwrites/danielyoonwrites.github.io">GitHub</a>.</p>
+    </section>
+
+  </main>
+
+  <!-- Footer: the same on every page -->
+  <footer class="site-footer">
+    <p><a href="https://www.instagram.com/theshykoreandad/">Instagram</a></p>
+    <p class="small-print">© 2026 Daniel Yoon</p>
+  </footer>
+
+</body>
+</html>
