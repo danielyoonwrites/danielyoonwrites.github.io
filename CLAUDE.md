@@ -20,7 +20,7 @@ Plain HTML and CSS. The owner is a beginner and edits the files by hand.
 ## Content
 
 - Keep the site general, like the Substack: writing, family life, the shy Korean voice.
-- Don't mention pastor work or church for now. The owner may add pastor and Christian writing later.
+- Pastor work can be mentioned, lightly: a line or two (for example on the About page), not the focus of any page. The owner may add more pastor and Christian writing later.
 
 ## Links
 
