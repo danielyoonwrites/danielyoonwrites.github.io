@@ -12,15 +12,18 @@ Honest: fewer spam calls, not none. No guide or tool stops them all, and the pag
 
 ## How the page works
 
-- The full checklist shows as soon as the page opens. Nobody has to answer anything to get help.
-- Three optional choices at the top shorten the list:
-  - Your phone: iPhone, Android, or show both
-  - Your carrier: T-Mobile, Verizon, AT&T, or another
+Changed October 24, 2026, after the owner read the first version: a full checklist was too much text for seniors.
+
+- Three questions first, one per screen, with big buttons:
+  - What kind of phone do you have? iPhone, Samsung Galaxy, another Android phone (like a Pixel), or I'm not sure (with a hint: an apple logo on the back means iPhone)
+  - Which phone company do you pay? T-Mobile, Verizon, AT&T, or another company / not sure (hint: it's on your phone bill)
   - Do you live in California? Yes or no
-- Choosing hides the steps that don't apply. Choosing nothing shows everything.
+- Then only the matching steps, one per screen: "Step 1 of 4," a few short lines, a big "Done, next step" button and a "Back" button.
+- Then "You're all set," with "Start over."
+- Every step is trimmed to the essentials. Calling the Do Not Call number comes first, since it's easier than signing up online.
 - Nothing is saved or sent anywhere. The page never asks for a phone number. No tracking.
-- It prints cleanly, so someone can print it for a parent.
-- "Last checked" date near the top, and the sources at the bottom, because carrier tools and phone settings change.
+- Sources sit in a fold-out "Where this comes from" at the bottom, with the "last checked" date.
+- Without JavaScript, every step shows on one page.
 
 ## The steps
 
@@ -72,5 +75,5 @@ Same Moon jar design as the website (see the website's `CLAUDE.md`), with these 
 
 1. This spec, plus `CLAUDE.md` for the folder. Check: read it. (Merged, pull request 20.)
 2. The page with the full checklist, sources and "last checked" date, no choices yet. Check: read it on a phone; tap every link. (Built October 24, 2026; parts for one phone, carrier or state are already tagged so step 3 can hide them.)
-3. The three optional choices, and print styles. Check: try each choice on a phone; print preview.
+3. Questions first, then one step at a time (replaced the optional choices; built October 24, 2026). Check: go through it on a phone with your own answers, then with "I'm not sure."
 4. Final pass: recheck every fact, and check the iPhone steps on a real iPhone. Check: follow the steps for your own phone and carrier.
