@@ -1,8 +1,11 @@
 // Loads the 4 newest posts from The Shy Korean into "Latest posts" on writing.html.
 // It runs in each visitor's browser when they open the page.
-// Substack blocks GitHub's computers, so this can't be done ahead of time.
 //
-// It tries three ways to read the Substack feed, in order, and uses the first that works.
+// Substack's security blocks most computers that aren't a person's browser, and it doesn't
+// let other websites read its data directly. Jina Reader (r.jina.ai), a free service,
+// fetches Substack's data and passes it on. Tested in October 2026.
+//
+// It tries three ways, in order, and uses the first that works.
 // If none work, the page keeps its fallback link.
 // To see which way worked, open writing.html?debug on your phone.
 
@@ -13,10 +16,15 @@
   var EXCERPT_WORDS = 30;
   var WAIT_SECONDS = 8; // how long to wait for each way before trying the next
 
+  var ARCHIVE_URL = 'https://thingsdandoes.substack.com/api/v1/archive?sort=new&limit=' + HOW_MANY_POSTS;
+  var JINA = 'https://r.jina.ai/';
+  // "X-Return-Format: text" asks Jina to pass Substack's data on unchanged
+  var JINA_HEADERS = { 'X-Return-Format': 'text' };
+
   var SOURCES = [
-    { name: 'Substack feed', url: FEED_URL, type: 'xml' },
-    { name: 'AllOrigins relay', url: 'https://api.allorigins.win/raw?url=' + encodeURIComponent(FEED_URL), type: 'xml' },
-    { name: 'rss2json', url: 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(FEED_URL), type: 'json' },
+    { name: 'Substack post list, through Jina', url: JINA + ARCHIVE_URL, headers: JINA_HEADERS, type: 'archive' },
+    { name: 'Substack feed, through Jina', url: JINA + FEED_URL, headers: JINA_HEADERS, type: 'xml' },
+    { name: 'Substack feed, direct', url: FEED_URL, headers: {}, type: 'xml' },
   ];
 
   var list = document.getElementById('latest-posts');
@@ -31,17 +39,18 @@
     list.parentNode.insertBefore(note, list);
   }
 
-  // The first real paragraph of a post, cut to about 30 words
+  // The opening of a post: its first paragraphs, cut to about 30 words
   function excerpt(html) {
     var page = new DOMParser().parseFromString(html || '', 'text/html');
     var paragraphs = page.querySelectorAll('p');
-    for (var i = 0; i < paragraphs.length; i++) {
+    var words = [];
+    for (var i = 0; i < paragraphs.length && words.length < EXCERPT_WORDS; i++) {
+      if (paragraphs[i].closest('figure, figcaption, .captioned-image-container')) continue; // skip image captions
       var text = paragraphs[i].textContent.replace(/\s+/g, ' ').trim();
-      var words = text.split(' ');
-      if (words.length < 8) continue; // skip captions and short lines
-      return words.length > EXCERPT_WORDS ? words.slice(0, EXCERPT_WORDS).join(' ') + ' …' : text;
+      if (text) words = words.concat(text.split(' '));
     }
-    return '';
+    if (words.length === 0) return '';
+    return words.length > EXCERPT_WORDS ? words.slice(0, EXCERPT_WORDS).join(' ') + ' …' : words.join(' ');
   }
 
   // Dates like "October 24, 2026"
@@ -74,10 +83,17 @@
     return posts;
   }
 
-  function postsFromJson(text) {
+  // Substack's post list (newest first)
+  function postsFromArchive(text) {
     var data = JSON.parse(text);
-    return (data.items || []).slice(0, HOW_MANY_POSTS).map(function (item) {
-      return { title: item.title, link: item.link, date: item.pubDate, html: item.content || item.description };
+    if (!Array.isArray(data)) return [];
+    return data.slice(0, HOW_MANY_POSTS).map(function (post) {
+      return {
+        title: post.title,
+        link: post.canonical_url,
+        date: post.post_date,
+        html: post.body_html || '<p>' + (post.truncated_body_text || '') + '</p>',
+      };
     });
   }
 
@@ -121,10 +137,10 @@
     });
   }
 
-  function fetchWithTimeout(url) {
+  function fetchWithTimeout(url, headers) {
     var controller = new AbortController();
     var timer = setTimeout(function () { controller.abort(); }, WAIT_SECONDS * 1000);
-    return fetch(url, { signal: controller.signal }).then(function (response) {
+    return fetch(url, { headers: headers, signal: controller.signal }).then(function (response) {
       clearTimeout(timer);
       if (!response.ok) throw new Error('answered ' + response.status);
       return response.text();
@@ -138,9 +154,9 @@
       return;
     }
     var source = SOURCES[index];
-    fetchWithTimeout(source.url)
+    fetchWithTimeout(source.url, source.headers)
       .then(function (text) {
-        var posts = source.type === 'json' ? postsFromJson(text) : postsFromXml(text);
+        var posts = source.type === 'archive' ? postsFromArchive(text) : postsFromXml(text);
         if (posts.length === 0) throw new Error('no posts found');
         show(posts);
         showDebug('Latest posts loaded through: ' + source.name + '.');
