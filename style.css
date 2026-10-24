@@ -147,6 +147,30 @@ h1 a {
   border-radius: 0;
 }
 
+/* Featured posts: a thin line above, then one post per row */
+.posts {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--glaze);
+}
+
+.post-list {
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.post-list li {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--glaze);
+  font-size: 1.125rem;
+  line-height: 1.45;
+}
+
+.post-list a {
+  text-decoration: none;
+}
+
 /* The opening words on the Home page, a little larger */
 .intro {
   margin: 0;
