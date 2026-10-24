@@ -1,56 +1,28 @@
-# Publishes the website with GitHub Pages, with the newest Substack posts added.
-# Runs when a change is merged into main, once a day (to pick up new posts),
-# and whenever you click "Run workflow" in the Actions tab.
-
+# TEMPORARY test version on Claude's branch only. Not for merging.
 name: Publish site
-
 on:
-  push:
-    branches: [main]
-  schedule:
-    - cron: "17 14 * * *" # every day at 14:17 UTC (7:17 a.m. in California during daylight time)
   workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Only one publish at a time
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
 jobs:
-  # Part 1: get the files ready, with the latest posts added
-  build:
+  fact-check:
     runs-on: ubuntu-latest
     steps:
-      - name: Get the website files
-        uses: actions/checkout@v4
-
-      - name: Add the latest Substack posts
-        run: node scripts/latest-posts.js
-        # If the posts can't be loaded, still publish the site with the fallback link
-        continue-on-error: true
-
-      - name: Set up GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Package the website
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .
-
-  # Part 2: publish (only from main; on other branches this part is skipped)
-  publish:
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Publish
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Open each source and pull the key lines
+        run: |
+          get() {  # $1 = label, $2 = url, $3 = words to look for
+            echo; echo "################ $1"; echo "URL: $2"
+            curl -sS -m 40 -H "X-Return-Format: text" "https://r.jina.ai/$2" -o /tmp/page.txt || true
+            echo "chars: $(wc -c < /tmp/page.txt)"
+            grep -i -o -E ".{0,220}($3).{0,220}" /tmp/page.txt | head -12
+          }
+          get "FTC DNC FAQ" "https://consumer.ftc.gov/articles/national-do-not-call-registry-faqs" "1-888-382-1222|31 days|72 hours|expire|TTY|scammer"
+          get "FTC block calls" "https://consumer.ftc.gov/articles/how-block-unwanted-calls" "carrier|Silence Unknown|Call Screen|Smart Call|press|button"
+          get "FTC spam texts" "https://consumer.ftc.gov/articles/how-recognize-and-report-spam-text-messages" "7726"
+          get "FTC robocalls" "https://consumer.ftc.gov/articles/robocalls" "press|hang up|caller ID|report"
+          get "T-Mobile scams" "https://www.t-mobile.com/support/plans-features/help-with-scams-spam-and-fraud" "#662#|#632#|Scam Block|free"
+          get "Verizon Call Filter FAQ" "https://www.verizon.com/support/call-filter-faqs/" "free|Verizon Protect|Services|Manage|spam filter|My Verizon"
+          get "AT&T ActiveArmor" "https://www.att.com/support/article/wireless/KM1147710/" "free|block|spam|fraud|voicemail"
+          get "Apple screen calls" "https://support.apple.com/guide/iphone/screen-and-block-calls-iphe4b3f7823/ios" "Unknown Callers|Silence|Ask Reason|Settings|Apps|Phone"
+          get "Google caller ID spam" "https://support.google.com/phoneapp/answer/3459196?hl=en" "Caller ID|spam|Call Screen|Settings|More"
+          get "Samsung Smart Call" "https://www.samsung.com/us/support/answer/ANS10003438/" "Caller ID and spam|Block spam|scam|Settings|More options"
+          get "DROP" "https://privacy.ca.gov/drop/" "10 minutes|500|broker|delete|August|45 days"
+          get "DROP help" "https://privacy.ca.gov/drop/help-with-drop/" "another California|on behalf|DROP ID|8-digit|eight|date of birth|email|Login.gov|Identity Gateway|phone"
