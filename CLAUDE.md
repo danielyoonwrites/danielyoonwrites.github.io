@@ -19,7 +19,7 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
 
 - Home (`index.html`), Writing (`writing.html`), Projects (`projects.html`), About (`about.html`).
 - The menu shows Writing, Projects, About. There's no Home link: the name "Daniel Yoon" goes to Home. Four links didn't fit on one line on a small phone (360px wide, checked October 2026).
-- Projects is for two kinds of readers. Each project has one friendly line for everyone, then a short "How I built it" note (what I wanted, the problem, what I decided, the trade-off) for anyone checking how he thinks. The page says once, at the top, that he builds them with AI. Quiet room is listed as in progress with no link, because the room is shared by private link.
+- Projects is for two kinds of readers. All projects come first and stay short (label, name, one friendly line, link), so every project shows near the top. The "How I built it" notes (what I wanted, the problem, what I decided, the trade-off) come after, in their own section, for anyone checking how he thinks. Never put the notes inside the project list: they push the next project out of sight (the owner's rule, October 2026). The page says once, at the top, that he builds them with AI. Quiet room is listed as in progress with no link, because the room is shared by private link.
 - One shared stylesheet: `style.css`.
 - `quiet-room/` is a separate web app with its own `CLAUDE.md` and `SPEC.md`.
 - `fewer-spam-calls/` is a one-page guide with its own `CLAUDE.md` and `SPEC.md`.

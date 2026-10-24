@@ -211,9 +211,10 @@ h3 a {
   color: var(--stone);
 }
 
-/* Latest posts and the newsletter: a thin line above each */
+/* Latest posts, the newsletter, and "How I built it" on Projects: a thin line above each */
 .latest,
-.newsletter {
+.newsletter,
+.projects-notes {
   margin-top: 3rem;
   padding-top: 2rem;
   border-top: 1px solid var(--glaze);
