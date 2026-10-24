@@ -17,6 +17,13 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
 - Later: Projects (`projects.html`) for small web apps.
 - One shared stylesheet: `style.css`.
 
+## Publishing and Latest posts
+
+- GitHub Pages publishes through the workflow `.github/workflows/publish.yml` (Pages source: GitHub Actions). It runs on every merge to main, once a day, and on "Run workflow".
+- Before publishing, `scripts/latest-posts.js` fills the "Latest posts" list on `writing.html` with the 4 newest posts from the Substack feed. It changes only the published copy, never the file in the repository.
+- Don't edit between the `LATEST POSTS START` and `LATEST POSTS END` lines. The text there is the fallback if the feed can't be reached.
+- GitHub turns off scheduled workflows after 60 days without repository activity; turn it back on in the Actions tab.
+
 ## Content
 
 - The voice is like the Substack: writing, family life, the shy Korean voice.
