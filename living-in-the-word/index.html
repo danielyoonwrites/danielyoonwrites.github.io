@@ -17,8 +17,8 @@
 
   <!-- The app's own look: Moon jar colors, big buttons.
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=3">
-  <script src="app.js?v=3" defer></script>
+  <link rel="stylesheet" href="style.css?v=4">
+  <script src="app.js?v=4" defer></script>
 </head>
 <body>
 
@@ -153,8 +153,17 @@
       <p class="hint">Read it in your own Bible.</p>
       <p class="note reading-early" hidden></p>
 
+      <!-- The AI's note on this chapter, if it wrote one (like the note on Mark 16:9–20) -->
+      <div class="leader-note reading-note" hidden>
+        <p class="label">A note on this reading</p>
+        <p class="reading-note-text"></p>
+      </div>
+
       <p class="label reflect-label">To think about</p>
       <ol class="reflect-list"></ol>
+      <p class="note reading-status" role="status" hidden></p>
+      <!-- Shown when the AI helper is set up but this phone has no passcode yet -->
+      <button type="button" class="quiet reading-ai" data-action="reading-ai" hidden>Questions for this reading</button>
 
       <button type="button" class="primary" data-action="done-reading">Done for today</button>
       <button type="button" class="quiet" data-action="end-plan">End this plan</button>

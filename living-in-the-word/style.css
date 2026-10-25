@@ -412,6 +412,11 @@ select {
   margin-top: 1rem;
 }
 
+/* The AI's note on a reading: the same look as the note for the leader */
+.reading-note {
+  margin: 1.5rem 0 0;
+}
+
 .reflect-label {
   margin-top: 2rem;
 }
