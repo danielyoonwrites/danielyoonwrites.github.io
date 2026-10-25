@@ -18,7 +18,7 @@
   <!-- The app's own look: Moon jar colors, big buttons.
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
   <link rel="stylesheet" href="style.css?v=6">
-  <script src="app.js?v=8" defer></script>
+  <script src="app.js?v=9" defer></script>
 </head>
 <body>
 
@@ -47,6 +47,7 @@
 
       <p class="note" id="saved-note">Saved only on this phone, in this browser. Nothing is sent anywhere. Clearing your browsing data erases it.</p>
       <p class="note" id="cant-save" hidden>This browser isn’t letting the app save, so your steps will be forgotten when you close the page.</p>
+      <button type="button" class="quiet" data-action="data">Backup and delete</button>
       <noscript><p class="note">This app needs JavaScript turned on in your browser.</p></noscript>
     </section>
 
@@ -110,6 +111,25 @@
         <p class="gentle-error" hidden>Type a few words first.</p>
         <button type="submit" class="primary">Add it</button>
       </form>
+      <button type="button" class="quiet back" data-action="back">Back</button>
+    </section>
+
+    <!-- Your data: save a backup file, bring it back, or delete everything -->
+    <section class="screen" id="data">
+      <p class="label">Your data</p>
+      <h2 tabindex="-1">Backup</h2>
+      <p>Everything is saved only on this phone, in this browser. A backup is a small file you keep, in Downloads or Google Drive, so you can bring everything back on a new phone or after clearing your browser.</p>
+      <button type="button" class="primary" data-action="save-backup">Save a backup</button>
+      <p class="note backup-when"></p>
+      <p class="note">If nothing downloads, open the app in Chrome. Some apps’ built-in browsers can’t save files.</p>
+
+      <button type="button" class="outline" data-action="restore">Restore a backup</button>
+      <!-- The phone's file picker opens when "Restore a backup" is tapped -->
+      <input type="file" id="restore-file" accept=".json,application/json" hidden>
+      <p class="note">Restoring replaces what’s on this phone with what’s in the backup.</p>
+      <p class="gentle-error data-message" hidden></p>
+
+      <button type="button" class="quiet" data-action="delete-all">Delete everything</button>
       <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 

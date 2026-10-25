@@ -11,6 +11,7 @@ const STORAGE_KEY = 'first-step-smaller';
 //   node = { id, text, status, created, updated, finished, before, after, date, children: [ node, ... ] }
 //   status is 'waiting' (not done yet), 'done' (a step done, with before, after and date)
 //   or 'finished' (a task marked "I finished it").
+//   data.lastBackup is the date of the last "Save a backup".
 let data = { version: 2, tasks: [] };
 let canSave = true;   // false if this browser won't let the app save (some private modes)
 
@@ -336,8 +337,8 @@ function showNode(node, keep = true) {
   fill('#node .node-status', status);
   fill('#node .node-name', node.text);
   const meta = document.querySelector('#node .node-meta');
-  meta.textContent = node.status === 'done' && node.before
-    ? shortDate(node.date) + ' · felt ' + node.before + ', was ' + node.after
+  meta.textContent = node.status === 'done'
+    ? [node.date ? shortDate(node.date) : '', node.before ? 'felt ' + node.before + ', was ' + node.after : ''].filter(Boolean).join(' · ')
     : '';
   meta.hidden = !meta.textContent;
   document.querySelector('#node .no-steps').hidden = !(isBigTask(node) && node.children.length === 0);
@@ -423,6 +424,85 @@ function showAfterChange(node) {
   if (node) showNode(node, false);
   else goToStart();
 }
+
+
+// ---------- Backup, restore, delete everything ----------
+
+function drawData() {
+  fill('#data .backup-when', data.lastBackup ? 'Last backup: ' + shortDate(data.lastBackup) : 'No backup yet.');
+}
+
+// Checks one task or step from a backup file and keeps only what makes sense,
+// so a damaged or edited file can't break the app
+function cleanNode(n, seen) {
+  if (!n || typeof n.text !== 'string' || !n.text.trim()) return null;
+  const id = typeof n.id === 'string' && n.id && !seen.has(n.id) ? n.id : newId();
+  seen.add(id);
+  const clean = {
+    id,
+    text: n.text.trim().slice(0, 120),
+    status: ['waiting', 'done', 'finished'].includes(n.status) ? n.status : 'waiting',
+    children: (Array.isArray(n.children) ? n.children : []).map((c) => cleanNode(c, seen)).filter(Boolean),
+  };
+  ['created', 'finished', 'date'].forEach((key) => {
+    if (typeof n[key] === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(n[key])) clean[key] = n[key];
+  });
+  ['before', 'after'].forEach((key) => {
+    if (Number.isInteger(n[key]) && n[key] >= 1 && n[key] <= 5) clean[key] = n[key];
+  });
+  if (typeof n.updated === 'number') clean.updated = n.updated;
+  return clean;
+}
+
+// Reads a backup file's words. Returns the cleaned data, or nothing if it isn't a backup.
+function readBackup(text) {
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch (error) {
+    return null;
+  }
+  if (!parsed || !Array.isArray(parsed.tasks)) return null;
+  let tasks;
+  try {
+    if (parsed.version === 1) tasks = parsed.tasks.map(fromVersion1);
+    else if (parsed.version === 2) tasks = parsed.tasks;
+    else return null;
+  } catch (error) {
+    return null;
+  }
+  const seen = new Set();
+  const backup = { version: 2, tasks: tasks.map((t) => cleanNode(t, seen)).filter(Boolean) };
+  if (typeof parsed.lastBackup === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(parsed.lastBackup)) {
+    backup.lastBackup = parsed.lastBackup;
+  }
+  return backup;
+}
+
+// When a backup file is picked: check it, ask before replacing, keep a copy of what was here
+document.getElementById('restore-file').addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const message = document.querySelector('#data .data-message');
+  const reader = new FileReader();
+  reader.onload = () => {
+    const backup = readBackup(String(reader.result));
+    if (!backup) {
+      message.textContent = 'That file doesn’t look like a First step smaller backup, so nothing changed.';
+      message.hidden = false;
+      return;
+    }
+    const count = backup.tasks.length;
+    const from = backup.lastBackup ? ' from ' + shortDate(backup.lastBackup) : '';
+    const question = 'Replace what’s on this phone with the backup' + from + ' (' + count + (count === 1 ? ' task' : ' tasks') + ')?';
+    if (!window.confirm(question)) return;
+    keepCopy('-before-restore', JSON.stringify(data));
+    data = backup;
+    save();
+    goToStart();
+  };
+  reader.readAsText(file);
+});
 
 
 // ---------- Doing a step ----------
@@ -600,6 +680,42 @@ const actions = {
     if (path) showNode(path[path.length - 1]);
   },
   history: showHistory,
+
+  // Backup and delete
+  data() {
+    drawData();
+    show('data');
+  },
+  'save-backup'() {
+    data.lastBackup = today();
+    save();
+    const file = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const link = make('a');
+    link.href = URL.createObjectURL(file);
+    link.download = 'first-step-smaller-backup-' + today() + '.json';
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+    drawData();
+  },
+  restore() {
+    const picker = document.getElementById('restore-file');
+    picker.value = '';      // so picking the same file again still works
+    picker.click();
+  },
+  'delete-all'() {
+    if (!window.confirm('Delete every task and step from this phone? This can’t be undone, unless you have a backup.')) return;
+    data = { version: 2, tasks: [] };
+    try {
+      // Also removes the copies kept for safety (version 1, unreadable, before a restore)
+      Object.keys(localStorage).filter((key) => key.startsWith(STORAGE_KEY)).forEach((key) => localStorage.removeItem(key));
+    } catch (error) {
+      // nothing more to remove
+    }
+    save();
+    goToStart();
+  },
 
   // On a task or step's own screen
   'do-next'() {

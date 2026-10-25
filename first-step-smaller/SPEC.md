@@ -35,6 +35,10 @@ One thing per screen, with big buttons.
     - Move into another task: put it at the end of another task's arc, like moving "Write a chapter of my book" into "Write a book." To keep the list short, it offers big tasks and parts that already hold steps.
     - Make it a task of its own: takes it out of its bigger task and lists it under Waiting (a done step becomes a finished task).
     - Remove it, and everything inside it, after a confirm.
+12. Backup and delete (built October 25, 2026): "Backup and delete" on the start screen opens its own screen.
+    - "Save a backup" downloads `first-step-smaller-backup-<date>.json` and shows "Last backup: Oct 25." Some apps' built-in browsers can't save files; the screen suggests Chrome.
+    - "Restore a backup" opens the phone's file picker, checks the file, says how many tasks it holds, and asks before replacing anything. It keeps a copy of what was there under `first-step-smaller-before-restore`. A file that isn't a backup changes nothing. Backups from version 1 are converted.
+    - "Delete everything" asks first, then removes all saved data, including the copies kept for safety.
 9. The arc (decided October 25, 2026): each small step is saved under its big task, so the history shows how a big task got done, one manageable step at a time. You still only think about one step at a time.
 
 ```
@@ -93,7 +97,7 @@ Short, with no studies named on the page (the owner's choice, October 25, 2026).
 - Plain HTML, CSS and JavaScript. No build tools, no npm.
 - Saved in the browser's `localStorage` under one key, `first-step-smaller`, as JSON with a version number. Version 2 (October 25, 2026) is a tree: any task or step can hold smaller steps.
   `{ "version": 2, "tasks": [ { "id": "...", "text": "Write a book", "status": "waiting", "created": "2026-10-25", "updated": 1761350000000, "children": [ { "id": "...", "text": "Chapter 1", "status": "finished", "finished": "2026-10-26", "children": [ { "id": "...", "text": "Write three sentences", "status": "done", "before": 3, "after": 1, "date": "2026-10-24", "children": [] } ] } ] } ] }`
-  `status` is "waiting" (not done yet), "done" (a step done, with `before`, `after` and `date`) or "finished" (marked "I finished it"). The backup file will be the same JSON.
+  `status` is "waiting" (not done yet), "done" (a step done, with `before`, `after` and `date`) or "finished" (marked "I finished it"). `lastBackup` is the date of the last "Save a backup." The backup file is the same JSON. When a backup is restored, every field is checked: unknown statuses become "waiting," ratings outside 1 to 5 and malformed dates are dropped, repeated ids get new ones, and names are shown as plain text, never run as code.
 - Version 1 (a flat list of steps per task) is turned into version 2 automatically when the app opens, after keeping a copy under `first-step-smaller-version-1`. If saved data can't be read, the app keeps a copy under `first-step-smaller-unreadable` instead of writing over it. If the browser won't let it save (some private modes), the start screen says so.
 - File links end in `?v=1`; raise the number when a file changes (GitHub Pages lets browsers keep files for 10 minutes).
 - Sentence case, no exclamation marks, no emoji.
@@ -105,7 +109,7 @@ Short, with no studies named on the page (the owner's choice, October 25, 2026).
 3. Saving on the phone, the Waiting list, and the history with an arc for each task. Check: close the browser, reopen it, everything's there. (Built October 25, 2026.)
 3a. Smaller steps inside steps, "Add a smaller step," and "Do the next step" in order. Check: make a task with two parts and steps inside one part, then tap "Do the next step." (Built October 25, 2026.)
 3b. Edit: rename, move up or down, move into another task, make it a task of its own, remove. Check: reorder two steps and see "Do the next step" follow the new order. (Built October 25, 2026.)
-4. Save a backup, restore it, delete everything. Check: back up, delete, restore.
+4. Save a backup, restore it, delete everything. Check: back up, delete, restore. (Built October 25, 2026.)
 5. Polish, then use it daily for a couple of weeks and note what annoys you.
 6. Before stage 3: name check, iPhone test, and add it to the Projects page.
 
