@@ -17,14 +17,24 @@ A little app for facing a task or anything you've been putting off, one small st
 
 One thing per screen, with big buttons.
 
-1. "What have you been putting off?" You type it.
-2. "How heavy does it feel?" 1 (light) to 5 (very heavy).
-3. Make it smaller. The app asks simple questions to shrink it to a first step of about 2 minutes, like "What's the very first thing your hands would do?" and "Could it be even smaller?" You type the step yourself.
-4. "Your first step" shows alone on the screen, with "Done" and "Not now."
+1. "What have you been putting off?" You type the big task.
+2. Make it smaller. The app asks simple questions to shrink it to a step of about 2 minutes: "What's the very first thing your hands would do?" then "Could it be even smaller?" You type the step yourself.
+3. "How heavy does this step feel?" 1 (light) to 5 (very heavy).
+4. "Your step" shows alone on the screen, with "Done" and "Not now."
 5. After "Done": "How was it, really?" 1 to 5.
-6. The app shows the two together, like "It felt like a 4. It was a 2." Then "One more small step" or "Stop here."
-7. "Not now" keeps it in a "Waiting" list to come back to, with no guilt.
-8. A history shows past steps with how heavy each felt before and after.
+6. The app shows the two together, like "It felt like a 4. It was a 2." Then "One more small step," "I finished it" or "Stop here for now."
+7. "Not now" and "Stop here for now" keep the task in a "Waiting" list to come back to, with no guilt.
+8. The arc (decided October 25, 2026): each small step is saved under its big task, so the history shows how a big task got done, one manageable step at a time. You still only think about one step at a time.
+
+```
+Clean the garage                  Finished
+  Oct 24   Clear one shelf        felt 4, was 2
+  Oct 25   Sort one box           felt 3, was 2
+  Oct 27   Take bags to the car   felt 3, was 1
+  3 small steps over 4 days
+```
+
+Changed October 25, 2026, while building step 2: you rate each small step, not the whole task, so every line of the arc compares like with like.
 
 ## Must-haves
 
@@ -36,12 +46,11 @@ One thing per screen, with big buttons.
 
 ## Not in stage 1
 
-- AI suggestions, a chain of next steps, reminders or notifications, accounts or syncing between devices, sharing.
+- AI suggestions, planning several steps ahead, reminders or notifications, accounts or syncing between devices, sharing.
 
 ## Ideas for later
 
 - Stage 2: an optional "Help me make it smaller" AI button (decided October 2026: no AI now, maybe later). It would need a small server so the AI key stays secret, each use costs money, and what people type would go to an outside company, so it must be optional and say so plainly.
-- A chain of steps: after one step, plan the next one.
 - Add to the phone's home screen and work without internet.
 - Accounts and syncing, only if people need it. The backup file is designed so it can be imported into an account later.
 
@@ -60,15 +69,17 @@ One thing per screen, with big buttons.
 ## Tech notes
 
 - Plain HTML, CSS and JavaScript. No build tools, no npm.
-- Saved in the browser's `localStorage` under one key, `first-step-smaller`, as JSON with a version number (`{ "version": 1, "items": [...] }`). The backup file is the same JSON.
+- Saved in the browser's `localStorage` under one key, `first-step-smaller`, as JSON with a version number. Each big task holds its small steps, so the arc can be shown:
+  `{ "version": 1, "tasks": [ { "name": "Clean the garage", "status": "waiting" or "finished", "steps": [ { "text": "Clear one shelf", "before": 4, "after": 2, "date": "2026-10-25" } ] } ] }`
+  The backup file is the same JSON.
 - File links end in `?v=1`; raise the number when a file changes (GitHub Pages lets browsers keep files for 10 minutes).
 - Sentence case, no exclamation marks, no emoji.
 
 ## Build plan (one pull request each, each with a check the owner does)
 
 1. This spec and the folder's `CLAUDE.md`. Check: read it.
-2. The screens, nothing saved yet. Check: go through it on your phone with something real.
-3. Saving on the phone, the Waiting list and the history. Check: close the browser, reopen it, everything's there.
+2. The screens, nothing saved yet, including the arc for the task in progress. Check: go through it on your phone with something real. (Built October 25, 2026.)
+3. Saving on the phone, the Waiting list, and the history with an arc for each task. Check: close the browser, reopen it, everything's there.
 4. Save a backup, restore it, delete everything. Check: back up, delete, restore.
 5. Polish, then use it daily for a couple of weeks and note what annoys you.
 6. Before stage 3: name check, iPhone test, and add it to the Projects page.
