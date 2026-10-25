@@ -4,24 +4,30 @@
 
 const STORAGE_KEY = 'first-step-smaller';
 
-// Everything that's saved. A backup file (build step 4) will hold the same thing:
-// { version: 1, tasks: [ { id, name, status: 'waiting' or 'finished', created, finished,
-//   updated, pending, steps: [ { text: 'Clear one shelf', before: 4, after: 2, date: '2026-10-25' } ] } ] }
-// "pending" is a step typed but not done yet ("Not now"), kept so it doesn't need retyping.
-let data = { version: 1, tasks: [] };
-let canSave = true;  // false if this browser won't let the app save (some private modes)
+// Everything that's saved (the backup file in build step 4 will hold the same thing).
+// Tasks are a tree: any task or step can hold smaller steps, as deep as needed,
+// like "Write a book" > "Chapter 1" > "Write three sentences".
+//   { version: 2, tasks: [ node, ... ] }
+//   node = { id, text, status, created, updated, finished, before, after, date, children: [ node, ... ] }
+//   status is 'waiting' (not done yet), 'done' (a step done, with before, after and date)
+//   or 'finished' (a task marked "I finished it").
+let data = { version: 2, tasks: [] };
+let canSave = true;   // false if this browser won't let the app save (some private modes)
 
-let task = null;     // the task being worked on (one of data.tasks)
-let current = null;  // the small step being worked on: { text, before }
-let history = [];    // screens visited, so Back can go to the one before
+let viewing = null;   // the task or step shown on the "node" screen
+let step = null;      // the small step being worked on
+let asking = null;    // the task a new step is being typed for
+let typed = null;     // the step just typed, so going Back and changing it doesn't add a second one
+let adding = null;    // the task a planned step is being added to
+let history = [];     // screens visited, so Back can go to the one before
 
 const screens = [...document.querySelectorAll('.screen')];
 
 
 // ---------- Saving on this phone ----------
 
-// Reads what's saved. If it can't be read, keeps a copy under another name
-// instead of writing over it, and starts fresh.
+// Reads what's saved. Data from the first version is turned into the tree,
+// after keeping a copy of it. Data that can't be read is kept as a copy, not written over.
 function load() {
   let saved;
   try {
@@ -31,20 +37,43 @@ function load() {
     return;
   }
   if (!saved) return;
+
+  let parsed = null;
   try {
-    const parsed = JSON.parse(saved);
-    if (parsed && parsed.version === 1 && Array.isArray(parsed.tasks)) {
-      data = parsed;
-      return;
-    }
+    parsed = JSON.parse(saved);
   } catch (error) {
-    // not readable; handled just below
+    parsed = null;
   }
+
+  if (parsed && parsed.version === 2 && Array.isArray(parsed.tasks)) {
+    data = parsed;
+  } else if (parsed && parsed.version === 1 && Array.isArray(parsed.tasks)) {
+    keepCopy('-version-1', saved);
+    data = { version: 2, tasks: parsed.tasks.map(fromVersion1) };
+    save();
+  } else {
+    keepCopy('-unreadable', saved);
+  }
+}
+
+function keepCopy(ending, text) {
   try {
-    localStorage.setItem(STORAGE_KEY + '-unreadable', saved);
+    localStorage.setItem(STORAGE_KEY + ending, text);
   } catch (error) {
     canSave = false;
   }
+}
+
+// The first version kept each task's steps in one flat list
+function fromVersion1(t) {
+  const children = t.steps.map((s) => ({
+    id: newId(), text: s.text, status: 'done', before: s.before, after: s.after, date: s.date, children: [],
+  }));
+  if (t.pending) children.push({ id: newId(), text: t.pending, status: 'waiting', children: [] });
+  return {
+    id: t.id || newId(), text: t.name, status: t.status, created: t.created,
+    finished: t.finished, updated: t.updated, children,
+  };
 }
 
 // Saves everything. Called after every change.
@@ -57,24 +86,107 @@ function save() {
   }
 }
 
-// Marks a task as just used, so it shows first in the lists, and saves
-function touch(t) {
-  t.updated = Date.now();
+// Marks a step's big task as just used, so it shows first in the lists, and saves
+function touch(node) {
+  const path = pathTo(node.id);
+  (path ? path[0] : node).updated = Date.now();
   save();
 }
 
+let idCount = 0;
 function newId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  idCount += 1;
+  return Date.now().toString(36) + idCount.toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+
+// ---------- The tree ----------
+
+// The path from a big task down to the step with this id: [big task, ..., step]
+function pathTo(id, nodes = data.tasks, path = []) {
+  for (const node of nodes) {
+    const here = path.concat(node);
+    if (node.id === id) return here;
+    const found = pathTo(id, node.children, here);
+    if (found) return found;
+  }
+  return null;
+}
+
+function parentOf(node) {
+  const path = pathTo(node.id);
+  return path && path.length > 1 ? path[path.length - 2] : null;
+}
+
+function isBigTask(node) {
+  return data.tasks.includes(node);
+}
+
+// A step with nothing inside it that isn't done yet
+function isStepToDo(node) {
+  return !isBigTask(node) && node.children.length === 0 && node.status === 'waiting';
+}
+
+// The next step to do inside a task: the first one not done yet, in order,
+// going into smaller steps first. Finished parts are skipped.
+function nextStepIn(node) {
+  for (const child of node.children) {
+    if (child.status === 'finished') continue;
+    if (child.children.length) {
+      const found = nextStepIn(child);
+      if (found) return found;
+    } else if (child.status === 'waiting') {
+      return child;
+    }
+  }
+  return null;
+}
+
+// Every step at the end of a branch inside a task (the ones that get done)
+function stepsIn(node) {
+  return node.children.flatMap((child) => (child.children.length ? stepsIn(child) : [child]));
+}
+
+// "2 of 3 steps done" or "No steps yet"
+function progress(node) {
+  const all = stepsIn(node);
+  if (!all.length) return 'No steps yet';
+  const done = all.filter((s) => s.status === 'done').length;
+  return done + ' of ' + all.length + (all.length === 1 ? ' step' : ' steps') + ' done';
+}
+
+// "3 small steps over 4 days" (empty if nothing is done)
+function arcSummary(node) {
+  const dates = stepsIn(node).filter((s) => s.status === 'done' && s.date).map((s) => s.date).sort();
+  if (!dates.length) return '';
+  const days = Math.round((new Date(dates[dates.length - 1]) - new Date(dates[0])) / 86400000) + 1;
+  const steps = dates.length === 1 ? '1 small step' : dates.length + ' small steps';
+  return days === 1 ? steps + ' in 1 day' : steps + ' over ' + days + ' days';
+}
+
+// Adding or doing a step inside a finished task opens that task again
+function reopen(node) {
+  (pathTo(node.id) || [node]).forEach((p) => {
+    if (p.status === 'finished') {
+      p.status = 'waiting';
+      delete p.finished;
+    }
+  });
 }
 
 
 // ---------- Showing screens ----------
 
-// Shows one screen, hides the rest, and moves the reader to it.
-// remember: false skips adding the current screen to the Back history.
-function show(id, remember = true) {
+// Remembers the screen showing now, so Back can return to it
+function remember() {
   const now = document.querySelector('.screen.active');
-  if (remember && now) history.push(now.id);
+  if (now) history.push({ screen: now.id, node: now.id === 'node' && viewing ? viewing.id : null });
+}
+
+// Shows one screen, hides the rest, and moves the reader to it.
+// keep: false skips remembering the current screen for Back.
+function show(id, keep = true) {
+  if (keep) remember();
   screens.forEach((screen) => screen.classList.toggle('active', screen.id === id));
   window.scrollTo(0, 0);
 
@@ -98,6 +210,15 @@ function make(tag, className, text) {
   return el;
 }
 
+// Makes a button that runs one of the actions below
+function actionButton(className, action, id) {
+  const button = make('button', className);
+  button.type = 'button';
+  button.dataset.action = action;
+  if (id) button.dataset.id = id;
+  return button;
+}
+
 // Today's date as 2026-10-25, and how to show it, like "Oct 25" (kept on one line)
 function today() {
   const d = new Date();
@@ -111,62 +232,59 @@ function shortDate(isoDate) {
 
 // ---------- The arc ----------
 
-// Draws a task's arc into a list: one line per small step, in order
-function drawArc(list, t) {
+// The small line under a step in an arc, like "felt 3, was 1" or "1 of 3 steps done · next"
+function describe(child, next) {
+  const words = [];
+  if (child.status === 'done' && child.before) words.push('felt ' + child.before + ', was ' + child.after);
+  if (child.children.length) words.push(progress(child));
+  if (child.status === 'finished') {
+    words.push('finished');
+  } else if (next && (child === next || (child.children.length && pathTo(next.id).includes(child)))) {
+    words.push('next');
+  } else if (isStepToDo(child)) {
+    words.push('not done yet');
+  }
+  return words.join(' · ');
+}
+
+// Draws a task's smaller steps as an arc: filled squares for done, hollow for not yet.
+// With tappable: true, each one opens when tapped.
+function drawArc(list, node, tappable) {
   list.textContent = '';
-  t.steps.forEach((step) => {
-    const item = make('li');
-    item.append(
-      make('span', 'arc-date', shortDate(step.date)),
-      make('span', 'arc-text', step.text),
-      make('span', 'arc-rating', 'felt ' + step.before + ', was ' + step.after)
-    );
+  const next = node.status === 'finished' ? null : nextStepIn(node);  // nothing is "next" in a finished part
+  node.children.forEach((child) => {
+    const item = make('li', child.status === 'waiting' ? 'to-do' : 'done');
+    const box = tappable ? actionButton('arc-item', 'open', child.id) : make('div', 'arc-item');
+    if (child.date) box.append(make('span', 'arc-date', shortDate(child.date)));
+    box.append(make('span', 'arc-text', child.text), make('span', 'arc-rating', describe(child, next)));
+    item.append(box);
     list.append(item);
   });
 }
 
-// "3 small steps over 4 days" (empty if there are no steps)
-function arcSummary(t) {
-  const count = t.steps.length;
-  if (!count) return '';
-  const first = new Date(t.steps[0].date);
-  const last = new Date(t.steps[count - 1].date);
-  const days = Math.round((last - first) / 86400000) + 1;
-  const steps = count === 1 ? '1 small step' : count + ' small steps';
-  return days === 1 ? steps + ' in 1 day' : steps + ' over ' + days + ' days';
-}
 
-// "2 small steps so far" or "No steps yet"
-function soFar(t) {
-  const count = t.steps.length;
-  if (!count) return 'No steps yet';
-  return (count === 1 ? '1 small step' : count + ' small steps') + ' so far';
-}
-
-
-// ---------- The start screen ----------
+// ---------- The start screen and the finished list ----------
 
 function newestFirst(a, b) {
   return (b.updated || 0) - (a.updated || 0);
 }
 
-// Fills in the Waiting list and the Finished link from what's saved
+// A big task you can tap, with a small line under its name
+function taskRow(task, words) {
+  const button = actionButton('row', 'open', task.id);
+  button.append(make('span', 'row-name', task.text), make('span', 'row-sub', words));
+  const item = make('li');
+  item.append(button);
+  return item;
+}
+
 function drawStart() {
-  const waiting = data.tasks.filter((t) => t.status === 'waiting').sort(newestFirst);
+  const waiting = data.tasks.filter((t) => t.status !== 'finished').sort(newestFirst);
   const finished = data.tasks.filter((t) => t.status === 'finished');
 
   const rows = document.querySelector('#waiting .rows');
   rows.textContent = '';
-  waiting.forEach((t) => {
-    const button = make('button', 'row');
-    button.type = 'button';
-    button.dataset.action = 'open';
-    button.dataset.id = t.id;
-    button.append(make('span', 'row-name', t.name), make('span', 'row-sub', soFar(t)));
-    const item = make('li');
-    item.append(button);
-    rows.append(item);
-  });
+  waiting.forEach((t) => rows.append(taskRow(t, progress(t))));
   document.getElementById('waiting').hidden = waiting.length === 0;
 
   document.querySelector('#finished-link .row').textContent = finished.length === 1
@@ -179,26 +297,82 @@ function drawStart() {
 }
 
 function goToStart() {
-  task = null;
-  current = null;
+  viewing = null;
+  step = null;
   history = [];
   drawStart();
   show('start', false);
 }
 
+function showHistory() {
+  const rows = document.querySelector('#history .rows');
+  rows.textContent = '';
+  data.tasks.filter((t) => t.status === 'finished').sort(newestFirst).forEach((t) => {
+    const words = [arcSummary(t), t.finished ? 'finished ' + shortDate(t.finished) : ''].filter(Boolean).join(' · ');
+    rows.append(taskRow(t, words));
+  });
+  show('history');
+}
 
-// ---------- Working on a task ----------
 
-// Starts a step: "What's one small thing..." the first time, "What's the next..." after.
-// A step typed earlier but not done ("Not now") is already in the box.
-function askForStep() {
-  const first = task.steps.length === 0;
-  document.getElementById('smaller-question').textContent = first
+// ---------- One task or step, with the smaller steps inside it ----------
+
+function showNode(node, keep = true) {
+  if (keep) remember();
+  viewing = node;
+  const toDo = isStepToDo(node);
+
+  // "Write a book › Chapter 1 ›" at the top: tap to go up
+  const crumbs = document.querySelector('#node .crumbs');
+  crumbs.textContent = '';
+  pathTo(node.id).slice(0, -1).forEach((p) => {
+    const crumb = actionButton('crumb', 'open', p.id);
+    crumb.textContent = p.text;
+    crumbs.append(crumb);
+  });
+
+  const status = { finished: 'Finished', done: 'Done' }[node.status] || (toDo ? 'Not done yet' : 'Waiting');
+  fill('#node .node-status', status);
+  fill('#node .node-name', node.text);
+  const meta = document.querySelector('#node .node-meta');
+  meta.textContent = node.status === 'done' && node.before
+    ? shortDate(node.date) + ' · felt ' + node.before + ', was ' + node.after
+    : '';
+  meta.hidden = !meta.textContent;
+  document.querySelector('#node .no-steps').hidden = !(isBigTask(node) && node.children.length === 0);
+  drawArc(document.querySelector('#node .node-arc'), node, true);
+
+  // Which buttons make sense here
+  const doButton = document.querySelector('#node [data-action="do-next"]');
+  doButton.textContent = toDo ? 'Do this step' : 'Do the next step';
+  doButton.hidden = node.status === 'finished' || (node.status === 'done' && node.children.length === 0);
+  document.querySelector('#node [data-action="finish-node"]').hidden = node.status !== 'waiting' || toDo;
+  document.querySelector('#node [data-action="remove"]').hidden = !isBigTask(node);
+
+  show('node', false);
+}
+
+
+// ---------- Doing a step ----------
+
+// Asks for a new step inside a task: "What's one small thing..." the first time, "What's the next..." after
+function askForStep(parent) {
+  asking = parent;
+  typed = null;
+  document.getElementById('smaller-question').textContent = parent.children.length === 0
     ? 'What’s one small thing you could do first?'
     : 'What’s the next small step?';
-  document.getElementById('step-text').value = task.pending || '';
-  fill('.task-label', task.name);
+  document.getElementById('step-text').value = '';
+  fill('.task-label', parent.text);
   show('smaller');
+}
+
+// Starts a step that's already in the tree: "How heavy does this step feel?"
+function doStep(node) {
+  step = node;
+  reopen(node);
+  fill('.step-text', node.text);
+  show('before');
 }
 
 // Kind words that compare how heavy it felt with how it really was
@@ -219,41 +393,39 @@ function readBox(form) {
   return value;
 }
 
-// "That's fine. It'll wait for you." with the task's steps so far
-function showLater() {
+// "That's fine. It'll wait for you." with what's done so far in this part
+function showLater(part) {
   const box = document.querySelector('#later .so-far');
-  box.hidden = task.steps.length === 0;
-  if (task.steps.length) {
-    fill('#later .task-name', task.name);
-    drawArc(document.querySelector('#later .arc'), task);
+  box.hidden = !part || part.children.length === 0;
+  if (!box.hidden) {
+    fill('#later .task-name', part.text);
+    drawArc(document.querySelector('#later .arc'), part, false);
   }
   history = [];
   show('later', false);
 }
 
-// A waiting task's own screen
-function showTask() {
-  fill('#task .task-name', task.name);
-  document.querySelector('#task .no-steps').hidden = task.steps.length > 0;
-  drawArc(document.querySelector('#task .arc'), task);
-  show('task');
-}
+// "I finished it": marks a task or part finished and shows its arc
+function finish(node) {
+  node.status = 'finished';
+  node.finished = today();
+  touch(node);
+  fill('#finished .task-name', node.text);
+  drawArc(document.querySelector('#finished .arc'), node, false);
+  fill('.arc-summary', arcSummary(node));
 
-// The finished tasks, newest first; each opens to show its arc
-function showHistory() {
-  const list = document.querySelector('#history .history-list');
-  list.textContent = '';
-  data.tasks.filter((t) => t.status === 'finished').sort(newestFirst).forEach((t) => {
-    const fold = make('details', 'done-task');
-    const summary = make('summary');
-    const words = [arcSummary(t), t.finished ? 'finished ' + shortDate(t.finished) : ''].filter(Boolean).join(' · ');
-    summary.append(make('span', 'row-name', t.name), make('span', 'row-sub', words));
-    const arc = make('ol', 'arc');
-    drawArc(arc, t);
-    fold.append(summary, arc);
-    list.append(fold);
-  });
-  show('history');
+  // A finished part of a bigger task offers a way back to that task
+  const parent = parentOf(node);
+  const up = document.querySelector('#finished .up-button');
+  up.hidden = !parent;
+  if (parent) {
+    up.textContent = 'Back to “' + parent.text + '”';
+    up.dataset.id = parent.id;
+  }
+  document.querySelector('#finished .new-button').className = (parent ? 'outline' : 'primary') + ' new-button';
+
+  history = [];
+  show('finished', false);
 }
 
 
@@ -261,21 +433,40 @@ function showHistory() {
 
 document.querySelector('#name form').addEventListener('submit', (event) => {
   event.preventDefault();
-  const name = readBox(event.target);
-  if (!name) return;
-  task = { id: newId(), name, status: 'waiting', created: today(), steps: [] };
+  const text = readBox(event.target);
+  if (!text) return;
+  const task = { id: newId(), text, status: 'waiting', created: today(), children: [] };
   data.tasks.push(task);
   touch(task);
-  askForStep();
+  askForStep(task);
 });
 
 document.querySelector('#smaller form').addEventListener('submit', (event) => {
   event.preventDefault();
   const text = readBox(event.target);
   if (!text) return;
-  current = { text };
+  if (typed) {
+    typed.text = text;     // came Back and changed the words
+  } else {
+    typed = { id: newId(), text, status: 'waiting', children: [] };
+    reopen(asking);
+    asking.children.push(typed);
+  }
+  touch(typed);
+  step = typed;
   fill('.step-text', text);
   show('before');
+});
+
+document.querySelector('#add form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const text = readBox(event.target);
+  if (!text) return;
+  reopen(adding);
+  adding.children.push({ id: newId(), text, status: 'waiting', children: [] });
+  touch(adding);
+  history.pop();           // back to the task, with Back working as before
+  showNode(adding, false);
 });
 
 
@@ -288,17 +479,19 @@ document.querySelectorAll('.scale').forEach((scale) => {
     const rating = Number(button.value);
 
     if (scale.dataset.rating === 'before') {
-      current.before = rating;
+      step.before = rating;
+      touch(step);
       history = [];          // no going back once the step is set
       show('do-it', false);
     } else {
-      task.steps.push({ text: current.text, before: current.before, after: rating, date: today() });
-      delete task.pending;
-      touch(task);
-      const [line, kind] = resultWords(current.before, rating);
+      step.after = rating;
+      step.status = 'done';
+      step.date = today();
+      touch(step);
+      const [line, kind] = resultWords(step.before, rating);
       fill('.result-line', line);
       fill('.result-kind', kind);
-      current = null;
+      fill('#result .finish-part', 'I finished “' + parentOf(step).text + '”');
       show('result', false);
     }
   });
@@ -314,40 +507,66 @@ const actions = {
   },
   back() {
     const previous = history.pop();
-    if (previous) show(previous, false);
+    if (!previous) return;
+    if (previous.screen === 'start') return goToStart();
+    const path = previous.node && pathTo(previous.node);
+    if (previous.screen === 'node') return path ? showNode(path[path.length - 1], false) : goToStart();
+    show(previous.screen, false);
   },
   open(button) {
-    task = data.tasks.find((t) => t.id === button.dataset.id);
-    if (task) showTask();
+    const path = pathTo(button.dataset.id);
+    if (path) showNode(path[path.length - 1]);
   },
-  continue: askForStep,
   history: showHistory,
+
+  // On a task or step's own screen
+  'do-next'() {
+    if (isStepToDo(viewing)) return doStep(viewing);
+    const next = nextStepIn(viewing);
+    return next ? doStep(next) : askForStep(viewing);
+  },
+  add() {
+    adding = viewing;
+    fill('.add-label', viewing.text);
+    document.getElementById('add-text').value = '';
+    show('add');
+  },
+  'finish-node'() {
+    finish(viewing);
+  },
+  remove() {
+    if (!window.confirm('Remove “' + viewing.text + '” and all its steps from this phone?')) return;
+    data.tasks = data.tasks.filter((t) => t !== viewing);
+    save();
+    goToStart();
+  },
+
+  // While doing a step
   done() {
     show('after', false);
   },
   'not-now'() {
-    task.pending = current.text;   // kept so it doesn't need retyping
-    touch(task);
-    showLater();
+    delete step.before;    // asked again next time
+    touch(step);
+    showLater(parentOf(step));
   },
-  'one-more': askForStep,
-  finished() {
-    task.status = 'finished';
-    task.finished = today();
-    delete task.pending;
-    touch(task);
-    fill('#finished .task-name', task.name);
-    drawArc(document.querySelector('#finished .arc'), task);
-    fill('.arc-summary', arcSummary(task));
-    history = [];
-    show('finished', false);
+  'one-more'() {
+    const part = parentOf(step);
+    const next = nextStepIn(part);
+    return next ? doStep(next) : askForStep(part);
   },
-  stop: showLater,
-  remove() {
-    if (!window.confirm('Remove “' + task.name + '” and its steps from this phone?')) return;
-    data.tasks = data.tasks.filter((t) => t !== task);
-    save();
-    goToStart();
+  'finish-part'() {
+    finish(parentOf(step));
+  },
+  stop() {
+    showLater(parentOf(step));
+  },
+
+  // After finishing
+  up(button) {
+    const path = pathTo(button.dataset.id);
+    history = [{ screen: 'start', node: null }];
+    return path ? showNode(path[path.length - 1], false) : goToStart();
   },
   restart: goToStart,
 };

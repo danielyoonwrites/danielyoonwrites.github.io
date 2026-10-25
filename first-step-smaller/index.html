@@ -17,8 +17,8 @@
 
   <!-- The app's own look: Moon jar colors, big buttons.
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=3">
-  <script src="app.js?v=5" defer></script>
+  <link rel="stylesheet" href="style.css?v=5">
+  <script src="app.js?v=7" defer></script>
 </head>
 <body>
 
@@ -50,15 +50,32 @@
       <noscript><p class="note">This app needs JavaScript turned on in your browser.</p></noscript>
     </section>
 
-    <!-- A waiting task: its steps so far, and what to do next -->
-    <section class="screen" id="task">
-      <p class="label">Waiting</p>
-      <h2 class="task-name" tabindex="-1"></h2>
-      <p class="no-steps">No steps yet.</p>
-      <ol class="arc"></ol>
-      <button type="button" class="primary" data-action="continue">Next small step</button>
-      <button type="button" class="outline" data-action="finished">I finished it</button>
+    <!-- Any task or step, with the smaller steps inside it. app.js fills it in.
+         Tapping a smaller step opens it on this same screen, one level at a time. -->
+    <section class="screen" id="node">
+      <nav class="crumbs" aria-label="Where you are"></nav>
+      <p class="label node-status"></p>
+      <h2 class="node-name" tabindex="-1"></h2>
+      <p class="node-meta"></p>
+      <p class="no-steps">No smaller steps yet.</p>
+      <ol class="arc node-arc"></ol>
+      <button type="button" class="primary" data-action="do-next">Do the next step</button>
+      <button type="button" class="outline" data-action="add">Add a smaller step</button>
+      <button type="button" class="outline" data-action="finish-node">I finished it</button>
       <button type="button" class="quiet" data-action="remove">Remove this task</button>
+      <button type="button" class="quiet back" data-action="back">Back</button>
+    </section>
+
+    <!-- Add a smaller step inside a task or step, to do now or later -->
+    <section class="screen" id="add">
+      <form>
+        <p class="label add-label"></p>
+        <h2><label for="add-text">Add a smaller step</label></h2>
+        <input id="add-text" type="text" maxlength="120" autocomplete="off">
+        <p class="hint">It goes at the end. The app hands you steps in order, one at a time.</p>
+        <p class="gentle-error" hidden>Type a few words first.</p>
+        <button type="submit" class="primary">Add it</button>
+      </form>
       <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
@@ -66,7 +83,7 @@
     <section class="screen" id="history">
       <p class="label">Finished</p>
       <h2 tabindex="-1">What you’ve finished</h2>
-      <div class="history-list"></div>
+      <ul class="rows"></ul>
       <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
@@ -150,7 +167,8 @@
       <h2 class="result-line" tabindex="-1"></h2>
       <p class="result-kind"></p>
       <button type="button" class="primary" data-action="one-more">One more small step</button>
-      <button type="button" class="outline" data-action="finished">I finished it</button>
+      <!-- app.js names the part you're in, like: I finished “Chapter 1” -->
+      <button type="button" class="outline finish-part" data-action="finish-part">I finished it</button>
       <button type="button" class="quiet" data-action="stop">Stop here for now</button>
     </section>
 
@@ -160,7 +178,9 @@
       <h2 class="task-name" tabindex="-1"></h2>
       <ol class="arc"></ol>
       <p class="arc-summary"></p>
-      <button type="button" class="primary" data-action="restart">Start something new</button>
+      <!-- Shown when a part of a bigger task is finished, like "Back to “Write a book”" -->
+      <button type="button" class="primary up-button" data-action="up" hidden></button>
+      <button type="button" class="primary new-button" data-action="restart">Start something new</button>
     </section>
 
     <!-- 8. Not now, or stop for now: no guilt -->
