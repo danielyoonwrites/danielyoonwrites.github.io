@@ -88,6 +88,8 @@ C1. The server code, `server/worker.js`, with the draft guidance, tested against
 C2. Built October 25, 2026, before the sign-ups (pull request 42); the server's address (`SERVER_URL` at the top of the AI helper part of `app.js`) is filled in after Part 2 of step B. In the app, a "Suggest questions for this passage" button with the passcode, the note for the leader above the questions, plus a test link (like `?test`) that shows a model choice and the cost of each answer. Deploy the server (after step B), then try the same passage with all three models. Check: pick the model. If answers stop at the 4,000-token cap (the longer guidance may mean more thinking), raise it a little.
 D. The chosen model becomes the only one, and the test choice comes out. Check: try it with this week's passage.
 
+E. AI questions for the reading plan (the owner's choice, October 25, 2026): opening a day's reading asks the AI for 3 or 4 personal reflection questions on that chapter, written for one person's quiet time instead of a group, and saves them with the plan so the same reading never costs twice. Until the AI is connected, the reading shows the three Swedish-method questions. The server gets a fourth pattern for this. Check: open today's reading.
+
 Then the rest of `SPEC.md`'s build plan: Share and Copy, Lead the study, saving, the reading plan, printing.
 
 ## Tech notes
