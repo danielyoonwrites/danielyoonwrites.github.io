@@ -23,6 +23,7 @@ One thing per screen, with big buttons.
 5. Lead (the owner's other pick): "Lead the study" shows one question at a time in big text, with Next and Back, for leading in the room or on a screen.
 6. Recent studies are kept on the phone, so a study can be reused or shared again.
 7. Later: a page that prints cleanly (the owner's "maybe also").
+8. Reading plan (the owner's idea, October 25, 2026): set a plan once, like "Matthew, one chapter a day, starting Nov 1." Each day the app shows today's reading, like "Today: Matthew 3," with a few questions to meditate on and "Done for today." No streaks and no guilt: a missed day just waits, the same kindness rule as First step smaller. In stage 1 the questions follow a method, so they're the same each day (a method made for personal reflection, such as lectio divina, could fit; check sources before using it). In stage 2, AI writes questions for that day's chapter, which the owner can read before meditating.
 
 ## Question methods
 
@@ -63,7 +64,7 @@ Sources (search results, October 25, 2026; the guides themselves weren't opened 
 
 ## Not in stage 1
 
-- AI suggestions, the Bible text, printing, accounts, collecting group members' answers.
+- AI suggestions, the Bible text, printing, accounts, collecting group members' answers, reminders or notifications for the reading plan.
 
 ## Name
 
@@ -81,6 +82,7 @@ Sources (search results, October 25, 2026; the guides themselves weren't opened 
 - Sharing uses the browser's share feature (`navigator.share`) when it's available, with "Copy" as the fallback. Check how it works in KakaoTalk's built-in browser during step 3.
 - Recent studies are saved in `localStorage` under `living-in-the-word`, as JSON with a version number.
 - File links end in `?v=1`; raise the number when a file changes.
+- The reading plan needs the number of chapters in each book of the Bible (Matthew has 28, for example). Take the list from a reliable source and check it when building; never type it from memory.
 
 ## Build plan (one pull request each, each with a check the owner does)
 
@@ -89,6 +91,7 @@ Sources (search results, October 25, 2026; the guides themselves weren't opened 
 3. Share and Copy. Check: share a study to yourself in KakaoTalk.
 4. Lead the study, one question at a time. Check: lead from your phone or a laptop.
 5. Recent studies saved on the phone. Check: close the browser, reopen it, they're there.
+5b. Reading plan: set a plan, see today's reading and questions, mark it done, and come back the next day (the owner chose to put it right after saving, October 25, 2026). Check: set a plan for a book you're reading and use it for a few days.
 6. A page that prints cleanly.
 7. Plan stage 2, the AI helper (its own plan, reviewed before building).
 
