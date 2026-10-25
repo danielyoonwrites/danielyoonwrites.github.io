@@ -485,6 +485,43 @@ button.arc-item:focus-visible {
 }
 
 
+/* ---------- Edit ---------- */
+.move-here {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--glaze);
+}
+
+.position {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--stone);
+}
+
+/* "Move up" and "Move down" side by side */
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.pair .outline {
+  margin-top: 0.75rem;
+  padding-left: 0.5rem;       /* a little more room, so "Move down" fits on one line */
+  padding-right: 0.5rem;
+}
+
+/* A button that can't be used right now, like "Move up" on the first step */
+button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+#edit [data-action="move-into"] {
+  margin-top: 1.5rem;
+}
+
+
 /* ---------- Footer ---------- */
 footer {
   padding: 1.25rem 0 2.5rem;

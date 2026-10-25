@@ -19,6 +19,7 @@ let step = null;      // the small step being worked on
 let asking = null;    // the task a new step is being typed for
 let typed = null;     // the step just typed, so going Back and changing it doesn't add a second one
 let adding = null;    // the task a planned step is being added to
+let editing = null;   // the task or step being edited
 let history = [];     // screens visited, so Back can go to the one before
 
 const screens = [...document.querySelectorAll('.screen')];
@@ -347,9 +348,80 @@ function showNode(node, keep = true) {
   doButton.textContent = toDo ? 'Do this step' : 'Do the next step';
   doButton.hidden = node.status === 'finished' || (node.status === 'done' && node.children.length === 0);
   document.querySelector('#node [data-action="finish-node"]').hidden = node.status !== 'waiting' || toDo;
-  document.querySelector('#node [data-action="remove"]').hidden = !isBigTask(node);
 
   show('node', false);
+}
+
+
+// ---------- Editing: rename, move up or down, move into another task, remove ----------
+
+// The list a task or step sits in: its bigger task's steps, or the big tasks themselves
+function listHolding(node) {
+  const parent = parentOf(node);
+  return parent ? parent.children : data.tasks;
+}
+
+// Takes a task or step out of where it is (it's put somewhere else right after, or removed)
+function detach(node) {
+  const list = listHolding(node);
+  list.splice(list.indexOf(node), 1);
+}
+
+// Does it still have something to do inside it?
+function hasWork(node) {
+  return node.status === 'waiting' || stepsIn(node).some((s) => s.status === 'waiting');
+}
+
+// Fills in the Edit screen for the task or step being edited
+function drawEdit() {
+  const big = isBigTask(editing);
+  document.getElementById('edit-text').value = editing.text;
+
+  const here = document.querySelector('#edit .move-here');
+  here.hidden = big;
+  if (!big) {
+    const list = listHolding(editing);
+    const place = list.indexOf(editing);
+    fill('#edit .position', 'Step ' + (place + 1) + ' of ' + list.length + ' in “' + parentOf(editing).text + '”');
+    document.querySelector('#edit [data-action="move-up"]').disabled = place === 0;
+    document.querySelector('#edit [data-action="move-down"]').disabled = place === list.length - 1;
+  }
+  document.querySelector('#edit [data-action="make-task"]').hidden = big;
+}
+
+// Moves it one place up or down in its arc (which also changes the order of "Do the next step")
+function moveBy(change) {
+  const list = listHolding(editing);
+  const place = list.indexOf(editing);
+  const to = place + change;
+  if (to < 0 || to >= list.length) return;
+  list.splice(place, 1);
+  list.splice(to, 0, editing);
+  touch(editing);
+  drawEdit();
+}
+
+// The places it could move into: big tasks and parts that already hold steps (to keep the
+// list short), but not itself, nothing inside it, and not where it already is
+function placesToMove(node) {
+  const places = [];
+  const current = parentOf(node);
+  (function walk(nodes, trail) {
+    nodes.forEach((n) => {
+      if (n === node) return;      // skips itself and everything inside it
+      const holdsSteps = isBigTask(n) || n.children.length > 0;
+      if (holdsSteps && n !== current) places.push({ node: n, trail });
+      walk(n.children, trail.concat(n.text));
+    });
+  })(data.tasks, []);
+  return places;
+}
+
+// Shows a task's screen after a move or a removal; Back goes to the start
+function showAfterChange(node) {
+  history = [{ screen: 'start', node: null }];
+  if (node) showNode(node, false);
+  else goToStart();
 }
 
 
@@ -458,6 +530,16 @@ document.querySelector('#smaller form').addEventListener('submit', (event) => {
   show('before');
 });
 
+document.querySelector('#edit form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const text = readBox(event.target);
+  if (!text) return;
+  editing.text = text;
+  touch(editing);
+  history.pop();           // back to its screen, with Back working as before
+  showNode(editing, false);
+});
+
 document.querySelector('#add form').addEventListener('submit', (event) => {
   event.preventDefault();
   const text = readBox(event.target);
@@ -534,11 +616,63 @@ const actions = {
   'finish-node'() {
     finish(viewing);
   },
+
+  // Editing
+  edit() {
+    editing = viewing;
+    drawEdit();
+    show('edit');
+  },
+  'move-up'() {
+    moveBy(-1);
+  },
+  'move-down'() {
+    moveBy(1);
+  },
+  'move-into'() {
+    fill('#move .move-title', 'Move “' + editing.text + '” into…');
+    const rows = document.querySelector('#move .rows');
+    rows.textContent = '';
+    const places = placesToMove(editing);
+    places.forEach((place) => {
+      const button = actionButton('row', 'move-to', place.node.id);
+      const where = place.trail.length ? 'in ' + place.trail.join(' › ') : 'a big task';
+      button.append(make('span', 'row-name', place.node.text), make('span', 'row-sub', where));
+      const item = make('li');
+      item.append(button);
+      rows.append(item);
+    });
+    document.querySelector('#move .move-none').hidden = places.length > 0;
+    show('move');
+  },
+  'move-to'(button) {
+    const path = pathTo(button.dataset.id);
+    if (!path) return;
+    const target = path[path.length - 1];
+    detach(editing);
+    target.children.push(editing);      // goes at the end of the arc
+    if (hasWork(editing)) reopen(target);
+    touch(target);
+    showAfterChange(target);
+  },
+  'make-task'() {
+    detach(editing);
+    if (editing.status === 'done') {     // a done step on its own counts as finished
+      editing.status = 'finished';
+      editing.finished = editing.date;
+    }
+    editing.created = editing.created || today();
+    data.tasks.push(editing);
+    touch(editing);
+    showAfterChange(editing);
+  },
   remove() {
-    if (!window.confirm('Remove “' + viewing.text + '” and all its steps from this phone?')) return;
-    data.tasks = data.tasks.filter((t) => t !== viewing);
+    const inside = editing.children.length ? ' and everything inside it' : '';
+    if (!window.confirm('Remove “' + editing.text + '”' + inside + ' from this phone?')) return;
+    const parent = parentOf(editing);
+    detach(editing);
     save();
-    goToStart();
+    showAfterChange(parent);
   },
 
   // While doing a step

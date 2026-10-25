@@ -17,8 +17,8 @@
 
   <!-- The app's own look: Moon jar colors, big buttons.
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=5">
-  <script src="app.js?v=7" defer></script>
+  <link rel="stylesheet" href="style.css?v=6">
+  <script src="app.js?v=8" defer></script>
 </head>
 <body>
 
@@ -62,7 +62,41 @@
       <button type="button" class="primary" data-action="do-next">Do the next step</button>
       <button type="button" class="outline" data-action="add">Add a smaller step</button>
       <button type="button" class="outline" data-action="finish-node">I finished it</button>
-      <button type="button" class="quiet" data-action="remove">Remove this task</button>
+      <button type="button" class="quiet" data-action="edit">Edit</button>
+      <button type="button" class="quiet back" data-action="back">Back</button>
+    </section>
+
+    <!-- Edit a task or step: rename, move up or down, move into another task, remove -->
+    <section class="screen" id="edit">
+      <p class="label">Edit</p>
+      <form>
+        <h2><label for="edit-text">Name</label></h2>
+        <input id="edit-text" type="text" maxlength="120" autocomplete="off">
+        <p class="gentle-error" hidden>Type a few words first.</p>
+        <button type="submit" class="primary">Save the name</button>
+      </form>
+
+      <!-- Moving within its arc (not shown for big tasks) -->
+      <div class="move-here">
+        <p class="position"></p>
+        <div class="pair">
+          <button type="button" class="outline" data-action="move-up">Move up</button>
+          <button type="button" class="outline" data-action="move-down">Move down</button>
+        </div>
+      </div>
+
+      <button type="button" class="outline" data-action="move-into">Move into another task</button>
+      <button type="button" class="quiet" data-action="make-task">Make it a task of its own</button>
+      <button type="button" class="quiet" data-action="remove">Remove</button>
+      <button type="button" class="quiet back" data-action="back">Back</button>
+    </section>
+
+    <!-- Pick where to move it: tap a task or step -->
+    <section class="screen" id="move">
+      <p class="label">Move</p>
+      <h2 class="move-title" tabindex="-1"></h2>
+      <ul class="rows"></ul>
+      <p class="no-steps move-none">There’s nowhere else to move it yet.</p>
       <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
