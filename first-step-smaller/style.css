@@ -189,6 +189,52 @@ button {
 }
 
 
+/* ---------- "Need help?": short tips that open when tapped ---------- */
+.help {
+  margin: 1rem 0 0;
+}
+
+.help summary {
+  display: inline-block;
+  min-height: 2.75rem;        /* tall enough to tap easily */
+  padding: 0.6rem 0;
+  box-sizing: border-box;
+  color: var(--celadon);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  list-style: none;           /* hides the browser's own small triangle */
+}
+
+.help summary::-webkit-details-marker {
+  display: none;              /* the same, for Safari */
+}
+
+.help summary::after {
+  content: "  +" / "";
+}
+
+.help[open] summary::after {
+  content: "  −" / "";
+}
+
+.help summary:focus-visible {
+  outline: 2px solid var(--celadon);
+  outline-offset: 3px;
+}
+
+.help ul {
+  margin: 0;
+  padding: 0 0 0 1.1rem;
+  font-size: 0.875rem;
+}
+
+.help li {
+  margin: 0 0 0.5rem;
+}
+
+
 /* ---------- 1 to 5 ---------- */
 .scale {
   display: grid;
