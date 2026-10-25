@@ -224,6 +224,7 @@ const actions = {
     }
     if (changedQuestions() && !window.confirm('Replace these questions with new suggestions?')) return;
     if (!passcode) {
+      afterPasscode = requestSuggestions;
       askPasscode(false);
       return;
     }
@@ -246,6 +247,7 @@ const SERVER_URL = '';
 const STORAGE_KEY = 'living-in-the-word';
 let passcode = readSaved().passcode || '';
 let asking = false;   // true while waiting for the AI
+let afterPasscode = requestSuggestions;   // what to do once a passcode is typed
 
 // The test link (the address with ?test) shows a model choice and what each answer cost
 const testMode = new URLSearchParams(window.location.search).has('test');
@@ -301,8 +303,8 @@ document.querySelector('#passcode form').addEventListener('submit', (event) => {
     return;
   }
   savePasscode(code);
-  goBack();   // back to the questions
-  requestSuggestions();
+  goBack();   // back to where the passcode was asked for
+  afterPasscode();
 });
 
 function setStatus(text) {
@@ -362,6 +364,7 @@ async function requestSuggestions() {
   if (result.error === 'wrong-passcode') {
     savePasscode('');
     setStatus('');
+    afterPasscode = requestSuggestions;
     askPasscode(true);
     return;
   }
@@ -428,9 +431,14 @@ const REFLECT = [
   'Arrow: how could this shape your day?',
 ];
 
-// The saved plan: { book: 'Matthew', perDay: 1, start: '2026-11-01', done: 2, lastDone: '2026-11-02' }
-//   done is how many readings are finished; lastDone is the date of the last "Done for today".
+// The saved plan: { book: 'Matthew', perDay: 1, start: '2026-11-01', done: 2, lastDone: '2026-11-02',
+//                   questions: { 2: { questions: [...], note: '' } } }
+//   done is how many readings are finished; lastDone is the date of the last "Done for today";
+//   questions holds the AI's questions for each reading (by number, starting at 0), so a
+//   reading is never paid for twice.
 let readingAhead = false;   // true after "Read the next one now", until the page closes
+let shownReading = null;    // the reading number on the "today" screen
+let readingRequest = null;  // the reading number the AI is writing questions for, if any
 
 // Today's date as 2026-10-25, in this phone's own time zone
 function today() {
@@ -531,16 +539,89 @@ function showToday(keepHistory = true) {
   early.hidden = plan.start <= today();
   early.textContent = 'Your plan starts ' + showDate(plan.start) + '. You can read ahead, or come back then.';
 
+  // The AI's questions for this reading if they're saved; otherwise the general ones,
+  // and the AI is asked (when it's set up and this phone has the passcode)
+  shownReading = plan.done;
+  const saved = plan.questions && plan.questions[plan.done];
+  showReflect(saved ? saved.questions : REFLECT, saved ? saved.note : '');
+  setReadingStatus('');
+  document.querySelector('.reading-ai').hidden = true;
+  if (!saved && SERVER_URL) {
+    if (passcode) fetchReadingQuestions(plan.done);
+    else document.querySelector('.reading-ai').hidden = false;
+  }
+
+  if (!keepHistory) screens.forEach((screen) => screen.classList.remove('active'));
+  show('today');
+}
+
+// Shows the questions to think about, and the AI's note if there is one
+function showReflect(questions, note) {
   const list = document.querySelector('.reflect-list');
   list.textContent = '';
-  REFLECT.forEach((question) => {
+  questions.forEach((question) => {
     const item = document.createElement('li');
     item.textContent = question;
     list.append(item);
   });
+  document.querySelector('.reading-note').hidden = !note;
+  fill('.reading-note-text', note || '');
+}
 
-  if (!keepHistory) screens.forEach((screen) => screen.classList.remove('active'));
-  show('today');
+function setReadingStatus(text) {
+  const status = document.querySelector('.reading-status');
+  status.textContent = text;
+  status.hidden = !text;
+}
+
+// Asks the AI helper for questions on reading number n, and saves them with the plan
+async function fetchReadingQuestions(n) {
+  if (readingRequest === n) return;
+  readingRequest = n;
+  document.querySelector('.reading-ai').hidden = true;
+  const plan = readSaved().plan;
+  const name = readingName(plan, n);
+  setReadingStatus('Writing questions for ' + name + '…');
+
+  let result;
+  try {
+    const response = await fetch(SERVER_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ passcode, passage: name, method: 'devotional' }),
+    });
+    result = await response.json();
+  } catch (error) {
+    result = { error: 'offline' };
+  }
+  readingRequest = null;
+
+  // The plan was ended or changed while waiting: these questions don't belong anymore
+  const saved = readSaved();
+  const now = saved.plan;
+  if (!now || now.book !== plan.book || now.perDay !== plan.perDay || now.start !== plan.start) return;
+  const onScreen = shownReading === n && document.getElementById('today').classList.contains('active');
+
+  if (result.error === 'wrong-passcode') {
+    savePasscode('');
+    if (onScreen) {
+      setReadingStatus('The passcode didn’t work.');
+      document.querySelector('.reading-ai').hidden = false;
+    }
+    return;
+  }
+  if (result.error || !result.knownPassage || !Array.isArray(result.questions) || !result.questions.length) {
+    if (onScreen) setReadingStatus(PROBLEMS[result.error] || PROBLEMS.other);
+    return;
+  }
+
+  now.questions = now.questions || {};
+  now.questions[n] = { questions: result.questions, note: result.leaderNote || '' };
+  writeSaved(saved);
+  if (onScreen) {
+    showReflect(result.questions, result.leaderNote || '');
+    setReadingStatus('');
+  }
 }
 
 function showDoneToday(plan, keepHistory = true) {
@@ -604,6 +685,12 @@ Object.assign(actions, {
     writeSaved(saved);
     showSetup();
     history = ['home'];
+  },
+
+  // "Questions for this reading": asks for the passcode first, then the AI
+  'reading-ai'() {
+    afterPasscode = () => fetchReadingQuestions(shownReading);
+    askPasscode(false);
   },
 
   'end-plan'() {

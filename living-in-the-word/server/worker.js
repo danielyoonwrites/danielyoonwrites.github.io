@@ -99,6 +99,12 @@ const METHODS = {
 2. One or two "Question mark:" questions about what is hard to understand in this passage.
 3. One or two "Arrow:" questions about how this passage applies to our lives.
 Start each question with its symbol's name, like "Light bulb: ...".`,
+  // The reading plan: one person's quiet time, one day's reading
+  devotional: `Personal reading, one day of a reading plan. These questions are for one person's quiet time with God, not for a group, so speak to the reader as "you." Write 3 or 4 questions in this order:
+1. One or two questions that help the reader notice what this reading says, especially about God.
+2. One question about the reader's heart: what they love, trust, fear or hope in.
+3. One question that turns the reading into a response to God: thanks, trust, repentance or prayer.
+Keep them short enough to hold in mind through the day.`,
 };
 
 
@@ -170,7 +176,7 @@ async function askClaude(apiKey, model, passage, method) {
   const body = {
     model,
     max_tokens: MAX_TOKENS,
-    system: GUIDANCE + '\n\nThe method the leader chose: ' + METHODS[method],
+    system: GUIDANCE + '\n\nThe method for this request: ' + METHODS[method],
     messages: [{ role: 'user', content: 'Passage: ' + passage }],
     output_config: {
       effort: 'medium',
