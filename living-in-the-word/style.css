@@ -1,0 +1,296 @@
+/* ============================================================
+   Living in the Word: styles
+   Design system: "Moon jar" (same as danielyoonwrites.github.io),
+   with big buttons that are easy to tap
+   ============================================================ */
+
+
+/* ---------- Colors ----------
+   Change a color here and it changes everywhere. */
+:root {
+  --porcelain: #F1EFEA; /* background */
+  --ink: #1E1C1A;       /* main text */
+  --celadon: #386F61;   /* links, buttons, small labels */
+  --stone: #6B655C;     /* hints, small print */
+  --glaze: #DCE6DF;     /* thin divider lines only */
+}
+
+
+/* ---------- The whole page ---------- */
+
+/* 112.5% of the phone's normal text size is 18 pixels for most people.
+   Every "rem" size below is measured from this. */
+html {
+  font-size: 112.5%;
+}
+
+body {
+  margin: 0 auto;
+  max-width: 30em;     /* keeps lines short enough to read comfortably */
+  padding: 0 1.25rem;  /* space at the left and right edges on phones */
+  background: var(--porcelain);
+  color: var(--ink);
+  font-family: "Libre Baskerville", Georgia, serif;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* Anything marked "hidden" stays hidden, even buttons styled to show as blocks */
+[hidden] {
+  display: none !important;
+}
+
+/* Never bold, not even headings */
+h1, h2, label, legend, strong, b {
+  font-weight: 400;
+}
+
+/* Asks newer browsers to avoid a single word alone on the last line */
+p, h1, h2 {
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--celadon);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--celadon);
+  outline-offset: 3px;
+}
+
+/* Headings get focus when a screen opens; no outline for that */
+h1:focus,
+h2:focus {
+  outline: none;
+}
+
+
+/* ---------- Screens: one at a time (app.js adds "active") ---------- */
+main {
+  padding: 3rem 0 2rem;
+}
+
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}
+
+h1 {
+  margin: 0 0 1rem;
+  font-size: 1.75rem;
+  line-height: 1.3;
+}
+
+h2 {
+  margin: 0 0 1rem;
+  font-size: 1.375rem;
+  line-height: 1.35;
+}
+
+.intro {
+  margin: 0 0 2.5rem;
+  font-size: 1.25rem;
+  line-height: 1.55;
+}
+
+/* Small labels, like "Discovery Bible Study": uppercase, celadon */
+.label {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--celadon);
+}
+
+/* Hints and notes in stone */
+.hint,
+.note {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--stone);
+}
+
+.note {
+  margin-top: 1.5rem;
+}
+
+/* "Type a passage first": gentle, in italic, never red */
+.gentle-error {
+  margin: 0.5rem 0 0;
+  font-style: italic;
+}
+
+
+/* ---------- Typing boxes ---------- */
+input[type="text"],
+textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--celadon);
+  border-radius: 0;
+  background: var(--porcelain);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 1rem;       /* 18 pixels, so iPhones don't zoom in when typing */
+  line-height: 1.5;
+}
+
+textarea {
+  display: block;
+  resize: none;          /* app.js makes each box as tall as its words */
+  overflow: hidden;
+}
+
+
+/* ---------- Buttons ---------- */
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Main button, like the website's Subscribe button */
+.primary,
+.outline {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 3.25rem;
+  margin-top: 1.5rem;
+  padding: 0.9rem 1.25rem;
+  border: 1px solid var(--celadon);
+  border-radius: 0;
+  background: var(--celadon);
+  color: var(--porcelain);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* "Add a question": the same shape, with a line instead of a fill */
+.outline {
+  background: var(--porcelain);
+  color: var(--celadon);
+}
+
+/* "Remove", "Back": small quiet labels */
+.quiet {
+  display: block;
+  min-height: 2.75rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0;
+  border: none;
+  background: transparent;
+  color: var(--stone);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.back::before {
+  content: "←  " / "";  /* the / "" keeps screen readers from reading the arrow */
+}
+
+
+/* ---------- Choosing a method ---------- */
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+legend {
+  padding: 0;
+}
+
+/* Each method is a big box you tap. The round dot shows which one is chosen. */
+.choice {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr;
+  column-gap: 0.75rem;
+  margin: 0 0 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--glaze);
+  cursor: pointer;
+}
+
+/* The chosen box gets a celadon line (on newer browsers; the dot always shows) */
+.choice:has(input:checked) {
+  border-color: var(--celadon);
+  box-shadow: inset 3px 0 0 var(--celadon);
+}
+
+.choice input {
+  grid-row: 1 / span 2;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0.15rem 0 0;
+  accent-color: var(--celadon);
+}
+
+.choice-name {
+  display: block;
+}
+
+.choice-line {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.8125rem;
+  color: var(--stone);
+}
+
+
+/* ---------- The questions ---------- */
+.method-tip {
+  margin: 1.25rem 0 1.5rem;
+  font-style: italic;
+}
+
+/* Numbered 1, 2, 3 in stone, to the left of each box */
+.question-list {
+  margin: 0;
+  padding: 0 0 0 1.5rem;
+}
+
+.question-list li {
+  margin: 0 0 0.5rem;
+  color: var(--stone);
+  font-size: 0.8125rem;
+}
+
+.question-list li::marker {
+  font-size: 1rem;
+}
+
+.question-list .remove {
+  margin-top: 0;
+  margin-left: auto;   /* on the right, under its box */
+}
+
+.no-steps {
+  margin: 0 0 1rem;
+  color: var(--stone);
+  font-style: italic;
+}
+
+
+/* ---------- Footer ---------- */
+footer {
+  padding: 1.25rem 0 2.5rem;
+  border-top: 1px solid var(--glaze);
+  font-size: 0.8125rem;
+}
+
+footer p {
+  margin: 0;
+}

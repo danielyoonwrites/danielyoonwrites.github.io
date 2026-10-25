@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Makes the page fit phone screens instead of showing a tiny desktop page -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Living in the Word</title>
+  <meta name="description" content="Type a Bible passage, choose a way to study it, and get discussion questions for your small group.">
+
+  <!-- Asks search engines not to list it while the owner tries it out. Remove at stage 3 (see SPEC.md). -->
+  <meta name="robots" content="noindex">
+
+  <!-- Font from Google Fonts: Libre Baskerville, Regular and Italic -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;1,400&display=swap">
+
+  <!-- The app's own look: Moon jar colors, big buttons.
+       Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
+  <link rel="stylesheet" href="style.css?v=1">
+  <script src="app.js?v=1" defer></script>
+</head>
+<body>
+
+  <main>
+
+    <!-- Each <section class="screen"> is one screen. app.js shows one at a time.
+         Edit the words right here. The questions themselves are at the top of app.js. -->
+
+    <!-- 1. Which passage? -->
+    <section class="screen active" id="passage">
+      <h1>Living in the Word</h1>
+      <p class="intro">Turn a Bible passage into questions for your small group.</p>
+      <form>
+        <h2><label for="passage-text">Which passage?</label></h2>
+        <input id="passage-text" type="text" maxlength="80" autocomplete="off" autocapitalize="words">
+        <p class="hint">A verse, a chapter or a longer passage, like “John 4:1-26.”</p>
+        <p class="gentle-error" hidden>Type a passage first.</p>
+        <button type="submit" class="primary">Next</button>
+      </form>
+      <p class="note">Nothing you type is sent anywhere.</p>
+      <noscript><p class="note">This app needs JavaScript turned on in your browser.</p></noscript>
+    </section>
+
+    <!-- 2. Choose a way to study it. Discovery Bible Study is already selected. -->
+    <section class="screen" id="method">
+      <p class="label passage-label"></p>
+      <form>
+        <fieldset>
+          <legend><h2 tabindex="-1">How do you want to study it?</h2></legend>
+
+          <!-- The value of each choice matches a method's name at the top of app.js -->
+          <label class="choice">
+            <input type="radio" name="method" value="dbs" checked>
+            <span class="choice-name">Discovery Bible Study</span>
+            <span class="choice-line">God, people, then what to obey and who to tell.</span>
+          </label>
+
+          <label class="choice">
+            <input type="radio" name="method" value="oia">
+            <span class="choice-name">Observe, Interpret, Apply</span>
+            <span class="choice-line">What it says, what it means, what to do.</span>
+          </label>
+
+          <label class="choice">
+            <input type="radio" name="method" value="swedish">
+            <span class="choice-name">The Swedish method</span>
+            <span class="choice-line">A light bulb, a question mark and an arrow.</span>
+          </label>
+        </fieldset>
+        <button type="submit" class="primary">See the questions</button>
+      </form>
+      <button type="button" class="quiet back" data-action="back">Back</button>
+    </section>
+
+    <!-- 3. The questions: edit, remove or add. app.js fills in the list. -->
+    <section class="screen" id="questions">
+      <p class="label method-label"></p>
+      <h2 class="passage-name" tabindex="-1"></h2>
+      <p class="hint">Tap a question to change its words.</p>
+      <p class="method-tip"></p>
+
+      <ol class="question-list"></ol>
+      <p class="no-steps no-questions" hidden>No questions yet.</p>
+
+      <button type="button" class="outline" data-action="add">Add a question</button>
+      <button type="button" class="quiet" data-action="reset">Start these questions over</button>
+      <p class="note">Your changes stay while this page is open. Nothing is shared or sent anywhere.</p>
+      <button type="button" class="quiet back" data-action="back">Back</button>
+    </section>
+
+  </main>
+
+  <!-- Small link back to the website -->
+  <footer>
+    <p><a href="https://danielyoonwrites.github.io">Made by Daniel Yoon</a></p>
+  </footer>
+
+</body>
+</html>
