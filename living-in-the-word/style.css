@@ -287,6 +287,38 @@ legend {
 }
 
 
+/* ---------- Share and Copy ---------- */
+
+/* Share and Copy side by side; Copy alone where sharing isn't available */
+.share-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--glaze);
+}
+
+.share-pair.single {
+  grid-template-columns: 1fr;
+}
+
+.share-pair .primary,
+.share-pair .outline {
+  margin-top: 0;
+}
+
+.share-status {
+  margin: 0.75rem 0 0;
+  font-style: italic;
+}
+
+.share-text {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+}
+
+
 /* ---------- The AI helper ---------- */
 
 /* "Suggest questions for this passage": the main button, above the questions */
