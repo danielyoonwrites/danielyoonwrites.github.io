@@ -162,7 +162,7 @@ export default {
 
     let answer;
     try {
-      answer = await askClaude(env.ANTHROPIC_API_KEY, model, passage, method);
+      answer = await askClaude(env.ANTHROPIC_API_KEY, model, passage, method, input.personal === true);
     } catch (error) {
       return reply({ error: 'ai-unavailable' }, 502, cors);
     }
@@ -172,11 +172,15 @@ export default {
 
 // Asks Claude for the questions. Plain fetch (no npm), in the format of Anthropic's docs:
 // https://platform.claude.com/docs/en/build-with-claude/structured-outputs
-async function askClaude(apiKey, model, passage, method) {
+async function askClaude(apiKey, model, passage, method, personal) {
+  // The reading plan asks for a group method's questions for one person (personal is true)
+  const forOne = personal && method !== 'devotional'
+    ? '\n\nThis is personal reading, one day of a reading plan, not a group study. Write only 3 or 4 questions in all, keeping the method\'s order and shape, for one person\'s quiet time with God. Speak to the reader as "you."'
+    : '';
   const body = {
     model,
     max_tokens: MAX_TOKENS,
-    system: GUIDANCE + '\n\nThe method for this request: ' + METHODS[method],
+    system: GUIDANCE + '\n\nThe method for this request: ' + METHODS[method] + forOne,
     messages: [{ role: 'user', content: 'Passage: ' + passage }],
     output_config: {
       effort: 'medium',

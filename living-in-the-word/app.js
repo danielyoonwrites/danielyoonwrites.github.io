@@ -511,19 +511,74 @@ const BOOKS = [
 ];
 const NEW_TESTAMENT_STARTS = 39;   // Matthew is the 40th book
 
-// Questions to think about each day, from the Swedish method (see SPEC.md), for one person.
-// Edit the wording here. The AI helper will write questions for each chapter later.
-const REFLECT = [
-  'Light bulb: what stands out to you in today’s reading?',
-  'Question mark: what’s hard to understand, or what would you ask God about it?',
-  'Arrow: how could this shape your day?',
-];
+// The styles of questions for the reading plan, for one person. Each has general questions
+// (shown until the AI writes questions for that reading) and the method the AI helper follows.
+// Edit the wording here. Quiet time isn't a named method (see SPEC.md); the others are the
+// study methods above, worded for one reader.
+const PLAN_STYLES = {
+  quiet: {
+    name: 'Quiet time',
+    line: 'What it shows about God, your heart, and a prayer.',
+    ai: 'devotional',
+    questions: [
+      'What does today’s reading show you about God?',
+      'What do you love, trust, fear or hope in, and how does this reading speak to it?',
+      'What do you want to say to God about it?',
+    ],
+  },
+  dbs: {
+    name: METHODS.dbs.name,
+    original: METHODS.dbs.original,
+    line: 'God, people, then what to obey and who to tell.',
+    ai: 'dbs',
+    questions: [
+      'What does today’s reading say about God?',
+      'What does it say about people, and about you?',
+      'How will you obey it today?',
+      'Who could you share it with?',
+    ],
+  },
+  oia: {
+    name: METHODS.oia.name,
+    original: METHODS.oia.original,
+    line: 'What it says, what it means, what to do.',
+    ai: 'oia',
+    questions: [
+      'Look: what does today’s reading say? Notice who, what, where, and any words that repeat.',
+      'Think: what does it mean?',
+      'Live: what will you do about it today?',
+    ],
+  },
+  swedish: {
+    name: METHODS.swedish.name,
+    original: METHODS.swedish.original,
+    line: 'What shines, what’s hard, how it applies.',
+    ai: 'swedish',
+    questions: [
+      'Light bulb: what stands out to you in today’s reading?',
+      'Question mark: what’s hard to understand, or what would you ask God about it?',
+      'Arrow: how could this shape your day?',
+    ],
+  },
+};
+const NEW_PLAN_STYLE = 'quiet';
+// Plans made before styles existed showed Light, question, arrow, so they keep it
+const OLD_PLAN_STYLE = 'swedish';
 
-// The saved plan: { book: 'Matthew', perDay: 1, start: '2026-11-01', done: 2, lastDone: '2026-11-02',
-//                   questions: { 2: { questions: [...], note: '' } } }
+function styleOf(plan) {
+  return PLAN_STYLES[plan.style] ? plan.style : OLD_PLAN_STYLE;
+}
+
+// Where a reading's AI questions are saved: by style and reading number, like "quiet-2"
+function questionsKey(plan, n) {
+  return styleOf(plan) + '-' + n;
+}
+
+// The saved plan: { book: 'Matthew', perDay: 1, start: '2026-11-01', style: 'quiet', done: 2,
+//                   lastDone: '2026-11-02', questions: { 'quiet-2': { questions: [...], note: '' } } }
 //   done is how many readings are finished; lastDone is the date of the last "Done for today";
-//   questions holds the AI's questions for each reading (by number, starting at 0), so a
-//   reading is never paid for twice.
+//   questions holds the AI's questions for each reading (by style and reading number, starting
+//   at 0), so a reading is never paid for twice.
 let readingAhead = false;   // true after "Read the next one now", until the page closes
 let shownReading = null;    // the reading number on the "today" screen
 let readingRequest = null;  // the reading number the AI is writing questions for, if any
@@ -571,7 +626,10 @@ function showSetup() {
       select.append(group);
     });
     select.value = 'Matthew';
+    const styles = document.getElementById('plan-style');
+    Object.entries(PLAN_STYLES).forEach(([id, style]) => styles.append(new Option(style.name, id)));
   }
+  document.getElementById('plan-style').value = NEW_PLAN_STYLE;
   document.getElementById('plan-start').value = today();
   updateSummary();
   show('plan-setup');
@@ -580,6 +638,8 @@ function showSetup() {
 // "28 readings. If you read every day, you'll finish Sat, Nov 28."
 function updateSummary() {
   const plan = setupChoices();
+  const style = PLAN_STYLES[plan.style];
+  fill('.style-line', (style.original ? style.original + '. ' : '') + style.line);
   const readings = readingsIn(plan);
   const finish = showDate(plan.start, readings - 1);
   fill('.plan-summary', readings === 1
@@ -592,6 +652,7 @@ function setupChoices() {
     book: document.getElementById('plan-book').value,
     perDay: Number(document.querySelector('#plan-setup input[name="pace"]:checked').value),
     start: document.getElementById('plan-start').value || today(),
+    style: document.getElementById('plan-style').value,
     done: 0,
   };
 }
@@ -630,8 +691,10 @@ function showToday(keepHistory = true) {
   // The AI's questions for this reading if they're saved; otherwise the general ones,
   // and the AI is asked (when it's set up and this phone has the passcode)
   shownReading = plan.done;
-  const saved = plan.questions && plan.questions[plan.done];
-  showReflect(saved ? saved.questions : REFLECT, saved ? saved.note : '');
+  const style = PLAN_STYLES[styleOf(plan)];
+  fill('.style-name', style.name);
+  const saved = plan.questions && plan.questions[questionsKey(plan, plan.done)];
+  showReflect(saved ? saved.questions : style.questions, saved ? saved.note : '');
   setReadingStatus('');
   document.querySelector('.reading-ai').hidden = true;
   if (!saved && SERVER_URL) {
@@ -669,6 +732,7 @@ async function fetchReadingQuestions(n) {
   document.querySelector('.reading-ai').hidden = true;
   const plan = readSaved().plan;
   const name = readingName(plan, n);
+  const key = questionsKey(plan, n);
   setReadingStatus('Writing questions for ' + name + '…');
 
   let result;
@@ -676,7 +740,7 @@ async function fetchReadingQuestions(n) {
     const response = await fetch(SERVER_URL, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ passcode, passage: name, method: 'devotional' }),
+      body: JSON.stringify({ passcode, passage: name, method: PLAN_STYLES[styleOf(plan)].ai, personal: true }),
     });
     result = await response.json();
   } catch (error) {
@@ -688,7 +752,9 @@ async function fetchReadingQuestions(n) {
   const saved = readSaved();
   const now = saved.plan;
   if (!now || now.book !== plan.book || now.perDay !== plan.perDay || now.start !== plan.start) return;
-  const onScreen = shownReading === n && document.getElementById('today').classList.contains('active');
+  // The style was changed while waiting: save them under the style they were written for
+  const onScreen = shownReading === n && questionsKey(now, n) === key &&
+    document.getElementById('today').classList.contains('active');
 
   if (result.error === 'wrong-passcode') {
     savePasscode('');
@@ -704,7 +770,7 @@ async function fetchReadingQuestions(n) {
   }
 
   now.questions = now.questions || {};
-  now.questions[n] = { questions: result.questions, note: result.leaderNote || '' };
+  now.questions[key] = { questions: result.questions, note: result.leaderNote || '' };
   writeSaved(saved);
   if (onScreen) {
     showReflect(result.questions, result.leaderNote || '');
@@ -750,6 +816,16 @@ function goHome() {
   history = [];
 }
 
+document.querySelector('#plan-style-screen form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const saved = readSaved();
+  saved.plan.style = document.querySelector('#plan-style-screen input:checked').value;
+  writeSaved(saved);
+  goBack();       // back to today's reading
+  showToday();    // with the new style's questions
+  history = ['home'];
+});
+
 Object.assign(actions, {
   'done-reading'() {
     const saved = readSaved();
@@ -773,6 +849,32 @@ Object.assign(actions, {
     writeSaved(saved);
     showSetup();
     history = ['home'];
+  },
+
+  // "Change" on today's reading: choose another style of questions
+  'change-style'() {
+    const box = document.querySelector('.style-choices');
+    box.textContent = '';
+    const current = styleOf(readSaved().plan);
+    Object.entries(PLAN_STYLES).forEach(([id, style]) => {
+      const label = document.createElement('label');
+      label.className = 'choice';
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'plan-style-choice';
+      input.value = id;
+      input.checked = id === current;
+      label.append(input);
+      [['choice-name', style.name], ['choice-original', style.original], ['choice-line', style.line]].forEach(([className, text]) => {
+        if (!text) return;
+        const span = document.createElement('span');
+        span.className = className;
+        span.textContent = text;
+        label.append(span);
+      });
+      box.append(label);
+    });
+    show('plan-style-screen');
   },
 
   // "Questions for this reading": asks for the passcode first, then the AI

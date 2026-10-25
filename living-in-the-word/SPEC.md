@@ -29,6 +29,13 @@ One thing per screen, with big buttons.
 
 Names in the app (the owner's choice, October 25, 2026): Discover (Discovery Bible Study), Look, think, live (Observe, Interpret, Apply), and Light, question, arrow (the Swedish method). The usual name shows in small print under each, and shared text says both, like "Discover (Discovery Bible Study)." The AI helper's instructions keep the usual names. A fourth, Quiet time, is for the reading plan.
 
+Reading plan styles (the owner's choice, October 25, 2026; pull request 47): chosen at setup (Quiet time first), with "Change" on each day's screen. Each has general questions for one reader, drafted by Claude for the owner's review, in `PLAN_STYLES` in `app.js`:
+- Quiet time: What does today's reading show you about God? / What do you love, trust, fear or hope in, and how does this reading speak to it? / What do you want to say to God about it? (Not a named method: it follows the "devotional" pattern in the AI helper, drafted October 2026.)
+- Discover: What does today's reading say about God? / What does it say about people, and about you? / How will you obey it today? / Who could you share it with?
+- Look, think, live: Look: what does today's reading say? Notice who, what, where, and any words that repeat. / Think: what does it mean? / Live: what will you do about it today?
+- Light, question, arrow: Light bulb: what stands out to you in today's reading? / Question mark: what's hard to understand, or what would you ask God about it? / Arrow: how could this shape your day?
+Plans made before styles existed keep Light, question, arrow.
+
 The exact wording is drafted in build step 2 and reviewed by the owner before use. There's no single official wording for Discovery Bible Study; churches word it differently.
 
 - Discovery Bible Study: What does this passage say about God? What does it say about people? How will I obey it? Who will I share it with? Some guides add retelling the passage in your own words.

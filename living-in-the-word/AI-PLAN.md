@@ -90,6 +90,8 @@ D. The chosen model becomes the only one, and the test choice comes out. Check: 
 
 E. Built October 25, 2026 (pull request 44). AI questions for the reading plan (the owner's choice, October 25, 2026): opening a day's reading asks the AI for 3 or 4 personal reflection questions on that chapter, written for one person's quiet time instead of a group, and saves them with the plan so the same reading never costs twice. Until the AI is connected, the reading shows the three Swedish-method questions. The server has a fourth pattern for this, `devotional` in `server/worker.js` (3 or 4 questions: notice what it says about God, the heart, a response to God). On a phone without the passcode, a quiet "Questions for this reading" button asks for it once. If the AI writes a note (like the Mark 16 note), it shows as "A note on this reading." Check: open today's reading.
 
+F. A style for the reading plan (pull request 47): the app sends the chosen style's method with `personal: true`, and the server adds a line asking for only 3 or 4 questions for one person's quiet time, in that method's order. Quiet time uses the `devotional` pattern. AI questions are saved by style and reading, so changing styles never pays twice for the same one.
+
 Then the rest of `SPEC.md`'s build plan: Share and Copy, Lead the study, saving, the reading plan, printing.
 
 ## Tech notes
