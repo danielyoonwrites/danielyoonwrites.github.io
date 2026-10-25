@@ -35,6 +35,11 @@ body {
   line-height: 1.6;
 }
 
+/* Anything marked "hidden" stays hidden, even buttons styled to show as blocks */
+[hidden] {
+  display: none !important;
+}
+
 /* Never bold, not even headings */
 h1, h2, label, strong, b {
   font-weight: 400;
@@ -400,46 +405,83 @@ button {
   font-style: italic;
 }
 
-/* Each finished task opens to show its arc (HTML's own <details>) */
-.done-task {
-  border-bottom: 1px solid var(--glaze);
+/* "Write a book › Chapter 1 ›" at the top of a step's screen: tap to go up */
+.crumbs {
+  margin: 0 0 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
 }
 
-.history-list {
-  border-top: 1px solid var(--glaze);
+.crumb {
+  min-height: 2.75rem;        /* tall enough to tap easily */
+  padding: 0.25rem 0;
+  border: none;
+  background: transparent;
+  color: var(--celadon);
+  font-size: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
 }
 
-.done-task summary {
+.crumb::after {
+  content: "  ›  " / "";
+  color: var(--stone);
+  text-decoration: none;
+  display: inline-block;
+  white-space: pre;
+}
+
+
+/* ---------- Steps you can tap inside an arc ---------- */
+.arc-item {
+  display: block;
+}
+
+button.arc-item {
   position: relative;
-  padding: 1rem 2rem 1rem 0;
-  cursor: pointer;
-  list-style: none;           /* hides the browser's own small triangle */
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0 1.75rem 0 0;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: inherit;
+  line-height: inherit;
+  text-align: left;
 }
 
-.done-task summary::-webkit-details-marker {
-  display: none;              /* the same, for Safari */
-}
-
-/* A celadon + when closed, − when open */
-.done-task summary::after {
-  content: "+" / "";
+/* A small arrow on the right says "tap to open" */
+button.arc-item::after {
+  content: "→" / "";
   position: absolute;
-  right: 0.25rem;
-  top: 1rem;
+  right: 0;
+  top: 1.2rem;
   color: var(--celadon);
 }
 
-.done-task[open] summary::after {
-  content: "−" / "";
-}
-
-.done-task summary:focus-visible {
+button.arc-item:focus-visible {
   outline: 2px solid var(--celadon);
   outline-offset: 3px;
 }
 
-.done-task .arc {
-  margin-bottom: 1.5rem;
+/* Steps not done yet get a hollow square on the line */
+.arc li.to-do::before {
+  box-sizing: border-box;
+  border: 1px solid var(--celadon);
+  background: var(--porcelain);
+}
+
+/* The date and "felt 3, was 1" under a step on its own screen */
+.node-meta {
+  margin: -0.5rem 0 1.25rem;
+  font-size: 0.8125rem;
+  color: var(--stone);
+}
+
+.node-name {
+  margin-bottom: 1rem;
 }
 
 

@@ -25,6 +25,10 @@ One thing per screen, with big buttons.
 6. The app shows the two together, like "It felt like a 4. It was a 2." Then "One more small step," "I finished it" or "Stop here for now."
 7. "Not now" and "Stop here for now" keep the task in a "Waiting" list on the start screen, with no guilt. "Not now" also keeps the step you typed, so it's already in the box when you come back. Tapping a waiting task shows its steps so far, with "Next small step," "I finished it" and "Remove this task."
 8. "See finished tasks" on the start screen lists finished tasks; each one opens to show its arc.
+10. Smaller steps inside steps (the owner's idea, October 25, 2026): any task or step can hold smaller steps, as deep as needed, like "Write a book" > "Chapter 1" > "Write three sentences." Each screen shows one level, with a trail at the top ("Write a book ›") to go back up. Filled squares are done, hollow squares are not done yet.
+    - "Add a smaller step" works on anything, including finished tasks, which reopen.
+    - "Do the next step" hands you the first step not done yet, in order, going into smaller steps first (the owner's choice: the app picks, so there's no decision in the moment). You change the order with Edit (next build step).
+    - After a step, "One more small step" takes the next planned step in the same part, or asks for a new one. "I finished “Chapter 1”" finishes that part, with a way back to the bigger task.
 9. The arc (decided October 25, 2026): each small step is saved under its big task, so the history shows how a big task got done, one manageable step at a time. You still only think about one step at a time.
 
 ```
@@ -57,7 +61,7 @@ Short, with no studies named on the page (the owner's choice, October 25, 2026).
 
 ## Not in stage 1
 
-- AI suggestions, planning several steps ahead, reminders or notifications, accounts or syncing between devices, sharing.
+- AI suggestions, reminders or notifications, accounts or syncing between devices, sharing. (Planning steps ahead was added October 25, 2026, with the guardrail that the app still hands you one step at a time.)
 
 ## Ideas for later
 
@@ -81,9 +85,10 @@ Short, with no studies named on the page (the owner's choice, October 25, 2026).
 ## Tech notes
 
 - Plain HTML, CSS and JavaScript. No build tools, no npm.
-- Saved in the browser's `localStorage` under one key, `first-step-smaller`, as JSON with a version number. Each big task holds its small steps, so the arc can be shown:
-  `{ "version": 1, "tasks": [ { "id": "...", "name": "Clean the garage", "status": "waiting" or "finished", "created": "2026-10-25", "finished": "2026-10-27", "updated": 1761350000000, "pending": "a step typed but not done yet", "steps": [ { "text": "Clear one shelf", "before": 4, "after": 2, "date": "2026-10-25" } ] } ] }`
-  The backup file is the same JSON. If saved data can't be read, the app keeps a copy under `first-step-smaller-unreadable` instead of writing over it. If the browser won't let it save (some private modes), the start screen says so.
+- Saved in the browser's `localStorage` under one key, `first-step-smaller`, as JSON with a version number. Version 2 (October 25, 2026) is a tree: any task or step can hold smaller steps.
+  `{ "version": 2, "tasks": [ { "id": "...", "text": "Write a book", "status": "waiting", "created": "2026-10-25", "updated": 1761350000000, "children": [ { "id": "...", "text": "Chapter 1", "status": "finished", "finished": "2026-10-26", "children": [ { "id": "...", "text": "Write three sentences", "status": "done", "before": 3, "after": 1, "date": "2026-10-24", "children": [] } ] } ] } ] }`
+  `status` is "waiting" (not done yet), "done" (a step done, with `before`, `after` and `date`) or "finished" (marked "I finished it"). The backup file will be the same JSON.
+- Version 1 (a flat list of steps per task) is turned into version 2 automatically when the app opens, after keeping a copy under `first-step-smaller-version-1`. If saved data can't be read, the app keeps a copy under `first-step-smaller-unreadable` instead of writing over it. If the browser won't let it save (some private modes), the start screen says so.
 - File links end in `?v=1`; raise the number when a file changes (GitHub Pages lets browsers keep files for 10 minutes).
 - Sentence case, no exclamation marks, no emoji.
 
@@ -92,6 +97,8 @@ Short, with no studies named on the page (the owner's choice, October 25, 2026).
 1. This spec and the folder's `CLAUDE.md`. Check: read it.
 2. The screens, nothing saved yet, including the arc for the task in progress. Check: go through it on your phone with something real. (Built October 25, 2026; new wording for the first question and "Need help?" tips added the same day, and the "Could it be even smaller?" screen removed.)
 3. Saving on the phone, the Waiting list, and the history with an arc for each task. Check: close the browser, reopen it, everything's there. (Built October 25, 2026.)
+3a. Smaller steps inside steps, "Add a smaller step," and "Do the next step" in order. Check: make a task with two parts and steps inside one part, then tap "Do the next step." (Built October 25, 2026.)
+3b. Edit: rename, move up or down, remove any step. Check: reorder two steps and see "Do the next step" follow the new order.
 4. Save a backup, restore it, delete everything. Check: back up, delete, restore.
 5. Polish, then use it daily for a couple of weeks and note what annoys you.
 6. Before stage 3: name check, iPhone test, and add it to the Projects page.
