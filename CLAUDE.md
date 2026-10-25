@@ -28,6 +28,7 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
 - `quiet-room/` is a separate web app with its own `CLAUDE.md` and `SPEC.md`.
 - `fewer-spam-calls/` is a one-page guide with its own `CLAUDE.md` and `SPEC.md`.
 - `first-step-smaller/` is a little app (planned October 2026) with its own `CLAUDE.md` and `SPEC.md`.
+- `living-in-the-word/` is a little app for Bible study questions (planned October 2026) with its own `CLAUDE.md` and `SPEC.md`.
 
 ## Publishing and Latest posts
 

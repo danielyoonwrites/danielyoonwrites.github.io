@@ -90,9 +90,18 @@ https://danielyoonwrites.github.io/first-step-smaller (live, not listed in searc
 - Next: the owner uses it daily for a couple of weeks (build step 5). Before listing it on the Projects page: test on a real iPhone, and do a trademark search (no app with the name was found in a web search, October 2026).
 
 
+## Project 5: Living in the Word (planned, spec only)
+
+https://danielyoonwrites.github.io/living-in-the-word (not built yet). Type a Bible passage, choose a study method (Discovery Bible Study already selected; Observe, Interpret, Apply; the Swedish method), edit the questions, then share them to a group chat or lead the study one question at a time. Read `living-in-the-word/SPEC.md` and `CLAUDE.md`.
+
+- Decided October 25, 2026: the owner uses it first to prepare his small group's studies, then anyone online. Stage 1 has no AI; stage 2 adds AI-suggested questions for the specific passage, which the owner reviews (a small server keeps the AI key secret; planned separately). Bible text isn't shown yet; check translation rules first.
+- Next: build plan step 2, type a passage, choose a method, see and edit the questions.
+- Claude effort: High for most steps; Extra high for stage 2 (the AI server).
+
+
 ## Pull requests so far
 
-1-3: the website's `CLAUDE.md` and content rules. 4: Home page. 5-9: Writing page (Substack, Subscribe button, featured posts, opening lines). 10: allow JavaScript. 11: About page. 12: polish and sharing previews. 13-16: automatic Latest posts (three approaches failed because of Substack's Cloudflare; the fourth, through Jina Reader on GitHub, works). 17-19: Quiet room spec, decisions, step 1. 20-24: Fewer spam calls (spec, first version, questions-first redesign, button and caching fixes, full fact check). 25: this handoff file. 26: Projects page. 27: shorter pages (Projects layout, tabs on Writing, fold-outs on Projects). 28: First step smaller spec. 29 to 35: First step smaller build (screens, tips, saving, steps inside steps, Edit, backup).
+1-3: the website's `CLAUDE.md` and content rules. 4: Home page. 5-9: Writing page (Substack, Subscribe button, featured posts, opening lines). 10: allow JavaScript. 11: About page. 12: polish and sharing previews. 13-16: automatic Latest posts (three approaches failed because of Substack's Cloudflare; the fourth, through Jina Reader on GitHub, works). 17-19: Quiet room spec, decisions, step 1. 20-24: Fewer spam calls (spec, first version, questions-first redesign, button and caching fixes, full fact check). 25: this handoff file. 26: Projects page. 27: shorter pages (Projects layout, tabs on Writing, fold-outs on Projects). 28: First step smaller spec. 29 to 35: First step smaller build (screens, tips, saving, steps inside steps, Edit, backup). 36: Living in the Word spec.
 
 
 ## Starting a new session
