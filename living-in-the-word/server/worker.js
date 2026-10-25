@@ -201,9 +201,12 @@ async function askClaude(apiKey, model, passage, method) {
     },
   };
 
+  // The key goes in the Authorization header, as Anthropic's docs show:
+  // https://platform.claude.com/docs/en/manage-claude/authentication
+  // (The key must be tied to one workspace when it's made, or another header is needed.)
   const headers = {
     'content-type': 'application/json',
-    'x-api-key': apiKey,
+    'authorization': 'Bearer ' + apiKey,
     'anthropic-version': '2026-10-21',
   };
 
