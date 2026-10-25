@@ -87,11 +87,11 @@ function readBox(form) {
   return value;
 }
 
-// Starts a new step: "What's the very first thing..." the first time, "What's the next..." after
+// Starts a new step: "What's one small thing..." the first time, "What's the next..." after
 function askForStep() {
   const first = task.steps.length === 0;
   document.getElementById('smaller-question').textContent = first
-    ? 'What’s the very first thing your hands would do?'
+    ? 'What’s one small thing you could do first?'
     : 'What’s the next small step?';
   document.getElementById('step-text').value = '';
   fill('.task-label', task.name);

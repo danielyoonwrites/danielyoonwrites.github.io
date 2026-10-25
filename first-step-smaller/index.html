@@ -17,8 +17,8 @@
 
   <!-- The app's own look: Moon jar colors, big buttons.
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=1">
-  <script src="app.js?v=1" defer></script>
+  <link rel="stylesheet" href="style.css?v=2">
+  <script src="app.js?v=2" defer></script>
 </head>
 <body>
 
@@ -52,10 +52,23 @@
     <section class="screen" id="smaller">
       <form>
         <p class="label task-label"></p>
-        <h2><label for="step-text" id="smaller-question">What’s the very first thing your hands would do?</label></h2>
+        <h2><label for="step-text" id="smaller-question">What’s one small thing you could do first?</label></h2>
         <input id="step-text" type="text" maxlength="120" autocomplete="off">
-        <p class="hint">Something you could do in about 2 minutes, like “Clear one shelf.”</p>
+        <p class="hint">Something you could do in about 2 minutes, like “Open the email” or “Clear one shelf.”</p>
         <p class="gentle-error" hidden>Type a few words first.</p>
+
+        <!-- "Need help?" opens short tips when tapped (HTML's own <details>).
+             Where each tip comes from is listed in SPEC.md. -->
+        <details class="help">
+          <summary>Need help?</summary>
+          <ul>
+            <li>Make it concrete: “Open the email,” not “Deal with email.”</li>
+            <li>Pick when and where: “After dinner, at the kitchen table.”</li>
+            <li>Only think about the next step. The finish line can wait.</li>
+            <li>Waited a long time? Forgive yourself, and start from here.</li>
+          </ul>
+        </details>
+
         <button type="submit" class="primary">Next</button>
       </form>
       <button type="button" class="quiet back" data-action="back">Back</button>

@@ -18,7 +18,7 @@ A little app for facing a task or anything you've been putting off, one small st
 One thing per screen, with big buttons.
 
 1. "What have you been putting off?" You type the big task.
-2. Make it smaller. The app asks simple questions to shrink it to a step of about 2 minutes: "What's the very first thing your hands would do?" then "Could it be even smaller?" You type the step yourself.
+2. Make it smaller. The app asks simple questions to shrink it to a step of about 2 minutes: "What's one small thing you could do first?" (chosen October 25, 2026, over "What's the very first thing your hands would do?", which sounded odd) then "Could it be even smaller?" You type the step yourself. Short examples sit under the box, and "Need help?" opens short tips (see below).
 3. "How heavy does this step feel?" 1 (light) to 5 (very heavy).
 4. "Your step" shows alone on the screen, with "Done" and "Not now."
 5. After "Done": "How was it, really?" 1 to 5.
@@ -36,6 +36,16 @@ Clean the garage                  Finished
 
 Changed October 25, 2026, while building step 2: you rate each small step, not the whole task, so every line of the arc compares like with like.
 
+## "Need help?" tips
+
+Short, with no studies named on the page (the owner's choice, October 25, 2026). Where each comes from, for anyone who asks. These were found through search summaries on October 25, 2026; the original papers couldn't be opened from Claude's session, so open them before quoting any numbers.
+
+- "Make it concrete: 'Open the email,' not 'Deal with email.'" People who thought about a task concretely did it sooner than people who thought about it abstractly: McCrea, Liberman, Trope and Sherman (2008), "Construal level and procrastination," *Psychological Science* 19(12).
+- "Pick when and where: 'After dinner, at the kitchen table.'" If-then plans ("implementation intentions") helped people reach goals across 94 tests: Gollwitzer and Sheeran (2006), *Advances in Experimental Social Psychology* 38.
+- "Only think about the next step. The finish line can wait." Close-by small goals built confidence and progress faster than a distant goal, in a study of children learning math: Bandura and Schunk (1981), *Journal of Personality and Social Psychology* 41. Other studies found mixed results.
+- "Waited a long time? Forgive yourself, and start from here." Students who forgave themselves for procrastinating before one exam procrastinated less before the next: Wohl, Pychyl and Bennett (2010), *Personality and Individual Differences* 48(7). A survey study, so it shows a link, not proof.
+- Background for the whole app: breaking overwhelming tasks into steps was part of a cognitive behavioral therapy program that helped adults with ADHD in a randomized trial: Safren and others (2010), *JAMA* 304(8).
+
 ## Must-haves
 
 - Kind words only: no streaks, no red marks, no "you failed." Stopping is always fine.
@@ -51,6 +61,7 @@ Changed October 25, 2026, while building step 2: you rate each small step, not t
 ## Ideas for later
 
 - Stage 2: an optional "Help me make it smaller" AI button (decided October 2026: no AI now, maybe later). It would need a small server so the AI key stays secret, each use costs money, and what people type would go to an outside company, so it must be optional and say so plainly.
+- Add a new task to an arc already in progress (the owner's idea, October 25, 2026).
 - Add to the phone's home screen and work without internet.
 - Accounts and syncing, only if people need it. The backup file is designed so it can be imported into an account later.
 
@@ -78,7 +89,7 @@ Changed October 25, 2026, while building step 2: you rate each small step, not t
 ## Build plan (one pull request each, each with a check the owner does)
 
 1. This spec and the folder's `CLAUDE.md`. Check: read it.
-2. The screens, nothing saved yet, including the arc for the task in progress. Check: go through it on your phone with something real. (Built October 25, 2026.)
+2. The screens, nothing saved yet, including the arc for the task in progress. Check: go through it on your phone with something real. (Built October 25, 2026; new wording for the first question and "Need help?" tips added the same day.)
 3. Saving on the phone, the Waiting list, and the history with an arc for each task. Check: close the browser, reopen it, everything's there.
 4. Save a backup, restore it, delete everything. Check: back up, delete, restore.
 5. Polish, then use it daily for a couple of weeks and note what annoys you.
