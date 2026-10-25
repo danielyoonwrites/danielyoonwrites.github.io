@@ -81,17 +81,18 @@ https://danielyoonwrites.github.io/fewer-spam-calls. A guide for anyone in the U
 - Delayed by Dan: Korean and Spanish versions. When resumed: a language choice on the first screen, one page per language, phone menu words taken from Apple, Google and Samsung's own Korean and Spanish help pages, and a native speaker reviews each version before it's shared.
 
 
-## Project 4: First step smaller (planned, spec only)
+## Project 4: First step smaller (built through step 4, owner's trial next)
 
-https://danielyoonwrites.github.io/first-step-smaller (not built yet). A little app for facing something you've been putting off: name it, rate how heavy it feels, shrink it to a 2-minute first step, do it, then rate how it really was. Read `first-step-smaller/SPEC.md` and `CLAUDE.md`.
+https://danielyoonwrites.github.io/first-step-smaller (live, not listed in search engines yet). A little app for facing something you've been putting off: name it, rate how heavy it feels, shrink it to a 2-minute first step, do it, then rate how it really was. Read `first-step-smaller/SPEC.md` and `CLAUDE.md`.
 
 - Decided October 2026: the owner uses it first, then anyone online. Not a therapy tool. No AI for now (maybe an optional button later). Saved only on the phone, with a backup file. First version is one step at a time.
-- Next: build plan step 2, the screens with nothing saved yet.
+- Built October 25, 2026 (pull requests 29 to 35): the screens, "Need help?" tips, saving on the phone, smaller steps inside steps (a tree, data version 2), Edit, and backup/restore/delete everything. See `SPEC.md` for every decision.
+- Next: the owner uses it daily for a couple of weeks (build step 5). Before listing it on the Projects page: test on a real iPhone, and do a trademark search (no app with the name was found in a web search, October 2026).
 
 
 ## Pull requests so far
 
-1-3: the website's `CLAUDE.md` and content rules. 4: Home page. 5-9: Writing page (Substack, Subscribe button, featured posts, opening lines). 10: allow JavaScript. 11: About page. 12: polish and sharing previews. 13-16: automatic Latest posts (three approaches failed because of Substack's Cloudflare; the fourth, through Jina Reader on GitHub, works). 17-19: Quiet room spec, decisions, step 1. 20-24: Fewer spam calls (spec, first version, questions-first redesign, button and caching fixes, full fact check). 25: this handoff file. 26: Projects page. 27: shorter pages (Projects layout, tabs on Writing, fold-outs on Projects). 28: First step smaller spec.
+1-3: the website's `CLAUDE.md` and content rules. 4: Home page. 5-9: Writing page (Substack, Subscribe button, featured posts, opening lines). 10: allow JavaScript. 11: About page. 12: polish and sharing previews. 13-16: automatic Latest posts (three approaches failed because of Substack's Cloudflare; the fourth, through Jina Reader on GitHub, works). 17-19: Quiet room spec, decisions, step 1. 20-24: Fewer spam calls (spec, first version, questions-first redesign, button and caching fixes, full fact check). 25: this handoff file. 26: Projects page. 27: shorter pages (Projects layout, tabs on Writing, fold-outs on Projects). 28: First step smaller spec. 29 to 35: First step smaller build (screens, tips, saving, steps inside steps, Edit, backup).
 
 
 ## Starting a new session
