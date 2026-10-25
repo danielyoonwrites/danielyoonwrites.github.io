@@ -345,6 +345,104 @@ button {
 }
 
 
+/* ---------- Saved tasks: the Waiting list and finished tasks ---------- */
+.saved-list {
+  margin-top: 2.5rem;
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A task you can tap: a box with a thin celadon line and a small arrow */
+.row {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 3.25rem;
+  margin: 0 0 0.75rem;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  border: 1px solid var(--celadon);
+  border-radius: 0;
+  background: var(--porcelain);
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.row::after {
+  content: "→" / "";
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--celadon);
+}
+
+.row-name {
+  display: block;
+}
+
+.row-sub {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.8125rem;
+  color: var(--stone);
+}
+
+.no-steps {
+  margin: 0 0 1rem;
+  color: var(--stone);
+  font-style: italic;
+}
+
+/* Each finished task opens to show its arc (HTML's own <details>) */
+.done-task {
+  border-bottom: 1px solid var(--glaze);
+}
+
+.history-list {
+  border-top: 1px solid var(--glaze);
+}
+
+.done-task summary {
+  position: relative;
+  padding: 1rem 2rem 1rem 0;
+  cursor: pointer;
+  list-style: none;           /* hides the browser's own small triangle */
+}
+
+.done-task summary::-webkit-details-marker {
+  display: none;              /* the same, for Safari */
+}
+
+/* A celadon + when closed, − when open */
+.done-task summary::after {
+  content: "+" / "";
+  position: absolute;
+  right: 0.25rem;
+  top: 1rem;
+  color: var(--celadon);
+}
+
+.done-task[open] summary::after {
+  content: "−" / "";
+}
+
+.done-task summary:focus-visible {
+  outline: 2px solid var(--celadon);
+  outline-offset: 3px;
+}
+
+.done-task .arc {
+  margin-bottom: 1.5rem;
+}
+
+
 /* ---------- Footer ---------- */
 footer {
   padding: 1.25rem 0 2.5rem;

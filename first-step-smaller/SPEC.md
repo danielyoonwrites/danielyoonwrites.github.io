@@ -23,8 +23,9 @@ One thing per screen, with big buttons.
 4. "Your step" shows alone on the screen, with "Done" and "Not now."
 5. After "Done": "How was it, really?" 1 to 5.
 6. The app shows the two together, like "It felt like a 4. It was a 2." Then "One more small step," "I finished it" or "Stop here for now."
-7. "Not now" and "Stop here for now" keep the task in a "Waiting" list to come back to, with no guilt.
-8. The arc (decided October 25, 2026): each small step is saved under its big task, so the history shows how a big task got done, one manageable step at a time. You still only think about one step at a time.
+7. "Not now" and "Stop here for now" keep the task in a "Waiting" list on the start screen, with no guilt. "Not now" also keeps the step you typed, so it's already in the box when you come back. Tapping a waiting task shows its steps so far, with "Next small step," "I finished it" and "Remove this task."
+8. "See finished tasks" on the start screen lists finished tasks; each one opens to show its arc.
+9. The arc (decided October 25, 2026): each small step is saved under its big task, so the history shows how a big task got done, one manageable step at a time. You still only think about one step at a time.
 
 ```
 Clean the garage                  Finished
@@ -81,8 +82,8 @@ Short, with no studies named on the page (the owner's choice, October 25, 2026).
 
 - Plain HTML, CSS and JavaScript. No build tools, no npm.
 - Saved in the browser's `localStorage` under one key, `first-step-smaller`, as JSON with a version number. Each big task holds its small steps, so the arc can be shown:
-  `{ "version": 1, "tasks": [ { "name": "Clean the garage", "status": "waiting" or "finished", "steps": [ { "text": "Clear one shelf", "before": 4, "after": 2, "date": "2026-10-25" } ] } ] }`
-  The backup file is the same JSON.
+  `{ "version": 1, "tasks": [ { "id": "...", "name": "Clean the garage", "status": "waiting" or "finished", "created": "2026-10-25", "finished": "2026-10-27", "updated": 1761350000000, "pending": "a step typed but not done yet", "steps": [ { "text": "Clear one shelf", "before": 4, "after": 2, "date": "2026-10-25" } ] } ] }`
+  The backup file is the same JSON. If saved data can't be read, the app keeps a copy under `first-step-smaller-unreadable` instead of writing over it. If the browser won't let it save (some private modes), the start screen says so.
 - File links end in `?v=1`; raise the number when a file changes (GitHub Pages lets browsers keep files for 10 minutes).
 - Sentence case, no exclamation marks, no emoji.
 
@@ -90,7 +91,7 @@ Short, with no studies named on the page (the owner's choice, October 25, 2026).
 
 1. This spec and the folder's `CLAUDE.md`. Check: read it.
 2. The screens, nothing saved yet, including the arc for the task in progress. Check: go through it on your phone with something real. (Built October 25, 2026; new wording for the first question and "Need help?" tips added the same day, and the "Could it be even smaller?" screen removed.)
-3. Saving on the phone, the Waiting list, and the history with an arc for each task. Check: close the browser, reopen it, everything's there.
+3. Saving on the phone, the Waiting list, and the history with an arc for each task. Check: close the browser, reopen it, everything's there. (Built October 25, 2026.)
 4. Save a backup, restore it, delete everything. Check: back up, delete, restore.
 5. Polish, then use it daily for a couple of weeks and note what annoys you.
 6. Before stage 3: name check, iPhone test, and add it to the Projects page.
