@@ -29,6 +29,12 @@ One thing per screen, with big buttons.
     - "Add a smaller step" works on anything, including finished tasks, which reopen.
     - "Do the next step" hands you the first step not done yet, in order, going into smaller steps first (the owner's choice: the app picks, so there's no decision in the moment). You change the order with Edit (next build step).
     - After a step, "One more small step" takes the next planned step in the same part, or asks for a new one. "I finished “Chapter 1”" finishes that part, with a way back to the bigger task.
+11. Edit (built October 25, 2026): "Edit" on any task or step's screen opens:
+    - Rename it.
+    - Move up or Move down in its arc, which also changes the order of "Do the next step." Not shown for big tasks, which are listed newest first.
+    - Move into another task: put it at the end of another task's arc, like moving "Write a chapter of my book" into "Write a book." To keep the list short, it offers big tasks and parts that already hold steps.
+    - Make it a task of its own: takes it out of its bigger task and lists it under Waiting (a done step becomes a finished task).
+    - Remove it, and everything inside it, after a confirm.
 9. The arc (decided October 25, 2026): each small step is saved under its big task, so the history shows how a big task got done, one manageable step at a time. You still only think about one step at a time.
 
 ```
@@ -66,7 +72,7 @@ Short, with no studies named on the page (the owner's choice, October 25, 2026).
 ## Ideas for later
 
 - Stage 2: an optional "Help me make it smaller" AI button (decided October 2026: no AI now, maybe later). It would need a small server so the AI key stays secret, each use costs money, and what people type would go to an outside company, so it must be optional and say so plainly.
-- Add a new task to an arc already in progress (the owner's idea, October 25, 2026).
+- Add a new task to an arc already in progress (the owner's idea, October 25, 2026): done through Edit, "Move into another task."
 - Add to the phone's home screen and work without internet.
 - Accounts and syncing, only if people need it. The backup file is designed so it can be imported into an account later.
 
@@ -98,7 +104,7 @@ Short, with no studies named on the page (the owner's choice, October 25, 2026).
 2. The screens, nothing saved yet, including the arc for the task in progress. Check: go through it on your phone with something real. (Built October 25, 2026; new wording for the first question and "Need help?" tips added the same day, and the "Could it be even smaller?" screen removed.)
 3. Saving on the phone, the Waiting list, and the history with an arc for each task. Check: close the browser, reopen it, everything's there. (Built October 25, 2026.)
 3a. Smaller steps inside steps, "Add a smaller step," and "Do the next step" in order. Check: make a task with two parts and steps inside one part, then tap "Do the next step." (Built October 25, 2026.)
-3b. Edit: rename, move up or down, remove any step. Check: reorder two steps and see "Do the next step" follow the new order.
+3b. Edit: rename, move up or down, move into another task, make it a task of its own, remove. Check: reorder two steps and see "Do the next step" follow the new order. (Built October 25, 2026.)
 4. Save a backup, restore it, delete everything. Check: back up, delete, restore.
 5. Polish, then use it daily for a couple of weeks and note what annoys you.
 6. Before stage 3: name check, iPhone test, and add it to the Projects page.
