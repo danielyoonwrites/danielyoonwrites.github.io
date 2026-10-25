@@ -121,19 +121,20 @@ https://danielyoonwrites.github.io/first-step-smaller (live, not listed in searc
 - Parked: an optional "Help me make it smaller" AI button.
 
 
-## Project 5: Living in the Word (planned, build step 2 next)
+## Project 5: Living in the Word (build step 2 done, step 3 next)
 
-https://danielyoonwrites.github.io/living-in-the-word (not built yet). Type a Bible passage, choose a study method (Discovery Bible Study already selected; Observe, Interpret, Apply; the Swedish method), edit the questions, then share them to a group chat or lead the study one question at a time. Read `living-in-the-word/SPEC.md` and `CLAUDE.md`.
+https://danielyoonwrites.github.io/living-in-the-word (step 2 live once merged: passage, method, questions to edit). Type a Bible passage, choose a study method (Discovery Bible Study already selected; Observe, Interpret, Apply; the Swedish method), edit the questions, then share them to a group chat or lead the study one question at a time. Read `living-in-the-word/SPEC.md` and `CLAUDE.md`.
 
 - Decided October 25, 2026: the owner uses it first to prepare his small group's studies, then anyone online. Stage 1 has no AI; stage 2 adds AI-suggested questions for the specific passage, which the owner reviews (a small server keeps the AI key secret; planned separately). Bible text isn't shown yet; check translation rules first.
 - Reading plan (Dan's idea, added October 25, 2026, as build step 5b, right after saving): set a plan like "Matthew, one chapter a day," and each day the app shows today's reading with questions to meditate on. No streaks or guilt.
-- Next: build plan step 2, type a passage, choose a method, see and edit the questions. Dan reviews the exact question wording.
+- Step 2 built October 25, 2026 (pull request 38): type a passage, choose a method, see the questions, edit, remove, add, or start them over. Each method keeps its own edits while the page is open; nothing is saved yet. The question wording is a draft in `app.js` (also listed in SPEC.md) and Dan reviews it.
+- Next: build plan step 3, Share and Copy (check `navigator.share` in KakaoTalk's built-in browser).
 - Claude effort: High for most steps; Extra high for stage 2 (the AI server). Not Max (Claude Code's docs say it "may show diminishing returns and is prone to overthinking").
 
 
 ## Pull requests so far
 
-1-3: the website's `CLAUDE.md` and content rules. 4: Home page. 5-9: Writing page (Substack, Subscribe button, featured posts, opening lines). 10: allow JavaScript. 11: About page. 12: polish and sharing previews. 13-16: automatic Latest posts (three approaches failed because of Substack's Cloudflare; the fourth, through Jina Reader on GitHub, works). 17-19: Quiet room spec, decisions, step 1. 20-24: Fewer spam calls (spec, first version, questions-first redesign, button and caching fixes, full fact check). 25: this handoff file. 26: Projects page. 27: shorter pages (Projects layout, tabs on Writing, fold-outs on Projects). 28: First step smaller spec. 29 to 35: First step smaller build (screens, tips, saving, steps inside steps, Edit, backup). 36: Living in the Word spec. 37: the reading plan added to Living in the Word, and this handoff update.
+1-3: the website's `CLAUDE.md` and content rules. 4: Home page. 5-9: Writing page (Substack, Subscribe button, featured posts, opening lines). 10: allow JavaScript. 11: About page. 12: polish and sharing previews. 13-16: automatic Latest posts (three approaches failed because of Substack's Cloudflare; the fourth, through Jina Reader on GitHub, works). 17-19: Quiet room spec, decisions, step 1. 20-24: Fewer spam calls (spec, first version, questions-first redesign, button and caching fixes, full fact check). 25: this handoff file. 26: Projects page. 27: shorter pages (Projects layout, tabs on Writing, fold-outs on Projects). 28: First step smaller spec. 29 to 35: First step smaller build (screens, tips, saving, steps inside steps, Edit, backup). 36: Living in the Word spec. 37: the reading plan added to Living in the Word, and this handoff update. 38: Living in the Word step 2 (passage, method, questions).
 
 
 ## Starting a new session

@@ -33,7 +33,29 @@ The exact wording is drafted in build step 2 and reviewed by the owner before us
 - Observe, Interpret, Apply (the inductive method): What does it say? What does it mean? What should I do?
 - The Swedish method: a light bulb (what stands out or shines), a question mark (what's hard to understand), and an arrow (how it applies to my life).
 
-Sources (search results, October 25, 2026; the guides themselves weren't opened from Claude's session):
+Draft wording, built in step 2 (October 25, 2026), waiting for the owner's review. It's written in `app.js` at the top, under "The questions for each method." These are Claude's own words following each method's pattern, not quotes from a guide.
+
+- Discovery Bible Study. Tip: "Read the passage aloud, maybe twice, then go through the questions together."
+  1. Can someone retell the passage in their own words?
+  2. What does this passage say about God?
+  3. What does it say about people?
+  4. How will I obey what it says this week?
+  5. Who will I share it with this week?
+- Observe, Interpret, Apply. Tip: "Read the passage aloud. Stay with what it says before moving to what it means."
+  1. What does the passage say? Notice who, what, when and where, and any words that repeat.
+  2. What does it mean? What do other parts of the Bible say about this?
+  3. What should I do about it?
+- The Swedish method. Tip: "Read the passage aloud. Give everyone a few quiet minutes with it, then share one of each."
+  1. Light bulb: what stands out or shines for you?
+  2. Question mark: what is hard to understand, or what would you ask?
+  3. Arrow: how does it apply to your life?
+
+What was checked for the draft (web search results, October 25, 2026; the pages themselves couldn't be opened from Claude's session, so this is unverified against the original guides):
+- Discovery Bible Study: versions agree on God, people, obey, share. A Fellowship of Christian Athletes template asks about God and people, then how the group will obey that week and who they'll share with: https://resources.fca.org/resources/discovery-bible-study-training
+- Observe, Interpret, Apply: "What does it say? What does it mean? What should I do?" (Revive Our Hearts, below). Christianity.com's guide suggests who, what, when, where and why questions, looking for repeated words, and letting Scripture interpret Scripture: https://www.christianity.com/wiki/bible/the-inductive-method-of-bible-study-the-basics-11530093.html
+- The Swedish method: light bulb, question mark, arrow; usually about 10 minutes of quiet study, then sharing in rounds; Ada Lum is said to have met it in a Swedish student group (Scripture Engagement and The Briefing, https://thebriefing.com.au/?p=5445). The draft tip says "a few quiet minutes" instead of a number.
+
+Earlier sources (search results, October 25, 2026; the guides themselves weren't opened from Claude's session):
 - Canyon Ridge, Discovery Bible Study: https://canyonridge.org/dbs
 - InterVarsity, Discovery Bible Study: https://ism.intervarsity.org/node/3389
 - InterVarsity, Leading Inductive Bible Study: https://library.intervarsity.org/library/leading-inductive-bible-study
@@ -87,7 +109,7 @@ Sources (search results, October 25, 2026; the guides themselves weren't opened 
 ## Build plan (one pull request each, each with a check the owner does)
 
 1. This spec and the folder's `CLAUDE.md`. Check: read it.
-2. Type a passage, choose a method, see and edit the questions. Check: try it with a real passage for your group, and fix any wording.
+2. Type a passage, choose a method, see and edit the questions. Built October 25, 2026 (not saved yet; edits last while the page is open). Check: try it with a real passage for your group, and fix any wording.
 3. Share and Copy. Check: share a study to yourself in KakaoTalk.
 4. Lead the study, one question at a time. Check: lead from your phone or a laptop.
 5. Recent studies saved on the phone. Check: close the browser, reopen it, they're there.
@@ -97,4 +119,4 @@ Sources (search results, October 25, 2026; the guides themselves weren't opened 
 
 ## Open questions (ask one at a time)
 
-- The exact question wording for each method (drafted in step 2).
+- The exact question wording for each method: drafted in step 2 (see "Question methods"), waiting for the owner's review.
