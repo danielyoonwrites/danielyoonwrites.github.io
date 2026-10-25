@@ -81,9 +81,17 @@ https://danielyoonwrites.github.io/fewer-spam-calls. A guide for anyone in the U
 - Delayed by Dan: Korean and Spanish versions. When resumed: a language choice on the first screen, one page per language, phone menu words taken from Apple, Google and Samsung's own Korean and Spanish help pages, and a native speaker reviews each version before it's shared.
 
 
+## Project 4: First step smaller (planned, spec only)
+
+https://danielyoonwrites.github.io/first-step-smaller (not built yet). A little app for facing something you've been putting off: name it, rate how heavy it feels, shrink it to a 2-minute first step, do it, then rate how it really was. Read `first-step-smaller/SPEC.md` and `CLAUDE.md`.
+
+- Decided October 2026: the owner uses it first, then anyone online. Not a therapy tool. No AI for now (maybe an optional button later). Saved only on the phone, with a backup file. First version is one step at a time.
+- Next: build plan step 2, the screens with nothing saved yet.
+
+
 ## Pull requests so far
 
-1-3: the website's `CLAUDE.md` and content rules. 4: Home page. 5-9: Writing page (Substack, Subscribe button, featured posts, opening lines). 10: allow JavaScript. 11: About page. 12: polish and sharing previews. 13-16: automatic Latest posts (three approaches failed because of Substack's Cloudflare; the fourth, through Jina Reader on GitHub, works). 17-19: Quiet room spec, decisions, step 1. 20-24: Fewer spam calls (spec, first version, questions-first redesign, button and caching fixes, full fact check). 25: this handoff file. 26: Projects page.
+1-3: the website's `CLAUDE.md` and content rules. 4: Home page. 5-9: Writing page (Substack, Subscribe button, featured posts, opening lines). 10: allow JavaScript. 11: About page. 12: polish and sharing previews. 13-16: automatic Latest posts (three approaches failed because of Substack's Cloudflare; the fourth, through Jina Reader on GitHub, works). 17-19: Quiet room spec, decisions, step 1. 20-24: Fewer spam calls (spec, first version, questions-first redesign, button and caching fixes, full fact check). 25: this handoff file. 26: Projects page. 27: shorter pages (Projects layout, tabs on Writing, fold-outs on Projects). 28: First step smaller spec.
 
 
 ## Starting a new session
