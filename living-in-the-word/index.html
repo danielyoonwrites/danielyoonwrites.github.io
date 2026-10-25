@@ -17,8 +17,8 @@
 
   <!-- The app's own look: Moon jar colors, big buttons.
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=5">
-  <script src="app.js?v=5" defer></script>
+  <link rel="stylesheet" href="style.css?v=6">
+  <script src="app.js?v=6" defer></script>
 </head>
 <body>
 
@@ -59,23 +59,27 @@
         <fieldset>
           <legend><h2 tabindex="-1">How do you want to study it?</h2></legend>
 
-          <!-- The value of each choice matches a method's name at the top of app.js -->
+          <!-- The value of each choice matches a method at the top of app.js.
+               The owner's names first (October 2026), the method's usual name in small print. -->
           <label class="choice">
             <input type="radio" name="method" value="dbs" checked>
-            <span class="choice-name">Discovery Bible Study</span>
+            <span class="choice-name">Discover</span>
+            <span class="choice-original">Discovery Bible Study</span>
             <span class="choice-line">God, people, then what to obey and who to tell.</span>
           </label>
 
           <label class="choice">
             <input type="radio" name="method" value="oia">
-            <span class="choice-name">Observe, Interpret, Apply</span>
+            <span class="choice-name">Look, think, live</span>
+            <span class="choice-original">Observe, Interpret, Apply</span>
             <span class="choice-line">What it says, what it means, what to do.</span>
           </label>
 
           <label class="choice">
             <input type="radio" name="method" value="swedish">
-            <span class="choice-name">The Swedish method</span>
-            <span class="choice-line">A light bulb, a question mark and an arrow.</span>
+            <span class="choice-name">Light, question, arrow</span>
+            <span class="choice-original">The Swedish method</span>
+            <span class="choice-line">What shines, what’s hard, how it applies.</span>
           </label>
         </fieldset>
         <button type="submit" class="primary">See the questions</button>

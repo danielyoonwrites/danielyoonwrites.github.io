@@ -27,6 +27,8 @@ One thing per screen, with big buttons.
 
 ## Question methods
 
+Names in the app (the owner's choice, October 25, 2026): Discover (Discovery Bible Study), Look, think, live (Observe, Interpret, Apply), and Light, question, arrow (the Swedish method). The usual name shows in small print under each, and shared text says both, like "Discover (Discovery Bible Study)." The AI helper's instructions keep the usual names. A fourth, Quiet time, is for the reading plan.
+
 The exact wording is drafted in build step 2 and reviewed by the owner before use. There's no single official wording for Discovery Bible Study; churches word it differently.
 
 - Discovery Bible Study: What does this passage say about God? What does it say about people? How will I obey it? Who will I share it with? Some guides add retelling the passage in your own words.
