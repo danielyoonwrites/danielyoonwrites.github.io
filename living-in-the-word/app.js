@@ -1,5 +1,6 @@
-// Living in the Word: shows one screen at a time, and turns a passage into
-// questions for a small group. The questions stay only while the page is open.
+// Living in the Word: shows one screen at a time. It turns a passage into
+// questions for a small group (they stay only while the page is open), and keeps
+// a daily reading plan (saved on this phone).
 // Only "Suggest questions" sends anything: the passage name and the method,
 // to the app's own small server (the AI helper, see AI-PLAN.md).
 // See SPEC.md for the plan.
@@ -57,6 +58,7 @@ const screens = [...document.querySelectorAll('.screen')];
 function show(id) {
   const now = screens.find((screen) => screen.classList.contains('active'));
   if (now && now.id !== id) history.push(now.id);
+  if (id === 'home') updatePlanStatus();   // the start screen always shows where the plan is
   screens.forEach((screen) => screen.classList.toggle('active', screen.id === id));
   window.scrollTo(0, 0);
 
@@ -64,7 +66,7 @@ function show(id) {
   const screen = document.getElementById(id);
   screen.querySelectorAll('.gentle-error').forEach((note) => { note.hidden = true; });
   const typing = id === 'passage' || id === 'passcode';
-  const target = typing ? screen.querySelector('input') : screen.querySelector('h2');
+  const target = typing ? screen.querySelector('input') : screen.querySelector('h1, h2');
   if (target) target.focus({ preventScroll: true });
 }
 
@@ -186,6 +188,16 @@ document.querySelector('#method form').addEventListener('submit', (event) => {
 const actions = {
   back: goBack,
 
+  // The start screen's two buttons
+  study() {
+    show('passage');
+  },
+  reading() {
+    if (readSaved().plan) showToday();
+    else showSetup();
+  },
+  home: goHome,
+
   // Adds an empty question at the end, with the cursor in it
   add() {
     drafts[method].push('');
@@ -244,7 +256,9 @@ const MODEL_NAMES = {
   'claude-haiku-5-5': 'Haiku 5.5',
 };
 
-// What's saved: { version: 1, passcode: '...' }. Later steps add recent studies.
+// What's saved on this phone, as one piece of JSON:
+//   { version: 1, passcode: '...', plan: { ... } }   (the plan is described in the reading plan part)
+// Later steps add recent studies.
 function readSaved() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -255,16 +269,20 @@ function readSaved() {
   return { version: 1 };
 }
 
+function writeSaved(saved) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+  } catch (error) {
+    // This browser won't save; things are kept until the page closes
+  }
+}
+
 function savePasscode(code) {
   passcode = code;
   const saved = readSaved();
   if (code) saved.passcode = code;
   else delete saved.passcode;
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-  } catch (error) {
-    // This browser won't save it; it's kept until the page closes
-  }
+  writeSaved(saved);
 }
 
 function askPasscode(wrong) {
@@ -376,6 +394,228 @@ async function requestSuggestions() {
     cost.hidden = false;
   }
 }
+
+
+
+// ---------- The reading plan ----------
+
+// The 66 books and how many chapters each has. Checked October 25, 2026: two
+// independent datasets agree on every book (66 books, 1,189 chapters):
+// github.com/thiagobodruk/bible and github.com/scrollmapper/bible_databases
+const BOOKS = [
+  ['Genesis', 50], ['Exodus', 40], ['Leviticus', 27], ['Numbers', 36], ['Deuteronomy', 34],
+  ['Joshua', 24], ['Judges', 21], ['Ruth', 4], ['1 Samuel', 31], ['2 Samuel', 24],
+  ['1 Kings', 22], ['2 Kings', 25], ['1 Chronicles', 29], ['2 Chronicles', 36], ['Ezra', 10],
+  ['Nehemiah', 13], ['Esther', 10], ['Job', 42], ['Psalms', 150], ['Proverbs', 31],
+  ['Ecclesiastes', 12], ['Song of Solomon', 8], ['Isaiah', 66], ['Jeremiah', 52], ['Lamentations', 5],
+  ['Ezekiel', 48], ['Daniel', 12], ['Hosea', 14], ['Joel', 3], ['Amos', 9],
+  ['Obadiah', 1], ['Jonah', 4], ['Micah', 7], ['Nahum', 3], ['Habakkuk', 3],
+  ['Zephaniah', 3], ['Haggai', 2], ['Zechariah', 14], ['Malachi', 4],
+  ['Matthew', 28], ['Mark', 16], ['Luke', 24], ['John', 21], ['Acts', 28],
+  ['Romans', 16], ['1 Corinthians', 16], ['2 Corinthians', 13], ['Galatians', 6], ['Ephesians', 6],
+  ['Philippians', 4], ['Colossians', 4], ['1 Thessalonians', 5], ['2 Thessalonians', 3], ['1 Timothy', 6],
+  ['2 Timothy', 4], ['Titus', 3], ['Philemon', 1], ['Hebrews', 13], ['James', 5],
+  ['1 Peter', 5], ['2 Peter', 3], ['1 John', 5], ['2 John', 1], ['3 John', 1],
+  ['Jude', 1], ['Revelation', 22],
+];
+const NEW_TESTAMENT_STARTS = 39;   // Matthew is the 40th book
+
+// Questions to think about each day, from the Swedish method (see SPEC.md), for one person.
+// Edit the wording here. The AI helper will write questions for each chapter later.
+const REFLECT = [
+  'Light bulb: what stands out to you in today’s reading?',
+  'Question mark: what’s hard to understand, or what would you ask God about it?',
+  'Arrow: how could this shape your day?',
+];
+
+// The saved plan: { book: 'Matthew', perDay: 1, start: '2026-11-01', done: 2, lastDone: '2026-11-02' }
+//   done is how many readings are finished; lastDone is the date of the last "Done for today".
+let readingAhead = false;   // true after "Read the next one now", until the page closes
+
+// Today's date as 2026-10-25, in this phone's own time zone
+function today() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+// A date like 2026-11-01 shown as "Sun, Nov 1", optionally some days later
+function showDate(isoDate, addDays = 0) {
+  const [y, m, d] = isoDate.split('-').map(Number);
+  const date = new Date(y, m - 1, d + addDays);
+  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function chaptersIn(bookName) {
+  const book = BOOKS.find(([name]) => name === bookName);
+  return book ? book[1] : 0;
+}
+
+function readingsIn(plan) {
+  return Math.ceil(chaptersIn(plan.book) / plan.perDay);
+}
+
+// Reading number n (starting at 0) as a passage, like "Matthew 3" or "Matthew 3–4".
+// Books with one chapter are just the book's name, like "Jude".
+function readingName(plan, n) {
+  const chapters = chaptersIn(plan.book);
+  if (chapters === 1) return plan.book;
+  const first = n * plan.perDay + 1;
+  const last = Math.min(first + plan.perDay - 1, chapters);
+  return plan.book + ' ' + (first === last ? first : first + '–' + last);
+}
+
+// The setup screen: fills in the books once, starts today
+function showSetup() {
+  const select = document.getElementById('plan-book');
+  if (!select.options.length) {
+    [['Old Testament', BOOKS.slice(0, NEW_TESTAMENT_STARTS)], ['New Testament', BOOKS.slice(NEW_TESTAMENT_STARTS)]].forEach(([title, books]) => {
+      const group = document.createElement('optgroup');
+      group.label = title;
+      books.forEach(([name]) => group.append(new Option(name, name)));
+      select.append(group);
+    });
+    select.value = 'Matthew';
+  }
+  document.getElementById('plan-start').value = today();
+  updateSummary();
+  show('plan-setup');
+}
+
+// "28 readings. If you read every day, you'll finish Sat, Nov 28."
+function updateSummary() {
+  const plan = setupChoices();
+  const readings = readingsIn(plan);
+  const finish = showDate(plan.start, readings - 1);
+  fill('.plan-summary', readings === 1
+    ? 'One reading, on ' + showDate(plan.start) + '.'
+    : readings + ' readings. If you read every day, you’ll finish ' + finish + '.');
+}
+
+function setupChoices() {
+  return {
+    book: document.getElementById('plan-book').value,
+    perDay: Number(document.querySelector('#plan-setup input[name="pace"]:checked').value),
+    start: document.getElementById('plan-start').value || today(),
+    done: 0,
+  };
+}
+
+document.querySelector('#plan-setup form').addEventListener('change', updateSummary);
+document.querySelector('#plan-setup form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const saved = readSaved();
+  saved.plan = setupChoices();
+  writeSaved(saved);
+  readingAhead = false;
+  history = ['home'];   // Back from today's reading goes to the start, not to setup
+  showToday(false);
+});
+
+// Today's reading, or "Done for today" if today's is finished
+function showToday(keepHistory = true) {
+  const plan = readSaved().plan;
+  const readings = readingsIn(plan);
+
+  if (plan.done >= readings) {
+    showFinished(plan);
+    return;
+  }
+  if (plan.lastDone === today() && !readingAhead) {
+    showDoneToday(plan, keepHistory);
+    return;
+  }
+
+  fill('.reading-count', 'Reading ' + (plan.done + 1) + ' of ' + readings);
+  fill('.reading-name', readingName(plan, plan.done));
+  const early = document.querySelector('.reading-early');
+  early.hidden = plan.start <= today();
+  early.textContent = 'Your plan starts ' + showDate(plan.start) + '. You can read ahead, or come back then.';
+
+  const list = document.querySelector('.reflect-list');
+  list.textContent = '';
+  REFLECT.forEach((question) => {
+    const item = document.createElement('li');
+    item.textContent = question;
+    list.append(item);
+  });
+
+  if (!keepHistory) screens.forEach((screen) => screen.classList.remove('active'));
+  show('today');
+}
+
+function showDoneToday(plan, keepHistory = true) {
+  fill('.done-title', 'Done for today.');
+  fill('.done-next', readingName(plan, plan.done) + ' is next. It’ll be here tomorrow.');
+  document.querySelector('.next-now').hidden = false;
+  document.querySelector('.new-plan').hidden = true;
+  if (!keepHistory) screens.forEach((screen) => screen.classList.remove('active'));
+  show('reading-done');
+}
+
+function showFinished(plan) {
+  fill('.done-title', 'You finished ' + plan.book + '.');
+  const readings = readingsIn(plan);
+  fill('.done-next', readings === 1 ? 'Well done.' : readings + ' readings, one day at a time.');
+  document.querySelector('.next-now').hidden = true;
+  document.querySelector('.new-plan').hidden = false;
+  show('reading-done');
+}
+
+// What the start screen says under "Today's reading"
+function updatePlanStatus() {
+  const plan = readSaved().plan;
+  let text = 'Set up a plan, like one chapter of Matthew a day.';
+  if (plan) {
+    const readings = readingsIn(plan);
+    if (plan.done >= readings) text = 'You finished ' + plan.book + '.';
+    else if (plan.lastDone === today()) text = 'Done for today. Next: ' + readingName(plan, plan.done) + '.';
+    else text = 'Next: ' + readingName(plan, plan.done) + '. Reading ' + (plan.done + 1) + ' of ' + readings + '.';
+  }
+  fill('.plan-status', text);
+}
+
+function goHome() {
+  history = [];
+  updatePlanStatus();
+  show('home');
+  history = [];
+}
+
+Object.assign(actions, {
+  'done-reading'() {
+    const saved = readSaved();
+    saved.plan.done += 1;
+    saved.plan.lastDone = today();
+    writeSaved(saved);
+    readingAhead = false;
+    showToday();
+    history = ['home'];   // Back goes to the start
+  },
+
+  'read-ahead'() {
+    readingAhead = true;
+    showToday();
+    history = ['home'];
+  },
+
+  'new-plan'() {
+    const saved = readSaved();
+    delete saved.plan;
+    writeSaved(saved);
+    showSetup();
+    history = ['home'];
+  },
+
+  'end-plan'() {
+    if (!window.confirm('End this plan? Where you are in it will be cleared.')) return;
+    const saved = readSaved();
+    delete saved.plan;
+    writeSaved(saved);
+    goHome();
+  },
+});
+
+updatePlanStatus();
 
 
 document.addEventListener('click', (event) => {

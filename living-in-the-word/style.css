@@ -133,6 +133,8 @@ h2 {
 /* ---------- Typing boxes ---------- */
 input[type="text"],
 input[type="password"],
+input[type="date"],
+select,
 textarea {
   box-sizing: border-box;
   width: 100%;
@@ -338,6 +340,93 @@ legend {
 
 .leader-note .note {
   margin-top: 0.25rem;
+}
+
+
+/* ---------- The reading plan ---------- */
+
+/* "Book", "How much a day", "Start": small labels above each choice */
+.field-label {
+  display: block;
+  margin: 1.5rem 0 0.5rem;
+  padding: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--celadon);
+}
+
+/* The browser's own look for the book list and the date, made to match */
+select,
+input[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+select {
+  /* a small arrow on the right, drawn in celadon */
+  padding-right: 2.5rem;
+  background-image: linear-gradient(45deg, transparent 50%, #386F61 50%), linear-gradient(135deg, #386F61 50%, transparent 50%);
+  background-position: calc(100% - 1.25rem) 50%, calc(100% - 0.9rem) 50%;
+  background-size: 0.35rem 0.35rem;
+  background-repeat: no-repeat;
+}
+
+/* 1, 2 or 3 chapters a day, side by side */
+.pace {
+  margin: 1.5rem 0 0;
+}
+
+.pace legend {
+  margin-top: 0;
+}
+
+.pace label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;      /* tall enough to tap easily */
+  margin-right: 1.75rem;
+}
+
+.pace input {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+  accent-color: var(--celadon);
+}
+
+.plan-summary {
+  margin: 1.5rem 0 0;
+  font-style: italic;
+}
+
+/* Today's reading */
+.reading-name {
+  margin-bottom: 0.25rem;
+  font-size: 1.75rem;
+  line-height: 1.3;
+}
+
+.reading-early {
+  margin-top: 1rem;
+}
+
+.reflect-label {
+  margin-top: 2rem;
+}
+
+.reflect-list {
+  margin: 0;
+  padding: 0 0 0 1.5rem;
+}
+
+.reflect-list li {
+  margin: 0 0 0.75rem;
+}
+
+.done-next {
+  margin: 0 0 1rem;
 }
 
 

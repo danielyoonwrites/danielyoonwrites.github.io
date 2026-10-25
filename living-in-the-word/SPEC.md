@@ -107,7 +107,7 @@ Moved up on October 25, 2026: after trying step 2, the owner pointed out that qu
 - Sharing uses the browser's share feature (`navigator.share`) when it's available, with "Copy" as the fallback. Check how it works in KakaoTalk's built-in browser during step 3.
 - Recent studies are saved in `localStorage` under `living-in-the-word`, as JSON with a version number.
 - File links end in `?v=1`; raise the number when a file changes.
-- The reading plan needs the number of chapters in each book of the Bible (Matthew has 28, for example). Take the list from a reliable source and check it when building; never type it from memory.
+- The reading plan needs the number of chapters in each book of the Bible (Matthew has 28, for example). Take the list from a reliable source and check it when building; never type it from memory. Checked October 25, 2026: two independent datasets agree on every book, 66 books and 1,189 chapters (https://github.com/thiagobodruk/bible and https://github.com/scrollmapper/bible_databases, both based on the KJV; English Bibles share these chapter counts). The list is `BOOKS` in `app.js`.
 
 ## Build plan (one pull request each, each with a check the owner does)
 
@@ -117,7 +117,7 @@ Moved up on October 25, 2026: after trying step 2, the owner pointed out that qu
 4. Share and Copy. Check: share a study to yourself in KakaoTalk.
 5. Lead the study, one question at a time. Check: lead from your phone or a laptop.
 6. Recent studies saved on the phone. Check: close the browser, reopen it, they're there.
-6b. Reading plan: set a plan, see today's reading and questions, mark it done, and come back the next day (the owner chose to put it right after saving, October 25, 2026). Check: set a plan for a book you're reading and use it for a few days.
+6b. Reading plan: set a plan, see today's reading and questions, mark it done, and come back the next day (the owner chose to put it right after saving, October 25, 2026). Moved up and built October 25, 2026, at the owner's request (pull request 43): a start screen ("Prepare a study" or "Today's reading"); choose a book, 1 to 3 chapters a day and a start date; "Reading 3 of 28: Matthew 3" with three Swedish-method questions; "Done for today"; "Read the next one now"; missed days wait; saved on the phone. AI questions for each reading come next (AI-PLAN.md, step E). Check: set a plan for a book you're reading and use it for a few days.
 7. A page that prints cleanly.
 
 ## Open questions (ask one at a time)

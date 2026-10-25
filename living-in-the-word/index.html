@@ -17,8 +17,8 @@
 
   <!-- The app's own look: Moon jar colors, big buttons.
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=2">
-  <script src="app.js?v=2" defer></script>
+  <link rel="stylesheet" href="style.css?v=3">
+  <script src="app.js?v=3" defer></script>
 </head>
 <body>
 
@@ -27,10 +27,20 @@
     <!-- Each <section class="screen"> is one screen. app.js shows one at a time.
          Edit the words right here. The questions themselves are at the top of app.js. -->
 
+    <!-- The start: a study for the group, or today's reading -->
+    <section class="screen active" id="home">
+      <h1 tabindex="-1">Living in the Word</h1>
+      <p class="intro">Prepare questions for your small group, or keep a daily reading plan.</p>
+      <button type="button" class="primary" data-action="study">Prepare a study</button>
+      <button type="button" class="outline" data-action="reading">Today’s reading</button>
+      <!-- app.js fills this in, like "Matthew 3. Reading 3 of 28." -->
+      <p class="note plan-status"></p>
+      <noscript><p class="note">This app needs JavaScript turned on in your browser.</p></noscript>
+    </section>
+
     <!-- 1. Which passage? -->
-    <section class="screen active" id="passage">
-      <h1>Living in the Word</h1>
-      <p class="intro">Turn a Bible passage into questions for your small group.</p>
+    <section class="screen" id="passage">
+      <p class="label">Prepare a study</p>
       <form>
         <h2><label for="passage-text">Which passage?</label></h2>
         <input id="passage-text" type="text" maxlength="80" autocomplete="off" autocapitalize="words">
@@ -39,7 +49,7 @@
         <button type="submit" class="primary">Next</button>
       </form>
       <p class="note">Nothing you type is sent anywhere, unless you tap “Suggest questions” later.</p>
-      <noscript><p class="note">This app needs JavaScript turned on in your browser.</p></noscript>
+      <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
     <!-- 2. Choose a way to study it. Discovery Bible Study is already selected. -->
@@ -108,6 +118,56 @@
       <button type="button" class="quiet" data-action="reset">Start these questions over</button>
       <p class="note">Your changes stay while this page is open. Nothing is shared. “Suggest questions” sends only the passage name and the method to the AI helper.</p>
       <button type="button" class="quiet back" data-action="back">Back</button>
+    </section>
+
+    <!-- Reading plan: set it up once. Chapter counts are at the top of the reading plan part of app.js. -->
+    <section class="screen" id="plan-setup">
+      <p class="label">Reading plan</p>
+      <h2 tabindex="-1">Set up a reading plan</h2>
+      <form>
+        <label class="field-label" for="plan-book">Book</label>
+        <select id="plan-book"></select>
+
+        <fieldset class="pace">
+          <legend class="field-label">Chapters a day</legend>
+          <label><input type="radio" name="pace" value="1" checked> 1</label>
+          <label><input type="radio" name="pace" value="2"> 2</label>
+          <label><input type="radio" name="pace" value="3"> 3</label>
+        </fieldset>
+
+        <label class="field-label" for="plan-start">Start</label>
+        <input id="plan-start" type="date">
+
+        <!-- app.js fills this in, like "28 readings. If you read every day, you’ll finish Sat, Nov 28." -->
+        <p class="plan-summary"></p>
+        <button type="submit" class="primary">Start the plan</button>
+      </form>
+      <p class="note">Saved only on this phone, in this browser. A missed day just waits for you.</p>
+      <button type="button" class="quiet back" data-action="back">Back</button>
+    </section>
+
+    <!-- Reading plan: today's reading, with questions to think about -->
+    <section class="screen" id="today">
+      <p class="label reading-count"></p>
+      <h2 class="reading-name" tabindex="-1"></h2>
+      <p class="hint">Read it in your own Bible.</p>
+      <p class="note reading-early" hidden></p>
+
+      <p class="label reflect-label">To think about</p>
+      <ol class="reflect-list"></ol>
+
+      <button type="button" class="primary" data-action="done-reading">Done for today</button>
+      <button type="button" class="quiet" data-action="end-plan">End this plan</button>
+      <button type="button" class="quiet back" data-action="back">Back</button>
+    </section>
+
+    <!-- Reading plan: after "Done for today", or the whole book finished -->
+    <section class="screen" id="reading-done">
+      <h2 class="done-title" tabindex="-1"></h2>
+      <p class="done-next"></p>
+      <button type="button" class="outline next-now" data-action="read-ahead">Read the next one now</button>
+      <button type="button" class="outline new-plan" data-action="new-plan" hidden>Start a new plan</button>
+      <button type="button" class="quiet" data-action="home">Back to the start</button>
     </section>
 
     <!-- The AI helper's passcode, asked once and saved on this phone -->
