@@ -124,14 +124,6 @@ document.querySelector('#smaller form').addEventListener('submit', (event) => {
   event.preventDefault();
   const text = readBox(event.target);
   if (!text) return;
-  document.getElementById('step-smaller').value = text;
-  show('even-smaller');
-});
-
-document.querySelector('#even-smaller form').addEventListener('submit', (event) => {
-  event.preventDefault();
-  const text = readBox(event.target);
-  if (!text) return;
   current = { text };
   fill('.step-text', text);
   show('before');

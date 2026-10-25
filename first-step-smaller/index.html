@@ -18,7 +18,7 @@
   <!-- The app's own look: Moon jar colors, big buttons.
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
   <link rel="stylesheet" href="style.css?v=2">
-  <script src="app.js?v=2" defer></script>
+  <script src="app.js?v=3" defer></script>
 </head>
 <body>
 
@@ -74,19 +74,7 @@
       <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
-    <!-- 3. Even smaller -->
-    <section class="screen" id="even-smaller">
-      <form>
-        <h2><label for="step-smaller">Could it be even smaller?</label></h2>
-        <p>If it still feels big, cut it in half. If it feels doable, keep it.</p>
-        <input id="step-smaller" type="text" maxlength="120" autocomplete="off">
-        <p class="gentle-error" hidden>Type a few words first.</p>
-        <button type="submit" class="primary">This is small enough</button>
-      </form>
-      <button type="button" class="quiet back" data-action="back">Back</button>
-    </section>
-
-    <!-- 4. How heavy, before -->
+    <!-- 3. How heavy, before -->
     <section class="screen" id="before">
       <p class="label">Your step</p>
       <p class="step-text"></p>
@@ -102,7 +90,7 @@
       <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
-    <!-- 5. The step, alone -->
+    <!-- 4. The step, alone -->
     <section class="screen" id="do-it">
       <p class="label">Your step</p>
       <h2 class="big-step step-text" tabindex="-1"></h2>
@@ -110,7 +98,7 @@
       <button type="button" class="quiet" data-action="not-now">Not now</button>
     </section>
 
-    <!-- 6. How heavy, after -->
+    <!-- 5. How heavy, after -->
     <section class="screen" id="after">
       <h2 tabindex="-1">How was it, really?</h2>
       <div class="scale" data-rating="after">
@@ -123,7 +111,7 @@
       <p class="scale-ends" aria-hidden="true"><span>Light</span><span>Very heavy</span></p>
     </section>
 
-    <!-- 7. Felt vs. was -->
+    <!-- 6. Felt vs. was -->
     <section class="screen" id="result">
       <h2 class="result-line" tabindex="-1"></h2>
       <p class="result-kind"></p>
@@ -132,7 +120,7 @@
       <button type="button" class="quiet" data-action="stop">Stop here for now</button>
     </section>
 
-    <!-- 8. Finished: the arc of the whole task -->
+    <!-- 7. Finished: the arc of the whole task -->
     <section class="screen" id="finished">
       <p class="label">Finished</p>
       <h2 class="task-name" tabindex="-1"></h2>
@@ -141,7 +129,7 @@
       <button type="button" class="primary" data-action="restart">Start something new</button>
     </section>
 
-    <!-- 9. Not now, or stop for now: no guilt -->
+    <!-- 8. Not now, or stop for now: no guilt -->
     <section class="screen" id="later">
       <h2 tabindex="-1">That’s fine. It’ll wait for you.</h2>
       <p>Come back to it when you’re ready.</p>
