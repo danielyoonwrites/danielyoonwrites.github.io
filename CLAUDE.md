@@ -27,6 +27,7 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
 - One shared stylesheet: `style.css`. Pages link it as `style.css?v=2`: raise the number on every page whenever `style.css` changes, so phones don't keep an old copy (GitHub Pages lets browsers keep files for 10 minutes). The same for `tabs.js?v=1`.
 - `quiet-room/` is a separate web app with its own `CLAUDE.md` and `SPEC.md`.
 - `fewer-spam-calls/` is a one-page guide with its own `CLAUDE.md` and `SPEC.md`.
+- `first-step-smaller/` is a little app (planned October 2026) with its own `CLAUDE.md` and `SPEC.md`.
 
 ## Publishing and Latest posts
 
