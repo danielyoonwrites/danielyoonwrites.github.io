@@ -63,7 +63,10 @@ Earlier sources (search results, October 25, 2026; the guides themselves weren't
 - Scripture Engagement, The Swedish Method: https://scripture-engagement.org/?p=545
 - Desiring God, Six Questions to Ask When Studying the Bible in a Group: https://www.desiringgod.org/articles/six-questions-to-ask-when-studying-the-bible-in-a-group
 
-## Stage 2: questions written for the specific passage (planned later)
+## Stage 2: questions written for the specific passage (next, see AI-PLAN.md)
+
+Moved up on October 25, 2026: after trying step 2, the owner pointed out that questions that are the same for every passage could just be printed once. Questions written for the passage are what make the app worth using. The full plan, with what was decided and checked, is in `AI-PLAN.md`.
+
 
 - A "Suggest questions for this passage" button. Suggestions show as drafts the owner reviews and edits; they're never shared on their own.
 - New skill: a small server, so the AI key stays secret (anything in a public website's code can be seen by anyone). Each use costs money, so it needs a spending limit.
@@ -110,12 +113,12 @@ Earlier sources (search results, October 25, 2026; the guides themselves weren't
 
 1. This spec and the folder's `CLAUDE.md`. Check: read it.
 2. Type a passage, choose a method, see and edit the questions. Built October 25, 2026 (not saved yet; edits last while the page is open). Check: try it with a real passage for your group, and fix any wording.
-3. Share and Copy. Check: share a study to yourself in KakaoTalk.
-4. Lead the study, one question at a time. Check: lead from your phone or a laptop.
-5. Recent studies saved on the phone. Check: close the browser, reopen it, they're there.
-5b. Reading plan: set a plan, see today's reading and questions, mark it done, and come back the next day (the owner chose to put it right after saving, October 25, 2026). Check: set a plan for a book you're reading and use it for a few days.
-6. A page that prints cleanly.
-7. Plan stage 2, the AI helper (its own plan, reviewed before building).
+3. The AI helper, moved up on October 25, 2026. Its own steps, A to D, are in `AI-PLAN.md`: the plan, sign-ups, the server with a side-by-side model test, then the "Suggest questions" button.
+4. Share and Copy. Check: share a study to yourself in KakaoTalk.
+5. Lead the study, one question at a time. Check: lead from your phone or a laptop.
+6. Recent studies saved on the phone. Check: close the browser, reopen it, they're there.
+6b. Reading plan: set a plan, see today's reading and questions, mark it done, and come back the next day (the owner chose to put it right after saving, October 25, 2026). Check: set a plan for a book you're reading and use it for a few days.
+7. A page that prints cleanly.
 
 ## Open questions (ask one at a time)
 
