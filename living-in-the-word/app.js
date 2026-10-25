@@ -177,6 +177,7 @@ document.querySelector('#method form').addEventListener('submit', (event) => {
   fill('.passage-name', passage);
   fill('.method-tip', METHODS[method].tip);
   setStatus('');
+  setShareStatus('');
   document.querySelector('.test-cost').hidden = true;
   show('questions');
   showQuestions();   // after the screen shows, so each box can measure its words
@@ -215,6 +216,43 @@ const actions = {
     showQuestions();
   },
 
+  // Sends the study through the phone's share menu, for example to a KakaoTalk group chat
+  async share() {
+    setShareStatus('');
+    const text = studyText();
+    if (!text) return;
+    try {
+      await navigator.share({ text });
+      setShareStatus('');
+    } catch (error) {
+      // Closing the share menu without choosing an app isn't a problem
+      if (error.name !== 'AbortError') setShareStatus('Sharing didn’t work here. Try Copy instead.');
+    }
+  },
+
+  // Copies the study, to paste anywhere
+  async copy() {
+    const text = studyText();
+    if (!text) return;
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(text);
+      copied = true;
+    } catch (error) {
+      copied = copyTheOldWay(text);
+    }
+    const box = document.querySelector('.share-text');
+    box.hidden = copied;
+    if (copied) {
+      setShareStatus('Copied. Paste it into your group chat.');
+    } else {
+      // Some apps' built-in browsers block copying: show the text to select by hand
+      box.value = text;
+      fitHeight(box);
+      setShareStatus('Copying didn’t work here. Press and hold the text below to select it.');
+    }
+  },
+
   // Asks the AI helper for questions written for this passage
   suggest() {
     if (asking) return;
@@ -231,6 +269,52 @@ const actions = {
     requestSuggestions();
   },
 };
+
+// ---------- Share and Copy ----------
+
+// The study as plain text: the passage, the method, then the numbered questions.
+// The note for the leader is never included. Empty questions are left out.
+function studyText() {
+  const questions = drafts[method].map((question) => question.trim()).filter(Boolean);
+  if (!questions.length) {
+    setShareStatus('Add a question first.');
+    return '';
+  }
+  return passage + '\n' + METHODS[method].name + '\n\n' +
+    questions.map((question, index) => (index + 1) + '. ' + question).join('\n\n');
+}
+
+function setShareStatus(text) {
+  const status = document.querySelector('.share-status');
+  status.textContent = text;
+  status.hidden = !text;
+  if (!text) document.querySelector('.share-text').hidden = true;
+}
+
+// For browsers without the newer copy feature
+function copyTheOldWay(text) {
+  const box = document.createElement('textarea');
+  box.value = text;
+  box.setAttribute('readonly', '');
+  box.style.position = 'fixed';
+  box.style.opacity = '0';
+  document.body.append(box);
+  box.select();
+  let copied = false;
+  try {
+    copied = document.execCommand('copy');
+  } catch (error) {
+    copied = false;
+  }
+  box.remove();
+  return copied;
+}
+
+// Phones that can't share (and most computers) get Copy only
+if (!navigator.share) {
+  document.querySelector('[data-action="share"]').hidden = true;
+  document.querySelector('.share-pair').classList.add('single');
+}
 
 // True if the questions on screen aren't the method's general ones anymore
 function changedQuestions() {

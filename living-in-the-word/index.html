@@ -17,8 +17,8 @@
 
   <!-- The app's own look: Moon jar colors, big buttons.
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=4">
-  <script src="app.js?v=4" defer></script>
+  <link rel="stylesheet" href="style.css?v=5">
+  <script src="app.js?v=5" defer></script>
 </head>
 <body>
 
@@ -115,8 +115,18 @@
       <p class="no-steps no-questions" hidden>No questions yet.</p>
 
       <button type="button" class="outline" data-action="add">Add a question</button>
+
+      <!-- Share or copy the passage and questions as plain text. The note for the leader is never included. -->
+      <div class="share-pair">
+        <button type="button" class="primary" data-action="share">Share</button>
+        <button type="button" class="outline" data-action="copy">Copy</button>
+      </div>
+      <p class="note share-status" role="status" hidden></p>
+      <!-- Shown only if copying doesn't work in this browser: the text, to select by hand -->
+      <textarea class="share-text" readonly hidden aria-label="The study, to copy by hand"></textarea>
+
       <button type="button" class="quiet" data-action="reset">Start these questions over</button>
-      <p class="note">Your changes stay while this page is open. Nothing is shared. “Suggest questions” sends only the passage name and the method to the AI helper.</p>
+      <p class="note">Your changes stay while this page is open. Nothing is shared until you tap Share or Copy. “Suggest questions” sends only the passage name and the method to the AI helper.</p>
       <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
