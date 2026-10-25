@@ -17,8 +17,8 @@
 
   <!-- The app's own look: Moon jar colors, big buttons.
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=1">
-  <script src="app.js?v=1" defer></script>
+  <link rel="stylesheet" href="style.css?v=2">
+  <script src="app.js?v=2" defer></script>
 </head>
 <body>
 
@@ -38,7 +38,7 @@
         <p class="gentle-error" hidden>Type a passage first.</p>
         <button type="submit" class="primary">Next</button>
       </form>
-      <p class="note">Nothing you type is sent anywhere.</p>
+      <p class="note">Nothing you type is sent anywhere, unless you tap “Suggest questions” later.</p>
       <noscript><p class="note">This app needs JavaScript turned on in your browser.</p></noscript>
     </section>
 
@@ -80,12 +80,47 @@
       <p class="hint">Tap a question to change its words.</p>
       <p class="method-tip"></p>
 
+      <!-- The AI helper: questions written for this passage (see AI-PLAN.md) -->
+      <button type="button" class="primary suggest" data-action="suggest">Suggest questions for this passage</button>
+
+      <!-- Only on the test link (add ?test to the address): choose the model and see what each answer cost -->
+      <fieldset class="test-only" hidden>
+        <legend class="label">Model (test only)</legend>
+        <label><input type="radio" name="model" value="claude-opus-5-5" checked> Opus 5.5</label>
+        <label><input type="radio" name="model" value="claude-sonnet-5-5"> Sonnet 5.5</label>
+        <label><input type="radio" name="model" value="claude-haiku-5-5"> Haiku 5.5</label>
+      </fieldset>
+
+      <p class="note suggest-status" role="status" hidden></p>
+      <p class="note test-cost" hidden></p>
+
+      <!-- The AI's note for the leader (one fact of background, for example). Never shared. -->
+      <div class="leader-note" hidden>
+        <p class="label">For the leader</p>
+        <p class="leader-note-text"></p>
+        <p class="note">Not shared with the group.</p>
+      </div>
+
       <ol class="question-list"></ol>
       <p class="no-steps no-questions" hidden>No questions yet.</p>
 
       <button type="button" class="outline" data-action="add">Add a question</button>
       <button type="button" class="quiet" data-action="reset">Start these questions over</button>
-      <p class="note">Your changes stay while this page is open. Nothing is shared or sent anywhere.</p>
+      <p class="note">Your changes stay while this page is open. Nothing is shared. “Suggest questions” sends only the passage name and the method to the AI helper.</p>
+      <button type="button" class="quiet back" data-action="back">Back</button>
+    </section>
+
+    <!-- The AI helper's passcode, asked once and saved on this phone -->
+    <section class="screen" id="passcode">
+      <form>
+        <p class="label">AI helper</p>
+        <h2><label for="passcode-text">Passcode</label></h2>
+        <input id="passcode-text" type="password" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <p class="hint">Type it once. It’s saved only on this phone, in this browser.</p>
+        <p class="gentle-error empty-passcode" hidden>Type the passcode first.</p>
+        <p class="gentle-error wrong-passcode" hidden>That passcode didn’t work. Try again.</p>
+        <button type="submit" class="primary">Save and suggest</button>
+      </form>
       <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 

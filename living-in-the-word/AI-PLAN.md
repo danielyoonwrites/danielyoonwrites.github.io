@@ -56,6 +56,18 @@ The AI doesn't get the Bible text (stage 1 shows no Bible text, and translations
 
 The owner reviews every question, as always.
 
+## What it should cost (Claude's estimate, October 25, 2026)
+
+Hosting is free (GitHub Pages, and Cloudflare's free plan). The AI is the only cost. Assuming about 2,400 tokens in and 1,400 out per set of questions (unverified until the test, which shows the real numbers):
+
+| | One set of questions | Small group (about 8 sets a month) | Plus a daily reading plan (about 30 more) |
+|---|---|---|---|
+| Opus 5.5 | about 3.7 cents | about 30 cents a month | about $1.40 a month |
+| Sonnet 5.5 | about 1.9 cents | about 15 cents | about 70 cents |
+| Haiku 5.5 | about 0.1 cent | about 1 cent | about 4 cents |
+
+The monthly spending limit ($5 recommended) is the most it can ever cost in a month. Each day's reading plan questions should be saved on the phone, so opening a day again costs nothing.
+
 ## Keeping the bill safe
 
 - The passcode: without it the server refuses before the AI is asked, so it costs nothing.
@@ -73,14 +85,14 @@ The owner reviews every question, as always.
 A. This plan. Check: read it.
 B. Sign-ups, no pull request: the Claude Console (credit, spending limit, key) and Cloudflare, one step at a time, after opening both sites' current help pages. Check: the key and passcode are saved in Cloudflare and nowhere else.
 C1. The server code, `server/worker.js`, with the draft guidance, tested against a stand-in for the AI (the real AI needs the key from step B). Check: read the guidance at the top.
-C2. In the app, a "Suggest questions for this passage" button with the passcode, the note for the leader above the questions, plus a test link (like `?test`) that shows a model choice and the cost of each answer. Deploy the server (after step B), then try the same passage with all three models. Check: pick the model. If answers stop at the 4,000-token cap (the longer guidance may mean more thinking), raise it a little.
+C2. Built October 25, 2026, before the sign-ups (pull request 42); the server's address (`SERVER_URL` at the top of the AI helper part of `app.js`) is filled in after Part 2 of step B. In the app, a "Suggest questions for this passage" button with the passcode, the note for the leader above the questions, plus a test link (like `?test`) that shows a model choice and the cost of each answer. Deploy the server (after step B), then try the same passage with all three models. Check: pick the model. If answers stop at the 4,000-token cap (the longer guidance may mean more thinking), raise it a little.
 D. The chosen model becomes the only one, and the test choice comes out. Check: try it with this week's passage.
 
 Then the rest of `SPEC.md`'s build plan: Share and Copy, Lead the study, saving, the reading plan, printing.
 
 ## Tech notes
 
-- The server calls the Claude API with plain `fetch` (raw HTTP), with the `anthropic-version: 2026-10-21` header. Anthropic's own SDK needs npm, which this website doesn't use.
+- The server calls the Claude API with plain `fetch` (raw HTTP), with the `anthropic-version: 2026-10-21` header, and the key as `Authorization: Bearer` (https://platform.claude.com/docs/en/manage-claude/authentication; the older `x-api-key` header is "legacy"). The key must be scoped to one workspace (the Default Workspace) when it's created; otherwise every request also needs an `anthropic-workspace-id` header. Anthropic's own SDK needs npm, which this website doesn't use.
 - Effort is `medium` for all three models in the test, so the comparison is fair. Opus and Sonnet use Anthropic's automatic fallback (`fallbacks: "default"`): if a safety check declines a request, Anthropic retries it on another model. Haiku has no fallback.
 - The answer comes back as JSON (a list of questions), using the API's structured outputs.
 - The server answers only to danielyoonwrites.github.io (and to a local test address during building), and only with the right passcode.

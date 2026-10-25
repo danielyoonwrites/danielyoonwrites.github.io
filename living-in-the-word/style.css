@@ -132,6 +132,7 @@ h2 {
 
 /* ---------- Typing boxes ---------- */
 input[type="text"],
+input[type="password"],
 textarea {
   box-sizing: border-box;
   width: 100%;
@@ -281,6 +282,62 @@ legend {
   margin: 0 0 1rem;
   color: var(--stone);
   font-style: italic;
+}
+
+
+/* ---------- The AI helper ---------- */
+
+/* "Suggest questions for this passage": the main button, above the questions */
+.suggest {
+  margin: 0 0 0.5rem;
+}
+
+/* While the AI writes, the button waits */
+.suggest:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.suggest-status {
+  margin: 0.5rem 0 1rem;
+  font-style: italic;
+}
+
+/* Test link only: the three models in a row */
+.test-only {
+  margin: 1rem 0 0;
+}
+
+.test-only label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.75rem;      /* tall enough to tap easily */
+  margin-right: 1rem;
+  font-size: 0.875rem;
+}
+
+.test-only input {
+  accent-color: var(--celadon);
+}
+
+.test-cost {
+  margin: 0 0 1rem;
+}
+
+/* The note for the leader: set apart by a thin celadon line on the left */
+.leader-note {
+  margin: 0 0 1.5rem;
+  padding: 0.25rem 0 0.25rem 1rem;
+  border-left: 2px solid var(--celadon);
+}
+
+.leader-note-text {
+  margin: 0;
+}
+
+.leader-note .note {
+  margin-top: 0.25rem;
 }
 
 
