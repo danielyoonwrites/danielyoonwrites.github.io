@@ -18,7 +18,7 @@ A little app for facing a task or anything you've been putting off, one small st
 One thing per screen, with big buttons.
 
 1. "What have you been putting off?" You type the big task.
-2. Make it smaller. The app asks simple questions to shrink it to a step of about 2 minutes: "What's one small thing you could do first?" (chosen October 25, 2026, over "What's the very first thing your hands would do?", which sounded odd) then "Could it be even smaller?" You type the step yourself. Short examples sit under the box, and "Need help?" opens short tips (see below).
+2. Make it smaller: "What's one small thing you could do first?" (chosen October 25, 2026, over "What's the very first thing your hands would do?", which sounded odd). You type a step of about 2 minutes yourself. Short examples sit under the box, and "Need help?" opens short tips (see below). The second question, "Could it be even smaller?", was removed October 25, 2026: the owner found it added friction.
 3. "How heavy does this step feel?" 1 (light) to 5 (very heavy).
 4. "Your step" shows alone on the screen, with "Done" and "Not now."
 5. After "Done": "How was it, really?" 1 to 5.
@@ -89,7 +89,7 @@ Short, with no studies named on the page (the owner's choice, October 25, 2026).
 ## Build plan (one pull request each, each with a check the owner does)
 
 1. This spec and the folder's `CLAUDE.md`. Check: read it.
-2. The screens, nothing saved yet, including the arc for the task in progress. Check: go through it on your phone with something real. (Built October 25, 2026; new wording for the first question and "Need help?" tips added the same day.)
+2. The screens, nothing saved yet, including the arc for the task in progress. Check: go through it on your phone with something real. (Built October 25, 2026; new wording for the first question and "Need help?" tips added the same day, and the "Could it be even smaller?" screen removed.)
 3. Saving on the phone, the Waiting list, and the history with an arc for each task. Check: close the browser, reopen it, everything's there.
 4. Save a backup, restore it, delete everything. Check: back up, delete, restore.
 5. Polish, then use it daily for a couple of weeks and note what annoys you.
