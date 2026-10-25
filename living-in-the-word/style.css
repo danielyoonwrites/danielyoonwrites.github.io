@@ -234,7 +234,7 @@ legend {
 }
 
 .choice input {
-  grid-row: 1 / span 2;
+  grid-row: 1 / span 3;
   width: 1.25rem;
   height: 1.25rem;
   margin: 0.15rem 0 0;
@@ -243,6 +243,14 @@ legend {
 
 .choice-name {
   display: block;
+}
+
+/* The method's usual name, like "Discovery Bible Study", in small print */
+.choice-original {
+  display: block;
+  font-size: 0.8125rem;
+  font-style: italic;
+  color: var(--stone);
 }
 
 .choice-line {

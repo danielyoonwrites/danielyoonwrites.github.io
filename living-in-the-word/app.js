@@ -11,7 +11,8 @@
 // "tip" is a short line shown above the questions.
 const METHODS = {
   dbs: {
-    name: 'Discovery Bible Study',
+    name: 'Discover',
+    original: 'Discovery Bible Study',   // the method's usual name, shown in small print and in shared text
     tip: 'Read the passage aloud, maybe twice, then go through the questions together.',
     questions: [
       'Can someone retell the passage in their own words?',
@@ -22,7 +23,8 @@ const METHODS = {
     ],
   },
   oia: {
-    name: 'Observe, Interpret, Apply',
+    name: 'Look, think, live',
+    original: 'Observe, Interpret, Apply',
     tip: 'Read the passage aloud. Stay with what it says before moving to what it means.',
     questions: [
       'What does the passage say? Notice who, what, when and where, and any words that repeat.',
@@ -31,7 +33,8 @@ const METHODS = {
     ],
   },
   swedish: {
-    name: 'The Swedish method',
+    name: 'Light, question, arrow',
+    original: 'The Swedish method',
     tip: 'Read the passage aloud. Give everyone a few quiet minutes with it, then share one of each.',
     questions: [
       'Light bulb: what stands out or shines for you?',
@@ -272,7 +275,8 @@ const actions = {
 
 // ---------- Share and Copy ----------
 
-// The study as plain text: the passage, the method, then the numbered questions.
+// The study as plain text: the passage, the method (like "Discover (Discovery Bible Study)"),
+// then the numbered questions.
 // The note for the leader is never included. Empty questions are left out.
 function studyText() {
   const questions = drafts[method].map((question) => question.trim()).filter(Boolean);
@@ -280,7 +284,7 @@ function studyText() {
     setShareStatus('Add a question first.');
     return '';
   }
-  return passage + '\n' + METHODS[method].name + '\n\n' +
+  return passage + '\n' + METHODS[method].name + ' (' + METHODS[method].original + ')\n\n' +
     questions.map((question, index) => (index + 1) + '. ' + question).join('\n\n');
 }
 
