@@ -20,8 +20,8 @@
 
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=12">
-  <script src="app.js?v=14" defer></script>
+  <link rel="stylesheet" href="style.css?v=13">
+  <script src="app.js?v=15" defer></script>
 </head>
 <body>
 
@@ -49,6 +49,12 @@
         <span class="row-text">Set up a Bible reading plan (like one chapter of Matthew a day), and I will generate five questions for the chapter you read today.</span>
         <!-- Only once a plan is set up: app.js fills this in, like "Next: Matthew 3. Reading 3 of 28." -->
         <span class="row-status plan-status"></span>
+      </button>
+      <button type="button" class="row" data-action="saved">
+        <span class="row-number" aria-hidden="true">03</span>
+        <span class="row-title">Saved studies</span>
+        <!-- app.js fills this in, like "3 studies saved on this phone." -->
+        <span class="row-text saved-count"></span>
       </button>
       <noscript><p class="note">This app needs JavaScript turned on in your browser.</p></noscript>
     </section>
@@ -115,17 +121,34 @@
       <button type="button" class="outline" data-action="add">Add a question</button>
       <button type="button" class="quiet suggest" data-action="suggest">Write new questions</button>
 
-      <!-- Share or copy the passage and questions as plain text. The note for the leader is never included.
+      <!-- Save keeps the questions on this phone (see "Saved studies" in SPEC.md). Share or Copy
+           sends the passage and questions as plain text; the note for the leader is never included.
            This bar stays at the bottom of the screen while you scroll. -->
       <div class="share-pair">
-        <button type="button" class="primary" data-action="share">Share</button>
+        <button type="button" class="primary" data-action="save">Save</button>
+        <button type="button" class="outline" data-action="share">Share</button>
         <button type="button" class="outline" data-action="copy">Copy</button>
       </div>
       <p class="note share-status" role="status" hidden></p>
       <!-- Shown only if copying doesn't work in this browser: the text, to select by hand -->
       <textarea class="share-text" readonly hidden aria-label="The study, to copy by hand"></textarea>
 
-      <p class="note">Your changes stay while this page is open. Nothing is shared until you tap Share or Copy.</p>
+      <p class="note">Tap Save to keep these questions on this phone. Nothing is shared until you tap Share or Copy.</p>
+      <!-- Only for a saved study -->
+      <button type="button" class="quiet" data-action="unsave" hidden>Remove from saved studies</button>
+    </section>
+
+    <!-- Saved studies: app.js fills in the list, newest first -->
+    <section class="screen" id="saved">
+      <header class="top-bar">
+        <button type="button" class="back" data-action="back">Back</button>
+        <span class="wordmark">Living in the Word</span>
+      </header>
+      <p class="label">Kept on this phone</p>
+      <h2 tabindex="-1">Saved studies</h2>
+      <ul class="saved-list" role="list"></ul>
+      <p class="note no-saved" hidden>Nothing saved yet. Prepare a study, then tap Save under its questions to keep them here.</p>
+      <p class="note">Saved only on this phone, in this browser. Clearing the browser’s data clears them too.</p>
     </section>
 
     <!-- Reading plan: set it up once. Chapter counts are at the top of the reading plan part of app.js. -->

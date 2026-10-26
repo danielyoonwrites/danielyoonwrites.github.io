@@ -21,7 +21,7 @@ One thing per screen, with big buttons.
 3. The questions appear, with the passage at the top. Edit any question, remove one, or add your own. "Write new questions" asks the AI again. Nothing is shared until the owner chooses to.
 4. Share (the owner's first pick): "Share" sends the passage and questions as plain text through the phone's share menu, for example to a KakaoTalk group chat. "Copy" is there too, in case sharing doesn't work.
 5. Lead (the owner's other pick): "Lead the study" shows one question at a time in big text, with Next and Back, for leading in the room or on a screen.
-6. Recent studies are kept on the phone, so a study can be reused or shared again.
+6. Saved studies: tap Save to keep a study's questions on the phone, to use, change or share again (built October 26, 2026; see "Saved studies").
 7. Later: a page that prints cleanly (the owner's "maybe also").
 8. Reading plan (the owner's idea, October 25, 2026): set a plan once, like "Matthew, one chapter a day, starting Nov 1." Each day the app shows today's reading, like "Today: Matthew 3," with a few questions to meditate on and "Done for today." No streaks and no guilt: a missed day just waits, the same kindness rule as First step smaller. In stage 1 the questions follow a method, so they're the same each day (a method made for personal reflection, such as lectio divina, could fit; check sources before using it). In stage 2, AI writes questions for that day's chapter, which the owner can read before meditating.
 
@@ -63,6 +63,16 @@ Moved up on October 25, 2026: after trying step 2, the owner pointed out that qu
 - What's sent is the passage name and whether it's for a group study or the reading plan, not anything personal.
 - AI can misquote Scripture or add interpretations, which is why the owner reviews everything.
 - Which AI, where the server runs and the cost limits are decided in a separate plan before stage 2, after checking current docs. Claude effort for stage 2: Extra high (the owner asked; Claude Code docs describe it as "deeper reasoning at higher token spend").
+
+## Saved studies (October 26, 2026)
+
+The owner asked to save questions for a passage and have the app remember them, like an app on a phone.
+
+- Save, next to Share and Copy (the bar at the bottom of the questions screen), keeps the passage, its questions (without empty ones) and the note for the leader on this phone. The button then says "Saved"; after any change it says "Save changes."
+- One saved study per passage: saving again keeps the newest. "John 15" and "john 15" count as the same passage.
+- "Saved studies" on the start screen (row 03) lists them, newest first, with how many questions and the date. Tap one to open it, change it, share it or write new questions. "Remove from saved studies" (under the questions) takes it off the list, after asking.
+- Typing a saved passage opens its saved questions instead of asking the AI, so it costs nothing and works even when the AI can't be reached.
+- Kept in the browser's storage under `living-in-the-word` (`studies`), only on this phone and in this browser. If the browser won't save (a private window), the app says so. The Bible text is never saved.
 
 ## Words on the start screen (the owner's, October 26, 2026; use them exactly)
 
@@ -155,7 +165,9 @@ Other options looked at the same day: the NIV is free to show through API.Bible'
 3. The AI helper, moved up on October 25, 2026. Its own steps, A to D, are in `AI-PLAN.md`: the plan, sign-ups, the server with a side-by-side model test, then the "Suggest questions" button.
 4. Share and Copy. Built October 25, 2026 (pull request 45): the passage and the numbered questions as plain text (the method's name too, until methods were removed), never the note for the leader; empty questions are left out. Share uses the phone's share menu (`navigator.share`) and is hidden where it isn't available (most computers); Copy uses the clipboard, then an older way, and if a browser blocks both it shows the text to select by hand. Not yet checked in KakaoTalk's built-in browser (Claude can't open KakaoTalk). Check: share a study to yourself in KakaoTalk, from Chrome and from inside KakaoTalk.
 5. Lead the study, one question at a time. Check: lead from your phone or a laptop.
-6. Recent studies saved on the phone. Check: close the browser, reopen it, they're there.
+6. Saved studies (the owner's request, October 26, 2026, pull request 57): a Save button with the questions and a "Saved studies" list on the start screen. Check: save a study, close the browser, reopen it, it's there.
+6c. Works without reception (next, the owner's request): an app you add to your home screen, with a copy kept on the phone so it opens offline and saved studies can be read anywhere. Writing new questions still needs internet. Needs an icon the owner approves. Before building, check WebKit's own page on Safari clearing a site's saved data: search results (unverified, mostly 2020) say Safari deletes a site's localStorage after 7 days of Safari use without visiting it, while home screen apps keep their own count.
+6d. A passage picker (the owner's request): Old or New Testament, then the books, then the chapters, then the whole chapter or a range of verses; the typing box stays. Needs the number of verses in each chapter, from two datasets that agree (a few chapters are numbered differently between translations; check those).
 6b. Reading plan: set a plan, see today's reading and questions, mark it done, and come back the next day (the owner chose to put it right after saving, October 25, 2026). Moved up and built October 25, 2026, at the owner's request (pull request 43): a start screen ("Prepare a study" or "Today's reading"); choose a book, 1 to 3 chapters a day and a start date; "Reading 3 of 28: Matthew 3" with three Swedish-method questions; "Done for today"; "Read the next one now"; missed days wait; saved on the phone. AI questions for each reading came next (AI-PLAN.md, step E); since October 26, 2026, the AI writes 4 and there are no styles to choose. Check: set a plan for a book you're reading and use it for a few days.
 7. A page that prints cleanly.
 

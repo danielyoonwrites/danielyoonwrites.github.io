@@ -688,14 +688,15 @@ select {
 
 /* ---------- Share and Copy ---------- */
 
-/* Share and Copy side by side, in a bar that stays at the bottom of the screen
-   while you scroll. Copy alone where sharing isn't available (most computers). */
+/* Save, Share and Copy side by side, in a bar that stays at the bottom of the screen
+   while you scroll. Save is a little wider, for "Save changes". Share is left out where
+   sharing isn't available (most computers). */
 .share-pair {
   position: sticky;
   bottom: 0;
   z-index: 2;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.6fr 1fr 1fr;
   gap: 0.625rem;
   margin: 2rem -1.5rem 0;      /* reaches the screen's edges */
   padding: 0.875rem 1.5rem;
@@ -704,12 +705,20 @@ select {
 }
 
 .share-pair.single {
-  grid-template-columns: 1fr;
+  grid-template-columns: 1.6fr 1fr;
 }
 
 .share-pair .primary,
 .share-pair .outline {
   margin-top: 0;
+  padding: 1rem 0.25rem;
+  letter-spacing: 0.14em;
+}
+
+/* "Saved": nothing new to save, so the button turns into an outline */
+.share-pair .primary.is-saved {
+  background: transparent;
+  color: var(--ink);
 }
 
 /* While typing in a question, the bar steps aside so it can't cover the keyboard's box */
@@ -737,6 +746,28 @@ select {
   font-size: 1rem;
   line-height: 1.45;
   resize: none;
+}
+
+
+/* ---------- Saved studies ---------- */
+
+/* One row per saved study, with thin lines between them */
+.saved-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.saved-list .row {
+  border-bottom: none;
+}
+
+.saved-list li:last-child .row {
+  border-bottom: 1px solid var(--line);
+}
+
+.no-saved {
+  margin-top: 0;
 }
 
 
