@@ -36,27 +36,12 @@ Only one pull request at a time from the branch: wait for a merge before startin
 When Dan says "do the rest," Claude works through the build plan one pull request at a time, starting the next one as soon as the last merges.
 
 
-## Notion approval prompts (to fix)
+## Notion approval prompts
 
-- Notion updates still ask Dan for approval each time, which stalls the work. The fix is an allow list in the repository file `.claude/settings.json`. Claude can't create it (a safety check stops Claude from giving itself permissions), so Dan adds it on GitHub. He said he'll do it later. Steps, checked against GitHub's docs:
-  1. Open https://github.com/danielyoonwrites/danielyoonwrites.github.io and click **Add file**, then **Create new file**.
-  2. File name: `.claude/settings.json`
-  3. Paste:
-     ```json
-     {
-       "permissions": {
-         "allow": [
-           "mcp__Notion__notion-search",
-           "mcp__Notion__notion-fetch",
-           "mcp__Notion__notion-update-page",
-           "mcp__Notion__notion-create-pages",
-           "mcp__Notion__notion-memory-search"
-         ]
-       }
-     }
-     ```
-  4. **Commit changes...**, commit directly to **main**, **Commit changes**. It takes effect in the next session.
-- Until then: one Notion write per finished piece of work.
+- Dan added the allow list `.claude/settings.json` on GitHub on October 26, 2026 (it lets Claude search, read, update and create Notion pages without asking). Claude can't change that file (a safety check stops Claude from giving itself permissions); only Dan edits it.
+- It takes effect from the next session. The session that was running when he added it still asked each time, even in Auto mode: Auto skips most prompts, but Notion writes still asked.
+- If a new session still asks for Notion, check that the file is on main and the tool names in it match the ones in the popup.
+- Until it works: one Notion write per finished piece of work.
 
 
 ## Limits of Claude's cloud sessions, and the workarounds that worked
