@@ -2,7 +2,8 @@
 //
 // What it does: the app sends a passage name (like "John 4:1-26"), whether it's for
 // a group study or the reading plan, and the passcode. This server checks the passcode,
-// asks Claude (Anthropic's AI) for 5 questions about that passage, and sends them back.
+// checks that the passage really is a Bible passage, asks Claude (Anthropic's AI) for
+// 5 questions about it, and sends them back.
 // It can also send back the passage itself, from Crossway's free ESV API (see "The Bible text" below).
 //
 // Why a server: the website is public, so a key in the app could be copied.
@@ -128,6 +129,110 @@ const MAX_TOKENS = 4000;
 const ALLOWED_ORIGINS = ['https://danielyoonwrites.github.io', 'http://127.0.0.1:8765'];
 
 
+// ---------- Only Bible passages reach the AI ----------
+// Before anything costs money, the server checks that the passage looks like a Bible
+// passage: a book of the Bible, then chapter and verse numbers, like "John 4:1-26",
+// "1 Cor 13", "Psalm 23", "Matthew 5–7" or just "Jude". Anything else (a sentence,
+// a question, instructions for the AI) is turned away here, so the AI can't be used
+// for other things. The AI still gets the passage exactly as it was typed.
+
+// The 66 books and their chapters, Genesis to Revelation (the same checked list as BOOKS in app.js)
+const BOOKS = [
+  ['Genesis', 50], ['Exodus', 40], ['Leviticus', 27], ['Numbers', 36], ['Deuteronomy', 34],
+  ['Joshua', 24], ['Judges', 21], ['Ruth', 4], ['1 Samuel', 31], ['2 Samuel', 24],
+  ['1 Kings', 22], ['2 Kings', 25], ['1 Chronicles', 29], ['2 Chronicles', 36], ['Ezra', 10],
+  ['Nehemiah', 13], ['Esther', 10], ['Job', 42], ['Psalms', 150], ['Proverbs', 31],
+  ['Ecclesiastes', 12], ['Song of Solomon', 8], ['Isaiah', 66], ['Jeremiah', 52], ['Lamentations', 5],
+  ['Ezekiel', 48], ['Daniel', 12], ['Hosea', 14], ['Joel', 3], ['Amos', 9],
+  ['Obadiah', 1], ['Jonah', 4], ['Micah', 7], ['Nahum', 3], ['Habakkuk', 3],
+  ['Zephaniah', 3], ['Haggai', 2], ['Zechariah', 14], ['Malachi', 4],
+  ['Matthew', 28], ['Mark', 16], ['Luke', 24], ['John', 21], ['Acts', 28],
+  ['Romans', 16], ['1 Corinthians', 16], ['2 Corinthians', 13], ['Galatians', 6], ['Ephesians', 6],
+  ['Philippians', 4], ['Colossians', 4], ['1 Thessalonians', 5], ['2 Thessalonians', 3], ['1 Timothy', 6],
+  ['2 Timothy', 4], ['Titus', 3], ['Philemon', 1], ['Hebrews', 13], ['James', 5],
+  ['1 Peter', 5], ['2 Peter', 3], ['1 John', 5], ['2 John', 1], ['3 John', 1],
+  ['Jude', 1], ['Revelation', 22],
+];
+
+// Each book's name squeezed together for matching, like "1corinthians"
+const BOOK_KEYS = BOOKS.map(([name]) => name.toLowerCase().replace(/[^a-z0-9]/g, ''));
+
+// Short forms and other names that aren't the start of the book's name. (Any clear start
+// of a name, like "Gen", "Rom" or "1 Cor", works without being listed here.) Common short
+// forms from the SBL and Chicago style guides, checked through search results only
+// (October 26, 2026), plus a few names people use.
+const OTHER_NAMES = {
+  gn: 'genesis', lv: 'leviticus', nm: 'numbers', dt: 'deuteronomy',
+  jgs: 'judges', jdg: 'judges', jdgs: 'judges', sm: 'samuel', kgs: 'kings', jb: 'job',
+  pss: 'psalms', prv: 'proverbs', qoh: 'ecclesiastes', qoheleth: 'ecclesiastes',
+  sg: 'songofsolomon', songofsongs: 'songofsolomon', cant: 'songofsolomon', canticles: 'songofsolomon',
+  dn: 'daniel', jl: 'joel', hb: 'habakkuk', hg: 'haggai',
+  mt: 'matthew', mk: 'mark', mrk: 'mark', lk: 'luke', jn: 'john', jhn: 'john',
+  phil: 'philippians', phlm: 'philemon', phm: 'philemon', tm: 'timothy',
+  jas: 'james', pt: 'peter', rv: 'revelation', revelations: 'revelation',
+};
+
+// Returns the book's number in BOOKS (0 for Genesis), or -1 if it isn't a book.
+// number is '', '1', '2' or '3'; name is letters only, like "cor".
+function findBook(number, name) {
+  const exact = BOOK_KEYS.indexOf(number + name);
+  if (exact >= 0) return exact;
+  if (OTHER_NAMES[name]) return BOOK_KEYS.indexOf(number + OTHER_NAMES[name]);
+  if (name.length < 2) return -1;
+  // The start of exactly one book's name, like "gen" or "1 cor" ("jo" could be five books)
+  const starts = BOOK_KEYS.filter((key) => key.startsWith(number + name));
+  return starts.length === 1 ? BOOK_KEYS.indexOf(starts[0]) : -1;
+}
+
+// "First John", "1st John" and "I John" all mean 1 John
+const NUMBER_WORDS = { first: '1', '1st': '1', i: '1', second: '2', '2nd': '2', ii: '2', third: '3', '3rd': '3', iii: '3' };
+
+// True if the text looks like one or more Bible passages
+function looksLikePassage(text) {
+  const tidy = text.toLowerCase()
+    .replace(/[–—]/g, '-')                               // dashes
+    .replace(/\s+(?:to|through|thru)\s+(?=\d)/g, '-')    // "5 to 7"
+    .replace(/\b(?:chapters?|chap\.)\s*(?=\d)/g, ' ')    // "John chapter 3"
+    .replace(/\s*\b(?:verses?|vv?\.?)\s*(?=\d)/g, ':')   // "John 3 verse 16"
+    .replace(/(\d)\.(?=\d)/g, '$1:')                     // "John 3.16"
+    .replace(/(\d)[abc]\b/g, '$1')                       // "John 3:16a"
+    .replace(/,\s*(?=[a-z])|\s+and\s+/g, ';')            // "John 3, Romans 5"
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\.$/, '');                                // "John 3:16."
+  if (!tidy) return false;
+
+  let book = -1;
+  return tidy.split(';').every((part, index) => {
+    // [a number word, like "First" or "II"] [or a number, like "1"] [the book's name] [the numbers]
+    const match = /^(?:(?:(first|second|third|1st|2nd|3rd|i{1,3})\s+|([123])\s*)?([a-z][a-z.\s]*?))?\s*(\d[\d\s:,-]*)?$/.exec(part.trim());
+    if (!match) return false;
+    const [, numberWord, digit, nameWords, place] = match;
+    if (nameWords) {
+      const number = digit || NUMBER_WORDS[numberWord] || '';
+      book = findBook(number, nameWords.replace(/[^a-z]/g, ''));
+      if (book < 0) return false;
+    } else if (index === 0 || !place) {
+      return false;   // numbers alone need a book before them, like "John 3; 4:1-10"
+    }
+    if (!place) return true;   // a whole book, like "Jude" or "Ruth"
+
+    // Numbers joined by ":", ",", "-" (like "3:16-18, 21" or "5-7"), each 1 to 200
+    const spots = place.trim();
+    if (!/^\d+(?:\s*[:,-]\s*\d+)*$/.test(spots)) return false;
+    if (spots.match(/\d+/g).some((n) => n < 1 || n > 200)) return false;
+
+    // The chapter numbers must be in the book. Without ":", every number is a chapter
+    // ("Matthew 5-7"); with ":", the numbers before a ":" are chapters ("Genesis 1:1-2:3").
+    // Books of one chapter skip this: "Jude 3" means verse 3.
+    const chapters = BOOKS[book][1];
+    if (chapters === 1) return true;
+    const chapterNumbers = spots.includes(':') ? (spots.match(/\d+(?=\s*:)/g) || []) : spots.match(/\d+/g);
+    return chapterNumbers.every((n) => Number(n) <= chapters);
+  });
+}
+
+
 // ---------- The Bible text (ESV) ----------
 // The passage itself, shown in the app above the questions. It comes from Crossway's
 // ESV API (https://api.esv.org), free for non-commercial use, with a key saved in
@@ -137,13 +242,9 @@ const ALLOWED_ORIGINS = ['https://danielyoonwrites.github.io', 'http://127.0.0.1
 // The AI is never sent the ESV text: Crossway's rules don't say whether that's allowed.
 const ESV_URL = 'https://api.esv.org/v3/passage/text/';
 
-// Chapters in each book, Genesis to Revelation (the same checked list as BOOKS in app.js),
+// Chapters in each book, Genesis to Revelation (from BOOKS above),
 // used to keep each answer under half a book
-const CHAPTERS = [
-  50, 40, 27, 36, 34, 24, 21, 4, 31, 24, 22, 25, 29, 36, 10, 13, 10, 42, 150, 31,
-  12, 8, 66, 52, 5, 48, 12, 14, 3, 9, 1, 4, 7, 3, 3, 3, 2, 14, 4,
-  28, 16, 24, 21, 28, 16, 16, 13, 6, 6, 4, 4, 5, 3, 6, 4, 3, 1, 13, 5, 5, 3, 5, 1, 1, 1, 22,
-];
+const CHAPTERS = BOOKS.map(([, chapters]) => chapters);
 
 // Asks Crossway for the passage as plain text, with verse numbers like [12]. No headings,
 // no footnotes, and "(ESV)" at the end, which their docs say fulfills the copyright display.
@@ -223,6 +324,13 @@ export default {
     const pattern = input.method === 'personal' || input.personal === true ? 'personal' : 'study';
     if (!passage || passage.length > 80) {
       return reply({ error: 'bad-request' }, 400, cors);
+    }
+
+    // Only Bible passages go any further, so the AI can't be used for anything else
+    // (see "Only Bible passages reach the AI"). The app shows "didn't recognize that passage."
+    if (!looksLikePassage(passage)) {
+      const notAPassage = input.want === 'text' ? { error: 'unknown-passage' } : { knownPassage: false, leaderNote: '', questions: [] };
+      return reply(notAPassage, 400, cors);
     }
 
     // The app asks for the passage itself separately, so it can show while the AI writes

@@ -73,7 +73,9 @@ The monthly spending limit ($5 recommended) is the most it can ever cost in a mo
 ## Keeping the bill safe
 
 - The passcode: without it the server refuses before the AI is asked, so it costs nothing.
-- The monthly spending limit in the Claude Console: the hard stop.
+- Only Bible passages reach the AI (pull request 61, October 26, 2026, the owner's request): the server checks that the passage is a book of the Bible with chapter and verse numbers, like "John 4:1-26", "1 Cor 13" or "Jude", before anything costs money (`looksLikePassage` in `server/worker.js`). Anything else, like a sentence or instructions for the AI, gets the app's "didn't recognize that passage" message, and the AI is never asked. The AI still gets the passage exactly as typed, and still checks it too (`known_passage`).
+- The monthly spending limit in the Claude Console: the hard stop. The account's tier allows up to $500 a month; set your own lower limit on the Billing page, under "Spend limits" (checked October 26, 2026: https://platform.claude.com/docs/en/api/rate-limits). When it's reached, the app says this month's AI limit is reached and shows the general questions.
+- Next (the owner's request, October 26, 2026): a daily limit, kept in a small Cloudflare database (D1), for each phone's internet address and for everyone together.
 - Each answer is capped at 4,000 tokens, thinking included, so one answer can't cost more than about 8 cents with Opus 5.5 (and much less with the others).
 - Parked: Cloudflare's rate limiting counter can slow repeated requests, but only counts per 10 or 60 seconds (search results only, unverified: https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/). Add it only if the passcode ever leaks.
 
