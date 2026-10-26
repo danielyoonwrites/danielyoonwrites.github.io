@@ -2,13 +2,14 @@
 //
 // What it does: the app sends a passage name (like "John 4:1-26"), whether it's for
 // a group study or the reading plan, and the passcode. This server checks the passcode,
-// checks that the passage really is a Bible passage, asks Claude (Anthropic's AI) for
-// 5 questions about it, and sends them back.
+// checks that the passage really is a Bible passage and that today's limits aren't used up,
+// asks Claude (Anthropic's AI) for 5 questions about it, and sends them back.
 // It can also send back the passage itself, from Crossway's free ESV API (see "The Bible text" below).
 //
 // Why a server: the website is public, so a key in the app could be copied.
 // The keys and the passcode are NOT in this file. They're saved in Cloudflare's
 // dashboard as secrets named ANTHROPIC_API_KEY, ESV_API_KEY and PASSCODE (see AI-PLAN.md).
+// The daily counts are in a Cloudflare D1 database connected as DB (see "Daily limits").
 //
 // How to update it: copy this whole file into the Worker's code editor in
 // Cloudflare's dashboard, then Deploy. Keep this copy in the repository the same.
@@ -233,6 +234,85 @@ function looksLikePassage(text) {
 }
 
 
+// ---------- Daily limits ----------
+// How many sets of questions the AI may write each day, so nobody can use up the credits
+// (the owner's choice, October 26, 2026). Every set counts: a study, a reading-plan day,
+// or "Write new questions." Wrong passcodes are counted too, so nobody can guess the
+// passcode by trying thousands of times. The counts start over at midnight Pacific time.
+const DAILY_LIMIT_EACH = 20;       // sets of questions for each internet connection
+const DAILY_LIMIT_ALL = 60;        // sets of questions for everyone together
+const WRONG_PASSCODE_LIMIT = 10;   // wrong passcodes for each internet connection
+
+// The counts are kept in a small Cloudflare database (D1), connected to this Worker under
+// the name DB (see AI-PLAN.md). One row a day for everyone, and for each connection:
+//   day "2026-10-26", who "everyone" or "questions:9f2c..." or "wrong:9f2c...", count 7
+// Each connection gets a scrambled code instead of its internet address, so the address
+// itself is never kept. Days before yesterday are deleted.
+
+const TABLE = 'CREATE TABLE IF NOT EXISTS usage (day TEXT NOT NULL, who TEXT NOT NULL, count INTEGER NOT NULL, PRIMARY KEY (day, who))';
+
+// The date in Pacific time, like "2026-10-26" (in UTC if the time zone isn't available)
+function dayInPacific(time = Date.now()) {
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).formatToParts(new Date(time));
+    const part = (type) => parts.find((p) => p.type === type).value;
+    return part('year') + '-' + part('month') + '-' + part('day');
+  } catch (error) {
+    return new Date(time).toISOString().slice(0, 10);
+  }
+}
+
+// The scrambled code for the phone's internet connection. The passcode is mixed in,
+// so the code can't be turned back into the address.
+async function connectionCode(request, env, day) {
+  const address = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const data = new TextEncoder().encode(env.PASSCODE + '|' + day + '|' + address);
+  const bytes = new Uint8Array(await crypto.subtle.digest('SHA-256', data));
+  return [...bytes.slice(0, 12)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Today's counts for the given names, like { everyone: 7, 'questions:9f2c...': 2 }
+async function readCounts(env, day, names) {
+  const marks = names.map(() => '?').join(', ');
+  const read = () => env.DB.prepare('SELECT who, count FROM usage WHERE day = ? AND who IN (' + marks + ')')
+    .bind(day, ...names).all();
+  let answer;
+  try {
+    answer = await read();
+  } catch (error) {
+    // The very first time (or if the table was deleted), make the table, then read again
+    if (!/no such table/i.test(String(error && error.message))) throw error;
+    await env.DB.prepare(TABLE).run();
+    answer = await read();
+  }
+  const { results } = answer;
+  const counts = {};
+  names.forEach((name) => { counts[name] = 0; });
+  results.forEach((row) => { counts[row.who] = row.count; });
+  return counts;
+}
+
+// Adds one to each count, then reads them back, all in one step: D1 runs a batch as one
+// transaction, one at a time, so requests arriving together still get different numbers
+// and can't slip past a limit together. Also deletes the days before yesterday.
+async function addOne(env, day, names) {
+  const steps = [];
+  names.forEach((name) => {
+    steps.push(env.DB.prepare('INSERT OR IGNORE INTO usage (day, who, count) VALUES (?, ?, 0)').bind(day, name));
+    steps.push(env.DB.prepare('UPDATE usage SET count = count + 1 WHERE day = ? AND who = ?').bind(day, name));
+  });
+  steps.push(env.DB.prepare('DELETE FROM usage WHERE day < ?').bind(dayInPacific(Date.now() - 86400000)));
+  const marks = names.map(() => '?').join(', ');
+  steps.push(env.DB.prepare('SELECT who, count FROM usage WHERE day = ? AND who IN (' + marks + ')').bind(day, ...names));
+  const results = await env.DB.batch(steps);
+  const counts = {};
+  results[results.length - 1].results.forEach((row) => { counts[row.who] = row.count; });
+  return counts;
+}
+
+
 // ---------- The Bible text (ESV) ----------
 // The passage itself, shown in the app above the questions. It comes from Crossway's
 // ESV API (https://api.esv.org), free for non-commercial use, with a key saved in
@@ -317,8 +397,30 @@ export default {
       return reply({ error: 'bad-request' }, 400, cors);
     }
 
-    // The passcode is checked before anything costs money
+    // Today's counts for this connection (see "Daily limits"). Without the database,
+    // nothing goes further: the limits are what keep the credits safe.
+    if (!env.DB) return reply({ error: 'not-set-up' }, 503, cors);
+    const day = dayInPacific();
+    const code = await connectionCode(request, env, day);
+    const mine = 'questions:' + code;
+    const wrong = 'wrong:' + code;
+    let counts;
+    try {
+      counts = await readCounts(env, day, [mine, wrong, 'everyone']);
+    } catch (error) {
+      return reply({ error: 'ai-unavailable' }, 503, cors);
+    }
+
+    // Too many wrong passcodes from this connection today: no more tries until tomorrow
+    if (counts[wrong] >= WRONG_PASSCODE_LIMIT) return reply({ error: 'too-many-tries' }, 429, cors);
+
+    // The passcode is checked before anything costs money. A wrong one is counted.
     if (!env.PASSCODE || typeof input.passcode !== 'string' || input.passcode !== env.PASSCODE) {
+      try {
+        await addOne(env, day, [wrong]);
+      } catch (error) {
+        // Not counted this time; the answer is the same
+      }
       return reply({ error: 'wrong-passcode' }, 401, cors);
     }
 
@@ -346,6 +448,21 @@ export default {
         text = { error: 'text-unavailable' };
       }
       return reply(text, text.error ? 502 : 200, cors);
+    }
+
+    // Today's limits, before the AI is asked. A set is counted even if the AI then fails.
+    if (counts[mine] >= DAILY_LIMIT_EACH || counts.everyone >= DAILY_LIMIT_ALL) {
+      return reply({ error: 'daily-limit' }, 429, cors);
+    }
+    let after;
+    try {
+      after = await addOne(env, day, [mine, 'everyone']);
+    } catch (error) {
+      return reply({ error: 'ai-unavailable' }, 503, cors);
+    }
+    // Requests that arrived together are checked again with their own numbers
+    if (after[mine] > DAILY_LIMIT_EACH || after.everyone > DAILY_LIMIT_ALL) {
+      return reply({ error: 'daily-limit' }, 429, cors);
     }
 
     let answer;
