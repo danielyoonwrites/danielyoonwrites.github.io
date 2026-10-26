@@ -488,6 +488,7 @@ async function showPassageText(screenId, name) {
   const linkOnly = screen.querySelector('.esv-only');
   const ownBible = screen.querySelector('.read-own');
   screen.querySelectorAll('.esv-link').forEach((link) => { link.href = esvLink(name); });
+  linkOnly.querySelector('a').textContent = 'Read ' + name + ' on esv.org';
   box.hidden = true;
   box.open = false;
   linkOnly.hidden = true;
