@@ -807,6 +807,110 @@ select {
 }
 
 
+/* ---------- Choose from the Bible (the passage picker) ---------- */
+
+/* "Choose from the Bible": right under the typing box, with "Go deeper with AI" close under it */
+.choose {
+  margin-top: 1.25rem;
+}
+
+.choose + .primary {
+  margin-top: 0.75rem;
+}
+
+/* Books, chapters and verses: boxes in a grid, with thin lines */
+.pick-grid {
+  display: grid;
+  gap: 0.375rem;
+  margin-top: 1.5rem;
+}
+
+.pick-grid button {
+  min-height: 2.75rem;          /* tall enough to tap easily */
+  padding: 0.4rem 0.25rem;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1.125rem;
+  line-height: 1.2;
+}
+
+.pick-grid button:active {
+  opacity: 0.6;
+}
+
+/* Books: two side by side, names on the left. A little smaller than the numbers, so the
+   longest names ("1 Thessalonians", "Song of Solomon") fit on one line on a small phone. */
+.book-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+.book-grid button {
+  padding: 0.5rem 0.6rem;
+  font-size: 1rem;
+  text-align: left;
+}
+
+/* Chapter and verse numbers: as many side by side as fit (6 on most phones) */
+.number-grid {
+  grid-template-columns: repeat(auto-fill, minmax(2.5rem, 1fr));
+}
+
+/* The chosen verses: shaded, with the first and the last filled in ink */
+.verse-grid button[aria-pressed="true"] {
+  background: var(--soft);
+  border-color: var(--soft);
+}
+
+.verse-grid button.end {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+/* A verse the ESV and NIV have only in a footnote (like Matthew 17:21): lighter, with a dashed line */
+.verse-grid .in-footnote {
+  border-style: dashed;
+  color: var(--muted);
+}
+
+/* "The whole chapter", filled in once it's chosen */
+.whole-chapter {
+  margin-top: 1.25rem;
+}
+
+.whole-chapter[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* The chosen passage and "Go deeper with AI": a bar that stays at the bottom of the
+   screen while you scroll, like the Save bar under the questions */
+.pick-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin: 2rem -1.5rem 0;      /* reaches the screen's edges */
+  padding: 0.75rem 1.5rem;
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+}
+
+.pick-choice {
+  margin: 0 0 0.5rem;
+  font-size: 1.375rem;
+  line-height: 1.2;
+}
+
+.pick-bar .primary {
+  min-height: 2.75rem;
+  margin-top: 0;
+  padding: 0.7rem 0.5rem;
+}
+
+
 /* ---------- The reading plan ---------- */
 
 /* "Book", "Chapters a day", "Start": small labels above each choice */
