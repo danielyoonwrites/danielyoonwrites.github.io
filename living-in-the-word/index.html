@@ -33,8 +33,8 @@
 
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=16">
-  <script src="app.js?v=20" defer></script>
+  <link rel="stylesheet" href="style.css?v=17">
+  <script src="app.js?v=21" defer></script>
 </head>
 <body>
 
@@ -84,10 +84,75 @@
         <input id="passage-text" type="text" maxlength="80" autocomplete="off" autocapitalize="words">
         <p class="hint">A verse, a chapter or a longer passage, like “John 4:1-26.”</p>
         <p class="gentle-error" hidden>Type a passage first.</p>
+        <!-- Instead of typing: the "Choose from the Bible" screens below. Right under the box,
+             so it shows above the phone's keyboard. -->
+        <button type="button" class="outline choose" data-action="choose">Choose from the Bible</button>
         <button type="submit" class="primary">Go deeper with AI</button>
       </form>
       <!-- Says plainly what the button does: the AI writes new questions every time -->
       <p class="note">The AI helper writes 5 new study questions just for this passage. It can take up to a minute. You can change any of them before you share. Only the passage name is sent.</p>
+    </section>
+
+    <!-- Choose from the Bible (the passage picker): Old or New Testament, then the book,
+         the chapter and the verses, one screen each. app.js fills in the books and numbers.
+         The verse numbers follow the NASB, ESV and NIV (VERSES in app.js). -->
+    <section class="screen" id="pick-testament">
+      <header class="top-bar">
+        <button type="button" class="back" data-action="back">Back</button>
+        <span class="wordmark">Living in the Word</span>
+      </header>
+      <p class="label">Prepare a study</p>
+      <h2 tabindex="-1">Choose from the Bible</h2>
+      <button type="button" class="row" data-action="pick-old">
+        <span class="row-title">Old Testament</span>
+        <span class="row-text">Genesis to Malachi, 39 books</span>
+      </button>
+      <button type="button" class="row" data-action="pick-new">
+        <span class="row-title">New Testament</span>
+        <span class="row-text">Matthew to Revelation, 27 books</span>
+      </button>
+    </section>
+
+    <section class="screen" id="pick-book">
+      <header class="top-bar">
+        <button type="button" class="back" data-action="back">Back</button>
+        <span class="wordmark">Living in the Word</span>
+      </header>
+      <!-- app.js fills in "Old Testament" or "New Testament", and its books -->
+      <p class="label pick-testament-name"></p>
+      <h2 tabindex="-1">Which book?</h2>
+      <div class="pick-grid book-grid"></div>
+    </section>
+
+    <section class="screen" id="pick-chapter">
+      <header class="top-bar">
+        <button type="button" class="back" data-action="back">Back</button>
+        <span class="wordmark">Living in the Word</span>
+      </header>
+      <!-- app.js fills in the book, like "Genesis", and its chapters ("Which psalm?" for Psalms) -->
+      <p class="label pick-book-name"></p>
+      <h2 class="pick-chapter-question" tabindex="-1">Which chapter?</h2>
+      <div class="pick-grid number-grid chapter-grid"></div>
+    </section>
+
+    <section class="screen" id="pick-verses">
+      <header class="top-bar">
+        <button type="button" class="back" data-action="back">Back</button>
+        <span class="wordmark">Living in the Word</span>
+      </header>
+      <!-- app.js fills in the chapter, like "John 3", and its verses -->
+      <p class="label pick-chapter-name"></p>
+      <h2 tabindex="-1">Which verses?</h2>
+      <button type="button" class="outline whole-chapter" data-action="pick-whole" aria-pressed="false">The whole chapter</button>
+      <p class="hint">Or tap the first verse, then the last.</p>
+      <div class="pick-grid number-grid verse-grid"></div>
+      <!-- Only for a chapter with a verse the ESV and NIV have only in a footnote, like Matthew 17:21 -->
+      <p class="note footnote-note" hidden></p>
+      <!-- Shows once something is chosen, and stays at the bottom of the screen while you scroll -->
+      <div class="pick-bar" hidden>
+        <p class="pick-choice" role="status"></p>
+        <button type="button" class="primary" data-action="pick-go">Go deeper with AI</button>
+      </div>
     </section>
 
     <!-- 2. The questions: 5 written by the AI helper for this passage (see AI-PLAN.md).

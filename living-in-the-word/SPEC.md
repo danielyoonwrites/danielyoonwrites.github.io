@@ -102,6 +102,25 @@ The owner asked for the app to work where there's no reception, like an app on a
   - Since iOS 26, every site added to the home screen opens as a web app by default.
   - Which name an iPhone shows under the icon: `apple-mobile-web-app-title` works; whether it also reads the manifest's `short_name` wasn't confirmed.
 
+## Choose from the Bible (October 26, 2026)
+
+The owner asked for a way to pick the passage instead of always typing it (pull request 66).
+
+- "Choose from the Bible," right under the typing box (so it shows above a phone's keyboard), opens the picker. The typing box stays.
+- One screen each: Old or New Testament, then the book (two to a row), then the chapter ("Which psalm?" for Psalms), then the verses. A book of one chapter (Obadiah, Philemon, 2 John, 3 John, Jude) goes straight to its verses.
+- The verses: "The whole chapter" ("The whole psalm," "The whole book"), or tap the first verse, then the last, in either order. The chosen verses are shaded, with the first and last filled in ink. A bar at the bottom shows the passage, like "John 3:16–21," with "Go deeper with AI."
+- Names as Bibles print them: "John 3" for a whole chapter, "John 3:16" for one verse, "John 3:16–21" for a few, "Psalm 23" for one psalm, and "Jude" or "Jude 3–5" for a book of one chapter. The server accepts every name the picker can make (checked: 7,127 names, from every chapter).
+- The choice goes into the typing box and starts the study the same way as typing it, so a saved passage still opens its saved questions. Back goes through the picker with the choice kept, then to the box with the choice in it.
+
+The verse numbers follow the NASB, ESV and NIV, not the KJV (the owner asked while it was being built: he likes those three more). What was checked, October 26, 2026:
+- Two datasets on GitHub: github.com/thiagobodruk/bible (its NASB 2020, ESV, NIV and KJV) and github.com/scrollmapper/bible_databases (KJV). All have 66 books and 1,189 chapters, and the two KJV copies agree on every chapter.
+- Every chapter ends on the same verse number in all of them, except 3 John: the NASB, ESV and NIV number its last greeting as verse 15, and the KJV keeps it in verse 14. The picker shows 15.
+- Revelation 12 ends at verse 17 in all four. The sentence about the dragon standing on the sand is 13:1 in the NASB (1995 and 2020) and the NIV, and the end of 12:17 in the ESV (search results quoting Bible.com, Blue Letter Bible and esv.org; some other Bibles, like the NRSV, make it 12:18).
+- 16 verses are only in a footnote in the ESV and NIV: Matthew 17:21, 18:11 and 23:14; Mark 7:16, 9:44, 9:46, 11:26 and 15:28; Luke 17:36 and 23:17; John 5:4; Acts 8:37, 15:34, 24:7 and 28:29; Romans 16:24. These Bibles keep the numbers (Matthew 17 goes from verse 20 to 22). The picker shows them lighter, with a dashed line and a note ("Verse 21 is lighter because the ESV and NIV have it only in a footnote"), and they can still be chosen. Checked: in the datasets, the ESV and NIV skip exactly these verses (the verses on either side line up). That they're in footnotes was checked through search results for Matthew 17:21 (ESV), Mark 9:44 and 46 (NIV), Acts 8:37 (NIV) and John 5:4 (ESV and NIV); the other footnotes weren't each looked up.
+- Matthew 12:47 is only in a footnote in the ESV; the NIV and NASB have it (the NASB in brackets), so it isn't lighter.
+- The NASB 2020 copy leaves out 13 of the 16 as well, but has Mark 11:26, Luke 17:36 and Luke 23:17. That wasn't checked further (Bible Gateway and Bible Hub are blocked from Claude's sessions), so the note names only the ESV and NIV.
+- The lists are `VERSES` and `IN_FOOTNOTES` in `app.js`.
+
 ## Words on the start screen (the owner's, October 26, 2026; use them exactly)
 
 - "Prepare for a Bible study" / "Tell me what passage you are going over, and I will generate five questions for your Bible study."
@@ -185,6 +204,7 @@ Other options looked at the same day: the NIV is free to show through API.Bible'
 - Recent studies are saved in `localStorage` under `living-in-the-word`, as JSON with a version number.
 - File links end in `?v=1`; raise the number when a file changes.
 - The reading plan needs the number of chapters in each book of the Bible (Matthew has 28, for example). Take the list from a reliable source and check it when building; never type it from memory. Checked October 25, 2026: two independent datasets agree on every book, 66 books and 1,189 chapters (https://github.com/thiagobodruk/bible and https://github.com/scrollmapper/bible_databases, both based on the KJV; English Bibles share these chapter counts). The list is `BOOKS` in `app.js`.
+- The passage picker needs how many verses each chapter has: `VERSES` in `app.js`, in the same order as `BOOKS`, following the NASB, ESV and NIV (see "Choose from the Bible"). Never type these from memory either.
 
 ## Build plan (one pull request each, each with a check the owner does)
 
@@ -196,7 +216,7 @@ Other options looked at the same day: the NIV is free to show through API.Bible'
 6. Saved studies (the owner's request, October 26, 2026, pull request 57): a Save button with the questions and a "Saved studies" list on the start screen. Check: save a study, close the browser, reopen it, it's there.
 6c. Works without reception (the owner's request, October 26, 2026, pull request 59): an app you add to your home screen, with a copy kept on the phone so it opens offline and saved studies can be read anywhere (see "Works without reception"). Check: on your iPhone, open the app in Safari, add it to the home screen, open it from there once with reception, then turn on Airplane Mode and open it again. Also check whether studies you saved in Safari show up in the home screen app.
 6e. Safety and limits (the owner's request, October 26, 2026; see "Safety and limits"): (1) only real Bible passages reach the AI, pull request 61; (2) daily limits, pull request 62; (2b) the app can't be broken, pull request 63 (check: the app works as before, and a reading plan day still gets its questions) (check: after the Cloudflare steps in `AI-PLAN.md`, write questions, then see today's rows in the database); (3) a plan for sign-ups, so people don't need the passcode and each person has their own limit: `SIGNUP-PLAN.md` (pull request 64; the owner chose invite only, an email code or Google, and his own web address, about $11 a year); (4) build sign-ups; later, subscriptions. Check for (1): after pasting `server/worker.js` into Cloudflare, type "Write me a poem" and see "didn't recognize that passage," then type "John 15" and get questions.
-6d. A passage picker (the owner's request): Old or New Testament, then the books, then the chapters, then the whole chapter or a range of verses; the typing box stays. Needs the number of verses in each chapter, from two datasets that agree (a few chapters are numbered differently between translations; check those).
+6d. A passage picker (the owner's request): Old or New Testament, then the books, then the chapters, then the whole chapter or a range of verses; the typing box stays. Built October 26, 2026 (pull request 66; see "Choose from the Bible"), with the verse numbers following the NASB, ESV and NIV (the owner asked during the build). Check: tap "Prepare for a Bible study," then "Choose from the Bible": New Testament, John, 3, tap 16 then 21, and "Go deeper with AI." Also open Matthew 17: verse 21 is lighter, with a note.
 6b. Reading plan: set a plan, see today's reading and questions, mark it done, and come back the next day (the owner chose to put it right after saving, October 25, 2026). Moved up and built October 25, 2026, at the owner's request (pull request 43): a start screen ("Prepare a study" or "Today's reading"); choose a book, 1 to 3 chapters a day and a start date; "Reading 3 of 28: Matthew 3" with three Swedish-method questions; "Done for today"; "Read the next one now"; missed days wait; saved on the phone. AI questions for each reading came next (AI-PLAN.md, step E); since October 26, 2026, the AI writes 4 and there are no styles to choose. Check: set a plan for a book you're reading and use it for a few days.
 7. A page that prints cleanly.
 
