@@ -2,7 +2,7 @@
 //
 // What it does: the app sends a passage name (like "John 4:1-26"), whether it's for
 // a group study or the reading plan, and the passcode. This server checks the passcode,
-// asks Claude (Anthropic's AI) for 4 questions about that passage, and sends them back.
+// asks Claude (Anthropic's AI) for 5 questions about that passage, and sends them back.
 //
 // Why a server: the website is public, so a key in the app could be copied.
 // The AI key and the passcode are NOT in this file. They're saved in Cloudflare's
@@ -82,24 +82,27 @@ Where Christians differ
 - Stay away from partisan politics.
 
 The questions
-- Write exactly 4 questions, in the order given below. The reading principles above still apply.`;
+- Write exactly 5 questions, in the order given below. The reading principles above still apply.`;
 
 
-// ---------- The order of the 4 questions ----------
-// The owner chose 4 questions and no study methods (October 26, 2026): since the AI writes
-// questions for each passage, the methods' templates got in the way. "study" is for a small
-// group; "personal" is for one day of the reading plan. Edit the words between the ` marks.
+// ---------- The order of the 5 questions ----------
+// The owner chose no study methods (October 26, 2026): since the AI writes questions for
+// each passage, the methods' templates got in the way. Then 5 questions instead of 4, the
+// 5th about prayer (October 26, 2026). "study" is for a small group; "personal" is for one
+// day of the reading plan. Edit the words between the ` marks.
 const PATTERNS = {
-  study: `A small group study. Write exactly 4 questions, in this order:
+  study: `A small group study. Write exactly 5 questions, in this order:
 1. One question on what the passage says: what happens, who is involved, or what stands out.
 2. One question on what the passage shows about God: the Father, the Son or the Holy Spirit.
 3. One question on what it means for our hearts: what we love, trust, fear or hope in, in light of the gospel.
-4. One question inviting one concrete response this week.`,
-  personal: `Personal reading, one day of a reading plan, for one person's quiet time with God, not a group. Speak to the reader as "you." Write exactly 4 questions, in this order:
+4. One question inviting one concrete response this week.
+5. One question on what the group can pray about together, drawn from this passage.`,
+  personal: `Personal reading, one day of a reading plan, for one person's quiet time with God, not a group. Speak to the reader as "you." Write exactly 5 questions, in this order:
 1. One question that helps the reader notice what this reading says.
 2. One question on what it shows about God.
 3. One question about the reader's heart: what they love, trust, fear or hope in.
-4. One question that turns the reading into a response to God: thanks, trust, repentance or prayer.
+4. One question inviting one way to live it out today.
+5. One question that turns the reading into prayer: thanks, trust, repentance or asking.
 Keep them short enough to hold in mind through the day.`,
 };
 
@@ -195,7 +198,7 @@ async function askClaude(apiKey, passage, pattern) {
             questions: {
               type: 'array',
               items: { type: 'string' },
-              description: 'Exactly 4 questions, in order. Empty if known_passage is false.',
+              description: 'Exactly 5 questions, in order. Empty if known_passage is false.',
             },
           },
           required: ['known_passage', 'leader_note', 'questions'],
