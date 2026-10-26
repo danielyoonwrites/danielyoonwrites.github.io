@@ -38,7 +38,7 @@ Passages of suffering, violence or evil (the owner's request, October 26, 2026, 
 - Also for every passage: a question doesn't offer a list of options to choose from (the Matthew 2 question did).
 - Notice how the author presents what happened. Judges shows evil as evil. Where the text doesn't say whether violence was right (Esther 9), don't celebrate it or make it a model. God's own judgments aren't a pattern for us.
 - Never ask anyone to share their own trauma, never blame victims, and don't ask what a victim should have done.
-- Be honest about hard questions without forcing a tidy answer. Show only what the passage itself shows about God: where God seems silent (Judges 19), don't claim the passage shows his care or protection (the owner's feedback, pull request 69). Let hope in Christ be real without making the grief disappear.
+- Don't ask about God's silence, where God was, or why he didn't stop it: for someone who has lived through trauma, that can wound their faith (the owner's rule, pull request 70, after a Judges 19 question asked about God's silence). Show only what the passage itself shows about God, like his protection of the child Jesus in Matthew 2 or his kindness to the midwives in Exodus 1. Where it shows little of God directly (Judges 19), don't claim his care or protection either (the owner's feedback, pull request 69): leave the question about God out. Don't force a tidy answer, and let hope in Christ be real without making the grief disappear.
 - Let the response fit the weight of the passage.
 - Give the leader a short heads-up in the note for the leader (for example, about the death of children or sexual violence).
 
