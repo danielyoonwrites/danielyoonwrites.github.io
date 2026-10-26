@@ -34,7 +34,7 @@
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
   <link rel="stylesheet" href="style.css?v=18">
-  <script src="app.js?v=21" defer></script>
+  <script src="app.js?v=22" defer></script>
 </head>
 <body>
 
@@ -54,12 +54,12 @@
       <button type="button" class="row" data-action="study">
         <span class="row-number" aria-hidden="true">01</span>
         <span class="row-title">Prepare for a Bible study</span>
-        <span class="row-text">Tell me what passage you are going over, and I will generate five questions for your Bible study.</span>
+        <span class="row-text">Tell me what passage you are going over, and I will generate three to five questions for your Bible study.</span>
       </button>
       <button type="button" class="row" data-action="reading">
         <span class="row-number" aria-hidden="true">02</span>
         <span class="row-title">Bible reading plan companion</span>
-        <span class="row-text">Set up a Bible reading plan (like one chapter of Matthew a day), and I will generate five questions for the chapter you read today.</span>
+        <span class="row-text">Set up a Bible reading plan (like one chapter of Matthew a day), and I will generate three to five questions for the chapter you read today.</span>
         <!-- Only once a plan is set up: app.js fills this in, like "Next: Matthew 3. Reading 3 of 28." -->
         <span class="row-status plan-status"></span>
       </button>
@@ -92,7 +92,7 @@
         <button type="submit" class="primary">Go deeper with AI</button>
       </form>
       <!-- Says plainly what the button does: the AI writes new questions every time -->
-      <p class="note">The AI helper writes 5 new study questions just for this passage. It can take up to a minute. You can change any of them before you share. Only the passage name is sent.</p>
+      <p class="note">The AI helper writes 3 to 5 new study questions just for this passage. It can take up to a minute. You can change any of them before you share. Only the passage name is sent.</p>
     </section>
 
     <!-- Choose from the Bible (the passage picker): Old or New Testament, then the book,

@@ -55,7 +55,7 @@ The AI doesn't get the Bible text (stage 1 shows no Bible text, and translations
 - Point to verse numbers ("in verse 10") instead of quoting verses.
 - Stay with what the passage says. Don't add an interpretation as if it were the text.
 - If it doesn't recognize the passage, say so instead of guessing.
-- Write exactly 5 questions in the set order, in plain words for a small group.
+- Write 3 to 5 questions in the set order (since October 26, 2026; before that, exactly 5), in plain words for a small group.
 
 The owner reviews every question, as always.
 
