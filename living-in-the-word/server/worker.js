@@ -111,7 +111,7 @@ Keep them short enough to hold in mind through the day.`,
 
 // ---------- Models and prices ----------
 // The owner chose Sonnet 5.5 on October 26, 2026, after a side-by-side test on John 1.
-// The others stay in the list only to price an answer if Anthropic ever falls back to one.
+// The others stay in the list only to price an answer if the model is ever changed.
 // Prices in US dollars per million tokens, from https://platform.claude.com/docs/en/about-claude/pricing
 // (checked October 25, 2026). Used only to show what each answer cost.
 const MODELS = {
@@ -312,6 +312,10 @@ export default {
     } catch (error) {
       return reply({ error: 'bad-request' }, 400, cors);
     }
+    // Only a { ... } message from the app (a bare "null" used to crash the server)
+    if (!input || typeof input !== 'object' || Array.isArray(input)) {
+      return reply({ error: 'bad-request' }, 400, cors);
+    }
 
     // The passcode is checked before anything costs money
     if (!env.PASSCODE || typeof input.passcode !== 'string' || input.passcode !== env.PASSCODE) {
@@ -400,9 +404,11 @@ async function askClaude(apiKey, passage, pattern) {
     'anthropic-version': '2026-10-21',
   };
 
-  // If a safety check declines, Anthropic retries on another model by itself
-  body.fallbacks = 'default';
-  headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
+  // No automatic retry on another model when a safety check declines (removed October 26, 2026).
+  // For Sonnet 5.5 it only retried declines about cybersecurity or building other AI models,
+  // never Bible questions, so it could only help someone misusing the app. A decline shows
+  // the general questions instead.
+  // https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
