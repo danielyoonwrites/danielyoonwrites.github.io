@@ -33,8 +33,8 @@
 
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=15">
-  <script src="app.js?v=19" defer></script>
+  <link rel="stylesheet" href="style.css?v=16">
+  <script src="app.js?v=20" defer></script>
 </head>
 <body>
 
@@ -113,6 +113,8 @@
       <p class="esv-only" hidden><a class="esv-link" href="https://www.esv.org/" target="_blank" rel="noopener">Read it on esv.org</a></p>
 
       <p class="note suggest-status" role="status" hidden></p>
+      <!-- Shown only when the passage isn't recognized (style.css, "not-found"): back to the box to fix it -->
+      <button type="button" class="primary change-passage" data-action="back">Change the passage</button>
       <!-- Only on the test link (add ?test to the address): what each answer cost -->
       <p class="note test-cost" hidden></p>
 
@@ -148,7 +150,7 @@
       <!-- Only for a saved study. Right under the Save bar, so it reads as part of it (the owner asked) -->
       <button type="button" class="quiet unsave" data-action="unsave" hidden>Remove from saved studies</button>
 
-      <p class="note">Tap Save to keep these questions on this phone. Nothing is shared until you tap Share or Copy.</p>
+      <p class="note save-note">Tap Save to keep these questions on this phone. Nothing is shared until you tap Share or Copy.</p>
     </section>
 
     <!-- Saved studies: app.js fills in the list, newest first -->

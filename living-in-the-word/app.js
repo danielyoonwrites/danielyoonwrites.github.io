@@ -154,6 +154,7 @@ document.querySelector('#passage form').addEventListener('submit', (event) => {
   }
 
   // A new passage starts fresh
+  showNotFound(false);
   passage = text;
   fill('.passage-name', passage);
   questions = [];
@@ -451,7 +452,14 @@ function showWriting(screenId, on) {
   document.getElementById(screenId).classList.toggle('writing', on);
 }
 
+// A passage that isn't recognized shows only the message and "Change the passage"
+// (style.css, "not-found")
+function showNotFound(on) {
+  document.getElementById('questions').classList.toggle('not-found', on);
+}
+
 async function requestSuggestions() {
+  showNotFound(false);
   asking = true;
   askingFor = passage;
   const thisRequest = ++latestRequest;
@@ -507,6 +515,7 @@ async function requestSuggestions() {
   if (!result.error && !result.knownPassage) {
     setStatus('The AI didn’t recognize that passage. Go back and check it, like “John 4:1-26.”');
     showQuestions();
+    showNotFound(true);
     return;
   }
   if (result.error || !Array.isArray(result.questions) || !result.questions.length) {
@@ -577,6 +586,7 @@ function updateSaveButton() {
 
 // Opens a saved study's questions, ready to use, change or share
 function openStudy(study) {
+  showNotFound(false);
   // If the AI is still writing for another passage, its answer is ignored
   latestRequest++;
   asking = false;
