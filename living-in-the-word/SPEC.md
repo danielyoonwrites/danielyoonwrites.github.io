@@ -93,6 +93,8 @@ Parked: a real photo on the start screen (Kinfolk is photo-led; the website's ru
 
 ## The Bible text (ESV, October 26, 2026)
 
+**On hold (the owner's choice, October 26, 2026).** The code is built and published, but no ESV key is set, so the app never shows Bible text: only a "Read it on esv.org" link. His reason: someday he may let people subscribe to the app. Crossway's free terms are only for non-commercial apps (no charge for any part), and Crossway licenses only organizations, not individuals. The NIV through API.Bible has the same non-commercial limit. If he wants the passage in the app and a paid app is still possible, look at the Berean Standard Bible first: API.Bible's licensing FAQ calls it public domain and allows it for display and AI (read October 26, 2026); its own terms page (https://berean.bible/terms.htm) hasn't been opened yet. To turn the ESV on instead, only the key is needed (steps in HANDOFF.md).
+
 The owner wanted the passage shown in the app if it was free and not hard, and chose the ESV (pull request 54).
 
 - How it shows: a fold-out above the questions, "Read John 4:1-26 ESV," closed until tapped, so the questions stay near the top. The same on today's reading, where it takes the place of "Read it in your own Bible." Verse numbers are small and grey; no headings or footnotes. While the AI writes the questions, the passage can already be read.
