@@ -20,7 +20,7 @@ Still open (asked one at a time when we get there):
 
 ## How it works
 
-1. In the app, type a passage and tap "Write questions with AI."
+1. In the app, type a passage and tap "Go deeper with AI." While the AI writes, the screen says so and shows placeholder lines.
 2. The app sends only the passage name (like "John 4:1-26"), whether it's a group study or the reading plan, and the passcode to a small server. Nothing personal.
 3. The server checks the passcode, then asks the AI (Claude, by Anthropic) with the secret key, which only the server knows.
 4. The questions come back and show as drafts, ready to edit, remove or add to.

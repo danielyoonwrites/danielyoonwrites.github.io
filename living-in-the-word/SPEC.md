@@ -16,8 +16,8 @@ Type a Bible passage (a verse, a chapter or a longer passage, like "John 4:1-26"
 
 One thing per screen, with big buttons.
 
-1. "Which passage?" Type it, like "John 4:1-26," and tap "Write questions with AI." A line under the button says what happens: the AI helper writes 5 new study questions for this passage (the owner asked for this to be clear, October 26, 2026).
-2. The AI helper writes 5 questions for that passage (see "The questions" below). While it writes, 5 general questions show; if the AI can't be reached, they stay. There used to be a choice of study method here; the owner removed it on October 26, 2026 (pull request 50).
+1. "Which passage?" Type it, like "John 4:1-26," and tap "Go deeper with AI" (the owner's words, October 26, 2026; it said "Write questions with AI" before). A line under the button says what happens: the AI helper writes 5 new study questions for this passage (the owner asked for this to be clear, October 26, 2026).
+2. The AI helper writes 5 questions for that passage (see "The questions" below). While it writes, the screen says "Writing 5 questions for John 4:1-26. This can take up to a minute." and shows five numbered placeholder lines that gently fade in and out, so it never looks blank (the owner asked, October 26, 2026). If the AI can't be reached, 5 general questions show instead, with a short note why. There used to be a choice of study method here; the owner removed it on October 26, 2026 (pull request 50).
 3. The questions appear, with the passage at the top. Edit any question, remove one, or add your own. "Write new questions" asks the AI again. Nothing is shared until the owner chooses to.
 4. Share (the owner's first pick): "Share" sends the passage and questions as plain text through the phone's share menu, for example to a KakaoTalk group chat. "Copy" is there too, in case sharing doesn't work.
 5. Lead (the owner's other pick): "Lead the study" shows one question at a time in big text, with Next and Back, for leading in the room or on a screen.
@@ -32,7 +32,7 @@ Since October 26, 2026 (the owner's choice, pull request 50), there's no study m
 - Group study: what the passage says (what happens, who is involved, what stands out); what it shows about God (the Father, the Son or the Holy Spirit); what it means for our hearts (what we love, trust, fear or hope in, in light of the gospel); one concrete response this week; what the group can pray about together.
 - Reading plan, for one person's quiet time: notice what the reading says; what it shows about God; the reader's heart; one way to live it out today; turning it into prayer (thanks, trust, repentance or asking).
 
-General questions show while the AI writes, or stay if it can't be reached. Drafted by Claude, waiting for the owner's review (`GENERAL_QUESTIONS` and `READING_QUESTIONS` in `app.js`):
+General questions show when the AI helper can't answer or isn't set up (while it writes, placeholder lines show instead). Drafted by Claude, waiting for the owner's review (`GENERAL_QUESTIONS` and `READING_QUESTIONS` in `app.js`):
 - Group study: What stands out to you in this passage? / What does this passage show about God? / How does it speak to what we love, trust or hope in? / What is one way you will respond to it this week? / What can we pray about together from this passage?
 - Reading plan: What stands out to you in today's reading? / What does it show you about God? / How does it speak to what you love, trust or hope in? / What is one way you can live it out today? / What do you want to say to God about it?
 

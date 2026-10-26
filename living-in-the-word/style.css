@@ -491,6 +491,91 @@ select {
 }
 
 
+/* ---------- While the AI writes ----------
+   app.js marks the screen as "writing" until the questions arrive. */
+
+/* Five quiet placeholder lines, numbered like the questions, gently fading in and out.
+   Hidden unless the screen is writing. */
+.writing-placeholder {
+  display: none;
+  counter-reset: placeholder;
+}
+
+.writing .writing-placeholder {
+  display: block;
+}
+
+.writing-placeholder span {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.writing-placeholder span:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.writing-placeholder span::before {
+  counter-increment: placeholder;
+  content: counter(placeholder, decimal-leading-zero);
+  font-family: var(--sans);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+/* Two bars, like the two lines of a question. The second line's length changes a little
+   from row to row, so it looks like real words are coming. */
+.writing-placeholder span::after {
+  content: "";
+  height: 2.2rem;
+  background-image: linear-gradient(var(--line), var(--line)), linear-gradient(var(--line), var(--line));
+  background-size: 100% 0.7rem, var(--second-line, 60%) 0.7rem;
+  background-position: left 0.15rem, left 1.35rem;
+  background-repeat: no-repeat;
+  animation: breathe 1.6s ease-in-out infinite;
+}
+
+.writing-placeholder span:nth-child(2)::after { --second-line: 40%; animation-delay: 0.15s; }
+.writing-placeholder span:nth-child(3)::after { --second-line: 75%; animation-delay: 0.3s; }
+.writing-placeholder span:nth-child(4)::after { --second-line: 50%; animation-delay: 0.45s; }
+.writing-placeholder span:nth-child(5)::after { --second-line: 65%; animation-delay: 0.6s; }
+
+@keyframes breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* For people who turn off motion on their phone: the lines stay still */
+@media (prefers-reduced-motion: reduce) {
+  .writing-placeholder span::after {
+    animation: none;
+  }
+}
+
+/* "Writing 5 questions for John 4:1-26...": in ink while writing, so it's easy to see */
+.writing .suggest-status,
+.writing .reading-status {
+  color: var(--ink);
+}
+
+.reading-status {
+  font-style: italic;
+}
+
+/* While writing, the questions and the buttons that act on them step aside */
+.writing .question-list,
+.writing .reflect-list,
+.writing .no-questions,
+.writing .leader-note,
+.writing .question-list ~ .hint,
+.writing [data-action="add"],
+.writing .share-pair {
+  display: none;
+}
+
+
 /* ---------- Share and Copy ---------- */
 
 /* Share and Copy side by side, in a bar that stays at the bottom of the screen
