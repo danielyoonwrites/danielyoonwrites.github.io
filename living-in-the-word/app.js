@@ -1012,6 +1012,25 @@ Object.assign(actions, {
 updatePlanStatus();
 
 
+// ---------- Works without reception ----------
+// sw.js keeps a copy of the app on the phone, so it opens without reception.
+// Writing new questions still needs the internet. See SPEC.md.
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});   // if it fails, the app works as before
+}
+
+// Asks the phone to keep saved studies even when it's short on space. Some phones say no; that's fine.
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persist().catch(() => {});
+}
+
+// The home screen tip isn't needed once the app is opened from the home screen
+const fromHomeScreen = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const installTip = document.querySelector('.install-tip');
+if (installTip) installTip.hidden = fromHomeScreen;
+
+
 document.addEventListener('click', (event) => {
   const button = event.target.closest('[data-action]');
   if (button && actions[button.dataset.action]) actions[button.dataset.action]();

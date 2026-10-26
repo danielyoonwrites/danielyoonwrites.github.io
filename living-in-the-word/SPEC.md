@@ -74,6 +74,22 @@ The owner asked to save questions for a passage and have the app remember them, 
 - Typing a saved passage opens its saved questions instead of asking the AI, so it costs nothing and works even when the AI can't be reached.
 - Kept in the browser's storage under `living-in-the-word` (`studies`), only on this phone and in this browser. If the browser won't save (a private window), the app says so. The Bible text is never saved.
 
+## Works without reception (October 26, 2026)
+
+The owner asked for the app to work where there's no reception, like an app on a phone.
+
+- Add it to the home screen: it opens like an app, without Safari's address bar. The icon is the full name, "Living in the Word," in EB Garamond on the paper color (the owner's choice, October 26, 2026). The name under the icon is "In the Word" (the owner's choice), set in `manifest.webmanifest` (`short_name`) and in `index.html` (`apple-mobile-web-app-title`, which iPhones read).
+- The offline helper, `sw.js` (a "service worker"), keeps a copy of the app's files and its fonts (English letters only) on the phone. With reception the newest files load and the copy is updated; with no reception, or if the internet takes more than 4 seconds, the copy is used. It never touches or keeps anything sent to or from the AI helper.
+- Saved studies and the reading plan were already kept on the phone, so they work without reception. Writing new questions still needs the internet; without it, the app shows the general questions and says it couldn't reach the AI helper.
+- A tip on the Saved studies screen says how to add the app to the home screen. It's hidden when the app is opened from the home screen.
+- The app asks the phone to keep its saved data (`navigator.storage.persist()`). Some phones say no; nothing changes then.
+- Icons: `icons/apple-touch-icon.png` (180 by 180, for iPhones), `icons/icon-192.png` and `icons/icon-512.png` (Android), and `icons/icon-maskable-512.png` (Android, with the words a little smaller so a round mask doesn't cut them). Made from EB Garamond, ink `#1D1B18` on paper `#F3EFE7`, square corners (the phone rounds them), no transparency.
+- What couldn't be checked (Apple's and WebKit's pages are blocked from Claude's sessions; from search results only, October 26, 2026):
+  - On an iPhone, a home screen app keeps its own saved data, separate from Safari's, so studies saved in Safari don't appear in the home screen app (a WebKit engineer called this "by design" in a 2022 bug comment).
+  - Safari may delete a site's saved data after 7 days of using Safari without visiting it; home screen apps keep their own count (WebKit, 2020).
+  - Since iOS 26, every site added to the home screen opens as a web app by default.
+  - Which name an iPhone shows under the icon: `apple-mobile-web-app-title` works; whether it also reads the manifest's `short_name` wasn't confirmed.
+
 ## Words on the start screen (the owner's, October 26, 2026; use them exactly)
 
 - "Prepare for a Bible study" / "Tell me what passage you are going over, and I will generate five questions for your Bible study."
@@ -166,7 +182,7 @@ Other options looked at the same day: the NIV is free to show through API.Bible'
 4. Share and Copy. Built October 25, 2026 (pull request 45): the passage and the numbered questions as plain text (the method's name too, until methods were removed), never the note for the leader; empty questions are left out. Share uses the phone's share menu (`navigator.share`) and is hidden where it isn't available (most computers); Copy uses the clipboard, then an older way, and if a browser blocks both it shows the text to select by hand. Not yet checked in KakaoTalk's built-in browser (Claude can't open KakaoTalk). Check: share a study to yourself in KakaoTalk, from Chrome and from inside KakaoTalk.
 5. Lead the study, one question at a time. Check: lead from your phone or a laptop.
 6. Saved studies (the owner's request, October 26, 2026, pull request 57): a Save button with the questions and a "Saved studies" list on the start screen. Check: save a study, close the browser, reopen it, it's there.
-6c. Works without reception (next, the owner's request): an app you add to your home screen, with a copy kept on the phone so it opens offline and saved studies can be read anywhere. Writing new questions still needs internet. Needs an icon the owner approves. Before building, check WebKit's own page on Safari clearing a site's saved data: search results (unverified, mostly 2020) say Safari deletes a site's localStorage after 7 days of Safari use without visiting it, while home screen apps keep their own count.
+6c. Works without reception (the owner's request, October 26, 2026, pull request 59): an app you add to your home screen, with a copy kept on the phone so it opens offline and saved studies can be read anywhere (see "Works without reception"). Check: on your iPhone, open the app in Safari, add it to the home screen, open it from there once with reception, then turn on Airplane Mode and open it again. Also check whether studies you saved in Safari show up in the home screen app.
 6d. A passage picker (the owner's request): Old or New Testament, then the books, then the chapters, then the whole chapter or a range of verses; the typing box stays. Needs the number of verses in each chapter, from two datasets that agree (a few chapters are numbered differently between translations; check those).
 6b. Reading plan: set a plan, see today's reading and questions, mark it done, and come back the next day (the owner chose to put it right after saving, October 25, 2026). Moved up and built October 25, 2026, at the owner's request (pull request 43): a start screen ("Prepare a study" or "Today's reading"); choose a book, 1 to 3 chapters a day and a start date; "Reading 3 of 28: Matthew 3" with three Swedish-method questions; "Done for today"; "Read the next one now"; missed days wait; saved on the phone. AI questions for each reading came next (AI-PLAN.md, step E); since October 26, 2026, the AI writes 4 and there are no styles to choose. Check: set a plan for a book you're reading and use it for a few days.
 7. A page that prints cleanly.

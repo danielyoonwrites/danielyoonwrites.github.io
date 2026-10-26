@@ -12,3 +12,4 @@ A little app that turns a Bible passage into discussion questions for a small gr
 - Stage 1 sends nothing anywhere. Save recent studies only in the browser (`localStorage`, key `living-in-the-word`). No accounts, analytics or tracking.
 - Never put an AI key or any secret in this folder. The website is public, so anyone can read its code. The AI helper in stage 2 needs its own server; its plan is `AI-PLAN.md`. Server code may live in `server/`, never with a key in it.
 - Raise the `?v=` number on file links whenever a file changes.
+- Works without reception: `sw.js` keeps a copy of the app on the phone (`SPEC.md`, "Works without reception"). If you add a file the app needs to open, add it to `APP_FILES` in `sw.js`. If the fonts link in `index.html` changes, change `FONTS` in `sw.js` too. It must never keep anything sent to or from the AI helper.
