@@ -30,7 +30,16 @@ One thing per screen, with big buttons.
 Since October 26, 2026 (the owner's choice, pull request 50), there's no study method to choose, for the group study or the reading plan. His reason: when the AI writes the questions for each passage, they won't fit a method's mold anyway. The AI writes exactly 5 questions, in this order (`PATTERNS` in `server/worker.js`). The owner moved from 4 to 5 the same day (pull request 51), and chose prayer for the 5th.
 
 - Group study: what the passage says (what happens, who is involved, what stands out); what it shows about God (the Father, the Son or the Holy Spirit); what it means for our hearts (what we love, trust, fear or hope in, in light of the gospel); one concrete response this week; what the group can pray about together.
-- Reading plan, for one person's quiet time: notice what the reading says; what it shows about God; the reader's heart; one way to live it out today; turning it into prayer (thanks, trust, repentance or asking).
+- Reading plan, for one person's quiet time: notice what the reading says; what it shows about God; the reader's heart; one way to live it out today; turning it into prayer (thanks, trust, lament, repentance or asking).
+
+Passages of suffering, violence or evil (the owner's request, October 26, 2026, pull request 68). A question on Matthew 2 named the children killed in Bethlehem, then turned in the same breath to praying "for those who don't yet know Jesus." The owner asked for pastoral care with passages like Exodus 1, Matthew 2, Esther 9 and Judges 19: never taking them lightly or glossing over them. The AI's guidance now has a section, "When a passage tells of suffering, violence or evil" (`GUIDANCE` in `server/worker.js`):
+- Name what happened soberly, without graphic detail and without hurrying past it, and stay with it instead of turning to another topic.
+- Make room for lament: the prayer question can be honest grief, a cry for justice, or prayer for people who suffer the same things today.
+- Notice how the author presents what happened. Judges shows evil as evil. Where the text doesn't say whether violence was right (Esther 9), don't celebrate it or make it a model. God's own judgments aren't a pattern for us.
+- Never ask anyone to share their own trauma, never blame victims, and don't ask what a victim should have done.
+- Be honest about hard questions without forcing a tidy answer, and let hope in Christ be real without making the grief disappear.
+- Let the response fit the weight of the passage.
+- Give the leader a short heads-up in the note for the leader (for example, about the death of children or sexual violence).
 
 General questions show when the AI helper can't answer or isn't set up (while it writes, placeholder lines show instead). Drafted by Claude, waiting for the owner's review (`GENERAL_QUESTIONS` and `READING_QUESTIONS` in `app.js`):
 - Group study: What stands out to you in this passage? / What does this passage show about God? / How does it speak to what we love, trust or hope in? / What is one way you will respond to it this week? / What can we pray about together from this passage?

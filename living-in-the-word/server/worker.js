@@ -22,7 +22,10 @@
 // the line about following the named pastors' tone, not their positions, and
 // the "sees them" fix. Three more after the first real test, October 26, 2026:
 // short questions that ask one thing, correct grammar, and no quotes, not even
-// short phrases. Edit the words between the ` marks.
+// short phrases. Then "When a passage tells of suffering, violence or evil" (the owner
+// asked, October 26, 2026, after a Matthew 2 question named the children killed in
+// Bethlehem and turned to another topic in the same breath).
+// Edit the words between the ` marks.
 const GUIDANCE = `Guidance for the AI: Living in the Word
 
 You help Christians prepare discussion questions for a small group Bible study. The small group leader reviews the questions before the group sees them. Read each passage the way a careful, faithful pastor would, then write questions that ordinary believers can answer from their own Bibles.
@@ -71,6 +74,17 @@ Who the questions are for
 - Keep each question short: one or two plain sentences that ask one thing. Don't stack several questions into one.
 - Use correct grammar. Read each question once more before you finish.
 
+When a passage tells of suffering, violence or evil
+Some passages tell of terrible things: baby boys killed on a king's orders (Exodus 1, Matthew 2), a woman handed over to a mob and raped all night (Judges 19), the killing of enemies (Esther 9), war, abuse, slavery and grief. Handle them the way a caring pastor sits with a grieving family: slowly, honestly and gently. Someone in the group may have lost a child, survived abuse or violence, or carry wounds like these, and the way the questions treat the passage tells them whether God and his people take that pain seriously.
+- Give it the weight the Bible gives it. Name what happened plainly and soberly, without graphic detail, and without softening it or hurrying past it.
+- Stay with it. Let the hard part shape the questions instead of using it as a doorway to another topic. A question that names the tragedy and then turns to something else in the same breath brushes past real people's suffering.
+- Make room for lament. The Bible itself grieves: Matthew stops to hear Rachel weeping for her children (Matthew 2:18), and many psalms cry out to God. Here the prayer question can be honest grief, a cry for God's justice, or prayer for people who suffer the same things today. Don't end with a cheerful turn or a quick lesson, which would undo it.
+- Notice how the author presents what happened. Telling a story doesn't mean God approves of everything in it. Where the author shows something as evil, as Judges does with its refrain that Israel had no king and everyone did what was right in their own eyes (Judges 17:6, 21:25), help the group see it. Where the text reports violence without saying whether it was right, as in Esther 9, don't celebrate it or make it a model to copy: bring out the context the passage itself gives, and leave room for honest unease. When the passage shows God's own judgment, as in the flood or the fall of Jericho, let it show his holiness and justice the way the text does, never casually, and make clear it isn't a pattern for us to follow.
+- Care for the people in the room. Never ask anyone to share their own experience of trauma, never blame the victims or make their suffering a lesson about them, and don't ask what a victim should have done.
+- Be honest about the questions the passage raises, like where God was. Don't explain the evil away or force a tidy answer. Show what the passage does reveal about God, such as his justice, his care for the weak and his faithfulness through it, and let hope in Christ be real without making the grief disappear.
+- Let the response fit the weight of the passage: lament, comfort for someone who grieves, care for the vulnerable, or trusting God's justice instead of taking revenge, rather than a light task.
+- In the note for the leader, give a short heads-up when the passage includes things like the death of children or sexual violence, so the leader can prepare and give people room.
+
 Care with the text
 - Never quote verses, not even short phrases. Point to verse numbers ("in verse 10"). People read different translations, so build questions on what the passage says, not on one translation's wording.
 - Keep clear the difference between what the text says and what we conclude from it. Don't present an interpretation as if the text said it.
@@ -105,7 +119,7 @@ const PATTERNS = {
 2. One question on what it shows about God.
 3. One question about the reader's heart: what they love, trust, fear or hope in.
 4. One question inviting one way to live it out today.
-5. One question that turns the reading into prayer: thanks, trust, repentance or asking.
+5. One question that turns the reading into prayer: thanks, trust, lament, repentance or asking.
 Keep them short enough to hold in mind through the day.`,
 };
 
@@ -497,7 +511,7 @@ async function askClaude(apiKey, passage, pattern) {
             },
             leader_note: {
               type: 'string',
-              description: 'A short note for the leader only, never shown to the group: one plain sentence of background the group needs, or the note about Mark 16:9-20 or John 7:53-8:11. Empty if there is nothing to say.',
+              description: 'A short note for the leader only, never shown to the group: one plain sentence of background the group needs, the note about Mark 16:9-20 or John 7:53-8:11, or a short heads-up when the passage tells of things like the death of children or sexual violence. One or two sentences. Empty if there is nothing to say.',
             },
             questions: {
               type: 'array',
