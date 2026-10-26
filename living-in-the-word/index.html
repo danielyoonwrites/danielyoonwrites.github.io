@@ -4,6 +4,11 @@
   <meta charset="utf-8">
   <!-- Makes the page fit phone screens instead of showing a tiny desktop page -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- A safety rule for the browser (a "Content-Security-Policy"): this page may only run its own
+       script (app.js), use its own style.css and Google's fonts, and talk to the AI helper's server.
+       So even if a mistake ever let strange text into the page as code, the browser wouldn't run it.
+       If you add a new outside service, it has to be added here too. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://living-in-the-word.danyoonsignup.workers.dev; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
   <title>Living in the Word</title>
   <meta name="description" content="Type a Bible passage and get discussion questions written for it, for your small group.">
   <!-- The color of the phone's top bar, the same warm paper as the app -->
@@ -29,7 +34,7 @@
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
   <link rel="stylesheet" href="style.css?v=15">
-  <script src="app.js?v=18" defer></script>
+  <script src="app.js?v=19" defer></script>
 </head>
 <body>
 
