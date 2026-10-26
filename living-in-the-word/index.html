@@ -28,7 +28,7 @@
 
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
   <script src="app.js?v=17" defer></script>
 </head>
 <body>
@@ -115,7 +115,6 @@
       <div class="panel leader-note" hidden>
         <p class="label">For the leader</p>
         <p class="leader-note-text"></p>
-        <p class="note">Not shared with the group.</p>
       </div>
 
       <!-- Shown only while the AI writes: five quiet lines that gently fade in and out -->
@@ -141,10 +140,10 @@
       <p class="note share-status" role="status" hidden></p>
       <!-- Shown only if copying doesn't work in this browser: the text, to select by hand -->
       <textarea class="share-text" readonly hidden aria-label="The study, to copy by hand"></textarea>
+      <!-- Only for a saved study. Right under the Save bar, so it reads as part of it (the owner asked) -->
+      <button type="button" class="quiet unsave" data-action="unsave" hidden>Remove from saved studies</button>
 
       <p class="note">Tap Save to keep these questions on this phone. Nothing is shared until you tap Share or Copy.</p>
-      <!-- Only for a saved study -->
-      <button type="button" class="quiet" data-action="unsave" hidden>Remove from saved studies</button>
     </section>
 
     <!-- Saved studies: app.js fills in the list, newest first -->
