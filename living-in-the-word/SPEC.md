@@ -91,11 +91,25 @@ What Kinfolk's look is (web search results, October 26, 2026; Kinfolk's site and
 
 Parked: a real photo on the start screen (Kinfolk is photo-led; the website's rule is real photos only, window light, ordinary things).
 
-## Bible text (parked)
+## The Bible text (ESV, October 26, 2026)
 
-- Stage 1 doesn't show the Bible text itself, only the passage name.
-- A "Read the passage" link to an online Bible might come in step 2; check the site's link format and terms first.
-- Showing the text inside the app means checking each translation's usage rules first, since most modern translations have them.
+The owner wanted the passage shown in the app if it was free and not hard, and chose the ESV (pull request 54).
+
+- How it shows: a fold-out above the questions, "Read John 4:1-26 ESV," closed until tapped, so the questions stay near the top. The same on today's reading, where it takes the place of "Read it in your own Bible." Verse numbers are small and grey; no headings or footnotes. While the AI writes the questions, the passage can already be read.
+- Where it comes from: Crossway's ESV API (https://api.esv.org), through the app's own server, with a free key saved in Cloudflare as `ESV_API_KEY`. The app asks the server for the text separately from the questions (`want: 'text'`), with the same passcode.
+- If it can't show (no key yet, no passcode, no connection, a passage Crossway doesn't recognize, or one that's too long), a "Read it on esv.org" link shows instead, to esv.org's page for that passage (like https://www.esv.org/John+4:1-26/, checked October 26, 2026).
+- The AI is never sent the ESV text. Crossway's rules don't mention AI. API.Bible's rules forbid sending copyrighted Bible text to an AI, which is why the NIV wasn't chosen for that either.
+- Shared text (Share and Copy) has only the passage name and the questions, as before.
+
+Crossway's rules for the free ESV API (read on api.esv.org, October 26, 2026, through GitHub's computers and Jina Reader):
+- "free of charge for non-commercial use." Non-commercial: "A non-commercial site does not charge for access to any part of the site." Commercial: "primarily designed to motivate visitors to buy something, to pay for a service, or to give a donation, or it accepts advertising or sponsorships." If the app ever asks for money, donations or ads, a license is needed, and Crossway's "policy is to license to organizations, not to individuals or solo developers."
+- At most 500 verses, or half a book, per request and on any page. The server refuses more (counting verse numbers, and chapters against the book's length; books of one or two chapters may show whole, since Crossway's request rule makes that exception).
+- 5,000 requests a day, 1,000 an hour, 60 a minute. Store no more than 500 verses: the app keeps the text only while the page is open and never saves it.
+- No changes to the words. "(ESV)" comes at the end of the text, which Crossway's docs say "fulfills your copyright display requirements." The app also shows Crossway's copyright notice under the text and a link to esv.org, as their terms ask for each page.
+- "You may not sell, share, or publish your access key." It lives only in Cloudflare.
+- For "individuals and non-commercial organizations that use the service in ways consistent with the historic Christian understanding of doctrine and the Bible."
+
+Other options looked at the same day: the NIV is free to show through API.Bible's non-commercial plan (5,000 requests a month), but API.Bible forbids sending it to an AI; the Berean Standard Bible (public domain) may be sent to an AI. Parked: giving the AI the BSB text, so its questions come from the real words.
 
 ## Must-haves
 
@@ -106,7 +120,7 @@ Parked: a real photo on the start screen (Kinfolk is photo-led; the website's ru
 
 ## Not in stage 1
 
-- AI suggestions, the Bible text, printing, accounts, collecting group members' answers, reminders or notifications for the reading plan.
+- AI suggestions, printing, accounts, collecting group members' answers, reminders or notifications for the reading plan.
 
 ## Name
 

@@ -449,6 +449,80 @@ select {
 }
 
 
+/* ---------- The passage (ESV), in a fold-out ----------
+   Closed until tapped, so the questions stay near the top. */
+.scripture {
+  margin: 0 0 1.75rem;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+/* The row you tap: "Read John 4:1-26", a small "ESV", and a + that turns into a − */
+.scripture summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.4rem 0;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  cursor: pointer;
+  list-style: none;
+}
+
+.scripture summary::-webkit-details-marker {
+  display: none;
+}
+
+.scripture summary::after {
+  content: "+" / "";
+  margin-left: auto;
+  font-family: var(--sans);
+  font-size: 1.25rem;
+}
+
+.scripture[open] summary::after {
+  content: "−" / "";
+}
+
+.scripture-tag {
+  font-family: var(--sans);
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+/* The words themselves. "pre-wrap" keeps the line breaks and the indents of poetry. */
+.scripture-text {
+  padding: 0.5rem 0 0;
+  font-size: 1.1875rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* Verse numbers: small and grey, a little raised */
+.verse-number {
+  margin-right: 0.15em;
+  font-family: var(--sans);
+  font-size: 0.6rem;
+  line-height: 0;
+  color: var(--muted);
+}
+
+.scripture-notice {
+  font-size: 0.75rem;
+}
+
+.scripture .note:last-child {
+  margin: 0.5rem 0 1rem;
+}
+
+/* Just the link, when the text can't show */
+.esv-only {
+  margin: -0.75rem 0 1.75rem;
+}
+
+
 /* ---------- Notes from the AI, in a shaded box ---------- */
 .panel {
   margin: 0 0 1.75rem;

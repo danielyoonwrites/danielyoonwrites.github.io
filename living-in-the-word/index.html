@@ -20,8 +20,8 @@
 
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=10">
-  <script src="app.js?v=12" defer></script>
+  <link rel="stylesheet" href="style.css?v=11">
+  <script src="app.js?v=13" defer></script>
 </head>
 <body>
 
@@ -80,6 +80,16 @@
       <p class="label">Questions</p>
       <h2 class="passage-name big-title" tabindex="-1"></h2>
       <p class="study-tip">Read it aloud, then go through the questions together.</p>
+
+      <!-- The passage itself (ESV), in a fold-out. app.js fills it in when it arrives,
+           or shows just the esv.org link if it can't (see "The Bible text" in SPEC.md). -->
+      <details class="scripture" hidden>
+        <summary><span class="scripture-title"></span> <span class="scripture-tag">ESV</span></summary>
+        <div class="scripture-text"></div>
+        <p class="note scripture-notice"></p>
+        <p class="note"><a class="esv-link" href="https://www.esv.org/" target="_blank" rel="noopener">Read it on esv.org</a></p>
+      </details>
+      <p class="note esv-only" hidden><a class="esv-link" href="https://www.esv.org/" target="_blank" rel="noopener">Read it on esv.org</a></p>
 
       <p class="note suggest-status" role="status" hidden></p>
       <!-- Only on the test link (add ?test to the address): what each answer cost -->
@@ -154,7 +164,17 @@
       </header>
       <p class="label reading-count"></p>
       <h2 class="reading-name big-title" tabindex="-1"></h2>
-      <p class="study-tip">Read it in your own Bible.</p>
+      <p class="study-tip read-own">Read it in your own Bible.</p>
+
+      <!-- The passage itself (ESV), in a fold-out. app.js fills it in when it arrives,
+           or shows just the esv.org link if it can't (see "The Bible text" in SPEC.md). -->
+      <details class="scripture" hidden>
+        <summary><span class="scripture-title"></span> <span class="scripture-tag">ESV</span></summary>
+        <div class="scripture-text"></div>
+        <p class="note scripture-notice"></p>
+        <p class="note"><a class="esv-link" href="https://www.esv.org/" target="_blank" rel="noopener">Read it on esv.org</a></p>
+      </details>
+      <p class="note esv-only" hidden><a class="esv-link" href="https://www.esv.org/" target="_blank" rel="noopener">Read it on esv.org</a></p>
       <p class="note reading-early" hidden></p>
 
       <!-- The AI's note on this chapter, if it wrote one (like the note on Mark 16:9–20) -->
