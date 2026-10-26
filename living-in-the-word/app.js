@@ -148,7 +148,8 @@ document.querySelector('#passage form').addEventListener('submit', (event) => {
   }
   show('questions');
   showQuestions();   // after the screen shows, so each box can measure its words
-  if (!questions.length) writeQuestions();
+  // Ask the AI, unless it's already writing for this same passage (Back, then the button again)
+  if (!questions.length && !(asking && askingFor === passage)) writeQuestions();
 });
 
 // Asks the AI helper for questions (the passcode first, if this phone doesn't have it yet)
@@ -293,6 +294,8 @@ const SERVER_URL = 'https://living-in-the-word.danyoonsignup.workers.dev/';
 const STORAGE_KEY = 'living-in-the-word';
 let passcode = readSaved().passcode || '';
 let asking = false;   // true while waiting for the AI
+let latestRequest = 0;   // counts requests, so only the newest one changes the screen
+let askingFor = '';      // the passage the AI is writing for, while asking
 let afterPasscode = requestSuggestions;   // what to do once a passcode is typed
 
 // The test link (the address with ?test) shows what each answer cost
@@ -361,13 +364,22 @@ const PROBLEMS = {
   other: 'The AI helper couldn’t answer just now, so these are general questions. Try again in a moment.',
 };
 
+// While the AI writes, the screen shows five quiet placeholder lines instead of the
+// questions, so it never looks blank (style.css, "writing")
+function showWriting(screenId, on) {
+  document.getElementById(screenId).classList.toggle('writing', on);
+}
+
 async function requestSuggestions() {
   asking = true;
+  askingFor = passage;
+  const thisRequest = ++latestRequest;
   const button = document.querySelector('[data-action="suggest"]');
   button.disabled = true;
   button.textContent = 'Writing questions…';
-  setStatus('Writing questions for ' + passage + '. This can take up to a minute.');
+  setStatus('Writing 5 questions for ' + passage + '. This can take up to a minute.');
   document.querySelector('.test-cost').hidden = true;
+  showWriting('questions', true);
   showQuestions();
 
   // Remember what was asked, in case the leader moves on while waiting
@@ -389,9 +401,13 @@ async function requestSuggestions() {
   }
   clearTimeout(timer);
 
+  // A newer request started while waiting (a new passage was typed): it changes the screen instead
+  if (thisRequest !== latestRequest) return;
+
   asking = false;
   button.disabled = false;
   button.textContent = 'Write new questions';
+  showWriting('questions', false);
 
   // The leader typed a new passage while waiting: these questions don't belong anymore
   if (questionsFor !== forPassage) {
@@ -460,7 +476,7 @@ const BOOKS = [
 ];
 const NEW_TESTAMENT_STARTS = 39;   // Matthew is the 40th book
 
-// Questions to think about each day, shown until the AI writes questions for that reading.
+// Questions to think about each day, shown when the AI helper isn't set up or can't answer.
 // The same order the AI follows for personal reading (see server/worker.js). Edit them here.
 const READING_QUESTIONS = [
   'What stands out to you in today’s reading?',
@@ -588,6 +604,7 @@ function showToday(keepHistory = true) {
   // The AI's questions for this reading if they're saved; otherwise the general ones,
   // and the AI is asked (when it's set up and this phone has the passcode)
   shownReading = plan.done;
+  showWriting('today', readingRequest === plan.done);   // still writing this one's questions?
   const saved = plan.questions && plan.questions[questionsKey(plan.done)];
   showReflect(saved ? saved.questions : READING_QUESTIONS, saved ? saved.note : '');
   setReadingStatus('');
@@ -628,7 +645,8 @@ async function fetchReadingQuestions(n) {
   const plan = readSaved().plan;
   const name = readingName(plan, n);
   const key = questionsKey(n);
-  setReadingStatus('Writing questions for ' + name + '…');
+  setReadingStatus('Writing 5 questions for ' + name + '. This can take up to a minute.');
+  showWriting('today', shownReading === n);
 
   let result;
   try {
@@ -642,6 +660,7 @@ async function fetchReadingQuestions(n) {
     result = { error: 'offline' };
   }
   readingRequest = null;
+  if (shownReading === n) showWriting('today', false);
 
   // The plan was ended or changed while waiting: these questions don't belong anymore
   const saved = readSaved();

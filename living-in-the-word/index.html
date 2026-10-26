@@ -20,8 +20,8 @@
 
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=9">
-  <script src="app.js?v=11" defer></script>
+  <link rel="stylesheet" href="style.css?v=10">
+  <script src="app.js?v=12" defer></script>
 </head>
 <body>
 
@@ -64,7 +64,7 @@
         <input id="passage-text" type="text" maxlength="80" autocomplete="off" autocapitalize="words">
         <p class="hint">A verse, a chapter or a longer passage, like “John 4:1-26.”</p>
         <p class="gentle-error" hidden>Type a passage first.</p>
-        <button type="submit" class="primary">Write questions with AI</button>
+        <button type="submit" class="primary">Go deeper with AI</button>
       </form>
       <!-- Says plainly what the button does: the AI writes new questions every time -->
       <p class="note">The AI helper writes 5 new study questions just for this passage. It can take up to a minute. You can change any of them before you share. Only the passage name is sent.</p>
@@ -91,6 +91,9 @@
         <p class="leader-note-text"></p>
         <p class="note">Not shared with the group.</p>
       </div>
+
+      <!-- Shown only while the AI writes: five quiet lines that gently fade in and out -->
+      <div class="writing-placeholder" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
 
       <!-- role="list" keeps it a list for screen readers, since the numbers are drawn by style.css -->
       <ol class="question-list" role="list"></ol>
@@ -161,6 +164,7 @@
       </div>
 
       <p class="label reflect-label">To think about</p>
+      <div class="writing-placeholder" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
       <ol class="reflect-list" role="list"></ol>
       <p class="note reading-status" role="status" hidden></p>
       <!-- Shown when the AI helper is set up but this phone has no passcode yet -->
