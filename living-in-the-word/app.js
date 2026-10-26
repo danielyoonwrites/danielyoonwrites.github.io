@@ -689,8 +689,10 @@ function showFinished(plan) {
   show('reading-done');
 }
 
-// What the start screen says under "Today's reading"
+// What the start screen says: today's date at the top, like "Monday, October 26",
+// and where the plan is, under "Today's reading"
 function updatePlanStatus() {
+  fill('.today-date', new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }));
   const plan = readSaved().plan;
   let text = 'Set up a plan, like one chapter of Matthew a day.';
   if (plan) {

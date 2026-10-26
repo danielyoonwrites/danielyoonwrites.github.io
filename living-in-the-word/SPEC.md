@@ -64,6 +64,33 @@ Moved up on October 25, 2026: after trying step 2, the owner pointed out that qu
 - AI can misquote Scripture or add interpretations, which is why the owner reviews everything.
 - Which AI, where the server runs and the cost limits are decided in a separate plan before stage 2, after checking current docs. Claude effort for stage 2: Extra high (the owner asked; Claude Code docs describe it as "deeper reasoning at higher token spend").
 
+## The look: "Paper and ink" (October 26, 2026)
+
+The owner asked for a big visual update: the app doesn't have to look like his website. It should look like a real app, clean like Kinfolk magazine, so people like to look at it and use it. He picked direction A, "Paper and ink," from two mockups (the other kept his celadon green).
+
+Colors (in `style.css`, at the top)
+- paper `#F3EFE7`: the background. Warm, never pure white.
+- ink `#1D1B18`: main text and the main buttons (solid ink with paper-colored words).
+- muted `#6B655C`: labels, hints, small print. Checked: about 5 to 1 against paper and 4.5 to 1 against soft, enough for small text.
+- line `#DCD4C7`: thin lines between rows only.
+- soft `#E9E3D8`: the shaded box behind the AI's notes.
+
+Type (Google Fonts)
+- EB Garamond, Regular and Italic, for everything you read: titles, questions, notes.
+- Jost, Regular and Medium, only for small capital labels ("PREPARE A STUDY"), numbers (01, 02) and button words, spaced out.
+- No bold. Big titles (the passage name is the biggest thing on the questions screen).
+
+Layout
+- One column, phone width, also on a computer.
+- A thin bar at the top of each screen with Back on the left and "Living in the Word" on the right; it stays at the top while scrolling. The start screen has no bar: today's date, the big title, and two tap-able rows with arrows.
+- Questions are numbered 01, 02, 03 with thin lines between them, and look like plain words until tapped. Share and Copy stay at the bottom of the screen while scrolling, and step aside while you type in a question.
+- Typing boxes are a single line to write on. "Chapters a day" is three boxes; the chosen one is filled in.
+- Square corners, lots of open space. Sentence case, no exclamation marks, no emoji (as before).
+
+What Kinfolk's look is (web search results, October 26, 2026; Kinfolk's site and the design articles are blocked from Claude's session, so these weren't opened and are unverified): minimal layouts with generous white space, muted natural photography, a classic serif paired with a simple sans-serif, and few colors. Garamond was its text typeface around its 2015 redesign, and a later redesign for its tenth anniversary brought in custom typefaces. Search results pointed to It's Nice That (itsnicethat.com) and D&AD (dandad.org). The app borrows the feel, not Kinfolk's fonts, logo or photos.
+
+Parked: a real photo on the start screen (Kinfolk is photo-led; the website's rule is real photos only, window light, ordinary things).
+
 ## Bible text (parked)
 
 - Stage 1 doesn't show the Bible text itself, only the passage name.
@@ -72,7 +99,7 @@ Moved up on October 25, 2026: after trying step 2, the owner pointed out that qu
 
 ## Must-haves
 
-- Phone first, then computer. Moon jar design, the same as the website.
+- Phone first, then computer. The app's own look, "Paper and ink" (see "The look"), since October 26, 2026. Before that it used the website's Moon jar design.
 - Stage 1 sends nothing anywhere; recent studies are saved only on the phone. No accounts, analytics or tracking.
 - Sentence case, no exclamation marks, no emoji. "the Word," meaning Scripture, keeps its capital.
 - A small link back to the website at the bottom.
