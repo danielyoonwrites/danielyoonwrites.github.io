@@ -5,7 +5,8 @@ Questions written for the specific passage. Planned with the owner on October 25
 ## Decided (October 25, 2026)
 
 - The AI follows the chosen method: for Discovery Bible Study it still asks about God, about people, obeying and sharing, but about this passage. Its questions replace the general ones as drafts. "Start these questions over" brings the general ones back.
-- Changed October 26, 2026 (the owner's choice, pull request 50): no methods or reading plan styles. When the AI writes for each passage, the questions won't fit a method's mold anyway. The AI writes exactly 4 questions in one fixed order (what the passage says, God, the heart, a response), as soon as a passage is typed. "Write new questions" asks again.
+- Changed October 26, 2026 (the owner's choice, pull request 50): no methods or reading plan styles. When the AI writes for each passage, the questions won't fit a method's mold anyway. The AI writes questions in one fixed order (what the passage says, God, the heart, a response), as soon as a passage is typed. "Write new questions" asks again.
+- Changed again October 26, 2026 (pull request 51): 5 questions, the 5th about praying together (the owner's choice), for the reading plan too (there, one way to live it out today, then prayer). The button now says "Write questions with AI," with a line saying it writes 5 new study questions.
 - A passcode: the first time the owner taps "Suggest questions," the app asks for it and remembers it on that phone. Other leaders can get their own later.
 - Which AI model: decided later, after a side-by-side test (see step C). The owner wants to see quality and cost together.
 - Every suggestion is a draft the owner reviews. Nothing is shared on its own.
@@ -19,7 +20,7 @@ Still open (asked one at a time when we get there):
 
 ## How it works
 
-1. In the app, type a passage and tap "Write questions."
+1. In the app, type a passage and tap "Write questions with AI."
 2. The app sends only the passage name (like "John 4:1-26"), whether it's a group study or the reading plan, and the passcode to a small server. Nothing personal.
 3. The server checks the passcode, then asks the AI (Claude, by Anthropic) with the secret key, which only the server knows.
 4. The questions come back and show as drafts, ready to edit, remove or add to.
@@ -53,7 +54,7 @@ The AI doesn't get the Bible text (stage 1 shows no Bible text, and translations
 - Point to verse numbers ("in verse 10") instead of quoting verses.
 - Stay with what the passage says. Don't add an interpretation as if it were the text.
 - If it doesn't recognize the passage, say so instead of guessing.
-- Write exactly 4 questions in the set order, in plain words for a small group.
+- Write exactly 5 questions in the set order, in plain words for a small group.
 
 The owner reviews every question, as always.
 
@@ -94,7 +95,7 @@ D. The chosen model becomes the only one, and the test choice comes out. Done Oc
 E. Built October 25, 2026 (pull request 44). AI questions for the reading plan (the owner's choice, October 25, 2026): opening a day's reading asks the AI for 3 or 4 personal reflection questions on that chapter, written for one person's quiet time instead of a group, and saves them with the plan so the same reading never costs twice. Until the AI is connected, the reading shows the three Swedish-method questions. The server has a fourth pattern for this, `devotional` in `server/worker.js` (3 or 4 questions: notice what it says about God, the heart, a response to God). On a phone without the passcode, a quiet "Questions for this reading" button asks for it once. If the AI writes a note (like the Mark 16 note), it shows as "A note on this reading." Check: open today's reading.
 
 F. A style for the reading plan (pull request 47): the app sends the chosen style's method with `personal: true`, and the server adds a line asking for only 3 or 4 questions for one person's quiet time, in that method's order. Quiet time uses the `devotional` pattern. AI questions are saved by style and reading, so changing styles never pays twice for the same one.
-Replaced October 26, 2026 (pull request 50): no styles. The app sends `method: 'personal'`, the server's `personal` pattern asks for exactly 4 questions, and they're saved by reading (`four-0`, `four-1` and so on). Readings saved under an old style are asked once more.
+Replaced October 26, 2026 (pull request 50): no styles. The app sends `method: 'personal'`, the server's `personal` pattern asks for exactly 4 questions, and they're saved by reading (`four-0`, `four-1` and so on). Readings saved under an old style are asked once more. Since pull request 51: 5 questions, saved as `five-0`, `five-1` and so on.
 
 Then the rest of `SPEC.md`'s build plan: Share and Copy, Lead the study, saving, the reading plan, printing.
 

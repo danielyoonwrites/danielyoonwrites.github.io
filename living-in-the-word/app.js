@@ -1,4 +1,4 @@
-// Living in the Word: shows one screen at a time. It writes 4 questions for a Bible
+// Living in the Word: shows one screen at a time. It writes 5 questions for a Bible
 // passage with the AI helper (they stay only while the page is open), and keeps a
 // daily reading plan (saved on this phone).
 // Only the passage name is sent anywhere, to the app's own small server (the AI helper,
@@ -7,12 +7,13 @@
 
 // ---------- General questions ----------
 // Shown when the AI helper can't answer. The same order the AI follows (see server/worker.js):
-// what it says, what it shows about God, our hearts, one response. Edit the wording here.
+// what it says, what it shows about God, our hearts, one response, prayer. Edit the wording here.
 const GENERAL_QUESTIONS = [
   'What stands out to you in this passage?',
   'What does this passage show about God?',
   'How does it speak to what we love, trust or hope in?',
   'What is one way you will respond to it this week?',
+  'What can we pray about together from this passage?',
 ];
 
 
@@ -465,17 +466,19 @@ const READING_QUESTIONS = [
   'What stands out to you in today’s reading?',
   'What does it show you about God?',
   'How does it speak to what you love, trust or hope in?',
+  'What is one way you can live it out today?',
   'What do you want to say to God about it?',
 ];
 
-// Where a reading's AI questions are saved, by reading number, like "four-2".
-// ("four" because the AI writes 4 questions; questions saved before that are left unused.)
+// Where a reading's AI questions are saved, by reading number, like "five-2".
+// ("five" because the AI writes 5 questions; questions saved before that are left unused,
+// so a reading opened before the change is written once more.)
 function questionsKey(n) {
-  return 'four-' + n;
+  return 'five-' + n;
 }
 
 // The saved plan: { book: 'Matthew', perDay: 1, start: '2026-11-01', done: 2,
-//                   lastDone: '2026-11-02', questions: { 'four-2': { questions: [...], note: '' } } }
+//                   lastDone: '2026-11-02', questions: { 'five-2': { questions: [...], note: '' } } }
 //   done is how many readings are finished; lastDone is the date of the last "Done for today";
 //   questions holds the AI's questions for each reading (by reading number, starting at 0),
 //   so a reading is never paid for twice.

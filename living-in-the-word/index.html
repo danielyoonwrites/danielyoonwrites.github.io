@@ -18,7 +18,7 @@
   <!-- The app's own look: Moon jar colors, big buttons.
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
   <link rel="stylesheet" href="style.css?v=8">
-  <script src="app.js?v=9" defer></script>
+  <script src="app.js?v=10" defer></script>
 </head>
 <body>
 
@@ -46,13 +46,14 @@
         <input id="passage-text" type="text" maxlength="80" autocomplete="off" autocapitalize="words">
         <p class="hint">A verse, a chapter or a longer passage, like “John 4:1-26.”</p>
         <p class="gentle-error" hidden>Type a passage first.</p>
-        <button type="submit" class="primary">Write questions</button>
+        <button type="submit" class="primary">Write questions with AI</button>
       </form>
-      <p class="note">Only the passage name is sent, to the AI helper that writes the questions.</p>
+      <!-- Says plainly what the button does: the AI writes new questions every time -->
+      <p class="note">The AI helper writes 5 new study questions just for this passage. It can take up to a minute. You can change any of them before you share. Only the passage name is sent.</p>
       <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
-    <!-- 2. The questions: 4 written by the AI helper for this passage (see AI-PLAN.md).
+    <!-- 2. The questions: 5 written by the AI helper for this passage (see AI-PLAN.md).
          Edit, remove or add. app.js fills in the list. -->
     <section class="screen" id="questions">
       <p class="label">Questions</p>

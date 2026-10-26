@@ -16,8 +16,8 @@ Type a Bible passage (a verse, a chapter or a longer passage, like "John 4:1-26"
 
 One thing per screen, with big buttons.
 
-1. "Which passage?" Type it, like "John 4:1-26," and tap "Write questions."
-2. The AI helper writes 4 questions for that passage (see "The questions" below). While it writes, 4 general questions show; if the AI can't be reached, they stay. There used to be a choice of study method here; the owner removed it on October 26, 2026 (pull request 50).
+1. "Which passage?" Type it, like "John 4:1-26," and tap "Write questions with AI." A line under the button says what happens: the AI helper writes 5 new study questions for this passage (the owner asked for this to be clear, October 26, 2026).
+2. The AI helper writes 5 questions for that passage (see "The questions" below). While it writes, 5 general questions show; if the AI can't be reached, they stay. There used to be a choice of study method here; the owner removed it on October 26, 2026 (pull request 50).
 3. The questions appear, with the passage at the top. Edit any question, remove one, or add your own. "Write new questions" asks the AI again. Nothing is shared until the owner chooses to.
 4. Share (the owner's first pick): "Share" sends the passage and questions as plain text through the phone's share menu, for example to a KakaoTalk group chat. "Copy" is there too, in case sharing doesn't work.
 5. Lead (the owner's other pick): "Lead the study" shows one question at a time in big text, with Next and Back, for leading in the room or on a screen.
@@ -27,14 +27,14 @@ One thing per screen, with big buttons.
 
 ## The questions
 
-Since October 26, 2026 (the owner's choice, pull request 50), there's no study method to choose, for the group study or the reading plan. His reason: when the AI writes the questions for each passage, they won't fit a method's mold anyway. The AI writes exactly 4 questions, in this order (`PATTERNS` in `server/worker.js`):
+Since October 26, 2026 (the owner's choice, pull request 50), there's no study method to choose, for the group study or the reading plan. His reason: when the AI writes the questions for each passage, they won't fit a method's mold anyway. The AI writes exactly 5 questions, in this order (`PATTERNS` in `server/worker.js`). The owner moved from 4 to 5 the same day (pull request 51), and chose prayer for the 5th.
 
-- Group study: what the passage says (what happens, who is involved, what stands out); what it shows about God (the Father, the Son or the Holy Spirit); what it means for our hearts (what we love, trust, fear or hope in, in light of the gospel); one concrete response this week.
-- Reading plan, for one person's quiet time: notice what the reading says; what it shows about God; the reader's heart; a response to God (thanks, trust, repentance or prayer).
+- Group study: what the passage says (what happens, who is involved, what stands out); what it shows about God (the Father, the Son or the Holy Spirit); what it means for our hearts (what we love, trust, fear or hope in, in light of the gospel); one concrete response this week; what the group can pray about together.
+- Reading plan, for one person's quiet time: notice what the reading says; what it shows about God; the reader's heart; one way to live it out today; turning it into prayer (thanks, trust, repentance or asking).
 
 General questions show while the AI writes, or stay if it can't be reached. Drafted by Claude, waiting for the owner's review (`GENERAL_QUESTIONS` and `READING_QUESTIONS` in `app.js`):
-- Group study: What stands out to you in this passage? / What does this passage show about God? / How does it speak to what we love, trust or hope in? / What is one way you will respond to it this week?
-- Reading plan: What stands out to you in today's reading? / What does it show you about God? / How does it speak to what you love, trust or hope in? / What do you want to say to God about it?
+- Group study: What stands out to you in this passage? / What does this passage show about God? / How does it speak to what we love, trust or hope in? / What is one way you will respond to it this week? / What can we pray about together from this passage?
+- Reading plan: What stands out to you in today's reading? / What does it show you about God? / How does it speak to what you love, trust or hope in? / What is one way you can live it out today? / What do you want to say to God about it?
 
 ### Removed: study methods (October 26, 2026)
 
@@ -87,7 +87,7 @@ Moved up on October 25, 2026: after trying step 2, the owner pointed out that qu
 
 ## How we'll know it works
 
-- Type "John 4:1-26," get 4 questions written for it, edit one, and share it to a chat: the chat shows the passage and the questions as plain text.
+- Type "John 4:1-26," get 5 questions written for it, edit one, and share it to a chat: the chat shows the passage and the questions as plain text.
 - "Lead the study" shows one question at a time and goes forward and back.
 - Close the browser and reopen it: recent studies are there.
 
@@ -102,7 +102,7 @@ Moved up on October 25, 2026: after trying step 2, the owner pointed out that qu
 ## Build plan (one pull request each, each with a check the owner does)
 
 1. This spec and the folder's `CLAUDE.md`. Check: read it.
-2. Type a passage, choose a method, see and edit the questions. Built October 25, 2026 (not saved yet; edits last while the page is open). Methods removed October 26, 2026 (pull request 50): the AI writes 4 questions right away. Check: try it with a real passage for your group, and fix any wording.
+2. Type a passage, choose a method, see and edit the questions. Built October 25, 2026 (not saved yet; edits last while the page is open). Methods removed October 26, 2026 (pull request 50): the AI writes questions right away (5 since pull request 51). Check: try it with a real passage for your group, and fix any wording.
 3. The AI helper, moved up on October 25, 2026. Its own steps, A to D, are in `AI-PLAN.md`: the plan, sign-ups, the server with a side-by-side model test, then the "Suggest questions" button.
 4. Share and Copy. Built October 25, 2026 (pull request 45): the passage and the numbered questions as plain text (the method's name too, until methods were removed), never the note for the leader; empty questions are left out. Share uses the phone's share menu (`navigator.share`) and is hidden where it isn't available (most computers); Copy uses the clipboard, then an older way, and if a browser blocks both it shows the text to select by hand. Not yet checked in KakaoTalk's built-in browser (Claude can't open KakaoTalk). Check: share a study to yourself in KakaoTalk, from Chrome and from inside KakaoTalk.
 5. Lead the study, one question at a time. Check: lead from your phone or a laptop.
