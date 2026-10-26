@@ -20,8 +20,8 @@
 
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=13">
-  <script src="app.js?v=15" defer></script>
+  <link rel="stylesheet" href="style.css?v=14">
+  <script src="app.js?v=16" defer></script>
 </head>
 <body>
 
@@ -125,7 +125,8 @@
            sends the passage and questions as plain text; the note for the leader is never included.
            This bar stays at the bottom of the screen while you scroll. -->
       <div class="share-pair">
-        <button type="button" class="primary" data-action="save">Save</button>
+        <!-- app.js fills in the words, like "Save these questions for John 1" -->
+        <button type="button" class="primary save-button" data-action="save">Save</button>
         <button type="button" class="outline" data-action="share">Share</button>
         <button type="button" class="outline" data-action="copy">Copy</button>
       </div>

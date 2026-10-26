@@ -531,13 +531,16 @@ function readyQuestions() {
   return questions.map((question) => question.trim()).filter(Boolean);
 }
 
-// The Save button says Save, Saved, or Save changes (after an edit)
+// The Save button says what it saves: "Save these questions for John 1", then
+// "Saved on this phone", or "Save your changes" after an edit
 function updateSaveButton() {
   const button = document.querySelector('[data-action="save"]');
   const study = findStudy(passage);
   const unchanged = study && JSON.stringify(study.questions) === JSON.stringify(readyQuestions()) &&
     (study.note || '') === leaderNote;
-  button.textContent = !study ? 'Save' : unchanged ? 'Saved' : 'Save changes';
+  // (a no-break space keeps "1 Corinthians" together if the words wrap)
+  button.textContent = !study ? 'Save these questions for ' + passage.replace(/^(\d) /, '$1\u00a0')
+    : unchanged ? 'Saved on this phone' : 'Save your changes';
   button.classList.toggle('is-saved', Boolean(unchanged));
   document.querySelector('[data-action="unsave"]').hidden = !study;
 }
