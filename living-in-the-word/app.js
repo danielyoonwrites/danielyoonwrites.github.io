@@ -1,57 +1,28 @@
-// Living in the Word: shows one screen at a time. It turns a passage into
-// questions for a small group (they stay only while the page is open), and keeps
-// a daily reading plan (saved on this phone).
-// Only "Suggest questions" sends anything: the passage name and the method,
-// to the app's own small server (the AI helper, see AI-PLAN.md).
-// See SPEC.md for the plan.
+// Living in the Word: shows one screen at a time. It writes 4 questions for a Bible
+// passage with the AI helper (they stay only while the page is open), and keeps a
+// daily reading plan (saved on this phone).
+// Only the passage name is sent anywhere, to the app's own small server (the AI helper,
+// see AI-PLAN.md). See SPEC.md for the plan.
 
 
-// ---------- The questions for each method ----------
-// Edit the wording right here. Where each method comes from is listed in SPEC.md.
-// "tip" is a short line shown above the questions.
-const METHODS = {
-  dbs: {
-    name: 'Discover',
-    original: 'Discovery Bible Study',   // the method's usual name, shown in small print and in shared text
-    tip: 'Read the passage aloud, maybe twice, then go through the questions together.',
-    questions: [
-      'Can someone retell the passage in their own words?',
-      'What does this passage say about God?',
-      'What does it say about people?',
-      'How will I obey what it says this week?',
-      'Who will I share it with this week?',
-    ],
-  },
-  oia: {
-    name: 'Look, think, live',
-    original: 'Observe, Interpret, Apply',
-    tip: 'Read the passage aloud. Stay with what it says before moving to what it means.',
-    questions: [
-      'What does the passage say? Notice who, what, when and where, and any words that repeat.',
-      'What does it mean? What do other parts of the Bible say about this?',
-      'What should I do about it?',
-    ],
-  },
-  swedish: {
-    name: 'Light, question, arrow',
-    original: 'The Swedish method',
-    tip: 'Read the passage aloud. Give everyone a few quiet minutes with it, then share one of each.',
-    questions: [
-      'Light bulb: what stands out or shines for you?',
-      'Question mark: what is hard to understand, or what would you ask?',
-      'Arrow: how does it apply to your life?',
-    ],
-  },
-};
+// ---------- General questions ----------
+// Shown when the AI helper can't answer. The same order the AI follows (see server/worker.js):
+// what it says, what it shows about God, our hearts, one response. Edit the wording here.
+const GENERAL_QUESTIONS = [
+  'What stands out to you in this passage?',
+  'What does this passage show about God?',
+  'How does it speak to what we love, trust or hope in?',
+  'What is one way you will respond to it this week?',
+];
 
 
 // ---------- What's being worked on (only while the page is open) ----------
-let passage = '';     // the passage typed, like "John 4:1-26"
-let method = 'dbs';   // the method chosen
-let drafts = {};      // the questions for each method, with any edits: { dbs: [...], ... }
-let notes = {};       // the AI's note for the leader, for each method it suggested questions for
-let draftsFor = '';   // the passage those questions belong to
-let history = [];     // screens visited, so Back can go to the one before
+let passage = '';        // the passage typed, like "John 4:1-26"
+let questions = [];      // the questions on screen, with any edits
+let leaderNote = '';     // the AI's note for the leader, if it wrote one
+let questionsFor = '';   // the passage those questions belong to
+let edited = false;      // true once the leader changes, removes or adds a question
+let history = [];        // screens visited, so Back can go to the one before
 
 const screens = [...document.querySelectorAll('.screen')];
 
@@ -92,7 +63,6 @@ function fill(selector, text) {
 function showQuestions() {
   const list = document.querySelector('.question-list');
   list.textContent = '';
-  const questions = drafts[method];
 
   questions.forEach((question, index) => {
     const item = document.createElement('li');
@@ -103,6 +73,7 @@ function showQuestions() {
     box.setAttribute('aria-label', 'Question ' + (index + 1));
     box.addEventListener('input', () => {
       questions[index] = box.value;
+      edited = true;
       fitHeight(box);
     });
     item.append(box);
@@ -114,6 +85,7 @@ function showQuestions() {
     remove.setAttribute('aria-label', 'Remove question ' + (index + 1));
     remove.addEventListener('click', () => {
       questions.splice(index, 1);
+      edited = true;
       showQuestions();
     });
     item.append(remove);
@@ -121,13 +93,12 @@ function showQuestions() {
     list.append(item);
   });
 
-  document.querySelector('.no-questions').hidden = questions.length > 0;
+  document.querySelector('.no-questions').hidden = questions.length > 0 || asking;
   list.querySelectorAll('textarea').forEach(fitHeight);
 
   // The AI's note for the leader, if it wrote one
-  const note = notes[method] || '';
-  document.querySelector('.leader-note').hidden = !note;
-  fill('.leader-note-text', note);
+  document.querySelector('.leader-note').hidden = !leaderNote;
+  fill('.leader-note-text', leaderNote);
 }
 
 // Makes a question's box as tall as its words, so nothing hides inside it
@@ -141,15 +112,17 @@ window.addEventListener('resize', () => {
   document.querySelectorAll('.question-list textarea').forEach(fitHeight);
 });
 
-// A fresh copy of a method's questions, so editing never changes the originals
-function freshQuestions(id) {
-  return METHODS[id].questions.slice();
+// The general questions, when the AI helper can't answer
+function useGeneralQuestions() {
+  questions = GENERAL_QUESTIONS.slice();
+  leaderNote = '';
+  edited = false;
+  showQuestions();
 }
 
 
-// ---------- Typing and choosing ----------
+// ---------- Which passage? ----------
 
-// 1. Which passage?
 document.querySelector('#passage form').addEventListener('submit', (event) => {
   event.preventDefault();
   const box = document.getElementById('passage-text');
@@ -160,31 +133,37 @@ document.querySelector('#passage form').addEventListener('submit', (event) => {
     return;
   }
   passage = text;
-  // A new passage starts fresh, so suggestions for another passage never show up here
-  if (passage !== draftsFor) {
-    drafts = {};
-    notes = {};
-    draftsFor = passage;
-  }
-  fill('.passage-label', passage);
-  show('method');
-});
-
-// 2. How do you want to study it?
-document.querySelector('#method form').addEventListener('submit', (event) => {
-  event.preventDefault();
-  method = document.querySelector('#method input[name="method"]:checked').value;
-  // Each method keeps its own edits, so switching back and forth doesn't lose them
-  if (!drafts[method]) drafts[method] = freshQuestions(method);
-  fill('.method-label', METHODS[method].name);
   fill('.passage-name', passage);
-  fill('.method-tip', METHODS[method].tip);
-  setStatus('');
   setShareStatus('');
-  document.querySelector('.test-cost').hidden = true;
+
+  // The same passage again keeps its questions; a new one starts fresh
+  if (passage !== questionsFor) {
+    questions = [];
+    leaderNote = '';
+    edited = false;
+    questionsFor = passage;
+    setStatus('');
+    document.querySelector('.test-cost').hidden = true;
+  }
   show('questions');
   showQuestions();   // after the screen shows, so each box can measure its words
+  if (!questions.length) writeQuestions();
 });
+
+// Asks the AI helper for questions (the passcode first, if this phone doesn't have it yet)
+function writeQuestions() {
+  if (!SERVER_URL) {
+    useGeneralQuestions();
+    return;
+  }
+  if (!passcode) {
+    if (!questions.length) useGeneralQuestions();   // what's there if the leader goes Back
+    afterPasscode = requestSuggestions;
+    askPasscode(false);
+    return;
+  }
+  requestSuggestions();
+}
 
 
 // ---------- Buttons ----------
@@ -204,19 +183,11 @@ const actions = {
 
   // Adds an empty question at the end, with the cursor in it
   add() {
-    drafts[method].push('');
+    questions.push('');
+    edited = true;
     showQuestions();
     const boxes = document.querySelectorAll('.question-list textarea');
     boxes[boxes.length - 1].focus();
-  },
-
-  // Puts back the method's own questions, undoing every edit and suggestion (asks first if anything changed)
-  reset() {
-    if (changedQuestions() && !window.confirm('Start over with the general questions? Changes here will be lost.')) return;
-    drafts[method] = freshQuestions(method);
-    delete notes[method];
-    setStatus('');
-    showQuestions();
   },
 
   // Sends the study through the phone's share menu, for example to a KakaoTalk group chat
@@ -256,36 +227,25 @@ const actions = {
     }
   },
 
-  // Asks the AI helper for questions written for this passage
+  // "Write new questions": asks the AI helper again (asks first if the leader changed anything)
   suggest() {
     if (asking) return;
-    if (!SERVER_URL) {
-      setStatus('The AI helper isn’t connected yet.');
-      return;
-    }
-    if (changedQuestions() && !window.confirm('Replace these questions with new suggestions?')) return;
-    if (!passcode) {
-      afterPasscode = requestSuggestions;
-      askPasscode(false);
-      return;
-    }
-    requestSuggestions();
+    if (edited && !window.confirm('Replace these questions with new ones? Your changes will be lost.')) return;
+    writeQuestions();
   },
 };
 
 // ---------- Share and Copy ----------
 
-// The study as plain text: the passage, the method (like "Discover (Discovery Bible Study)"),
-// then the numbered questions.
+// The study as plain text: the passage, then the numbered questions.
 // The note for the leader is never included. Empty questions are left out.
 function studyText() {
-  const questions = drafts[method].map((question) => question.trim()).filter(Boolean);
-  if (!questions.length) {
+  const ready = questions.map((question) => question.trim()).filter(Boolean);
+  if (!ready.length) {
     setShareStatus('Add a question first.');
     return '';
   }
-  return passage + '\n' + METHODS[method].name + ' (' + METHODS[method].original + ')\n\n' +
-    questions.map((question, index) => (index + 1) + '. ' + question).join('\n\n');
+  return passage + '\n\n' + ready.map((question, index) => (index + 1) + '. ' + question).join('\n\n');
 }
 
 function setShareStatus(text) {
@@ -320,10 +280,6 @@ if (!navigator.share) {
   document.querySelector('.share-pair').classList.add('single');
 }
 
-// True if the questions on screen aren't the method's general ones anymore
-function changedQuestions() {
-  return drafts[method].join('\n') !== METHODS[method].questions.join('\n') || Boolean(notes[method]);
-}
 
 
 // ---------- The AI helper ----------
@@ -338,14 +294,8 @@ let passcode = readSaved().passcode || '';
 let asking = false;   // true while waiting for the AI
 let afterPasscode = requestSuggestions;   // what to do once a passcode is typed
 
-// The test link (the address with ?test) shows a model choice and what each answer cost
+// The test link (the address with ?test) shows what each answer cost
 const testMode = new URLSearchParams(window.location.search).has('test');
-document.querySelector('.test-only').hidden = !testMode;
-const MODEL_NAMES = {
-  'claude-opus-5-5': 'Opus 5.5',
-  'claude-sonnet-5-5': 'Sonnet 5.5',
-  'claude-haiku-5-5': 'Haiku 5.5',
-};
 
 // What's saved on this phone, as one piece of JSON:
 //   { version: 1, passcode: '...', plan: { ... } }   (the plan is described in the reading plan part)
@@ -404,10 +354,10 @@ function setStatus(text) {
 
 // Kind words for each problem the AI helper can report
 const PROBLEMS = {
-  'limit-reached': 'This month’s AI limit is reached. The general questions are still here.',
-  declined: 'The AI couldn’t write questions for this one. Try again, or use the general questions.',
-  offline: 'Couldn’t reach the AI helper. Check your connection and try again.',
-  other: 'The AI helper couldn’t answer just now. Try again in a moment.',
+  'limit-reached': 'This month’s AI limit is reached, so these are general questions.',
+  declined: 'The AI couldn’t write questions for this one, so these are general questions.',
+  offline: 'Couldn’t reach the AI helper, so these are general questions. Check your connection and try again.',
+  other: 'The AI helper couldn’t answer just now, so these are general questions. Try again in a moment.',
 };
 
 async function requestSuggestions() {
@@ -415,14 +365,12 @@ async function requestSuggestions() {
   const button = document.querySelector('[data-action="suggest"]');
   button.disabled = true;
   button.textContent = 'Writing questions…';
-  setStatus('This can take up to a minute.');
+  setStatus('Writing questions for ' + passage + '. This can take up to a minute.');
   document.querySelector('.test-cost').hidden = true;
+  showQuestions();
 
   // Remember what was asked, in case the leader moves on while waiting
   const forPassage = passage;
-  const forMethod = method;
-  const body = { passcode, passage: forPassage, method: forMethod };
-  if (testMode) body.model = document.querySelector('.test-only input:checked').value;
 
   let result = null;
   const stop = new AbortController();
@@ -431,7 +379,7 @@ async function requestSuggestions() {
     const response = await fetch(SERVER_URL, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ passcode, passage: forPassage, method: 'study' }),
       signal: stop.signal,
     });
     result = await response.json();
@@ -442,10 +390,10 @@ async function requestSuggestions() {
 
   asking = false;
   button.disabled = false;
-  button.textContent = 'Suggest questions for this passage';
+  button.textContent = 'Write new questions';
 
-  // The leader typed a new passage while waiting: these suggestions don't belong anymore
-  if (draftsFor !== forPassage) {
+  // The leader typed a new passage while waiting: these questions don't belong anymore
+  if (questionsFor !== forPassage) {
     setStatus('');
     return;
   }
@@ -453,34 +401,33 @@ async function requestSuggestions() {
   if (result.error === 'wrong-passcode') {
     savePasscode('');
     setStatus('');
+    if (!questions.length) useGeneralQuestions();
     afterPasscode = requestSuggestions;
     askPasscode(true);
     return;
   }
-  if (result.error) {
+  if (!result.error && !result.knownPassage) {
+    setStatus('The AI didn’t recognize that passage. Go back and check it, like “John 4:1-26.”');
+    showQuestions();
+    return;
+  }
+  if (result.error || !Array.isArray(result.questions) || !result.questions.length) {
+    // Keep questions already on screen; otherwise show the general ones
+    if (!questions.length) useGeneralQuestions();
+    else showQuestions();
     setStatus(PROBLEMS[result.error] || PROBLEMS.other);
     return;
   }
-  if (!result.knownPassage) {
-    setStatus('The AI didn’t recognize that passage. Check it, like “John 4:1-26.”');
-    return;
-  }
-  if (!Array.isArray(result.questions) || !result.questions.length) {
-    setStatus(PROBLEMS.other);
-    return;
-  }
 
-  drafts[forMethod] = result.questions;
-  notes[forMethod] = result.leaderNote || '';
-  if (method === forMethod) {
-    setStatus('Suggested for this passage. Read each one, and change anything before you use it.');
-    showQuestions();
-  }
+  questions = result.questions;
+  leaderNote = result.leaderNote || '';
+  edited = false;
+  setStatus('Written for this passage. Read each one, and change anything before you use it.');
+  showQuestions();
 
   if (testMode) {
     const cost = document.querySelector('.test-cost');
-    cost.textContent = (MODEL_NAMES[result.model] || result.model) + ': ' +
-      result.inputTokens.toLocaleString() + ' tokens in, ' +
+    cost.textContent = result.inputTokens.toLocaleString() + ' tokens in, ' +
       result.outputTokens.toLocaleString() + ' out. About ' +
       (result.cost * 100).toFixed(2) + ' cents.';
     cost.hidden = false;
@@ -512,74 +459,26 @@ const BOOKS = [
 ];
 const NEW_TESTAMENT_STARTS = 39;   // Matthew is the 40th book
 
-// The styles of questions for the reading plan, for one person. Each has general questions
-// (shown until the AI writes questions for that reading) and the method the AI helper follows.
-// Edit the wording here. Quiet time isn't a named method (see SPEC.md); the others are the
-// study methods above, worded for one reader.
-const PLAN_STYLES = {
-  quiet: {
-    name: 'Quiet time',
-    line: 'What it shows about God, your heart, and a prayer.',
-    ai: 'devotional',
-    questions: [
-      'What does today’s reading show you about God?',
-      'What do you love, trust, fear or hope in, and how does this reading speak to it?',
-      'What do you want to say to God about it?',
-    ],
-  },
-  dbs: {
-    name: METHODS.dbs.name,
-    original: METHODS.dbs.original,
-    line: 'God, people, then what to obey and who to tell.',
-    ai: 'dbs',
-    questions: [
-      'What does today’s reading say about God?',
-      'What does it say about people, and about you?',
-      'How will you obey it today?',
-      'Who could you share it with?',
-    ],
-  },
-  oia: {
-    name: METHODS.oia.name,
-    original: METHODS.oia.original,
-    line: 'What it says, what it means, what to do.',
-    ai: 'oia',
-    questions: [
-      'Look: what does today’s reading say? Notice who, what, where, and any words that repeat.',
-      'Think: what does it mean?',
-      'Live: what will you do about it today?',
-    ],
-  },
-  swedish: {
-    name: METHODS.swedish.name,
-    original: METHODS.swedish.original,
-    line: 'What shines, what’s hard, how it applies.',
-    ai: 'swedish',
-    questions: [
-      'Light bulb: what stands out to you in today’s reading?',
-      'Question mark: what’s hard to understand, or what would you ask God about it?',
-      'Arrow: how could this shape your day?',
-    ],
-  },
-};
-const NEW_PLAN_STYLE = 'quiet';
-// Plans made before styles existed showed Light, question, arrow, so they keep it
-const OLD_PLAN_STYLE = 'swedish';
+// Questions to think about each day, shown until the AI writes questions for that reading.
+// The same order the AI follows for personal reading (see server/worker.js). Edit them here.
+const READING_QUESTIONS = [
+  'What stands out to you in today’s reading?',
+  'What does it show you about God?',
+  'How does it speak to what you love, trust or hope in?',
+  'What do you want to say to God about it?',
+];
 
-function styleOf(plan) {
-  return PLAN_STYLES[plan.style] ? plan.style : OLD_PLAN_STYLE;
+// Where a reading's AI questions are saved, by reading number, like "four-2".
+// ("four" because the AI writes 4 questions; questions saved before that are left unused.)
+function questionsKey(n) {
+  return 'four-' + n;
 }
 
-// Where a reading's AI questions are saved: by style and reading number, like "quiet-2"
-function questionsKey(plan, n) {
-  return styleOf(plan) + '-' + n;
-}
-
-// The saved plan: { book: 'Matthew', perDay: 1, start: '2026-11-01', style: 'quiet', done: 2,
-//                   lastDone: '2026-11-02', questions: { 'quiet-2': { questions: [...], note: '' } } }
+// The saved plan: { book: 'Matthew', perDay: 1, start: '2026-11-01', done: 2,
+//                   lastDone: '2026-11-02', questions: { 'four-2': { questions: [...], note: '' } } }
 //   done is how many readings are finished; lastDone is the date of the last "Done for today";
-//   questions holds the AI's questions for each reading (by style and reading number, starting
-//   at 0), so a reading is never paid for twice.
+//   questions holds the AI's questions for each reading (by reading number, starting at 0),
+//   so a reading is never paid for twice.
 let readingAhead = false;   // true after "Read the next one now", until the page closes
 let shownReading = null;    // the reading number on the "today" screen
 let readingRequest = null;  // the reading number the AI is writing questions for, if any
@@ -627,10 +526,7 @@ function showSetup() {
       select.append(group);
     });
     select.value = 'Matthew';
-    const styles = document.getElementById('plan-style');
-    Object.entries(PLAN_STYLES).forEach(([id, style]) => styles.append(new Option(style.name, id)));
   }
-  document.getElementById('plan-style').value = NEW_PLAN_STYLE;
   document.getElementById('plan-start').value = today();
   updateSummary();
   show('plan-setup');
@@ -639,8 +535,6 @@ function showSetup() {
 // "28 readings. If you read every day, you'll finish Sat, Nov 28."
 function updateSummary() {
   const plan = setupChoices();
-  const style = PLAN_STYLES[plan.style];
-  fill('.style-line', (style.original ? style.original + '. ' : '') + style.line);
   const readings = readingsIn(plan);
   const finish = showDate(plan.start, readings - 1);
   fill('.plan-summary', readings === 1
@@ -653,7 +547,6 @@ function setupChoices() {
     book: document.getElementById('plan-book').value,
     perDay: Number(document.querySelector('#plan-setup input[name="pace"]:checked').value),
     start: document.getElementById('plan-start').value || today(),
-    style: document.getElementById('plan-style').value,
     done: 0,
   };
 }
@@ -692,10 +585,8 @@ function showToday(keepHistory = true) {
   // The AI's questions for this reading if they're saved; otherwise the general ones,
   // and the AI is asked (when it's set up and this phone has the passcode)
   shownReading = plan.done;
-  const style = PLAN_STYLES[styleOf(plan)];
-  fill('.style-name', style.name);
-  const saved = plan.questions && plan.questions[questionsKey(plan, plan.done)];
-  showReflect(saved ? saved.questions : style.questions, saved ? saved.note : '');
+  const saved = plan.questions && plan.questions[questionsKey(plan.done)];
+  showReflect(saved ? saved.questions : READING_QUESTIONS, saved ? saved.note : '');
   setReadingStatus('');
   document.querySelector('.reading-ai').hidden = true;
   if (!saved && SERVER_URL) {
@@ -733,7 +624,7 @@ async function fetchReadingQuestions(n) {
   document.querySelector('.reading-ai').hidden = true;
   const plan = readSaved().plan;
   const name = readingName(plan, n);
-  const key = questionsKey(plan, n);
+  const key = questionsKey(n);
   setReadingStatus('Writing questions for ' + name + '…');
 
   let result;
@@ -741,7 +632,7 @@ async function fetchReadingQuestions(n) {
     const response = await fetch(SERVER_URL, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ passcode, passage: name, method: PLAN_STYLES[styleOf(plan)].ai, personal: true }),
+      body: JSON.stringify({ passcode, passage: name, method: 'personal' }),
     });
     result = await response.json();
   } catch (error) {
@@ -753,9 +644,7 @@ async function fetchReadingQuestions(n) {
   const saved = readSaved();
   const now = saved.plan;
   if (!now || now.book !== plan.book || now.perDay !== plan.perDay || now.start !== plan.start) return;
-  // The style was changed while waiting: save them under the style they were written for
-  const onScreen = shownReading === n && questionsKey(now, n) === key &&
-    document.getElementById('today').classList.contains('active');
+  const onScreen = shownReading === n && document.getElementById('today').classList.contains('active');
 
   if (result.error === 'wrong-passcode') {
     savePasscode('');
@@ -817,16 +706,6 @@ function goHome() {
   history = [];
 }
 
-document.querySelector('#plan-style-screen form').addEventListener('submit', (event) => {
-  event.preventDefault();
-  const saved = readSaved();
-  saved.plan.style = document.querySelector('#plan-style-screen input:checked').value;
-  writeSaved(saved);
-  goBack();       // back to today's reading
-  showToday();    // with the new style's questions
-  history = ['home'];
-});
-
 Object.assign(actions, {
   'done-reading'() {
     const saved = readSaved();
@@ -850,32 +729,6 @@ Object.assign(actions, {
     writeSaved(saved);
     showSetup();
     history = ['home'];
-  },
-
-  // "Change" on today's reading: choose another style of questions
-  'change-style'() {
-    const box = document.querySelector('.style-choices');
-    box.textContent = '';
-    const current = styleOf(readSaved().plan);
-    Object.entries(PLAN_STYLES).forEach(([id, style]) => {
-      const label = document.createElement('label');
-      label.className = 'choice';
-      const input = document.createElement('input');
-      input.type = 'radio';
-      input.name = 'plan-style-choice';
-      input.value = id;
-      input.checked = id === current;
-      label.append(input);
-      [['choice-name', style.name], ['choice-original', style.original], ['choice-line', style.line]].forEach(([className, text]) => {
-        if (!text) return;
-        const span = document.createElement('span');
-        span.className = className;
-        span.textContent = text;
-        label.append(span);
-      });
-      box.append(label);
-    });
-    show('plan-style-screen');
   },
 
   // "Questions for this reading": asks for the passcode first, then the AI
