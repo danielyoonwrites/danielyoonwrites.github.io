@@ -106,7 +106,7 @@ The owner asked for the app to work where there's no reception, like an app on a
 
 The owner asked for a way to pick the passage instead of always typing it (pull request 66).
 
-- "Choose from the Bible," right under the typing box (so it shows above a phone's keyboard), opens the picker. The typing box stays.
+- "Choose from the Bible" sits above the typing box, as a box with an arrow, with "Or type it" between them. So both read as ways to choose the passage, and only "Go deeper with AI" starts the questions (the owner asked, October 26, 2026, pull request 67: under the box, the two buttons looked like a choice between them). It opens the picker. The typing box stays.
 - One screen each: Old or New Testament, then the book (two to a row), then the chapter ("Which psalm?" for Psalms), then the verses. A book of one chapter (Obadiah, Philemon, 2 John, 3 John, Jude) goes straight to its verses.
 - The verses: "The whole chapter" ("The whole psalm," "The whole book"), or tap the first verse, then the last, in either order. The chosen verses are shaded, with the first and last filled in ink. A bar at the bottom shows the passage, like "John 3:16–21," with "Go deeper with AI."
 - Names as Bibles print them: "John 3" for a whole chapter, "John 3:16" for one verse, "John 3:16–21" for a few, "Psalm 23" for one psalm, and "Jude" or "Jude 3–5" for a book of one chapter. The server accepts every name the picker can make (checked: 7,127 names, from every chapter).

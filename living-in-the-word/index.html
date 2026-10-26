@@ -33,7 +33,7 @@
 
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=17">
+  <link rel="stylesheet" href="style.css?v=18">
   <script src="app.js?v=21" defer></script>
 </head>
 <body>
@@ -81,12 +81,14 @@
       <p class="label">Prepare a study</p>
       <form>
         <h2><label for="passage-text">Which passage?</label></h2>
+        <!-- Two ways to say which passage: choose it from the Bible (the screens below), or type it.
+             The picker comes first, so both read as ways to choose the passage, and only
+             "Go deeper with AI" starts the questions (the owner asked, October 26, 2026). -->
+        <button type="button" class="choose" data-action="choose">Choose from the Bible</button>
+        <label class="field-label" for="passage-text">Or type it</label>
         <input id="passage-text" type="text" maxlength="80" autocomplete="off" autocapitalize="words">
         <p class="hint">A verse, a chapter or a longer passage, like “John 4:1-26.”</p>
-        <p class="gentle-error" hidden>Type a passage first.</p>
-        <!-- Instead of typing: the "Choose from the Bible" screens below. Right under the box,
-             so it shows above the phone's keyboard. -->
-        <button type="button" class="outline choose" data-action="choose">Choose from the Bible</button>
+        <p class="gentle-error" hidden>Type a passage first, or choose one from the Bible.</p>
         <button type="submit" class="primary">Go deeper with AI</button>
       </form>
       <!-- Says plainly what the button does: the AI writes new questions every time -->
