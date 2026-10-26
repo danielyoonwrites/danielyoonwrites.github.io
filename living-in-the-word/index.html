@@ -17,8 +17,8 @@
 
   <!-- The app's own look: Moon jar colors, big buttons.
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=6">
-  <script src="app.js?v=6" defer></script>
+  <link rel="stylesheet" href="style.css?v=7">
+  <script src="app.js?v=7" defer></script>
 </head>
 <body>
 
@@ -152,6 +152,11 @@
         <label class="field-label" for="plan-start">Start</label>
         <input id="plan-start" type="date">
 
+        <!-- The style of questions each day. app.js fills in the choices and the line under it. -->
+        <label class="field-label" for="plan-style">Questions</label>
+        <select id="plan-style"></select>
+        <p class="hint style-line"></p>
+
         <!-- app.js fills this in, like "28 readings. If you read every day, you’ll finish Sat, Nov 28." -->
         <p class="plan-summary"></p>
         <button type="submit" class="primary">Start the plan</button>
@@ -174,6 +179,8 @@
       </div>
 
       <p class="label reflect-label">To think about</p>
+      <!-- The style of questions, like "Quiet time", with a link to change it -->
+      <p class="style-now"><span class="style-name"></span> <button type="button" class="link-button" data-action="change-style">Change</button></p>
       <ol class="reflect-list"></ol>
       <p class="note reading-status" role="status" hidden></p>
       <!-- Shown when the AI helper is set up but this phone has no passcode yet -->
@@ -181,6 +188,21 @@
 
       <button type="button" class="primary" data-action="done-reading">Done for today</button>
       <button type="button" class="quiet" data-action="end-plan">End this plan</button>
+      <button type="button" class="quiet back" data-action="back">Back</button>
+    </section>
+
+    <!-- Reading plan: change the style of questions -->
+    <section class="screen" id="plan-style-screen">
+      <p class="label">Reading plan</p>
+      <form>
+        <fieldset>
+          <legend><h2 tabindex="-1">Which style of questions?</h2></legend>
+          <!-- app.js fills in the four choices -->
+          <div class="style-choices"></div>
+        </fieldset>
+        <button type="submit" class="primary">Use this style</button>
+      </form>
+      <p class="note">Questions already written for earlier readings stay as they are.</p>
       <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
