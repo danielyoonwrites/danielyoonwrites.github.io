@@ -685,6 +685,35 @@ select {
 }
 
 
+/* A passage that isn't recognized ("Write me a poem"): only the message and
+   "Change the passage" show, since nothing else applies (the owner asked, October 26, 2026) */
+.change-passage {
+  display: none;
+}
+
+.not-found .change-passage {
+  display: block;
+}
+
+.not-found .study-tip,
+.not-found .scripture,
+.not-found .esv-only,
+.not-found .test-cost,
+.not-found .leader-note,
+.not-found .question-list,
+.not-found .no-questions,
+.not-found .hint,
+.not-found [data-action="add"],
+.not-found .suggest,
+.not-found .share-pair,
+.not-found .share-status,
+.not-found .share-text,
+.not-found .unsave,
+.not-found .save-note {
+  display: none;
+}
+
+
 /* ---------- Share and Copy ---------- */
 
 /* A bar that stays at the bottom of the screen while you scroll: Save across the whole
