@@ -76,6 +76,7 @@ function showQuestions() {
       questions[index] = box.value;
       edited = true;
       fitHeight(box);
+      updateSaveButton();
     });
     item.append(box);
 
@@ -100,6 +101,7 @@ function showQuestions() {
   // The AI's note for the leader, if it wrote one
   document.querySelector('.leader-note').hidden = !leaderNote;
   fill('.leader-note-text', leaderNote);
+  updateSaveButton();
 }
 
 // Makes a question's box as tall as its words, so nothing hides inside it
@@ -133,24 +135,38 @@ document.querySelector('#passage form').addEventListener('submit', (event) => {
     box.focus();
     return;
   }
-  passage = text;
-  fill('.passage-name', passage);
   setShareStatus('');
 
-  // The same passage again keeps its questions; a new one starts fresh
-  if (passage !== questionsFor) {
-    questions = [];
-    leaderNote = '';
-    edited = false;
-    questionsFor = passage;
-    setStatus('');
-    document.querySelector('.test-cost').hidden = true;
+  // The passage already on screen (even typed as "john 15"): back to its questions as they are
+  if (questionsFor && samePassage(text, questionsFor)) {
+    show('questions');
+    showQuestions();   // after the screen shows, so each box can measure its words
+    // Ask the AI only if there are no questions yet and it isn't already writing them
+    if (!questions.length && !(asking && samePassage(askingFor, passage))) writeQuestions();
+    return;
   }
-  showPassageText('questions', passage);   // does nothing if this passage's text is already there
+
+  // A saved passage opens its saved questions, without asking the AI
+  const study = findStudy(text);
+  if (study) {
+    openStudy(study);
+    return;
+  }
+
+  // A new passage starts fresh
+  passage = text;
+  fill('.passage-name', passage);
+  questions = [];
+  leaderNote = '';
+  edited = false;
+  questionsFor = passage;
+  setStatus('');
+  document.querySelector('.test-cost').hidden = true;
+  showPassageText('questions', passage);
   show('questions');
-  showQuestions();   // after the screen shows, so each box can measure its words
+  showQuestions();
   // Ask the AI, unless it's already writing for this same passage (Back, then the button again)
-  if (!questions.length && !(asking && askingFor === passage)) writeQuestions();
+  if (!(asking && samePassage(askingFor, passage))) writeQuestions();
 });
 
 // Asks the AI helper for questions (the passcode first, if this phone doesn't have it yet)
@@ -183,6 +199,36 @@ const actions = {
     else showSetup();
   },
   home: goHome,
+  saved: showSavedList,
+
+  // Saves this study's questions on this phone, or saves the changes to them
+  save() {
+    const ready = readyQuestions();
+    if (!ready.length) {
+      setShareStatus('Add a question first.');
+      return;
+    }
+    const saved = readSaved();
+    const others = (saved.studies || []).filter((study) => !samePassage(study.passage, passage));
+    saved.studies = [{ passage, questions: ready, note: leaderNote, saved: today() }, ...others];
+    if (!writeSaved(saved)) {
+      setShareStatus('This browser wouldn’t save it. In a private window, nothing can be kept.');
+      return;
+    }
+    edited = false;   // nothing unsaved now, so writing new questions won't lose anything
+    setShareStatus('Saved on this phone. Find it under Saved studies on the start screen.');
+    updateSaveButton();
+  },
+
+  // Takes this study off the saved list (its questions stay on screen until you leave)
+  unsave() {
+    if (!window.confirm('Remove ' + passage + ' from your saved studies?')) return;
+    const saved = readSaved();
+    saved.studies = (saved.studies || []).filter((study) => !samePassage(study.passage, passage));
+    writeSaved(saved);
+    setShareStatus('Removed from saved studies.');
+    updateSaveButton();
+  },
 
   // Adds an empty question at the end, with the cursor in it
   add() {
@@ -315,11 +361,14 @@ function readSaved() {
   return { version: 1 };
 }
 
+// Returns false if this browser won't save (a private window, for example)
 function writeSaved(saved) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+    return true;
   } catch (error) {
     // This browser won't save; things are kept until the page closes
+    return false;
   }
 }
 
@@ -451,6 +500,96 @@ async function requestSuggestions() {
       (result.cost * 100).toFixed(2) + ' cents.';
     cost.hidden = false;
   }
+}
+
+
+
+// ---------- Saved studies ----------
+// Tap Save under the questions to keep them on this phone, in the browser's storage with
+// the rest of the app's things (see readSaved). One saved study per passage: saving it again
+// keeps the newest. They're listed on the "Saved studies" screen, and typing a saved passage
+// opens its saved questions instead of asking the AI. Only the questions and the note for
+// the leader are saved, never the Bible text.
+
+// Saved studies, newest first: [{ passage: 'John 15', questions: [...], note: '', saved: '2026-10-26' }]
+function savedStudies() {
+  return readSaved().studies || [];
+}
+
+// "John 15" and "john  15" are the same passage
+function samePassage(a, b) {
+  const tidy = (text) => text.toLowerCase().replace(/[–—]/g, '-').replace(/\s+/g, ' ').trim();
+  return tidy(a) === tidy(b);
+}
+
+function findStudy(name) {
+  return savedStudies().find((study) => samePassage(study.passage, name));
+}
+
+// The questions worth keeping, without empty ones
+function readyQuestions() {
+  return questions.map((question) => question.trim()).filter(Boolean);
+}
+
+// The Save button says Save, Saved, or Save changes (after an edit)
+function updateSaveButton() {
+  const button = document.querySelector('[data-action="save"]');
+  const study = findStudy(passage);
+  const unchanged = study && JSON.stringify(study.questions) === JSON.stringify(readyQuestions()) &&
+    (study.note || '') === leaderNote;
+  button.textContent = !study ? 'Save' : unchanged ? 'Saved' : 'Save changes';
+  button.classList.toggle('is-saved', Boolean(unchanged));
+  document.querySelector('[data-action="unsave"]').hidden = !study;
+}
+
+// Opens a saved study's questions, ready to use, change or share
+function openStudy(study) {
+  // If the AI is still writing for another passage, its answer is ignored
+  latestRequest++;
+  asking = false;
+  const button = document.querySelector('[data-action="suggest"]');
+  button.disabled = false;
+  button.textContent = 'Write new questions';
+  showWriting('questions', false);
+
+  passage = study.passage;
+  questions = study.questions.slice();
+  leaderNote = study.note || '';
+  edited = false;
+  questionsFor = passage;
+  fill('.passage-name', passage);
+  setShareStatus('');
+  setStatus('Saved ' + showDate(study.saved) + '. Change anything, or write new questions.');
+  document.querySelector('.test-cost').hidden = true;
+  showPassageText('questions', passage);
+  show('questions');
+  showQuestions();
+}
+
+// The "Saved studies" screen: one row per study, newest first
+function showSavedList() {
+  const list = document.querySelector('.saved-list');
+  list.textContent = '';
+  const studies = savedStudies();
+  studies.forEach((study) => {
+    const item = document.createElement('li');
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'row';
+    const title = document.createElement('span');
+    title.className = 'row-title';
+    title.textContent = study.passage;
+    const text = document.createElement('span');
+    text.className = 'row-text';
+    const count = study.questions.length;
+    text.textContent = (count === 1 ? '1 question' : count + ' questions') + '. Saved ' + showDate(study.saved) + '.';
+    row.append(title, text);
+    row.addEventListener('click', () => openStudy(study));
+    item.append(row);
+    list.append(item);
+  });
+  document.querySelector('.no-saved').hidden = studies.length > 0;
+  show('saved');
 }
 
 
@@ -806,6 +945,9 @@ function showFinished(plan) {
 // and where the plan is, under "Bible reading plan companion" (nothing until a plan is set up)
 function updatePlanStatus() {
   fill('.today-date', new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }));
+  const count = savedStudies().length;
+  fill('.saved-count', count === 0 ? 'Save a study’s questions to keep them here, on this phone.'
+    : (count === 1 ? '1 study' : count + ' studies') + ' saved on this phone.');
   const plan = readSaved().plan;
   let text = '';
   if (plan) {
