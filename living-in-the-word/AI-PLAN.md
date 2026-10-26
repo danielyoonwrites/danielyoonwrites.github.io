@@ -75,9 +75,21 @@ The monthly spending limit ($5 recommended) is the most it can ever cost in a mo
 - The passcode: without it the server refuses before the AI is asked, so it costs nothing.
 - Only Bible passages reach the AI (pull request 61, October 26, 2026, the owner's request): the server checks that the passage is a book of the Bible with chapter and verse numbers, like "John 4:1-26", "1 Cor 13" or "Jude", before anything costs money (`looksLikePassage` in `server/worker.js`). Anything else, like a sentence or instructions for the AI, gets the app's "didn't recognize that passage" message, and the AI is never asked. The AI still gets the passage exactly as typed, and still checks it too (`known_passage`).
 - The monthly spending limit in the Claude Console: the hard stop. The account's tier allows up to $500 a month; set your own lower limit on the Billing page, under "Spend limits" (checked October 26, 2026: https://platform.claude.com/docs/en/api/rate-limits). When it's reached, the app says this month's AI limit is reached and shows the general questions.
-- Next (the owner's request, October 26, 2026): a daily limit, kept in a small Cloudflare database (D1), for each phone's internet address and for everyone together.
+- Daily limits (pull request 62, October 26, 2026; numbers chosen by the owner): 20 sets of questions a day for each internet connection, and 60 a day for everyone together. Every set counts (a study, a reading-plan day, "Write new questions"), counted before the AI is asked. 10 wrong passcodes from one connection lock it out until the next day, so nobody can guess the passcode with a program. The counts start over at midnight Pacific time. They're kept in a Cloudflare D1 database connected to the Worker as `DB` (see "Daily limits" in `server/worker.js`): only a scrambled code for each connection (the internet address and the passcode mixed and scrambled, never the address itself), and only today and yesterday. Requests that arrive together can't slip past a limit together: D1 runs each batch as one transaction. Without the database, the server answers "not set up" and never asks the AI. D1's free plan allows 5 million rows read and 100,000 written a day (search results quoting Cloudflare's pricing page, October 26, 2026; Cloudflare's docs are blocked from Claude's sessions); each set of questions uses about 5 reads and 2 writes.
 - Each answer is capped at 4,000 tokens, thinking included, so one answer can't cost more than about 8 cents with Opus 5.5 (and much less with the others).
-- Parked: Cloudflare's rate limiting counter can slow repeated requests, but only counts per 10 or 60 seconds (search results only, unverified: https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/). Add it only if the passcode ever leaks.
+- Known limits of the limits: wrong passcodes sent all at the same instant can get a few more than 10 tries before the lockout counts them (harmless with a passcode of four or more random words); people on the same Wi-Fi share one connection's 20; a phone that changes networks gets a new count; someone with many internet addresses could still use up the 60 for everyone (the monthly spending limit is the hard stop) or flood the free plan's 100,000 requests a day (no cost, but the helper stops until the next day).
+
+## Setting up the daily limits (pull request 62)
+
+The owner does this once, in Cloudflare's dashboard. The labels come from search results (Cloudflare's docs are blocked from Claude's sessions) and may be worded a little differently.
+
+1. Make the database: Storage & databases, then D1 SQL database, then Create. Name it `living-in-the-word-limits`.
+2. Connect it to the Worker: Workers & Pages, then `living-in-the-word`, then Settings, then Bindings, then Add, then D1 database. Variable name: `DB` (capital letters). Pick `living-in-the-word-limits`, then save.
+3. Paste the new `server/worker.js` into the Worker (Edit code, pick the Latest version, Deploy). The server makes its table, `usage`, the first time it's needed.
+4. Check: write questions for a passage in the app, then open the database in Cloudflare: the `usage` table has today's rows, one for "everyone" and one for this connection.
+
+If step 2 is skipped, the app says "The AI helper isn't fully set up yet" and the AI is never asked.
+
 
 ## Parked: Bible text
 

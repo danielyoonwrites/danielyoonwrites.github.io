@@ -410,6 +410,9 @@ function setStatus(text) {
 // Kind words for each problem the AI helper can report
 const PROBLEMS = {
   'limit-reached': 'This month’s AI limit is reached, so these are general questions.',
+  'daily-limit': 'Today’s AI limit is reached, so these are general questions. It starts again tomorrow.',
+  'too-many-tries': 'Too many wrong passcodes were tried from this internet connection today, so these are general questions. Try again tomorrow.',
+  'not-set-up': 'The AI helper isn’t fully set up yet, so these are general questions.',
   declined: 'The AI couldn’t write questions for this one, so these are general questions.',
   offline: 'Couldn’t reach the AI helper, so these are general questions. Check your connection and try again.',
   other: 'The AI helper couldn’t answer just now, so these are general questions. Try again in a moment.',
