@@ -64,6 +64,12 @@ Moved up on October 25, 2026: after trying step 2, the owner pointed out that qu
 - AI can misquote Scripture or add interpretations, which is why the owner reviews everything.
 - Which AI, where the server runs and the cost limits are decided in a separate plan before stage 2, after checking current docs. Claude effort for stage 2: Extra high (the owner asked; Claude Code docs describe it as "deeper reasoning at higher token spend").
 
+## Words on the start screen (the owner's, October 26, 2026; use them exactly)
+
+- "Prepare for a Bible study" / "Tell me what passage you are going over, and I will generate five questions for your Bible study."
+- "Bible reading plan companion" / "Set up a Bible reading plan (like one chapter of Matthew a day), and I will generate five questions for the chapter you read today." Once a plan is set up, a line under it says where it is, like "Next: Matthew 3. Reading 3 of 28."
+- Sentence case, the owner's choice when asked (he typed them with capitals first).
+
 ## The look: "Paper and ink" (October 26, 2026)
 
 The owner asked for a big visual update: the app doesn't have to look like his website. It should look like a real app, clean like Kinfolk magazine, so people like to look at it and use it. He picked direction A, "Paper and ink," from two mockups (the other kept his celadon green).
@@ -99,7 +105,7 @@ The owner wanted the passage shown in the app if it was free and not hard, and c
 
 - How it shows: a fold-out above the questions, "Read John 4:1-26 ESV," closed until tapped, so the questions stay near the top. The same on today's reading, where it takes the place of "Read it in your own Bible." Verse numbers are small and grey; no headings or footnotes. While the AI writes the questions, the passage can already be read.
 - Where it comes from: Crossway's ESV API (https://api.esv.org), through the app's own server, with a free key saved in Cloudflare as `ESV_API_KEY`. The app asks the server for the text separately from the questions (`want: 'text'`), with the same passcode.
-- If it can't show (no key yet, no passcode, no connection, a passage Crossway doesn't recognize, or one that's too long), a "Read it on esv.org" link shows instead, to esv.org's page for that passage (like https://www.esv.org/John+4:1-26/, checked October 26, 2026).
+- If it can't show (no key yet, no passcode, no connection, a passage Crossway doesn't recognize, or one that's too long), a big "Read John 4:1-26 on esv.org" row shows instead (made bigger at the owner's request, October 26, 2026), linking to esv.org's page for that passage (like https://www.esv.org/John+4:1-26/, checked October 26, 2026).
 - The AI is never sent the ESV text. Crossway's rules don't mention AI. API.Bible's rules forbid sending copyrighted Bible text to an AI, which is why the NIV wasn't chosen for that either.
 - Shared text (Share and Copy) has only the passage name and the questions, as before.
 

@@ -264,7 +264,20 @@ h2 {
 .row-text {
   display: block;
   font-size: 0.9375rem;
+  line-height: 1.45;
   color: var(--muted);
+}
+
+/* Where the reading plan is, like "Next: Matthew 3. Reading 3 of 28." Hidden when empty. */
+.row-status {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.9375rem;
+  font-style: italic;
+}
+
+.row-status:empty {
+  display: none;
 }
 
 
@@ -519,7 +532,30 @@ select {
 
 /* Just the link, when the text can't show */
 .esv-only {
-  margin: -0.75rem 0 1.75rem;
+  margin: 0 0 1.75rem;
+}
+
+/* A row you can tap, like the passage fold-out: "Read John 15 on esv.org", with an arrow
+   that points out of the app (it opens esv.org) */
+.esv-only a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.4rem 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 1.25rem;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.esv-only a::after {
+  content: "↗" / "";
+  margin-left: auto;
+  font-family: var(--sans);
+  font-size: 1.125rem;
 }
 
 
