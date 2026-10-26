@@ -581,11 +581,6 @@ select {
   line-height: 1.45;
 }
 
-.panel .note {
-  margin-top: 0.4rem;
-  font-size: 0.8125rem;
-}
-
 
 /* ---------- The AI helper ---------- */
 
@@ -736,6 +731,11 @@ select {
 .share-status {
   margin: 0.75rem 0 0;
   font-style: italic;
+}
+
+/* "Remove from saved studies" sits close under the Save bar, so it reads as part of it */
+.quiet.unsave {
+  margin-top: 0;
 }
 
 /* The study as text, shown only if copying doesn't work */

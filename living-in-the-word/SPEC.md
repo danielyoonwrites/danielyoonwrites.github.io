@@ -70,7 +70,7 @@ The owner asked to save questions for a passage and have the app remember them, 
 
 - Save, in the bar at the bottom of the questions screen, keeps the passage, its questions (without empty ones) and the note for the leader on this phone. It says what it saves: "Save these questions for John 1" (the owner asked for this, October 26, 2026), then "Saved on this phone," or "Save your changes" after any change. It spans the bar's width, with Share and Copy side by side under it.
 - One saved study per passage: saving again keeps the newest. "John 15" and "john 15" count as the same passage.
-- "Saved studies" on the start screen (row 03) lists them, newest first, with how many questions and the date. Tap one to open it, change it, share it or write new questions. "Remove from saved studies" (under the questions) takes it off the list, after asking.
+- "Saved studies" on the start screen (row 03) lists them, newest first, with how many questions and the date. Tap one to open it, change it, share it or write new questions. "Remove from saved studies," right under the Save bar (the owner asked, October 26, 2026, pull request 60), takes it off the list, after asking.
 - Typing a saved passage opens its saved questions instead of asking the AI, so it costs nothing and works even when the AI can't be reached.
 - Kept in the browser's storage under `living-in-the-word` (`studies`), only on this phone and in this browser. If the browser won't save (a private window), the app says so. The Bible text is never saved.
 
