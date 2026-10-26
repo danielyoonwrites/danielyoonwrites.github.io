@@ -146,6 +146,7 @@ document.querySelector('#passage form').addEventListener('submit', (event) => {
     setStatus('');
     document.querySelector('.test-cost').hidden = true;
   }
+  showPassageText('questions', passage);   // does nothing if this passage's text is already there
   show('questions');
   showQuestions();   // after the screen shows, so each box can measure its words
   // Ask the AI, unless it's already writing for this same passage (Back, then the button again)
@@ -348,6 +349,7 @@ document.querySelector('#passcode form').addEventListener('submit', (event) => {
   savePasscode(code);
   goBack();   // back to where the passcode was asked for
   afterPasscode();
+  retryPassageText();   // the passage text waits for the passcode too
 });
 
 function setStatus(text) {
@@ -449,6 +451,96 @@ async function requestSuggestions() {
       (result.cost * 100).toFixed(2) + ' cents.';
     cost.hidden = false;
   }
+}
+
+
+
+// ---------- The Bible text (ESV) ----------
+// The passage itself, in a fold-out above the questions and on today's reading. It comes
+// through the app's own server from Crossway's free ESV API (see "The Bible text" in SPEC.md).
+// It's kept only while the page is open, never saved: Crossway allows storing no more than
+// 500 verses. If it can't come (no passcode yet, no connection, too long), a link to
+// esv.org shows instead.
+
+// Crossway's copyright notice, shown under the text (their wording, from api.esv.org)
+const ESV_NOTICE = 'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), ' +
+  '© 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved. ' +
+  'The ESV text may not be quoted in any publication made available to the public by a Creative Commons license. ' +
+  'The ESV may not be translated into any other language. ' +
+  'Users may not copy or download more than 500 verses of the ESV Bible or more than one half of any book of the ESV Bible.';
+
+const textFor = { questions: '', today: '' };      // the passage each screen's text is for (shown or coming)
+const textWanted = { questions: '', today: '' };   // the passage each screen last asked for
+
+// esv.org's own page for a passage, like https://www.esv.org/John+4:1-26/
+function esvLink(name) {
+  const clean = name.replace(/[–—]/g, '-').replace(/[^A-Za-z0-9:;,\- ]/g, '').trim();
+  return 'https://www.esv.org/' + clean.replace(/\s+/g, '+') + '/';
+}
+
+async function showPassageText(screenId, name) {
+  textWanted[screenId] = name;
+  if (textFor[screenId] === name) return;   // already showing, or on its way
+  textFor[screenId] = name;
+
+  const screen = document.getElementById(screenId);
+  const box = screen.querySelector('.scripture');
+  const linkOnly = screen.querySelector('.esv-only');
+  const ownBible = screen.querySelector('.read-own');
+  screen.querySelectorAll('.esv-link').forEach((link) => { link.href = esvLink(name); });
+  box.hidden = true;
+  box.open = false;
+  linkOnly.hidden = true;
+  if (ownBible) ownBible.hidden = false;
+
+  let result = { error: 'not-connected' };
+  if (SERVER_URL && passcode) {
+    try {
+      const response = await fetch(SERVER_URL, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ passcode, passage: name, want: 'text' }),
+      });
+      result = await response.json();
+    } catch (error) {
+      result = { error: 'offline' };
+    }
+  }
+  if (textFor[screenId] !== name) return;   // the screen moved on to another passage
+
+  if (result.error || typeof result.text !== 'string') {
+    textFor[screenId] = '';   // try again next time this passage shows
+    linkOnly.hidden = false;
+    return;
+  }
+  box.querySelector('.scripture-title').textContent = 'Read ' + name;
+  fillScripture(box.querySelector('.scripture-text'), result.text);
+  box.querySelector('.scripture-notice').textContent = ESV_NOTICE;
+  box.hidden = false;
+  if (ownBible) ownBible.hidden = true;
+}
+
+// Puts the words on screen as plain text (never as code), with verse numbers like [12] made small
+function fillScripture(target, text) {
+  target.textContent = '';
+  text.split(/\[(\d+)\]/).forEach((part, index) => {
+    if (index % 2 === 0) {
+      target.append(part);
+      return;
+    }
+    const number = document.createElement('sup');
+    number.className = 'verse-number';
+    number.textContent = part;
+    target.append(number);
+  });
+}
+
+// After the passcode is typed, the screen showing now tries its text again
+function retryPassageText() {
+  const screenId = document.getElementById('today').classList.contains('active') ? 'today' : 'questions';
+  if (!textWanted[screenId]) return;
+  textFor[screenId] = '';
+  showPassageText(screenId, textWanted[screenId]);
 }
 
 
@@ -597,6 +689,7 @@ function showToday(keepHistory = true) {
 
   fill('.reading-count', 'Reading ' + (plan.done + 1) + ' of ' + readings);
   fill('.reading-name', readingName(plan, plan.done));
+  showPassageText('today', readingName(plan, plan.done));
   const early = document.querySelector('.reading-early');
   early.hidden = plan.start <= today();
   early.textContent = 'Your plan starts ' + showDate(plan.start) + '. You can read ahead, or come back then.';

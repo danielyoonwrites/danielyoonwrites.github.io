@@ -3,10 +3,11 @@
 // What it does: the app sends a passage name (like "John 4:1-26"), whether it's for
 // a group study or the reading plan, and the passcode. This server checks the passcode,
 // asks Claude (Anthropic's AI) for 5 questions about that passage, and sends them back.
+// It can also send back the passage itself, from Crossway's free ESV API (see "The Bible text" below).
 //
 // Why a server: the website is public, so a key in the app could be copied.
-// The AI key and the passcode are NOT in this file. They're saved in Cloudflare's
-// dashboard as secrets named ANTHROPIC_API_KEY and PASSCODE (see AI-PLAN.md).
+// The keys and the passcode are NOT in this file. They're saved in Cloudflare's
+// dashboard as secrets named ANTHROPIC_API_KEY, ESV_API_KEY and PASSCODE (see AI-PLAN.md).
 //
 // How to update it: copy this whole file into the Worker's code editor in
 // Cloudflare's dashboard, then Deploy. Keep this copy in the repository the same.
@@ -127,6 +128,69 @@ const MAX_TOKENS = 4000;
 const ALLOWED_ORIGINS = ['https://danielyoonwrites.github.io', 'http://127.0.0.1:8765'];
 
 
+// ---------- The Bible text (ESV) ----------
+// The passage itself, shown in the app above the questions. It comes from Crossway's
+// ESV API (https://api.esv.org), free for non-commercial use, with a key saved in
+// Cloudflare as a secret named ESV_API_KEY. Crossway's rules (read October 26, 2026):
+// no more than 500 verses, or half of any book, at a time; never change the words;
+// show "(ESV)" with the text, the copyright notice and a link to esv.org (the app does).
+// The AI is never sent the ESV text: Crossway's rules don't say whether that's allowed.
+const ESV_URL = 'https://api.esv.org/v3/passage/text/';
+
+// Chapters in each book, Genesis to Revelation (the same checked list as BOOKS in app.js),
+// used to keep each answer under half a book
+const CHAPTERS = [
+  50, 40, 27, 36, 34, 24, 21, 4, 31, 24, 22, 25, 29, 36, 10, 13, 10, 42, 150, 31,
+  12, 8, 66, 52, 5, 48, 12, 14, 3, 9, 1, 4, 7, 3, 3, 3, 2, 14, 4,
+  28, 16, 24, 21, 28, 16, 16, 13, 6, 6, 4, 4, 5, 3, 6, 4, 3, 1, 13, 5, 5, 3, 5, 1, 1, 1, 22,
+];
+
+// Asks Crossway for the passage as plain text, with verse numbers like [12]. No headings,
+// no footnotes, and "(ESV)" at the end, which their docs say fulfills the copyright display.
+async function getEsvText(key, passage) {
+  if (!key) return { error: 'text-not-set-up' };
+  const query = new URLSearchParams({
+    q: passage,
+    'include-passage-references': 'false',
+    'include-headings': 'false',
+    'include-footnotes': 'false',
+    'include-short-copyright': 'true',
+    'indent-paragraphs': '0',
+    'indent-poetry-lines': '2',
+  });
+  const response = await fetch(ESV_URL + '?' + query, {
+    headers: { authorization: 'Token ' + key },
+  });
+  if (!response.ok) return { error: 'text-unavailable' };
+  const data = await response.json();
+  const text = Array.isArray(data.passages) ? data.passages.join('\n\n').trim() : '';
+  if (!text || !Array.isArray(data.parsed) || !data.parsed.length) return { error: 'unknown-passage' };
+  if (tooLong(data.parsed, text)) return { error: 'too-long' };
+  return { canonical: data.canonical || passage, text };
+}
+
+// Crossway's limit: no more than 500 verses, or more than half of any book.
+// Verses are counted by their numbers, like [12]. Half a book is counted in chapters
+// (a careful measure: part of a chapter counts as a whole one). Books of one or two
+// chapters may be shown whole, as Crossway's rules allow for them.
+// Crossway numbers each verse like 43004001: book 43 (John), chapter 4, verse 1.
+function tooLong(parsed, text) {
+  if ((text.match(/\[\d+\]/g) || []).length > 500) return true;
+  const chaptersPerBook = {};
+  for (const [start, end] of parsed) {
+    const book = Math.floor(start / 1000000);
+    if (Math.floor(end / 1000000) !== book) return true;   // runs into another book
+    const first = Math.floor(start / 1000) % 1000;
+    const last = Math.floor(end / 1000) % 1000;
+    chaptersPerBook[book] = (chaptersPerBook[book] || 0) + (last - first + 1);
+  }
+  return Object.keys(chaptersPerBook).some((book) => {
+    const total = CHAPTERS[book - 1];
+    return !total || (total > 2 && chaptersPerBook[book] * 2 > total);
+  });
+}
+
+
 // ---------- Answering the app ----------
 
 export default {
@@ -159,6 +223,17 @@ export default {
     const pattern = input.method === 'personal' || input.personal === true ? 'personal' : 'study';
     if (!passage || passage.length > 80) {
       return reply({ error: 'bad-request' }, 400, cors);
+    }
+
+    // The app asks for the passage itself separately, so it can show while the AI writes
+    if (input.want === 'text') {
+      let text;
+      try {
+        text = await getEsvText(env.ESV_API_KEY, passage);
+      } catch (error) {
+        text = { error: 'text-unavailable' };
+      }
+      return reply(text, text.error ? 502 : 200, cors);
     }
 
     let answer;
