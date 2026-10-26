@@ -4,7 +4,8 @@ A little app that turns a Bible passage into discussion questions for a small gr
 
 ## Rules for working here
 
-- Same rules as the website's `CLAUDE.md`: plain words for a beginner, one small change per pull request with a check the owner does, no build tools, Moon jar design, phone first.
+- Same rules as the website's `CLAUDE.md`: plain words for a beginner, one small change per pull request with a check the owner does, no build tools, phone first.
+- The app has its own look, "Paper and ink" (the owner's choice, October 26, 2026): clean like Kinfolk magazine, not the website's Moon jar design. Colors, fonts and layout are in `SPEC.md` ("The look") and at the top of `style.css`.
 - The owner is a pastor and reviews every question before it's shared. Never share anything automatically.
 - Be careful with Scripture: never invent a quote. Stage 1 shows only the passage name, not the text. Before showing any Bible text, check that translation's usage rules.
 - The AI writes exactly 5 questions per passage, in the order set in `server/worker.js` (`PATTERNS`); the general questions in `app.js` are the fallback. There's no study method to choose: the owner removed them on October 26, 2026 (see `SPEC.md`). Don't add one back unless he asks. Mark anything that couldn't be checked.

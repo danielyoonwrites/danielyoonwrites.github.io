@@ -6,19 +6,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Living in the Word</title>
   <meta name="description" content="Type a Bible passage and get discussion questions written for it, for your small group.">
+  <!-- The color of the phone's top bar, the same warm paper as the app -->
+  <meta name="theme-color" content="#F3EFE7">
 
   <!-- Asks search engines not to list it while the owner tries it out. Remove at stage 3 (see SPEC.md). -->
   <meta name="robots" content="noindex">
 
-  <!-- Font from Google Fonts: Libre Baskerville, Regular and Italic -->
+  <!-- Fonts from Google Fonts: EB Garamond (Regular and Italic) for reading,
+       Jost for small labels and buttons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;1,400&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital@0;1&family=Jost:wght@400;500&display=swap">
 
-  <!-- The app's own look: Moon jar colors, big buttons.
+  <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=8">
-  <script src="app.js?v=10" defer></script>
+  <link rel="stylesheet" href="style.css?v=9">
+  <script src="app.js?v=11" defer></script>
 </head>
 <body>
 
@@ -29,17 +32,32 @@
 
     <!-- The start: a study for the group, or today's reading -->
     <section class="screen active" id="home">
-      <h1 tabindex="-1">Living in the Word</h1>
+      <!-- app.js fills in today's date, like "Monday, October 26" -->
+      <p class="label today-date"></p>
+      <h1 tabindex="-1">Living in<br>the <span class="italic">Word</span></h1>
       <p class="intro">Prepare questions for your small group, or keep a daily reading plan.</p>
-      <button type="button" class="primary" data-action="study">Prepare a study</button>
-      <button type="button" class="outline" data-action="reading">Today’s reading</button>
-      <!-- app.js fills this in, like "Matthew 3. Reading 3 of 28." -->
-      <p class="note plan-status"></p>
+
+      <!-- The two choices, as big rows you can tap anywhere -->
+      <button type="button" class="row" data-action="study">
+        <span class="row-number" aria-hidden="true">01</span>
+        <span class="row-title">Prepare a study</span>
+        <span class="row-text">Five new questions, written by AI for your passage</span>
+      </button>
+      <button type="button" class="row" data-action="reading">
+        <span class="row-number" aria-hidden="true">02</span>
+        <span class="row-title">Today’s reading</span>
+        <!-- app.js fills this in, like "Next: Matthew 3. Reading 3 of 28." -->
+        <span class="row-text plan-status"></span>
+      </button>
       <noscript><p class="note">This app needs JavaScript turned on in your browser.</p></noscript>
     </section>
 
     <!-- 1. Which passage? -->
     <section class="screen" id="passage">
+      <header class="top-bar">
+        <button type="button" class="back" data-action="back">Back</button>
+        <span class="wordmark">Living in the Word</span>
+      </header>
       <p class="label">Prepare a study</p>
       <form>
         <h2><label for="passage-text">Which passage?</label></h2>
@@ -50,35 +68,40 @@
       </form>
       <!-- Says plainly what the button does: the AI writes new questions every time -->
       <p class="note">The AI helper writes 5 new study questions just for this passage. It can take up to a minute. You can change any of them before you share. Only the passage name is sent.</p>
-      <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
     <!-- 2. The questions: 5 written by the AI helper for this passage (see AI-PLAN.md).
          Edit, remove or add. app.js fills in the list. -->
     <section class="screen" id="questions">
+      <header class="top-bar">
+        <button type="button" class="back" data-action="back">Back</button>
+        <span class="wordmark">Living in the Word</span>
+      </header>
       <p class="label">Questions</p>
-      <h2 class="passage-name" tabindex="-1"></h2>
-      <p class="study-tip">Read the passage aloud, then go through the questions together.</p>
+      <h2 class="passage-name big-title" tabindex="-1"></h2>
+      <p class="study-tip">Read it aloud, then go through the questions together.</p>
 
       <p class="note suggest-status" role="status" hidden></p>
       <!-- Only on the test link (add ?test to the address): what each answer cost -->
       <p class="note test-cost" hidden></p>
 
       <!-- The AI's note for the leader (one fact of background, for example). Never shared. -->
-      <div class="leader-note" hidden>
+      <div class="panel leader-note" hidden>
         <p class="label">For the leader</p>
         <p class="leader-note-text"></p>
         <p class="note">Not shared with the group.</p>
       </div>
 
-      <ol class="question-list"></ol>
+      <!-- role="list" keeps it a list for screen readers, since the numbers are drawn by style.css -->
+      <ol class="question-list" role="list"></ol>
       <p class="no-steps no-questions" hidden>No questions yet.</p>
       <p class="hint">Tap a question to change its words.</p>
 
       <button type="button" class="outline" data-action="add">Add a question</button>
       <button type="button" class="quiet suggest" data-action="suggest">Write new questions</button>
 
-      <!-- Share or copy the passage and questions as plain text. The note for the leader is never included. -->
+      <!-- Share or copy the passage and questions as plain text. The note for the leader is never included.
+           This bar stays at the bottom of the screen while you scroll. -->
       <div class="share-pair">
         <button type="button" class="primary" data-action="share">Share</button>
         <button type="button" class="outline" data-action="copy">Copy</button>
@@ -88,22 +111,26 @@
       <textarea class="share-text" readonly hidden aria-label="The study, to copy by hand"></textarea>
 
       <p class="note">Your changes stay while this page is open. Nothing is shared until you tap Share or Copy.</p>
-      <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
     <!-- Reading plan: set it up once. Chapter counts are at the top of the reading plan part of app.js. -->
     <section class="screen" id="plan-setup">
+      <header class="top-bar">
+        <button type="button" class="back" data-action="back">Back</button>
+        <span class="wordmark">Living in the Word</span>
+      </header>
       <p class="label">Reading plan</p>
       <h2 tabindex="-1">Set up a reading plan</h2>
       <form>
         <label class="field-label" for="plan-book">Book</label>
         <select id="plan-book"></select>
 
+        <!-- 1, 2 or 3, as three boxes side by side; the chosen one is filled in -->
         <fieldset class="pace">
           <legend class="field-label">Chapters a day</legend>
-          <label><input type="radio" name="pace" value="1" checked> 1</label>
-          <label><input type="radio" name="pace" value="2"> 2</label>
-          <label><input type="radio" name="pace" value="3"> 3</label>
+          <label><input type="radio" name="pace" value="1" checked><span>1</span></label>
+          <label><input type="radio" name="pace" value="2"><span>2</span></label>
+          <label><input type="radio" name="pace" value="3"><span>3</span></label>
         </fieldset>
 
         <label class="field-label" for="plan-start">Start</label>
@@ -114,36 +141,43 @@
         <button type="submit" class="primary">Start the plan</button>
       </form>
       <p class="note">Saved only on this phone, in this browser. A missed day just waits for you.</p>
-      <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
     <!-- Reading plan: today's reading, with questions to think about -->
     <section class="screen" id="today">
+      <header class="top-bar">
+        <button type="button" class="back" data-action="back">Back</button>
+        <span class="wordmark">Living in the Word</span>
+      </header>
       <p class="label reading-count"></p>
-      <h2 class="reading-name" tabindex="-1"></h2>
-      <p class="hint">Read it in your own Bible.</p>
+      <h2 class="reading-name big-title" tabindex="-1"></h2>
+      <p class="study-tip">Read it in your own Bible.</p>
       <p class="note reading-early" hidden></p>
 
       <!-- The AI's note on this chapter, if it wrote one (like the note on Mark 16:9–20) -->
-      <div class="leader-note reading-note" hidden>
+      <div class="panel reading-note" hidden>
         <p class="label">A note on this reading</p>
         <p class="reading-note-text"></p>
       </div>
 
       <p class="label reflect-label">To think about</p>
-      <ol class="reflect-list"></ol>
+      <ol class="reflect-list" role="list"></ol>
       <p class="note reading-status" role="status" hidden></p>
       <!-- Shown when the AI helper is set up but this phone has no passcode yet -->
       <button type="button" class="quiet reading-ai" data-action="reading-ai" hidden>Questions for this reading</button>
 
       <button type="button" class="primary" data-action="done-reading">Done for today</button>
       <button type="button" class="quiet" data-action="end-plan">End this plan</button>
-      <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
     <!-- Reading plan: after "Done for today", or the whole book finished -->
     <section class="screen" id="reading-done">
-      <h2 class="done-title" tabindex="-1"></h2>
+      <header class="top-bar">
+        <button type="button" class="back" data-action="back">Back</button>
+        <span class="wordmark">Living in the Word</span>
+      </header>
+      <p class="label">Reading plan</p>
+      <h2 class="done-title big-title" tabindex="-1"></h2>
       <p class="done-next"></p>
       <button type="button" class="outline next-now" data-action="read-ahead">Read the next one now</button>
       <button type="button" class="outline new-plan" data-action="new-plan" hidden>Start a new plan</button>
@@ -152,6 +186,10 @@
 
     <!-- The AI helper's passcode, asked once and saved on this phone -->
     <section class="screen" id="passcode">
+      <header class="top-bar">
+        <button type="button" class="back" data-action="back">Back</button>
+        <span class="wordmark">Living in the Word</span>
+      </header>
       <form>
         <p class="label">AI helper</p>
         <h2><label for="passcode-text">Passcode</label></h2>
@@ -159,9 +197,8 @@
         <p class="hint">Type it once. It’s saved only on this phone, in this browser.</p>
         <p class="gentle-error empty-passcode" hidden>Type the passcode first.</p>
         <p class="gentle-error wrong-passcode" hidden>That passcode didn’t work. Try again.</p>
-        <button type="submit" class="primary">Save and suggest</button>
+        <button type="submit" class="primary">Save and write questions</button>
       </form>
-      <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
   </main>
