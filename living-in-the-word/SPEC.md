@@ -16,8 +16,8 @@ Type a Bible passage (a verse, a chapter or a longer passage, like "John 4:1-26"
 
 One thing per screen, with big buttons.
 
-1. "Which passage?" Type it, like "John 4:1-26," and tap "Go deeper with AI" (the owner's words, October 26, 2026; it said "Write questions with AI" before). A line under the button says what happens: the AI helper writes 5 new study questions for this passage (the owner asked for this to be clear, October 26, 2026).
-2. The AI helper writes 5 questions for that passage (see "The questions" below). While it writes, the screen says "Writing 5 questions for John 4:1-26. This can take up to a minute." and shows five numbered placeholder lines that gently fade in and out, so it never looks blank (the owner asked, October 26, 2026). If the AI can't be reached, 5 general questions show instead, with a short note why. There used to be a choice of study method here; the owner removed it on October 26, 2026 (pull request 50).
+1. "Which passage?" Type it, like "John 4:1-26," and tap "Go deeper with AI" (the owner's words, October 26, 2026; it said "Write questions with AI" before). A line under the button says what happens: the AI helper writes 3 to 5 new study questions for this passage (the owner asked for this to be clear, October 26, 2026).
+2. The AI helper writes 3 to 5 questions for that passage (see "The questions" below). While it writes, the screen says "Writing questions for John 4:1-26. This can take up to a minute." and shows five numbered placeholder lines that gently fade in and out, so it never looks blank (the owner asked, October 26, 2026). If the AI can't be reached, 5 general questions show instead, with a short note why. There used to be a choice of study method here; the owner removed it on October 26, 2026 (pull request 50).
 3. The questions appear, with the passage at the top. Edit any question, remove one, or add your own. "Write new questions" asks the AI again. Nothing is shared until the owner chooses to.
 4. Share (the owner's first pick): "Share" sends the passage and questions as plain text through the phone's share menu, for example to a KakaoTalk group chat. "Copy" is there too, in case sharing doesn't work.
 5. Lead (the owner's other pick): "Lead the study" shows one question at a time in big text, with Next and Back, for leading in the room or on a screen.
@@ -27,18 +27,18 @@ One thing per screen, with big buttons.
 
 ## The questions
 
-Since October 26, 2026 (the owner's choice, pull request 50), there's no study method to choose, for the group study or the reading plan. His reason: when the AI writes the questions for each passage, they won't fit a method's mold anyway. The AI writes exactly 5 questions, in this order (`PATTERNS` in `server/worker.js`). The owner moved from 4 to 5 the same day (pull request 51), and chose prayer for the 5th.
+Since October 26, 2026 (the owner's choice, pull request 50), there's no study method to choose, for the group study or the reading plan. His reason: when the AI writes the questions for each passage, they won't fit a method's mold anyway. The AI writes 3 to 5 questions, in this order (`PATTERNS` in `server/worker.js`). The owner moved from 4 to 5 the same day (pull request 51), and chose prayer for the 5th. Then 3 to 5 (the owner's rule, October 26, 2026, pull request 69, after Judges 19 repeated itself and forced a question that didn't fit): the AI always writes the first and the last, and leaves out any of the others that would repeat another question or doesn't fit the passage well. Each question should bring out something new.
 
 - Group study: what the passage says (what happens, who is involved, what stands out); what it shows about God (the Father, the Son or the Holy Spirit); what it means for our hearts (what we love, trust, fear or hope in, in light of the gospel); one concrete response this week; what the group can pray about together.
 - Reading plan, for one person's quiet time: notice what the reading says; what it shows about God; the reader's heart; one way to live it out today; turning it into prayer (thanks, trust, lament, repentance or asking).
 
 Passages of suffering, violence or evil (the owner's request, October 26, 2026, pull request 68). A question on Matthew 2 named the children killed in Bethlehem, then turned in the same breath to praying "for those who don't yet know Jesus." The owner asked for pastoral care with passages like Exodus 1, Matthew 2, Esther 9 and Judges 19: never taking them lightly or glossing over them. The AI's guidance now has a section, "When a passage tells of suffering, violence or evil" (`GUIDANCE` in `server/worker.js`):
-- Name what happened soberly, without graphic detail and without hurrying past it, and stay with it instead of turning to another topic. When the hard part is one piece of a longer passage (Matthew 2), it gets its own question, and the rest of the passage still gets its due.
+- Name what happened soberly, without hurrying past it, in general words like "sexual violence," "abuse" or "killed," never graphic terms, in the questions and the note for the leader (the owner asked after a Judges 19 note said "gang rape," pull request 69). Stay with it instead of turning to another topic. When the hard part is one piece of a longer passage (Matthew 2), it gets its own question, and the rest of the passage still gets its due.
 - Make room for lament: the prayer question can be honest grief, a cry for justice, or prayer for people who suffer the same things today (one of these, not a list).
 - Also for every passage: a question doesn't offer a list of options to choose from (the Matthew 2 question did).
 - Notice how the author presents what happened. Judges shows evil as evil. Where the text doesn't say whether violence was right (Esther 9), don't celebrate it or make it a model. God's own judgments aren't a pattern for us.
 - Never ask anyone to share their own trauma, never blame victims, and don't ask what a victim should have done.
-- Be honest about hard questions without forcing a tidy answer, and let hope in Christ be real without making the grief disappear.
+- Be honest about hard questions without forcing a tidy answer. Show only what the passage itself shows about God: where God seems silent (Judges 19), don't claim the passage shows his care or protection (the owner's feedback, pull request 69). Let hope in Christ be real without making the grief disappear.
 - Let the response fit the weight of the passage.
 - Give the leader a short heads-up in the note for the leader (for example, about the death of children or sexual violence).
 
@@ -133,9 +133,10 @@ The verse numbers follow the NASB, ESV and NIV, not the KJV (the owner asked whi
 
 ## Words on the start screen (the owner's, October 26, 2026; use them exactly)
 
-- "Prepare for a Bible study" / "Tell me what passage you are going over, and I will generate five questions for your Bible study."
-- "Bible reading plan companion" / "Set up a Bible reading plan (like one chapter of Matthew a day), and I will generate five questions for the chapter you read today." Once a plan is set up, a line under it says where it is, like "Next: Matthew 3. Reading 3 of 28."
+- "Prepare for a Bible study" / "Tell me what passage you are going over, and I will generate three to five questions for your Bible study."
+- "Bible reading plan companion" / "Set up a Bible reading plan (like one chapter of Matthew a day), and I will generate three to five questions for the chapter you read today." Once a plan is set up, a line under it says where it is, like "Next: Matthew 3. Reading 3 of 28."
 - Sentence case, the owner's choice when asked (he typed them with capitals first).
+- "five questions" became "three to five questions" with the 3 to 5 rule (pull request 69), so the words stay true; the rest is his wording.
 
 ## The look: "Paper and ink" (October 26, 2026)
 
@@ -203,7 +204,7 @@ Other options looked at the same day: the NIV is free to show through API.Bible'
 
 ## How we'll know it works
 
-- Type "John 4:1-26," get 5 questions written for it, edit one, and share it to a chat: the chat shows the passage and the questions as plain text.
+- Type "John 4:1-26," get 3 to 5 questions written for it, edit one, and share it to a chat: the chat shows the passage and the questions as plain text.
 - "Lead the study" shows one question at a time and goes forward and back.
 - Close the browser and reopen it: recent studies are there.
 

@@ -3,7 +3,7 @@
 // What it does: the app sends a passage name (like "John 4:1-26"), whether it's for
 // a group study or the reading plan, and the passcode. This server checks the passcode,
 // checks that the passage really is a Bible passage and that today's limits aren't used up,
-// asks Claude (Anthropic's AI) for 5 questions about it, and sends them back.
+// asks Claude (Anthropic's AI) for 3 to 5 questions about it, and sends them back.
 // It can also send back the passage itself, from Crossway's free ESV API (see "The Bible text" below).
 //
 // Why a server: the website is public, so a key in the app could be copied.
@@ -24,7 +24,9 @@
 // short questions that ask one thing, correct grammar, and no quotes, not even
 // short phrases. Then "When a passage tells of suffering, violence or evil" (the owner
 // asked, October 26, 2026, after a Matthew 2 question named the children killed in
-// Bethlehem and turned to another topic in the same breath).
+// Bethlehem and turned to another topic in the same breath). After he tried Judges 19
+// (October 26, 2026): general words like "sexual violence" instead of graphic terms, only
+// what the passage itself shows about God, and 3 to 5 questions that each bring something new.
 // Edit the words between the ` marks.
 const GUIDANCE = `Guidance for the AI: Living in the Word
 
@@ -75,13 +77,13 @@ Who the questions are for
 - Use correct grammar. Read each question once more before you finish.
 
 When a passage tells of suffering, violence or evil
-Some passages tell of terrible things: baby boys killed on a king's orders (Exodus 1, Matthew 2), a woman handed over to a mob and raped all night (Judges 19), the killing of enemies (Esther 9), war, abuse, slavery and grief. Handle them the way a caring pastor sits with a grieving family: slowly, honestly and gently. Someone in the group may have lost a child, survived abuse or violence, or carry wounds like these, and the way the questions treat the passage tells them whether God and his people take that pain seriously.
-- Give it the weight the Bible gives it. Name what happened plainly and soberly, without graphic detail, and without softening it or hurrying past it.
+Some passages tell of terrible things: baby boys killed on a king's orders (Exodus 1, Matthew 2), sexual violence against a woman handed over to a mob (Judges 19), the killing of enemies (Esther 9), war, abuse, slavery and grief. Handle them the way a caring pastor sits with a grieving family: slowly, honestly and gently. Someone in the group may have lost a child, survived abuse or violence, or carry wounds like these, and the way the questions treat the passage tells them whether God and his people take that pain seriously.
+- Give it the weight the Bible gives it. Name what happened honestly and soberly, without softening it or hurrying past it, but in general words like "sexual violence," "abuse" or "killed" rather than graphic or crude terms, in the questions and in the note for the leader.
 - Stay with it. When a question touches the hard part, let it stay there instead of using it as a doorway to another topic: a question that names the tragedy and then turns to something else in the same breath brushes past real people's suffering. When the hard part is one piece of a longer passage, as in Matthew 2, still follow the passage's main emphasis, and give the hard part its own question rather than a passing mention.
 - Make room for lament. The Bible itself grieves: Matthew records Rachel weeping for her children (Matthew 2:18), and many psalms cry out to God. Here the prayer question can lead the group into lament, such as honest grief, a cry for God's justice, or prayer for people who suffer the same things today. Choose the one that fits the passage best and ask about it alone. Don't end with a cheerful turn or a quick lesson, which would undo it.
 - Notice how the author presents what happened. Telling a story doesn't mean God approves of everything in it. Where the author shows something as evil, as Judges does with its refrain that Israel had no king and everyone did what was right in their own eyes (Judges 17:6, 21:25), help the group see it. Where the text reports violence without saying whether it was right, as in Esther 9, don't celebrate it or make it a model to copy: bring out the context the passage itself gives, and leave room for honest unease. When the passage shows God's own judgment, as in the flood or the fall of Jericho, let it show his holiness and justice the way the text does, never casually, and make clear it isn't a pattern for us to follow.
 - Care for the people in the room. Never ask anyone to share their own experience of trauma, never blame the victims or make their suffering a lesson about them, and don't ask what a victim should have done.
-- Be honest about the questions the passage raises, like where God was. Don't explain the evil away or force a tidy answer. Show what the passage does reveal about God, such as his justice, his care for the weak and his faithfulness through it, and let hope in Christ be real without making the grief disappear.
+- Be honest about the questions the passage raises, like where God was. Show only what the passage itself shows about God. When God seems silent or absent, as in Judges 19, don't claim the passage shows his care or protection: let the group sit honestly with that silence, and let any hope come from the wider story of Scripture without pretending this passage says it. Don't explain the evil away or force a tidy answer, and let hope in Christ be real without making the grief disappear.
 - Let the response fit the weight of the passage. A light task after a story of cruelty rings hollow; something like comforting someone who grieves, caring for someone vulnerable, or trusting God's justice instead of taking revenge fits better. Ask about one.
 - In the note for the leader, give a short heads-up when the passage includes things like the death of children or sexual violence, so the leader can prepare and give people room.
 
@@ -99,28 +101,31 @@ Where Christians differ
 - Stay away from partisan politics.
 
 The questions
-- Write exactly 5 questions, in the order given below. The reading principles above still apply.`;
+- Write 3 to 5 questions, in the order given below: only as many as the passage really supports. Each one should bring out something new, so don't ask two questions about the same thing. The reading principles above still apply.`;
 
 
-// ---------- The order of the 5 questions ----------
+// ---------- The order of the questions ----------
 // The owner chose no study methods (October 26, 2026): since the AI writes questions for
 // each passage, the methods' templates got in the way. Then 5 questions instead of 4, the
-// 5th about prayer (October 26, 2026). "study" is for a small group; "personal" is for one
+// 5th about prayer (October 26, 2026). Then 3 to 5 (the owner's rule, October 26, 2026, after
+// Judges 19), so the AI never repeats itself or makes up a question that doesn't fit; the
+// first and the last are always written. "study" is for a small group; "personal" is for one
 // day of the reading plan. Edit the words between the ` marks.
 const PATTERNS = {
-  study: `A small group study. Write exactly 5 questions, in this order:
+  study: `A small group study. Write 3 to 5 questions, in this order:
 1. One question on what the passage says: what happens, who is involved, or what stands out.
 2. One question on what the passage shows about God: the Father, the Son or the Holy Spirit.
 3. One question on what it means for our hearts: what we love, trust, fear or hope in, in light of the gospel.
 4. One question inviting one concrete response this week.
-5. One question on what the group can pray about together, drawn from this passage.`,
-  personal: `Personal reading, one day of a reading plan, for one person's quiet time with God, not a group. Speak to the reader as "you." Write exactly 5 questions, in this order:
+5. One question on what the group can pray about together, drawn from this passage.
+Always write the first and the last. Leave out any of the others that would repeat another question or doesn't fit this passage well, rather than making one up.`,
+  personal: `Personal reading, one day of a reading plan, for one person's quiet time with God, not a group. Speak to the reader as "you." Write 3 to 5 questions, in this order:
 1. One question that helps the reader notice what this reading says.
 2. One question on what it shows about God.
 3. One question about the reader's heart: what they love, trust, fear or hope in.
 4. One question inviting one way to live it out today.
 5. One question that turns the reading into prayer: thanks, trust, lament, repentance or asking.
-Keep them short enough to hold in mind through the day.`,
+Always write the first and the last. Leave out any of the others that would repeat another question or doesn't fit this reading well, rather than making one up. Keep them short enough to hold in mind through the day.`,
 };
 
 
@@ -516,7 +521,7 @@ async function askClaude(apiKey, passage, pattern) {
             questions: {
               type: 'array',
               items: { type: 'string' },
-              description: 'Exactly 5 questions, in order. Empty if known_passage is false.',
+              description: '3 to 5 questions, in order. Empty if known_passage is false.',
             },
           },
           required: ['known_passage', 'leader_note', 'questions'],

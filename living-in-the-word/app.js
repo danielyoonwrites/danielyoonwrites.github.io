@@ -1,4 +1,4 @@
-// Living in the Word: shows one screen at a time. It writes 5 questions for a Bible
+// Living in the Word: shows one screen at a time. It writes 3 to 5 questions for a Bible
 // passage with the AI helper (they stay only while the page is open), and keeps a
 // daily reading plan (saved on this phone).
 // Only the passage name is sent anywhere, to the app's own small server (the AI helper,
@@ -471,7 +471,7 @@ async function requestSuggestions() {
   const button = document.querySelector('[data-action="suggest"]');
   button.disabled = true;
   button.textContent = 'Writing questions…';
-  setStatus('Writing 5 questions for ' + passage + '. This can take up to a minute.');
+  setStatus('Writing questions for ' + passage + '. This can take up to a minute.');
   document.querySelector('.test-cost').hidden = true;
   showWriting('questions', true);
   showQuestions();
@@ -767,8 +767,9 @@ const READING_QUESTIONS = [
 ];
 
 // Where a reading's AI questions are saved, by reading number, like "five-2".
-// ("five" because the AI writes 5 questions; questions saved before that are left unused,
-// so a reading opened before the change is written once more.)
+// ("five" is from when the AI wrote exactly 5 questions; questions saved before that were
+// left unused, so a reading opened before that change was written once more. Since
+// October 26, 2026, the AI writes 3 to 5 under the same name, so saved readings stay.)
 function questionsKey(n) {
   return 'five-' + n;
 }
@@ -929,7 +930,7 @@ async function fetchReadingQuestions(n) {
   const plan = readSaved().plan;
   const name = readingName(plan, n);
   const key = questionsKey(n);
-  setReadingStatus('Writing 5 questions for ' + name + '. This can take up to a minute.');
+  setReadingStatus('Writing questions for ' + name + '. This can take up to a minute.');
   showWriting('today', shownReading === n);
 
   let result;
