@@ -11,6 +11,8 @@ This repository is public. Keep personal details out of this file.
 - He learns by doing: explain every change in plain words, one small change per pull request, and give him a check he can do himself before merging.
 - How he likes instructions:
   - Numbered steps, with the full link inside each step (never "the link above") and the exact button or tab to click.
+  - Every answer stands on its own (Dan's rule, October 26, 2026, after Claude said "the steps are two messages up"): repeat every step, link, name and value in full each time, even if it was given before. Never "see above" or "as before." He has ADHD and can't keep track of where things are.
+  - For anything he pastes (like `server/worker.js` into Cloudflare), give the direct links to copy it: the GitHub file page (`https://github.com/danielyoonwrites/danielyoonwrites.github.io/blob/main/<path>`, with its "Copy raw file" button) and the raw page (`https://raw.githubusercontent.com/danielyoonwrites/danielyoonwrites.github.io/main/<path>`), plus exactly where to paste it.
   - Ask one question at a time, with options and a recommendation.
   - Accuracy matters most. Check facts against official sources before stating them, say clearly when something couldn't be checked, and never guess.
   - Start feedback with what works, then up to three ranked problems, each with a fix.
