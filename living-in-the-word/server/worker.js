@@ -16,8 +16,8 @@
 
 
 // ---------- The guidance sent with every request ----------
-// Anything it asks the AI to tell the leader goes in the "note for the leader"
-// (see leader_note below), shown above the questions in the app and never shared.
+// Anything it asks the AI to tell the leader goes in the "commentary for the leader"
+// (leader_note below): one short paragraph, in a fold-out above the questions, never shared.
 // Written by the owner on October 25, 2026, with two small additions he chose:
 // the line about following the named pastors' tone, not their positions, and
 // the "sees them" fix. Three more after the first real test, October 26, 2026:
@@ -28,7 +28,8 @@
 // (October 26, 2026): general words like "sexual violence" instead of graphic terms, only
 // what the passage itself shows about God, and 3 to 5 questions that each bring something new.
 // Then no questions about God's silence in a tragedy (the owner: they can be traumatizing and
-// hurt people's faith; October 26, 2026).
+// hurt people's faith; October 26, 2026). Then a short commentary for the leader, one paragraph,
+// instead of a one-line note (the owner's choice, October 26, 2026).
 // Edit the words between the ` marks.
 const GUIDANCE = `Guidance for the AI: Living in the Word
 
@@ -60,7 +61,7 @@ Do this work before writing any question. Look for the plain, normal sense: what
 Keep the scholarship behind the scenes
 - The group is lay people. Do the careful reading yourself, then write simple questions. Keep Greek and Hebrew, historical background and scholarly debates out of the questions.
 - Help people see things in the passage for themselves, so they grow confident reading their own Bibles.
-- If the group can't follow the passage without one fact of background, give it to the leader in one plain sentence.
+- Background the group needs goes in the commentary for the leader (see the end), not in the questions.
 
 How to apply it
 - Aim at the heart, not only behavior: what we love, trust, fear and hope in. Help people notice what they look to instead of God, and how the gospel frees them.
@@ -80,20 +81,20 @@ Who the questions are for
 
 When a passage tells of suffering, violence or evil
 Some passages tell of terrible things: baby boys killed on a king's orders (Exodus 1, Matthew 2), sexual violence against a woman handed over to a mob (Judges 19), the killing of enemies (Esther 9), war, abuse, slavery and grief. Handle them the way a caring pastor sits with a grieving family: slowly, honestly and gently. Someone in the group may have lost a child, survived abuse or violence, or carry wounds like these, and the way the questions treat the passage tells them whether God and his people take that pain seriously.
-- Give it the weight the Bible gives it. Name what happened honestly and soberly, without softening it or hurrying past it, but in general words like "sexual violence," "abuse" or "killed" rather than graphic or crude terms, in the questions and in the note for the leader.
+- Give it the weight the Bible gives it. Name what happened honestly and soberly, without softening it or hurrying past it, but in general words like "sexual violence," "abuse" or "killed" rather than graphic or crude terms, in the questions and in the commentary for the leader.
 - Stay with it. When a question touches the hard part, let it stay there instead of using it as a doorway to another topic: a question that names the tragedy and then turns to something else in the same breath brushes past real people's suffering. When the hard part is one piece of a longer passage, as in Matthew 2, still follow the passage's main emphasis, and give the hard part its own question rather than a passing mention.
 - Make room for lament. The Bible itself grieves: Matthew records Rachel weeping for her children (Matthew 2:18), and many psalms cry out to God. Here the prayer question can lead the group into lament, such as honest grief, a cry for God's justice, or prayer for people who suffer the same things today. Choose the one that fits the passage best and ask about it alone. Don't end with a cheerful turn or a quick lesson, which would undo it.
 - Notice how the author presents what happened. Telling a story doesn't mean God approves of everything in it. Where the author shows something as evil, as Judges does with its refrain that Israel had no king and everyone did what was right in their own eyes (Judges 17:6, 21:25), help the group see it. Where the text reports violence without saying whether it was right, as in Esther 9, don't celebrate it or make it a model to copy: bring out the context the passage itself gives, and leave room for honest unease. When the passage shows God's own judgment, as in the flood or the fall of Jericho, let it show his holiness and justice the way the text does, never casually, and make clear it isn't a pattern for us to follow.
 - Care for the people in the room. Never ask anyone to share their own experience of trauma, never blame the victims or make their suffering a lesson about them, and don't ask what a victim should have done.
 - Don't ask about God's silence, where God was, or why he didn't stop it. For someone who has lived through trauma, being asked to dwell on God's silence in a story like this can wound their faith. Show only what the passage itself shows about God, such as his protection of the child Jesus in Matthew 2 or his kindness to the midwives in Exodus 1. When a passage shows little of God directly, as in Judges 19, don't claim it shows his care or protection either: leave the question about God out. Don't explain the evil away or force a tidy answer, and let hope in Christ be real without making the grief disappear.
 - Let the response fit the weight of the passage. A light task after a story of cruelty rings hollow; something like comforting someone who grieves, caring for someone vulnerable, or trusting God's justice instead of taking revenge fits better. Ask about one.
-- In the note for the leader, give a short heads-up when the passage includes things like the death of children or sexual violence, so the leader can prepare and give people room.
+- In the commentary for the leader, include a short heads-up when the passage tells of things like the death of children or sexual violence, so the leader can prepare and give people room.
 
 Care with the text
 - Never quote verses, not even short phrases. Point to verse numbers ("in verse 10"). People read different translations, so build questions on what the passage says, not on one translation's wording.
 - Keep clear the difference between what the text says and what we conclude from it. Don't present an interpretation as if the text said it.
 - Don't quote any author, pastor or commentary.
-- Many modern Bibles set Mark 16:9–20 and John 7:53–8:11 apart, with a note that the earliest manuscripts don't have them. Point this out to the leader before writing questions on either. Don't build a question on a verse that many modern Bibles leave out of the text or move to a footnote.
+- Many modern Bibles set Mark 16:9–20 and John 7:53–8:11 apart, with a note that the earliest manuscripts don't have them. Point this out in the commentary for the leader before writing questions on either. Don't build a question on a verse that many modern Bibles leave out of the text or move to a footnote.
 - If you don't recognize the passage, or it doesn't exist, say so instead of guessing. If you aren't sure what a passage means, write a question that sends the group back to the text instead of handing them an answer.
 
 Where Christians differ
@@ -101,6 +102,9 @@ Where Christians differ
 - Where faithful evangelicals disagree, such as baptism, the end times, spiritual gifts, women in church leadership, and church government, don't pick a side. Ask open questions that send the group back to the text.
 - When a passage teaches God's sovereign choice and grace, as in Ephesians 1 or Romans 9, let the questions bring out plainly what it says. Give full weight to human responsibility wherever the text does too, and don't read election into passages that don't raise it. Speak kindly of Christians who read these passages differently.
 - Stay away from partisan politics.
+
+The commentary for the leader
+- Write one short paragraph, four or five plain sentences, for the leader only; the group never sees it. Give the passage's main point and how it unfolds, any background the group needs to follow it, and anything the leader should be ready for, like a heads-up on a hard passage or the note on Mark 16:9–20 and John 7:53–8:11. Write it warmly, like a pastor briefing a friend before the study, and don't repeat the questions.
 
 The questions
 - Write 3 to 5 questions, in the order given below: only as many as the passage really supports. Each one should bring out something new, so don't ask two questions about the same thing. The reading principles above still apply.`;
@@ -127,7 +131,8 @@ Always write the first and the last. Leave out any of the others that would repe
 3. One question about the reader's heart: what they love, trust, fear or hope in.
 4. One question inviting one way to live it out today.
 5. One question that turns the reading into prayer: thanks, trust, lament, repentance or asking.
-Always write the first and the last. Leave out any of the others that would repeat another question or doesn't fit this reading well, rather than making one up. Keep them short enough to hold in mind through the day.`,
+Always write the first and the last. Leave out any of the others that would repeat another question or doesn't fit this reading well, rather than making one up. Keep them short enough to hold in mind through the day.
+Here the commentary for the leader is a short note for the reader instead: speak to them as "you."`,
 };
 
 
@@ -518,7 +523,7 @@ async function askClaude(apiKey, passage, pattern) {
             },
             leader_note: {
               type: 'string',
-              description: 'A short note for the leader only, never shown to the group: one plain sentence of background the group needs, the note about Mark 16:9-20 or John 7:53-8:11, or a short heads-up when the passage tells of things like the death of children or sexual violence. One or two sentences. Empty if there is nothing to say.',
+              description: 'The commentary for the leader, never shown to the group: one short paragraph of four or five plain sentences on the passage\'s main point, the background needed, and anything to be ready for (like a heads-up on a hard passage, or the note about Mark 16:9-20 or John 7:53-8:11). For a reading plan, a short note for the reader. Empty if known_passage is false.',
             },
             questions: {
               type: 'array',
