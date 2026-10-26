@@ -328,8 +328,9 @@ function changedQuestions() {
 
 // ---------- The AI helper ----------
 
-// The AI helper's address: the Cloudflare Worker (see AI-PLAN.md). Filled in once it's set up.
-const SERVER_URL = '';
+// The AI helper's address: the Cloudflare Worker (see AI-PLAN.md), set up October 26, 2026.
+// Set it back to '' to turn the AI helper off in the app.
+const SERVER_URL = 'https://living-in-the-word.danyoonsignup.workers.dev/';
 
 // The passcode is saved on this phone only, under the app's own name in the browser's storage
 const STORAGE_KEY = 'living-in-the-word';
