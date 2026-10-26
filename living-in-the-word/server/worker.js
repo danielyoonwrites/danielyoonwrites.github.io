@@ -1,8 +1,8 @@
 // Living in the Word: the small server for the AI helper (a Cloudflare Worker).
 //
-// What it does: the app sends a passage name (like "John 4:1-26"), a study method
-// and the passcode. This server checks the passcode, asks Claude (Anthropic's AI)
-// for questions about that passage, and sends the questions back.
+// What it does: the app sends a passage name (like "John 4:1-26"), whether it's for
+// a group study or the reading plan, and the passcode. This server checks the passcode,
+// asks Claude (Anthropic's AI) for 4 questions about that passage, and sends them back.
 //
 // Why a server: the website is public, so a key in the app could be copied.
 // The AI key and the passcode are NOT in this file. They're saved in Cloudflare's
@@ -81,39 +81,32 @@ Where Christians differ
 - When a passage teaches God's sovereign choice and grace, as in Ephesians 1 or Romans 9, let the questions bring out plainly what it says. Give full weight to human responsibility wherever the text does too, and don't read election into passages that don't raise it. Speak kindly of Christians who read these passages differently.
 - Stay away from partisan politics.
 
-The method
-- Follow the method the leader chose, in its order. Whatever the method, the reading principles above still apply.`;
+The questions
+- Write exactly 4 questions, in the order given below. The reading principles above still apply.`;
 
 
-// ---------- The study methods ----------
-// The same three methods as the app (app.js). The AI follows the chosen one's pattern.
-const METHODS = {
-  dbs: `Discovery Bible Study. Write 5 to 7 questions in this order:
-1. One question inviting someone to retell the passage in their own words.
-2. One or two questions on what this passage shows about God.
-3. One or two questions on what it shows about people.
-4. One question on how I will obey it this week.
-5. One question on who I will share it with this week.`,
-  oia: `Observe, Interpret, Apply (inductive Bible study). Write 6 to 8 questions in this order:
-1. Two or three questions on what the passage says (observe).
-2. Two or three questions on what it means (interpret).
-3. One or two questions on what to do about it (apply).`,
-  swedish: `The Swedish method. Write 3 to 6 questions in this order:
-1. One or two "Light bulb:" questions about what stands out or shines in this passage.
-2. One or two "Question mark:" questions about what is hard to understand in this passage.
-3. One or two "Arrow:" questions about how this passage applies to our lives.
-Start each question with its symbol's name, like "Light bulb: ...".`,
-  // The reading plan: one person's quiet time, one day's reading
-  devotional: `Personal reading, one day of a reading plan. These questions are for one person's quiet time with God, not for a group, so speak to the reader as "you." Write 3 or 4 questions in this order:
-1. One or two questions that help the reader notice what this reading says, especially about God.
-2. One question about the reader's heart: what they love, trust, fear or hope in.
-3. One question that turns the reading into a response to God: thanks, trust, repentance or prayer.
+// ---------- The order of the 4 questions ----------
+// The owner chose 4 questions and no study methods (October 26, 2026): since the AI writes
+// questions for each passage, the methods' templates got in the way. "study" is for a small
+// group; "personal" is for one day of the reading plan. Edit the words between the ` marks.
+const PATTERNS = {
+  study: `A small group study. Write exactly 4 questions, in this order:
+1. One question on what the passage says: what happens, who is involved, or what stands out.
+2. One question on what the passage shows about God: the Father, the Son or the Holy Spirit.
+3. One question on what it means for our hearts: what we love, trust, fear or hope in, in light of the gospel.
+4. One question inviting one concrete response this week.`,
+  personal: `Personal reading, one day of a reading plan, for one person's quiet time with God, not a group. Speak to the reader as "you." Write exactly 4 questions, in this order:
+1. One question that helps the reader notice what this reading says.
+2. One question on what it shows about God.
+3. One question about the reader's heart: what they love, trust, fear or hope in.
+4. One question that turns the reading into a response to God: thanks, trust, repentance or prayer.
 Keep them short enough to hold in mind through the day.`,
 };
 
 
 // ---------- Models and prices ----------
-// Until the owner picks one after the side-by-side test, the app can ask for any of these.
+// The owner chose Sonnet 5.5 on October 26, 2026, after a side-by-side test on John 1.
+// The others stay in the list only to price an answer if Anthropic ever falls back to one.
 // Prices in US dollars per million tokens, from https://platform.claude.com/docs/en/about-claude/pricing
 // (checked October 25, 2026). Used only to show what each answer cost.
 const MODELS = {
@@ -121,7 +114,7 @@ const MODELS = {
   'claude-sonnet-5-5': { input: 2,    output: 10 },
   'claude-haiku-5-5':  { input: 0.10, output: 0.50 },
 };
-const DEFAULT_MODEL = 'claude-opus-5-5';
+const MODEL = 'claude-sonnet-5-5';
 
 // The longest an answer can be, thinking included (a hard limit that also caps the cost:
 // with Opus 5.5, 4,000 tokens is at most 8 cents of writing).
@@ -158,15 +151,16 @@ export default {
     }
 
     const passage = typeof input.passage === 'string' ? input.passage.trim() : '';
-    const method = input.method;
-    const model = input.model === undefined ? DEFAULT_MODEL : input.model;
-    if (!passage || passage.length > 80 || !METHODS[method] || !MODELS[model]) {
+    // The reading plan asks for "personal" questions. (Older copies of the app sent a
+    // study method's name, or personal: true; those still work.)
+    const pattern = input.method === 'personal' || input.personal === true ? 'personal' : 'study';
+    if (!passage || passage.length > 80) {
       return reply({ error: 'bad-request' }, 400, cors);
     }
 
     let answer;
     try {
-      answer = await askClaude(env.ANTHROPIC_API_KEY, model, passage, method, input.personal === true);
+      answer = await askClaude(env.ANTHROPIC_API_KEY, passage, pattern);
     } catch (error) {
       return reply({ error: 'ai-unavailable' }, 502, cors);
     }
@@ -176,15 +170,11 @@ export default {
 
 // Asks Claude for the questions. Plain fetch (no npm), in the format of Anthropic's docs:
 // https://platform.claude.com/docs/en/build-with-claude/structured-outputs
-async function askClaude(apiKey, model, passage, method, personal) {
-  // The reading plan asks for a group method's questions for one person (personal is true)
-  const forOne = personal && method !== 'devotional'
-    ? '\n\nThis is personal reading, one day of a reading plan, not a group study. Write only 3 or 4 questions in all, keeping the method\'s order and shape, for one person\'s quiet time with God. Speak to the reader as "you."'
-    : '';
+async function askClaude(apiKey, passage, pattern) {
   const body = {
-    model,
+    model: MODEL,
     max_tokens: MAX_TOKENS,
-    system: GUIDANCE + '\n\nThe method for this request: ' + METHODS[method] + forOne,
+    system: GUIDANCE + '\n\n' + PATTERNS[pattern],
     messages: [{ role: 'user', content: 'Passage: ' + passage }],
     output_config: {
       effort: 'medium',
@@ -205,7 +195,7 @@ async function askClaude(apiKey, model, passage, method, personal) {
             questions: {
               type: 'array',
               items: { type: 'string' },
-              description: 'The discussion questions, in order. Empty if known_passage is false.',
+              description: 'Exactly 4 questions, in order. Empty if known_passage is false.',
             },
           },
           required: ['known_passage', 'leader_note', 'questions'],
@@ -224,12 +214,9 @@ async function askClaude(apiKey, model, passage, method, personal) {
     'anthropic-version': '2026-10-21',
   };
 
-  // Opus and Sonnet: if a safety check declines, Anthropic retries on another model by itself.
-  // (Haiku has no such fallback.)
-  if (model !== 'claude-haiku-5-5') {
-    body.fallbacks = 'default';
-    headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
-  }
+  // If a safety check declines, Anthropic retries on another model by itself
+  body.fallbacks = 'default';
+  headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -238,8 +225,8 @@ async function askClaude(apiKey, model, passage, method, personal) {
   });
   const result = await response.json();
 
-  // The monthly spending limit (or a rate limit) was reached
-  if (response.status === 429 || (result.error && /usage limits/i.test(result.error.message || ''))) {
+  // The monthly spending limit, a rate limit, or the month's credits were used up
+  if (response.status === 429 || (result.error && /usage limits|credit balance/i.test(result.error.message || ''))) {
     return { error: 'limit-reached' };
   }
   if (!response.ok) return { error: 'ai-unavailable' };
@@ -256,14 +243,14 @@ async function askClaude(apiKey, model, passage, method, personal) {
   }
 
   const usage = result.usage || {};
-  const price = MODELS[result.model] || MODELS[model];
+  const price = MODELS[result.model] || MODELS[MODEL];
   const cost = ((usage.input_tokens || 0) * price.input + (usage.output_tokens || 0) * price.output) / 1e6;
 
   return {
     knownPassage: parsed.known_passage === true,
     leaderNote: typeof parsed.leader_note === 'string' ? parsed.leader_note.trim() : '',
     questions: Array.isArray(parsed.questions) ? parsed.questions.filter((q) => typeof q === 'string' && q.trim()) : [],
-    model: result.model || model,
+    model: result.model || MODEL,
     inputTokens: usage.input_tokens || 0,
     outputTokens: usage.output_tokens || 0,
     cost,   // in US dollars, like 0.031

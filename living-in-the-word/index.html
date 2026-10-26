@@ -5,7 +5,7 @@
   <!-- Makes the page fit phone screens instead of showing a tiny desktop page -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Living in the Word</title>
-  <meta name="description" content="Type a Bible passage, choose a way to study it, and get discussion questions for your small group.">
+  <meta name="description" content="Type a Bible passage and get discussion questions written for it, for your small group.">
 
   <!-- Asks search engines not to list it while the owner tries it out. Remove at stage 3 (see SPEC.md). -->
   <meta name="robots" content="noindex">
@@ -17,8 +17,8 @@
 
   <!-- The app's own look: Moon jar colors, big buttons.
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=7">
-  <script src="app.js?v=8" defer></script>
+  <link rel="stylesheet" href="style.css?v=8">
+  <script src="app.js?v=9" defer></script>
 </head>
 <body>
 
@@ -46,66 +46,21 @@
         <input id="passage-text" type="text" maxlength="80" autocomplete="off" autocapitalize="words">
         <p class="hint">A verse, a chapter or a longer passage, like “John 4:1-26.”</p>
         <p class="gentle-error" hidden>Type a passage first.</p>
-        <button type="submit" class="primary">Next</button>
+        <button type="submit" class="primary">Write questions</button>
       </form>
-      <p class="note">Nothing you type is sent anywhere, unless you tap “Suggest questions” later.</p>
+      <p class="note">Only the passage name is sent, to the AI helper that writes the questions.</p>
       <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
-    <!-- 2. Choose a way to study it. Discovery Bible Study is already selected. -->
-    <section class="screen" id="method">
-      <p class="label passage-label"></p>
-      <form>
-        <fieldset>
-          <legend><h2 tabindex="-1">How do you want to study it?</h2></legend>
-
-          <!-- The value of each choice matches a method at the top of app.js.
-               The owner's names first (October 2026), the method's usual name in small print. -->
-          <label class="choice">
-            <input type="radio" name="method" value="dbs" checked>
-            <span class="choice-name">Discover</span>
-            <span class="choice-original">Discovery Bible Study</span>
-            <span class="choice-line">God, people, then what to obey and who to tell.</span>
-          </label>
-
-          <label class="choice">
-            <input type="radio" name="method" value="oia">
-            <span class="choice-name">Look, think, live</span>
-            <span class="choice-original">Observe, Interpret, Apply</span>
-            <span class="choice-line">What it says, what it means, what to do.</span>
-          </label>
-
-          <label class="choice">
-            <input type="radio" name="method" value="swedish">
-            <span class="choice-name">Light, question, arrow</span>
-            <span class="choice-original">The Swedish method</span>
-            <span class="choice-line">What shines, what’s hard, how it applies.</span>
-          </label>
-        </fieldset>
-        <button type="submit" class="primary">See the questions</button>
-      </form>
-      <button type="button" class="quiet back" data-action="back">Back</button>
-    </section>
-
-    <!-- 3. The questions: edit, remove or add. app.js fills in the list. -->
+    <!-- 2. The questions: 4 written by the AI helper for this passage (see AI-PLAN.md).
+         Edit, remove or add. app.js fills in the list. -->
     <section class="screen" id="questions">
-      <p class="label method-label"></p>
+      <p class="label">Questions</p>
       <h2 class="passage-name" tabindex="-1"></h2>
-      <p class="hint">Tap a question to change its words.</p>
-      <p class="method-tip"></p>
-
-      <!-- The AI helper: questions written for this passage (see AI-PLAN.md) -->
-      <button type="button" class="primary suggest" data-action="suggest">Suggest questions for this passage</button>
-
-      <!-- Only on the test link (add ?test to the address): choose the model and see what each answer cost -->
-      <fieldset class="test-only" hidden>
-        <legend class="label">Model (test only)</legend>
-        <label><input type="radio" name="model" value="claude-opus-5-5" checked> Opus 5.5</label>
-        <label><input type="radio" name="model" value="claude-sonnet-5-5"> Sonnet 5.5</label>
-        <label><input type="radio" name="model" value="claude-haiku-5-5"> Haiku 5.5</label>
-      </fieldset>
+      <p class="study-tip">Read the passage aloud, then go through the questions together.</p>
 
       <p class="note suggest-status" role="status" hidden></p>
+      <!-- Only on the test link (add ?test to the address): what each answer cost -->
       <p class="note test-cost" hidden></p>
 
       <!-- The AI's note for the leader (one fact of background, for example). Never shared. -->
@@ -117,8 +72,10 @@
 
       <ol class="question-list"></ol>
       <p class="no-steps no-questions" hidden>No questions yet.</p>
+      <p class="hint">Tap a question to change its words.</p>
 
       <button type="button" class="outline" data-action="add">Add a question</button>
+      <button type="button" class="quiet suggest" data-action="suggest">Write new questions</button>
 
       <!-- Share or copy the passage and questions as plain text. The note for the leader is never included. -->
       <div class="share-pair">
@@ -129,8 +86,7 @@
       <!-- Shown only if copying doesn't work in this browser: the text, to select by hand -->
       <textarea class="share-text" readonly hidden aria-label="The study, to copy by hand"></textarea>
 
-      <button type="button" class="quiet" data-action="reset">Start these questions over</button>
-      <p class="note">Your changes stay while this page is open. Nothing is shared until you tap Share or Copy. “Suggest questions” sends only the passage name and the method to the AI helper.</p>
+      <p class="note">Your changes stay while this page is open. Nothing is shared until you tap Share or Copy.</p>
       <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 
@@ -151,11 +107,6 @@
 
         <label class="field-label" for="plan-start">Start</label>
         <input id="plan-start" type="date">
-
-        <!-- The style of questions each day. app.js fills in the choices and the line under it. -->
-        <label class="field-label" for="plan-style">Questions</label>
-        <select id="plan-style"></select>
-        <p class="hint style-line"></p>
 
         <!-- app.js fills this in, like "28 readings. If you read every day, you’ll finish Sat, Nov 28." -->
         <p class="plan-summary"></p>
@@ -179,8 +130,6 @@
       </div>
 
       <p class="label reflect-label">To think about</p>
-      <!-- The style of questions, like "Quiet time", with a link to change it -->
-      <p class="style-now"><span class="style-name"></span> <button type="button" class="link-button" data-action="change-style">Change</button></p>
       <ol class="reflect-list"></ol>
       <p class="note reading-status" role="status" hidden></p>
       <!-- Shown when the AI helper is set up but this phone has no passcode yet -->
@@ -188,21 +137,6 @@
 
       <button type="button" class="primary" data-action="done-reading">Done for today</button>
       <button type="button" class="quiet" data-action="end-plan">End this plan</button>
-      <button type="button" class="quiet back" data-action="back">Back</button>
-    </section>
-
-    <!-- Reading plan: change the style of questions -->
-    <section class="screen" id="plan-style-screen">
-      <p class="label">Reading plan</p>
-      <form>
-        <fieldset>
-          <legend><h2 tabindex="-1">Which style of questions?</h2></legend>
-          <!-- app.js fills in the four choices -->
-          <div class="style-choices"></div>
-        </fieldset>
-        <button type="submit" class="primary">Use this style</button>
-      </form>
-      <p class="note">Questions already written for earlier readings stay as they are.</p>
       <button type="button" class="quiet back" data-action="back">Back</button>
     </section>
 

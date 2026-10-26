@@ -102,7 +102,7 @@ h2 {
   line-height: 1.55;
 }
 
-/* Small labels, like "Discovery Bible Study": uppercase, celadon */
+/* Small labels, like "For the leader": uppercase, celadon */
 .label {
   margin: 0 0 0.5rem;
   font-size: 0.75rem;
@@ -205,7 +205,7 @@ button {
 }
 
 
-/* ---------- Choosing a method ---------- */
+/* ---------- Groups of choices (chapters a day) ---------- */
 fieldset {
   margin: 0;
   padding: 0;
@@ -216,54 +216,10 @@ legend {
   padding: 0;
 }
 
-/* Each method is a big box you tap. The round dot shows which one is chosen. */
-.choice {
-  display: grid;
-  grid-template-columns: 1.5rem 1fr;
-  column-gap: 0.75rem;
-  margin: 0 0 0.75rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid var(--glaze);
-  cursor: pointer;
-}
-
-/* The chosen box gets a celadon line (on newer browsers; the dot always shows) */
-.choice:has(input:checked) {
-  border-color: var(--celadon);
-  box-shadow: inset 3px 0 0 var(--celadon);
-}
-
-.choice input {
-  grid-row: 1 / span 3;
-  width: 1.25rem;
-  height: 1.25rem;
-  margin: 0.15rem 0 0;
-  accent-color: var(--celadon);
-}
-
-.choice-name {
-  display: block;
-}
-
-/* The method's usual name, like "Discovery Bible Study", in small print */
-.choice-original {
-  display: block;
-  font-size: 0.8125rem;
-  font-style: italic;
-  color: var(--stone);
-}
-
-.choice-line {
-  display: block;
-  margin-top: 0.15rem;
-  font-size: 0.8125rem;
-  color: var(--stone);
-}
-
-
 /* ---------- The questions ---------- */
-.method-tip {
-  margin: 1.25rem 0 1.5rem;
+/* "Read the passage aloud...": a short tip under the passage */
+.study-tip {
+  margin: 0 0 1.25rem;
   font-style: italic;
 }
 
@@ -329,9 +285,9 @@ legend {
 
 /* ---------- The AI helper ---------- */
 
-/* "Suggest questions for this passage": the main button, above the questions */
+/* "Write new questions": a quiet button under "Add a question" */
 .suggest {
-  margin: 0 0 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 /* While the AI writes, the button waits */
@@ -343,24 +299,6 @@ legend {
 .suggest-status {
   margin: 0.5rem 0 1rem;
   font-style: italic;
-}
-
-/* Test link only: the three models in a row */
-.test-only {
-  margin: 1rem 0 0;
-}
-
-.test-only label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  min-height: 2.75rem;      /* tall enough to tap easily */
-  margin-right: 1rem;
-  font-size: 0.875rem;
-}
-
-.test-only input {
-  accent-color: var(--celadon);
 }
 
 .test-cost {
@@ -459,29 +397,6 @@ select {
 
 .reflect-label {
   margin-top: 2rem;
-}
-
-/* "Quiet time  Change": the style of questions, with a small link to change it */
-.style-now {
-  margin: 0 0 0.5rem;
-  font-size: 0.8125rem;
-  color: var(--stone);
-}
-
-.link-button {
-  min-height: 2.75rem;        /* tall enough to tap easily */
-  padding: 0 0.25rem;
-  border: none;
-  background: transparent;
-  color: var(--celadon);
-  font-size: inherit;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
-}
-
-.style-line {
-  margin-top: 0.5rem;
 }
 
 .reflect-list {

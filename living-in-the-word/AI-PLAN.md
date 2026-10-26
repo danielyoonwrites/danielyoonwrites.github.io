@@ -5,6 +5,7 @@ Questions written for the specific passage. Planned with the owner on October 25
 ## Decided (October 25, 2026)
 
 - The AI follows the chosen method: for Discovery Bible Study it still asks about God, about people, obeying and sharing, but about this passage. Its questions replace the general ones as drafts. "Start these questions over" brings the general ones back.
+- Changed October 26, 2026 (the owner's choice, pull request 50): no methods or reading plan styles. When the AI writes for each passage, the questions won't fit a method's mold anyway. The AI writes exactly 4 questions in one fixed order (what the passage says, God, the heart, a response), as soon as a passage is typed. "Write new questions" asks again.
 - A passcode: the first time the owner taps "Suggest questions," the app asks for it and remembers it on that phone. Other leaders can get their own later.
 - Which AI model: decided later, after a side-by-side test (see step C). The owner wants to see quality and cost together.
 - Every suggestion is a draft the owner reviews. Nothing is shared on its own.
@@ -18,8 +19,8 @@ Still open (asked one at a time when we get there):
 
 ## How it works
 
-1. In the app, after choosing a method, tap "Suggest questions for this passage."
-2. The app sends only the passage name (like "John 4:1-26"), the method and the passcode to a small server. Nothing personal.
+1. In the app, type a passage and tap "Write questions."
+2. The app sends only the passage name (like "John 4:1-26"), whether it's a group study or the reading plan, and the passcode to a small server. Nothing personal.
 3. The server checks the passcode, then asks the AI (Claude, by Anthropic) with the secret key, which only the server knows.
 4. The questions come back and show as drafts, ready to edit, remove or add to.
 
@@ -52,7 +53,7 @@ The AI doesn't get the Bible text (stage 1 shows no Bible text, and translations
 - Point to verse numbers ("in verse 10") instead of quoting verses.
 - Stay with what the passage says. Don't add an interpretation as if it were the text.
 - If it doesn't recognize the passage, say so instead of guessing.
-- Follow the chosen method's pattern, in plain words for a small group.
+- Write exactly 4 questions in the set order, in plain words for a small group.
 
 The owner reviews every question, as always.
 
@@ -88,18 +89,19 @@ C1. The server code, `server/worker.js`, with the draft guidance, tested against
 First real test, October 26, 2026 (John 1, Discover, Opus 5.5): the questions followed the guidance and every verse reference checked out, but they were long, quoted "come and see," and had one grammar slip. The owner added three lines to the guidance (pull request 49): short questions that ask one thing, no quotes "not even short phrases," and correct grammar. After changing `server/worker.js`, paste it into Cloudflare again (Edit code, then Deploy).
 
 C2. Built October 25, 2026, before the sign-ups (pull request 42); the server's address (`SERVER_URL` at the top of the AI helper part of `app.js`) is filled in after Part 2 of step B. In the app, a "Suggest questions for this passage" button with the passcode, the note for the leader above the questions, plus a test link (like `?test`) that shows a model choice and the cost of each answer. Deploy the server (after step B), then try the same passage with all three models. Check: pick the model. If answers stop at the 4,000-token cap (the longer guidance may mean more thinking), raise it a little.
-D. The chosen model becomes the only one, and the test choice comes out. Check: try it with this week's passage.
+D. The chosen model becomes the only one, and the test choice comes out. Done October 26, 2026 (pull request 50): the owner chose Sonnet 5.5 after trying John 1 with all three models. The `?test` link now shows only the cost of each answer. Check: try it with this week's passage.
 
 E. Built October 25, 2026 (pull request 44). AI questions for the reading plan (the owner's choice, October 25, 2026): opening a day's reading asks the AI for 3 or 4 personal reflection questions on that chapter, written for one person's quiet time instead of a group, and saves them with the plan so the same reading never costs twice. Until the AI is connected, the reading shows the three Swedish-method questions. The server has a fourth pattern for this, `devotional` in `server/worker.js` (3 or 4 questions: notice what it says about God, the heart, a response to God). On a phone without the passcode, a quiet "Questions for this reading" button asks for it once. If the AI writes a note (like the Mark 16 note), it shows as "A note on this reading." Check: open today's reading.
 
 F. A style for the reading plan (pull request 47): the app sends the chosen style's method with `personal: true`, and the server adds a line asking for only 3 or 4 questions for one person's quiet time, in that method's order. Quiet time uses the `devotional` pattern. AI questions are saved by style and reading, so changing styles never pays twice for the same one.
+Replaced October 26, 2026 (pull request 50): no styles. The app sends `method: 'personal'`, the server's `personal` pattern asks for exactly 4 questions, and they're saved by reading (`four-0`, `four-1` and so on). Readings saved under an old style are asked once more.
 
 Then the rest of `SPEC.md`'s build plan: Share and Copy, Lead the study, saving, the reading plan, printing.
 
 ## Tech notes
 
 - The server calls the Claude API with plain `fetch` (raw HTTP), with the `anthropic-version: 2026-10-21` header, and the key as `Authorization: Bearer` (https://platform.claude.com/docs/en/manage-claude/authentication; the older `x-api-key` header is "legacy"). The key must be scoped to one workspace (the Default Workspace) when it's created; otherwise every request also needs an `anthropic-workspace-id` header. Anthropic's own SDK needs npm, which this website doesn't use.
-- Effort is `medium` for all three models in the test, so the comparison is fair. Opus and Sonnet use Anthropic's automatic fallback (`fallbacks: "default"`): if a safety check declines a request, Anthropic retries it on another model. Haiku has no fallback.
+- Effort is `medium`. The model is Sonnet 5.5 (`MODEL` in `server/worker.js`), with Anthropic's automatic fallback (`fallbacks: "default"`): if a safety check declines a request, Anthropic retries it on another model. During the test (until October 26, 2026), all three models used medium effort, so the comparison was fair.
 - The answer comes back as JSON (a list of questions), using the API's structured outputs.
 - The server answers only to danielyoonwrites.github.io (and to a local test address during building), and only with the right passcode.
 - The model's name is one line in the server, so changing it later is easy.
