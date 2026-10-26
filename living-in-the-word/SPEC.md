@@ -68,7 +68,7 @@ Moved up on October 25, 2026: after trying step 2, the owner pointed out that qu
 
 The owner asked to save questions for a passage and have the app remember them, like an app on a phone.
 
-- Save, next to Share and Copy (the bar at the bottom of the questions screen), keeps the passage, its questions (without empty ones) and the note for the leader on this phone. The button then says "Saved"; after any change it says "Save changes."
+- Save, in the bar at the bottom of the questions screen, keeps the passage, its questions (without empty ones) and the note for the leader on this phone. It says what it saves: "Save these questions for John 1" (the owner asked for this, October 26, 2026), then "Saved on this phone," or "Save your changes" after any change. It spans the bar's width, with Share and Copy side by side under it.
 - One saved study per passage: saving again keeps the newest. "John 15" and "john 15" count as the same passage.
 - "Saved studies" on the start screen (row 03) lists them, newest first, with how many questions and the date. Tap one to open it, change it, share it or write new questions. "Remove from saved studies" (under the questions) takes it off the list, after asking.
 - Typing a saved passage opens its saved questions instead of asking the AI, so it costs nothing and works even when the AI can't be reached.
