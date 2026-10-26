@@ -334,7 +334,8 @@ if (!navigator.share) {
 // ---------- The AI helper ----------
 
 // The AI helper's address: the Cloudflare Worker (see AI-PLAN.md), set up October 26, 2026.
-// Set it back to '' to turn the AI helper off in the app.
+// Set it back to '' to turn the AI helper off in the app. If the address ever changes,
+// change it in the Content-Security-Policy line in index.html too, or the browser blocks it.
 const SERVER_URL = 'https://living-in-the-word.danyoonsignup.workers.dev/';
 
 // The passcode is saved on this phone only, under the app's own name in the browser's storage
@@ -354,11 +355,36 @@ const testMode = new URLSearchParams(window.location.search).has('test');
 function readSaved() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (saved && saved.version === 1) return saved;
+    if (saved && saved.version === 1) return tidySaved(saved);
   } catch (error) {
     // Nothing saved yet, or this browser won't let the app save
   }
   return { version: 1 };
+}
+
+// Keeps only what's in the shape the app expects, so a damaged entry (from a bug, or
+// another page of the website) is skipped instead of stopping the app from working
+function tidySaved(saved) {
+  const clean = { version: 1 };
+  const text = (value) => (typeof value === 'string' ? value : '');
+  const onlyText = (list) => list.filter((item) => typeof item === 'string');
+  if (typeof saved.passcode === 'string') clean.passcode = saved.passcode;
+  if (Array.isArray(saved.studies)) {
+    clean.studies = saved.studies
+      .filter((study) => study && typeof study.passage === 'string' && Array.isArray(study.questions))
+      .map((study) => ({ passage: study.passage, questions: onlyText(study.questions), note: text(study.note), saved: text(study.saved) }));
+  }
+  const plan = saved.plan;
+  if (plan && typeof plan.book === 'string' && typeof plan.start === 'string'
+      && Number.isInteger(plan.perDay) && plan.perDay > 0 && Number.isInteger(plan.done) && plan.done >= 0) {
+    clean.plan = { ...plan, questions: {} };
+    Object.entries(plan.questions && typeof plan.questions === 'object' ? plan.questions : {}).forEach(([key, entry]) => {
+      if (entry && Array.isArray(entry.questions)) {
+        clean.plan.questions[key] = { questions: onlyText(entry.questions), note: text(entry.note) };
+      }
+    });
+  }
+  return clean;
 }
 
 // Returns false if this browser won't save (a private window, for example)
@@ -413,6 +439,7 @@ const PROBLEMS = {
   'daily-limit': 'Today’s AI limit is reached, so these are general questions. It starts again tomorrow.',
   'too-many-tries': 'Too many wrong passcodes were tried from this internet connection today, so these are general questions. Try again tomorrow.',
   'not-set-up': 'The AI helper isn’t fully set up yet, so these are general questions.',
+  'too-long': 'This passage was too long for the AI to answer, so these are general questions. Try a shorter passage.',
   declined: 'The AI couldn’t write questions for this one, so these are general questions.',
   offline: 'Couldn’t reach the AI helper, so these are general questions. Check your connection and try again.',
   other: 'The AI helper couldn’t answer just now, so these are general questions. Try again in a moment.',
@@ -739,6 +766,9 @@ function questionsKey(n) {
 let readingAhead = false;   // true after "Read the next one now", until the page closes
 let shownReading = null;    // the reading number on the "today" screen
 let readingRequest = null;  // the reading number the AI is writing questions for, if any
+// Readings whose AI questions failed while the page is open: they aren't asked for again
+// by themselves (each try can cost), only when "Questions for this reading" is tapped
+const readingFailed = new Set();
 
 // Today's date as 2026-10-25, in this phone's own time zone
 function today() {
@@ -849,7 +879,7 @@ function showToday(keepHistory = true) {
   setReadingStatus('');
   document.querySelector('.reading-ai').hidden = true;
   if (!saved && SERVER_URL) {
-    if (passcode) fetchReadingQuestions(plan.done);
+    if (passcode && !readingFailed.has(plan.done)) fetchReadingQuestions(plan.done);
     else document.querySelector('.reading-ai').hidden = false;
   }
 
@@ -916,7 +946,12 @@ async function fetchReadingQuestions(n) {
     return;
   }
   if (result.error || !result.knownPassage || !Array.isArray(result.questions) || !result.questions.length) {
-    if (onScreen) setReadingStatus(PROBLEMS[result.error] || PROBLEMS.other);
+    // Without reception, the next visit tries again by itself; otherwise only when tapped
+    if (result.error !== 'offline') readingFailed.add(n);
+    if (onScreen) {
+      setReadingStatus(PROBLEMS[result.error] || PROBLEMS.other);
+      if (result.error !== 'offline') document.querySelector('.reading-ai').hidden = false;
+    }
     return;
   }
 
@@ -997,8 +1032,13 @@ Object.assign(actions, {
     history = ['home'];
   },
 
-  // "Questions for this reading": asks for the passcode first, then the AI
+  // "Questions for this reading": asks the AI (for the passcode first, if this phone doesn't have it)
   'reading-ai'() {
+    readingFailed.delete(shownReading);   // asked for on purpose: try again
+    if (passcode) {
+      fetchReadingQuestions(shownReading);
+      return;
+    }
     afterPasscode = () => fetchReadingQuestions(shownReading);
     askPasscode(false);
   },

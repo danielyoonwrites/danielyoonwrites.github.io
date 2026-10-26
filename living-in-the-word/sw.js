@@ -107,14 +107,17 @@ async function newestOrCopy(event, request) {
   event.waitUntil(fromInternet.catch(() => {}));   // let it finish even if the copy is used
 
   const tooSlow = new Promise((resolve) => setTimeout(resolve, WAIT));
+  let noReception = false;
   try {
     const response = await Promise.race([fromInternet, tooSlow]);
     if (response) return response;
   } catch (error) {
-    // No reception: use the copy below
+    noReception = true;
   }
 
-  const copy = await findCopy(request);
+  // No reception: the copy of this file, whatever its version. Only slow: the exact same
+  // version only (style.css?v=15, not ?v=14), so a newer page never runs with an older script.
+  const copy = await findCopy(request, noReception);
   return copy || fromInternet;   // no copy yet: keep waiting for the internet
 }
 
@@ -125,10 +128,10 @@ async function keepCopy(request, response) {
   await cache.put(request, response);
 }
 
-async function findCopy(request) {
+async function findCopy(request, anyVersion) {
   const cache = await caches.open(CACHE);
-  const copy = await cache.match(request, { ignoreSearch: true, ignoreVary: true });
-  // Any page of the app (like index.html) can fall back to the app's start page
-  if (!copy && request.mode === 'navigate') return cache.match('./', { ignoreSearch: true });
+  const copy = await cache.match(request, { ignoreSearch: anyVersion, ignoreVary: true });
+  // Without reception, any page of the app (like index.html) can fall back to the start page
+  if (!copy && anyVersion && request.mode === 'navigate') return cache.match('./', { ignoreSearch: true });
   return copy;
 }
