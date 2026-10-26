@@ -33,8 +33,8 @@
 
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=18">
-  <script src="app.js?v=22" defer></script>
+  <link rel="stylesheet" href="style.css?v=19">
+  <script src="app.js?v=23" defer></script>
 </head>
 <body>
 
@@ -185,11 +185,12 @@
       <!-- Only on the test link (add ?test to the address): what each answer cost -->
       <p class="note test-cost" hidden></p>
 
-      <!-- The AI's note for the leader (one fact of background, for example). Never shared. -->
-      <div class="panel leader-note" hidden>
-        <p class="label">For the leader</p>
+      <!-- The AI's commentary for the leader: one short paragraph (the main point, background,
+           anything to be ready for), in a fold-out, closed until tapped. Never shared. -->
+      <details class="leader-note" hidden>
+        <summary>For the leader</summary>
         <p class="leader-note-text"></p>
-      </div>
+      </details>
 
       <!-- Shown only while the AI writes: five quiet lines that gently fade in and out -->
       <div class="writing-placeholder" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
@@ -287,11 +288,11 @@
       <p class="esv-only" hidden><a class="esv-link" href="https://www.esv.org/" target="_blank" rel="noopener">Read it on esv.org</a></p>
       <p class="note reading-early" hidden></p>
 
-      <!-- The AI's note on this chapter, if it wrote one (like the note on Mark 16:9–20) -->
-      <div class="panel reading-note" hidden>
-        <p class="label">A note on this reading</p>
+      <!-- The AI's short note on this reading, in a fold-out, closed until tapped -->
+      <details class="reading-note" hidden>
+        <summary>A note on this reading</summary>
         <p class="reading-note-text"></p>
-      </div>
+      </details>
 
       <p class="label reflect-label">To think about</p>
       <div class="writing-placeholder" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>

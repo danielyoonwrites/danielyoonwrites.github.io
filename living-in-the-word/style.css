@@ -147,7 +147,7 @@ main {
 
 /* ---------- Words ---------- */
 
-/* Small labels, like "Prepare a study" or "For the leader": small capitals, spaced out */
+/* Small labels, like "Prepare a study" or "Questions": small capitals, spaced out */
 .label {
   margin: 0 0 0.75rem;
   font-family: var(--sans);
@@ -563,22 +563,60 @@ select {
 }
 
 
-/* ---------- Notes from the AI, in a shaded box ---------- */
-.panel {
+/* ---------- The AI's commentary for the leader, and its note on a reading ----------
+   A fold-out like the passage's: closed until tapped, so the questions stay near the top
+   (the owner's choice, October 26, 2026). */
+.leader-note,
+.reading-note {
   margin: 0 0 1.75rem;
-  padding: 1rem 1.1rem;
-  background: var(--soft);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 
-.panel .label {
-  margin-bottom: 0.4rem;
+/* The row you tap: "For the leader" and a + that turns into a − */
+.leader-note summary,
+.reading-note summary {
+  display: flex;
+  align-items: center;
+  min-height: 3.25rem;
+  padding: 0.4rem 0;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  cursor: pointer;
+  list-style: none;
 }
 
+.leader-note summary::-webkit-details-marker,
+.reading-note summary::-webkit-details-marker {
+  display: none;
+}
+
+.leader-note summary::after,
+.reading-note summary::after {
+  content: "+" / "";
+  margin-left: auto;
+  font-family: var(--sans);
+  font-size: 1.25rem;
+}
+
+.leader-note[open] summary::after,
+.reading-note[open] summary::after {
+  content: "−" / "";
+}
+
+/* Right above the questions, whose own top line divides them, so no second line or gap */
+.leader-note {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+/* The paragraph itself */
 .leader-note-text,
 .reading-note-text {
   margin: 0;
-  font-style: italic;
-  line-height: 1.45;
+  padding: 0.25rem 0 1rem;
+  font-size: 1.0625rem;
+  line-height: 1.6;
 }
 
 
@@ -1009,9 +1047,6 @@ fieldset {
   margin: 0 0 1.5rem;
 }
 
-.reading-note {
-  margin-top: 0;
-}
 
 .reflect-label {
   margin-top: 0.5rem;

@@ -20,7 +20,7 @@ const GENERAL_QUESTIONS = [
 // ---------- What's being worked on (only while the page is open) ----------
 let passage = '';        // the passage typed, like "John 4:1-26"
 let questions = [];      // the questions on screen, with any edits
-let leaderNote = '';     // the AI's note for the leader, if it wrote one
+let leaderNote = '';     // the AI's commentary for the leader, if it wrote one
 let questionsFor = '';   // the passage those questions belong to
 let edited = false;      // true once the leader changes, removes or adds a question
 let history = [];        // screens visited, so Back can go to the one before
@@ -98,7 +98,7 @@ function showQuestions() {
   document.querySelector('.no-questions').hidden = questions.length > 0 || asking;
   list.querySelectorAll('textarea').forEach(fitHeight);
 
-  // The AI's note for the leader, if it wrote one
+  // The AI's commentary for the leader, if it wrote one (a fold-out; see closeLeaderNote)
   document.querySelector('.leader-note').hidden = !leaderNote;
   fill('.leader-note-text', leaderNote);
   updateSaveButton();
@@ -114,6 +114,11 @@ function fitHeight(box) {
 window.addEventListener('resize', () => {
   document.querySelectorAll('.question-list textarea').forEach(fitHeight);
 });
+
+// The commentary for the leader starts closed for each new set of questions
+function closeLeaderNote() {
+  document.querySelector('#questions .leader-note').open = false;
+}
 
 // The general questions, when the AI helper can't answer
 function useGeneralQuestions() {
@@ -164,6 +169,7 @@ function startStudy(text) {
   fill('.passage-name', passage);
   questions = [];
   leaderNote = '';
+  closeLeaderNote();
   edited = false;
   questionsFor = passage;
   setStatus('');
@@ -533,6 +539,7 @@ async function requestSuggestions() {
 
   questions = result.questions;
   leaderNote = result.leaderNote || '';
+  closeLeaderNote();
   edited = false;
   setStatus('Written for this passage. Read each one, and change anything before you use it.');
   showQuestions();
@@ -603,6 +610,7 @@ function openStudy(study) {
   passage = study.passage;
   questions = study.questions.slice();
   leaderNote = study.note || '';
+  closeLeaderNote();
   edited = false;
   questionsFor = passage;
   fill('.passage-name', passage);
@@ -912,7 +920,9 @@ function showReflect(questions, note) {
     item.textContent = question;
     list.append(item);
   });
-  document.querySelector('.reading-note').hidden = !note;
+  const noteBox = document.querySelector('.reading-note');
+  noteBox.hidden = !note;
+  noteBox.open = false;   // closed until tapped, each time a reading shows
   fill('.reading-note-text', note || '');
 }
 
