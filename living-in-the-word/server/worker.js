@@ -104,7 +104,7 @@ Where Christians differ
 - Stay away from partisan politics.
 
 The commentary for the leader
-- Write one short paragraph, four or five plain sentences, for the leader only; the group never sees it. Give the passage's main point and how it unfolds, any background the group needs to follow it, and anything the leader should be ready for, like a heads-up on a hard passage or the note on Mark 16:9–20 and John 7:53–8:11. Write it warmly, like a pastor briefing a friend before the study, and don't repeat the questions.
+- Write one short paragraph for the leader only, about 100 words: four or five short, plain sentences. The group never sees it. Choose what helps most: the passage's main point and how it unfolds, any background the group needs to follow it, and anything the leader should be ready for, like a heads-up on a hard passage or the note on Mark 16:9–20 and John 7:53–8:11. Write it warmly, like a pastor briefing a friend before the study, and don't repeat the questions.
 
 The questions
 - Write 3 to 5 questions, in the order given below: only as many as the passage really supports. Each one should bring out something new, so don't ask two questions about the same thing. The reading principles above still apply.`;
@@ -523,7 +523,7 @@ async function askClaude(apiKey, passage, pattern) {
             },
             leader_note: {
               type: 'string',
-              description: 'The commentary for the leader, never shown to the group: one short paragraph of four or five plain sentences on the passage\'s main point, the background needed, and anything to be ready for (like a heads-up on a hard passage, or the note about Mark 16:9-20 or John 7:53-8:11). For a reading plan, a short note for the reader. Empty if known_passage is false.',
+              description: 'The commentary for the leader, never shown to the group: one short paragraph, about 100 words in four or five short sentences, on the passage\'s main point, the background needed, and anything to be ready for (like a heads-up on a hard passage, or the note about Mark 16:9-20 or John 7:53-8:11). For a reading plan, a short note for the reader. Empty if known_passage is false.',
             },
             questions: {
               type: 'array',
