@@ -802,11 +802,11 @@ function showFinished(plan) {
 }
 
 // What the start screen says: today's date at the top, like "Monday, October 26",
-// and where the plan is, under "Today's reading"
+// and where the plan is, under "Bible reading plan companion" (nothing until a plan is set up)
 function updatePlanStatus() {
   fill('.today-date', new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }));
   const plan = readSaved().plan;
-  let text = 'Set up a plan, like one chapter of Matthew a day.';
+  let text = '';
   if (plan) {
     const readings = readingsIn(plan);
     if (plan.done >= readings) text = 'You finished ' + plan.book + '.';

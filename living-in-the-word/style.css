@@ -264,7 +264,20 @@ h2 {
 .row-text {
   display: block;
   font-size: 0.9375rem;
+  line-height: 1.45;
   color: var(--muted);
+}
+
+/* Where the reading plan is, like "Next: Matthew 3. Reading 3 of 28." Hidden when empty. */
+.row-status {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.9375rem;
+  font-style: italic;
+}
+
+.row-status:empty {
+  display: none;
 }
 
 

@@ -64,6 +64,12 @@ Moved up on October 25, 2026: after trying step 2, the owner pointed out that qu
 - AI can misquote Scripture or add interpretations, which is why the owner reviews everything.
 - Which AI, where the server runs and the cost limits are decided in a separate plan before stage 2, after checking current docs. Claude effort for stage 2: Extra high (the owner asked; Claude Code docs describe it as "deeper reasoning at higher token spend").
 
+## Words on the start screen (the owner's, October 26, 2026; use them exactly)
+
+- "Prepare for a Bible study" / "Tell me what passage you are going over, and I will generate five questions for your Bible study."
+- "Bible reading plan companion" / "Set up a Bible reading plan (like one chapter of Matthew a day), and I will generate five questions for the chapter you read today." Once a plan is set up, a line under it says where it is, like "Next: Matthew 3. Reading 3 of 28."
+- Sentence case, the owner's choice when asked (he typed them with capitals first).
+
 ## The look: "Paper and ink" (October 26, 2026)
 
 The owner asked for a big visual update: the app doesn't have to look like his website. It should look like a real app, clean like Kinfolk magazine, so people like to look at it and use it. He picked direction A, "Paper and ink," from two mockups (the other kept his celadon green).
