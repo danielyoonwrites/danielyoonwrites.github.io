@@ -1,8 +1,33 @@
 # Handoff: where everything stands
 
-Last updated October 25, 2026, at the end of the second session, so the next session can pick up without the old chat. Read this first, then the `CLAUDE.md` and `SPEC.md` (and `PROGRESS.md`) for whichever project you're working on. Keep this file up to date when something big changes.
+Last updated October 26, 2026 (Pacific time), at the end of the third session, so the next session can pick up without the old chat. Read this first, then the `CLAUDE.md` and `SPEC.md` (and `PROGRESS.md`) for whichever project you're working on. Keep this file up to date when something big changes.
 
 This repository is public. Keep personal details out of this file.
+
+
+## Where things stand (end of the third session, October 26, 2026)
+
+Read this part first; everything below it is the detail.
+
+Waiting on Dan:
+1. Paste the newest `living-in-the-word/server/worker.js` into Cloudflare: open https://github.com/danielyoonwrites/danielyoonwrites.github.io/blob/main/living-in-the-word/server/worker.js and tap "Copy raw file," then in Cloudflare go to Compute, Workers & Pages, living-in-the-word, Edit code, select all, paste, Deploy. It carries pull requests 68 to 71: care with hard passages, 3 to 5 questions, no questions about God's silence, and the short commentary for the leader. Then try John 15 at https://danielyoonwrites.github.io/living-in-the-word/?test and look at the commentary and the cost. He had pasted the versions up to pull request 69 and tried Matthew 2 and Judges 19 live; whether he pasted 70 and 71 isn't known.
+2. Resend (sign-up step S2): wait for `mail.danielyoonwrites.com` to show "Verified," then make a Sending-access API key for that address only and save it in Cloudflare as the secret `RESEND_API_KEY`, plus the secret `OWNER_EMAIL`. Then build S3, sign-in with an email code (`living-in-the-word/SIGNUP-PLAN.md`).
+3. The Anthropic API key expires November 24, 2026. Before then, make a new key and replace the Cloudflare secret `ANTHROPIC_API_KEY` (remind him in good time, with every step).
+4. Smaller checks, if not done yet: a spend limit in the Claude Console ($10 suggested); a passcode of four or more random words; two-step sign-in on his Cloudflare account; the home screen app in Airplane Mode; Share inside KakaoTalk; his review of the general questions' wording (`SPEC.md`, "The questions").
+
+First thing in the next session: save to Dan's Notion Master Notes, in one write (the allow list in `.claude/settings.json` should stop the approval pop-ups now). It's missing pull requests 58 to 71 and the research from the third session: how hard a real phone app would be, the sign-up options and their costs, the web address, the verse numbering behind the passage picker (the NASB, ESV and NIV; 3 John 15; the 16 verses in footnotes), the hard-passage guidance and its test runs, and the commentary's cost. Also his standing rules from that session: every answer stands on its own; the NASB, ESV and NIV over the KJV; for hard passages, gentle words and no questions about God's silence.
+
+Choices Dan made that later work must keep:
+- The passage picker's verse numbers follow the NASB, ESV and NIV.
+- The AI writes 3 to 5 questions. The first (what the passage says) and the last (prayer) are always written; that was Claude's choice, and Dan merged it without changes.
+- Hard passages: general words like "sexual violence," never graphic terms; never a question about God's silence, where God was, or why he didn't stop it (in Dan's words, such questions "can hurt people's faith").
+- The commentary for the leader: about 100 words, in a fold-out closed until tapped, written in the same request as the questions to keep costs down.
+
+Parked (raise only when it becomes relevant):
+- Sign-ups after S3: S4 to S6, then Apple sign-in, moving the app to `danielyoonwrites.com` (with a way to bring saved studies along), saved studies in the account, subscriptions, and the total daily cap at S6 (raise it to about 200, or remove it).
+- The reading plan says "Psalms 23" where Bibles say "Psalm 23" (the picker already says "Psalm 23").
+- An Android line in the home screen tip, Korean book names, and moving saved studies from Safari into an iPhone home screen app.
+- Don't mention the domain's auto-renew until September 2027.
 
 
 ## Who you're working with
@@ -21,12 +46,13 @@ This repository is public. Keep personal details out of this file.
 - He tests on his phone (Android, Chrome, sometimes inside the KakaoTalk in-app browser) and sends screenshots. He catches friction fast (an odd question, an extra screen), so show screenshots before every pull request.
 - His design rules, learned the hard way: keep pages short on a phone (tabs, fold-outs, one level per screen); no long lists; one thing per screen in apps.
 - His Bibles: he likes the NASB, ESV and NIV more than the KJV (October 26, 2026). Anything about verse numbers or Bible wording follows those three.
+- He's a pastor: with Scripture, care for hurting people comes first. For passages of tragedy he asked for gentle, general words and no questions about God's silence (October 26, 2026; details in `living-in-the-word/SPEC.md`, "The questions").
 - He keeps notes in Notion: a "Master Notes" page with one page per topic. Save important decisions and checked facts there, in one write per finished piece of work.
 
 
 ## How the work flows
 
-1. Claude works on the branch it's given (each session gets its own; the second session used `ccr-4cf7b8b6-sypqs8`) and restarts it from `main` after each merge: `git fetch origin main && git checkout -B <branch> FETCH_HEAD`.
+1. Claude works on the branch it's given (each session gets its own; the second session used `ccr-4cf7b8b6-sypqs8`, the third `ccr-c34f8c4c-6bmdd8`) and restarts it from `main` after each merge: `git fetch origin main && git checkout -B <branch> FETCH_HEAD`.
 2. Claude opens a pull request with a plain-words description and a "How to check it" list.
    Right after opening it, Claude subscribes to the pull request's activity (`subscribe_pr_activity`), so the merge wakes the session. Dan should never have to say "it merged." Claude also sets one backup check-in about 50 minutes later (`send_later`), and cancels it when the merge arrives.
 3. Dan reviews and merges on GitHub (Conversation tab, Merge pull request, Confirm merge).
@@ -60,6 +86,8 @@ When Dan says "do the rest," Claude works through the build plan one pull reques
 - **Testing apps:** serve the repository with `python3 -m http.server 8765 --bind 127.0.0.1`, then drive it with Playwright at 360 pixels wide (a small Android phone) and 1280 (a computer), and take screenshots. Check what's actually visible on screen, not just the `hidden` setting: a button style once overrode `hidden`, and only a screenshot caught it. Stop the server with `fuser -k 8765/tcp` (a `pkill` that matches its own command line ends the shell).
 - **Browser caching:** GitHub Pages lets browsers keep files for 10 minutes (`cache-control: max-age=600`). When a page's CSS or JavaScript changes, raise the `?v=` number on its links, or phones mix old and new files.
 - **The stop hook** requires all changes to be committed and pushed before ending a turn.
+- **Bible sites are blocked** by the session's network rule (the proxy answers 403): Bible Gateway, Bible Hub, esv.org, Wikipedia, biblestudytools.com and christianity.com, as of October 26, 2026. For verse data, attach public GitHub datasets with `add_repo` (read): `thiagobodruk/bible` (JSON for the KJV, NASB 2020, ESV, NIV and more; its verses aren't numbered, so line up neighboring verses to find a gap) and `scrollmapper/bible_databases` (large: clone with a blob filter and check out only the file you need). Web search works for confirming a verse's wording or footnote.
+- **Testing the AI's instructions without the real key** (it's only in Cloudflare): give separate Sonnet helpers (the Agent tool, model `sonnet`) the exact system prompt built from `server/worker.js` (GUIDANCE plus the pattern, saved to a file) and one passage each, without telling them what's being tested; run the old instructions too, for comparison. Each run takes about 6 to 10 minutes. They're stand-ins for the app's own answers: always say so to Dan. Example lists in the guidance get copied into questions, so describe the goal instead of listing options.
 
 
 ## Project 1: the website (done, live)
@@ -112,7 +140,7 @@ https://danielyoonwrites.github.io/first-step-smaller (live, not listed in searc
 
 ## Project 5: Living in the Word (AI helper live with Sonnet 5.5)
 
-https://danielyoonwrites.github.io/living-in-the-word (live, not listed in search engines). Type a Bible passage, and the AI helper writes 5 questions for it; edit them, then share them to a group chat (Lead the study, one question at a time, is still to come). There's also a daily reading plan with 5 AI questions for each reading. Read `living-in-the-word/SPEC.md` and `CLAUDE.md`.
+https://danielyoonwrites.github.io/living-in-the-word (live, not listed in search engines). Type a Bible passage or choose it from the Bible, and the AI helper writes 3 to 5 questions for it, with a short commentary for the leader; edit them, save them, then share them to a group chat (Lead the study, one question at a time, is still to come). There's also a daily reading plan with 3 to 5 AI questions for each reading. Read `living-in-the-word/SPEC.md` and `CLAUDE.md`.
 
 - Decided October 25, 2026: the owner uses it first to prepare his small group's studies, then anyone online. Stage 1 has no AI; stage 2 adds AI-suggested questions for the specific passage, which the owner reviews (a small server keeps the AI key secret; planned separately). Bible text isn't shown yet; check translation rules first.
 - Reading plan (Dan's idea, added October 25, 2026, as build step 5b, right after saving): set a plan like "Matthew, one chapter a day," and each day the app shows today's reading with questions to meditate on. No streaks or guilt.
@@ -158,7 +186,7 @@ https://danielyoonwrites.github.io/living-in-the-word (live, not listed in searc
 
 ## Pull requests so far
 
-1-3: the website's `CLAUDE.md` and content rules. 4: Home page. 5-9: Writing page (Substack, Subscribe button, featured posts, opening lines). 10: allow JavaScript. 11: About page. 12: polish and sharing previews. 13-16: automatic Latest posts (three approaches failed because of Substack's Cloudflare; the fourth, through Jina Reader on GitHub, works). 17-19: Quiet room spec, decisions, step 1. 20-24: Fewer spam calls (spec, first version, questions-first redesign, button and caching fixes, full fact check). 25: this handoff file. 26: Projects page. 27: shorter pages (Projects layout, tabs on Writing, fold-outs on Projects). 28: First step smaller spec. 29 to 35: First step smaller build (screens, tips, saving, steps inside steps, Edit, backup). 36: Living in the Word spec. 37: the reading plan added to Living in the Word, and this handoff update. 38: Living in the Word step 2 (passage, method, questions). 39: the AI helper plan. 40: the AI helper's server code. 41: Dan's theological guidance and the note for the leader. 42: the Suggest questions button. 43: the reading plan. 44: AI questions for each reading. 45: Share and Copy. 46: new names for the methods. 47: question styles for the reading plan. 48: the app connected to the AI helper. 49: guidance fixes after the first real test. 50: methods and styles removed, 4 AI questions, Sonnet 5.5. 51: 5 questions, and a clearer Write questions button. 52: the app's new look, "Paper and ink." 53: a loading state while the AI writes, and "Go deeper with AI." 54: the passage shown in the ESV. 55: the ESV put on hold (notes only). 56: Dan's words on the start screen, and a bigger esv.org link. 57: saved studies. 58: a clearer Save button ("Save these questions for John 1") and a boxed esv.org button. 59: works without reception (home screen icon and an offline copy). 60: no "Not shared with the group" line in the leader box; "Remove from saved studies" moved up under the Save bar. 61: only real Bible passages reach the AI, and two server fixes from a security review. 62: daily limits and a wrong-passcode lockout. 63: the app can't be broken (a browser safety rule, damaged saved data, failed readings, offline-copy timing). 64: the sign-up plan. 65: a cleaner screen when a passage isn't recognized. 66: the passage picker ("Choose from the Bible"), with verse numbers following the NASB, ESV and NIV. 67: "Choose from the Bible" moved above the typing box, with "Or type it." 68: pastoral care for passages of suffering, violence or evil (the AI's guidance). 69: 3 to 5 questions, gentler words and honesty about God's silence (after Judges 19). 70: no questions about God's silence in tragedies (Dan's rule). 71: a short commentary for the leader, in a fold-out.
+1-3: the website's `CLAUDE.md` and content rules. 4: Home page. 5-9: Writing page (Substack, Subscribe button, featured posts, opening lines). 10: allow JavaScript. 11: About page. 12: polish and sharing previews. 13-16: automatic Latest posts (three approaches failed because of Substack's Cloudflare; the fourth, through Jina Reader on GitHub, works). 17-19: Quiet room spec, decisions, step 1. 20-24: Fewer spam calls (spec, first version, questions-first redesign, button and caching fixes, full fact check). 25: this handoff file. 26: Projects page. 27: shorter pages (Projects layout, tabs on Writing, fold-outs on Projects). 28: First step smaller spec. 29 to 35: First step smaller build (screens, tips, saving, steps inside steps, Edit, backup). 36: Living in the Word spec. 37: the reading plan added to Living in the Word, and this handoff update. 38: Living in the Word step 2 (passage, method, questions). 39: the AI helper plan. 40: the AI helper's server code. 41: Dan's theological guidance and the note for the leader. 42: the Suggest questions button. 43: the reading plan. 44: AI questions for each reading. 45: Share and Copy. 46: new names for the methods. 47: question styles for the reading plan. 48: the app connected to the AI helper. 49: guidance fixes after the first real test. 50: methods and styles removed, 4 AI questions, Sonnet 5.5. 51: 5 questions, and a clearer Write questions button. 52: the app's new look, "Paper and ink." 53: a loading state while the AI writes, and "Go deeper with AI." 54: the passage shown in the ESV. 55: the ESV put on hold (notes only). 56: Dan's words on the start screen, and a bigger esv.org link. 57: saved studies. 58: a clearer Save button ("Save these questions for John 1") and a boxed esv.org button. 59: works without reception (home screen icon and an offline copy). 60: no "Not shared with the group" line in the leader box; "Remove from saved studies" moved up under the Save bar. 61: only real Bible passages reach the AI, and two server fixes from a security review. 62: daily limits and a wrong-passcode lockout. 63: the app can't be broken (a browser safety rule, damaged saved data, failed readings, offline-copy timing). 64: the sign-up plan. 65: a cleaner screen when a passage isn't recognized. 66: the passage picker ("Choose from the Bible"), with verse numbers following the NASB, ESV and NIV. 67: "Choose from the Bible" moved above the typing box, with "Or type it." 68: pastoral care for passages of suffering, violence or evil (the AI's guidance). 69: 3 to 5 questions, gentler words and honesty about God's silence (after Judges 19). 70: no questions about God's silence in tragedies (Dan's rule). 71: a short commentary for the leader, in a fold-out. 72: this handoff update, and the sign-up plan's finished steps marked.
 
 
 ## Starting a new session
@@ -166,7 +194,7 @@ https://danielyoonwrites.github.io/living-in-the-word (live, not listed in searc
 Open https://claude.ai/code, start a new session with this repository, set the effort (High for most work), and paste one of these:
 
 - Continue Living in the Word:
-  > Read HANDOFF.md, then living-in-the-word/CLAUDE.md and SPEC.md, and build the next step in the build plan.
+  > Read HANDOFF.md ("Where things stand" first), then living-in-the-word/CLAUDE.md and SPEC.md. First save the Notion notes it lists. Then help me with what's waiting, one step at a time.
 - Feedback on First step smaller, after using it:
   > Read HANDOFF.md, then first-step-smaller/CLAUDE.md and SPEC.md. Here's what I noticed while using it: [notes].
 - Continue the Quiet room:
