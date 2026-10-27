@@ -14,7 +14,7 @@ So people can use the AI helper without the shared passcode, each with their own
 - **The shared passcode goes away** once sign-ups work.
 
 Still open (asked one at a time when we get there):
-- The web address's name (step S1).
+- The web address's name (step S1): done, `danielyoonwrites.com` (bought at Cloudflare, October 26, 2026).
 - Moving the app itself to the new address later. Its own address means its own browser storage, apart from the website, but saved studies would need moving (parked below).
 - The words of a short privacy page (what's kept, and that it's never sold or shared).
 
@@ -98,13 +98,14 @@ Email codes work either way, which is part of why they're in the plan.
 
 ## Build steps (one pull request each, each with a check the owner does)
 
-S1. This plan. Check: read it, and choose the web address's name.
+S1. This plan. Check: read it, and choose the web address's name. Done October 26, 2026 (pull request 64; the name is `danielyoonwrites.com`).
 
 S2. The owner's setup, no code, one step at a time with screenshots:
-- buy the web address at Cloudflare
-- set up Resend and prove the address is yours
-- make a Google "client ID"
-- save the new keys in Cloudflare as secrets (like `RESEND_API_KEY`, `GOOGLE_CLIENT_ID` and `OWNER_EMAIL`)
+- buy the web address at Cloudflare (done October 26, 2026)
+- set up Resend and prove the address is yours (started October 26, 2026, with `mail.danielyoonwrites.com`; waiting for "Verified")
+- save the new keys in Cloudflare as secrets: `RESEND_API_KEY` (a Sending-access key, only for that address) and `OWNER_EMAIL`
+
+The Google "client ID" moved to S5, when Google sign-in is built.
 
 Check: a test email arrives.
 
@@ -112,7 +113,7 @@ S3. Sign in with an email code, in the server and the app. During the change, th
 
 S4. The owner's page: invite by email, see who's invited and today's use, turn someone off. Check: invite one person from your group; they sign in.
 
-S5. "Continue with Google." Check: sign in with Google on your phone, and on an iPhone if someone in the group has one.
+S5. "Continue with Google." First the owner makes a Google "client ID" and saves it in Cloudflare as the secret `GOOGLE_CLIENT_ID`. Check: sign in with Google on your phone, and on an iPhone if someone in the group has one.
 
 S6. Limits for each person, and the passcode removed. Check: a day of normal use.
 
