@@ -12,7 +12,7 @@
 :root {
   --paper: #F3EFE7;   /* background: warm paper, never pure white */
   --ink: #1D1B18;     /* main text and the main buttons */
-  --muted: #6B655C;   /* small print, labels, hints */
+  --muted: #57524A;   /* small print, labels, hints: 6.8 to 1 on paper, 6.1 on soft (was #6B655C) */
   --line: #DCD4C7;    /* thin lines between rows */
   --soft: #E9E3D8;    /* the shaded box behind notes */
 
@@ -130,8 +130,8 @@ main {
   background: transparent;
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 0.6875rem;
-  letter-spacing: 0.18em;
+  font-size: 0.7778rem;   /* 14 pixels (readability, October 28, 2026) */
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
@@ -151,8 +151,8 @@ main {
 .label {
   margin: 0 0 0.75rem;
   font-family: var(--sans);
-  font-size: 0.6875rem;
-  letter-spacing: 0.2em;
+  font-size: 0.75rem;     /* 13.5 pixels: Apple's guidelines put 11 points as the smallest text */
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -249,8 +249,8 @@ h2 {
 .row-number {
   display: block;
   font-family: var(--sans);
-  font-size: 0.625rem;
-  letter-spacing: 0.2em;
+  font-size: 0.7778rem;
+  letter-spacing: 0.12em;
   color: var(--muted);
 }
 
@@ -263,7 +263,7 @@ h2 {
 
 .row-text {
   display: block;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   line-height: 1.45;
   color: var(--muted);
 }
@@ -272,7 +272,7 @@ h2 {
 .row-status {
   display: block;
   margin-top: 0.4rem;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-style: italic;
 }
 
@@ -346,9 +346,9 @@ select {
   background: var(--ink);
   color: var(--paper);
   font-family: var(--sans);
-  font-size: 0.6875rem;
+  font-size: 0.7778rem;   /* 14 pixels */
   font-weight: 500;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
@@ -371,10 +371,10 @@ select {
   padding: 0.5rem 0;
   border: none;
   background: transparent;
-  color: var(--muted);
+  color: var(--ink);        /* in ink, not grey, so it's easy to see (October 28, 2026) */
   font-family: var(--sans);
-  font-size: 0.625rem;
-  letter-spacing: 0.18em;
+  font-size: 0.7222rem;     /* 13 pixels */
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -394,8 +394,8 @@ select {
 .question-list li,
 .reflect-list li {
   display: grid;
-  grid-template-columns: 2.25rem 1fr;
-  padding: 0.9rem 0 0.5rem;
+  grid-template-columns: 1fr;
+  padding: 1.25rem 0 0.5rem;
   border-top: 1px solid var(--line);
 }
 
@@ -407,18 +407,18 @@ select {
 .question-list li::before,
 .reflect-list li::before {
   counter-increment: question;
-  content: counter(question, decimal-leading-zero);
-  grid-row: 1 / span 2;
-  padding-top: 0.55rem;
-  font-family: var(--sans);
-  font-size: 0.6875rem;
-  letter-spacing: 0.12em;
+  content: counter(question, lower-roman) ".";   /* i., ii., iii., like a magazine (October 28, 2026) */
+  margin-bottom: 0.35rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-style: italic;
+  line-height: 1.2;
   color: var(--muted);
 }
 
 /* Each question is a box you can type in, but it looks like plain words until tapped */
 .question-list textarea {
-  grid-column: 2;
+  grid-column: 1;
   display: block;
   box-sizing: border-box;
   width: 100%;
@@ -429,8 +429,8 @@ select {
   background: transparent;
   color: var(--ink);
   font-family: var(--serif);
-  font-size: 1.25rem;
-  line-height: 1.35;
+  font-size: 1.3125rem;   /* about 24 pixels */
+  line-height: 1.4;
   resize: none;          /* app.js makes each box as tall as its words */
   overflow: hidden;
 }
@@ -443,7 +443,7 @@ select {
 }
 
 .question-list .remove {
-  grid-column: 2;
+  grid-column: 1;
   justify-self: end;
   margin-top: 0;
   min-height: 2.25rem;
@@ -452,9 +452,9 @@ select {
 
 /* The questions to think about in the reading plan: plain words, not boxes */
 .reflect-list li {
-  padding-bottom: 0.9rem;
-  font-size: 1.25rem;
-  line-height: 1.35;
+  padding-bottom: 1.25rem;
+  font-size: 1.3125rem;
+  line-height: 1.4;
 }
 
 .no-steps {
@@ -502,7 +502,7 @@ select {
 
 .scripture-tag {
   font-family: var(--sans);
-  font-size: 0.625rem;
+  font-size: 0.7222rem;
   letter-spacing: 0.2em;
   color: var(--muted);
 }
@@ -519,7 +519,7 @@ select {
 .verse-number {
   margin-right: 0.15em;
   font-family: var(--sans);
-  font-size: 0.6rem;
+  font-size: 0.6875rem;   /* 12 pixels, above Apple's 11-point floor */
   line-height: 0;
   color: var(--muted);
 }
@@ -606,10 +606,23 @@ select {
   content: "−" / "";
 }
 
-/* Right above the questions, whose own top line divides them, so no second line or gap */
-.leader-note {
-  margin-bottom: 0;
-  border-bottom: none;
+/* The commentary for the leader, and the note on a reading: a soft shaded box, with a small
+   capital "FOR THE LEADER" (the magazine look, October 28, 2026) */
+.leader-note,
+.reading-note {
+  margin-bottom: 2rem;
+  padding: 0.25rem 1.1rem 0.5rem;
+  border: none;
+  background: var(--soft);
+}
+
+.leader-note summary,
+.reading-note summary {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 /* The paragraph itself */
@@ -617,7 +630,7 @@ select {
 .reading-note-text {
   margin: 0;
   padding: 0.25rem 0 1rem;
-  font-size: 1.0625rem;
+  font-size: 1.125rem;
   line-height: 1.6;
 }
 
@@ -691,8 +704,8 @@ select {
 
 .writing-placeholder span {
   display: grid;
-  grid-template-columns: 2.25rem 1fr;
-  padding: 0.9rem 0;
+  grid-template-columns: 1fr;
+  padding: 1.25rem 0 0.9rem;
   border-top: 1px solid var(--line);
 }
 
@@ -702,10 +715,12 @@ select {
 
 .writing-placeholder span::before {
   counter-increment: placeholder;
-  content: counter(placeholder, decimal-leading-zero);
-  font-family: var(--sans);
-  font-size: 0.6875rem;
-  letter-spacing: 0.12em;
+  content: counter(placeholder, lower-roman) ".";
+  margin-bottom: 0.35rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-style: italic;
+  line-height: 1.2;
   color: var(--muted);
 }
 
@@ -1018,8 +1033,8 @@ select {
   margin: 1.75rem 0 0.25rem;
   padding: 0;
   font-family: var(--sans);
-  font-size: 0.6875rem;
-  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -1105,4 +1120,98 @@ footer {
 
 footer p {
   margin: 0;
+}
+
+
+/* ---------- The magazine look (the owner's choice, October 28, 2026) ----------
+   Inspired by Kinfolk: a centered start like a magazine's opening page, centered titles
+   with a short rule under them, and lots of space. The reading text stays left-aligned,
+   and nothing is smaller than 13 pixels (see SPEC.md, "The look"). */
+
+/* The start screen: today's date between two lines, like a magazine's dateline */
+#home {
+  padding-top: 1.75rem;
+}
+
+.dateline {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 3.5rem;
+  padding: 0.6rem 0 0;
+  border-top: 1px solid var(--ink);
+  box-shadow: 0 -4px 0 -3px var(--line);   /* a second thin line just above */
+}
+
+.home-title {
+  text-align: center;
+  margin: 0 0 3rem;
+}
+
+#home h1 {
+  font-size: 3.1rem;
+  margin-bottom: 1.25rem;
+}
+
+#home .intro {
+  margin: 0;
+  font-style: italic;
+}
+
+/* The three choices, like a table of contents: the number in its own column */
+#home .row {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  padding: 1.35rem 0 1.4rem;
+}
+
+#home .row:first-of-type {
+  border-top-color: var(--ink);
+}
+
+#home .row::after {
+  content: none;
+}
+
+#home .row-number {
+  padding-top: 0.55rem;
+}
+
+#home .row-title {
+  margin-top: 0;
+}
+
+#home .row-title,
+#home .row-text,
+#home .row-status {
+  grid-column: 2;
+}
+
+/* "Signed in as ...", centered at the bottom */
+#home .account {
+  text-align: center;
+}
+
+#home .account .quiet {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Each screen's heading, centered: the small label above, the title, the tip under it */
+.screen > .label,
+.screen > h2,
+.screen > .study-tip,
+.screen > form > .label,
+.screen > form > h2,
+.sign-in-text {
+  text-align: center;
+}
+
+/* The passage or reading name gets a short line under it, like a magazine article's title */
+.screen > .study-tip::after {
+  content: "";
+  display: block;
+  width: 3rem;
+  height: 1px;
+  margin: 1.5rem auto 0;
+  background: var(--ink);
 }
