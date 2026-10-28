@@ -88,3 +88,8 @@ Each decision about the website with its reason, oldest first. Each app keeps it
 ### October 28, 2026: the website's rules moved into `.claude/rules/` (pull request 81)
 - Decision: the website's own rules (its pages, publishing and Latest posts, the words already chosen, and its links) moved from `CLAUDE.md` into `.claude/rules/website.md`, and the Moon jar design into `.claude/rules/moon-jar.md`. The rules for every project, and the privacy rule, stay in `CLAUDE.md`.
 - Why: so they load only when Claude works on the files they name: the website's own files, and for the design also Fewer spam calls, First step smaller and Quiet room. Dan chose this notes cleanup ("A") after asking how to spend fewer tokens on reading these notes.
+
+### October 28, 2026: short handoff notes (pull request 82)
+- Decision: `HANDOFF.md` becomes a short index (under about 80 lines). Each app keeps a `PROGRESS.md` (where it stands, rewritten) and a `DECISIONS.md` (choices and reasons, only added to); the website's decisions are in this file; the full history moves to `CHANGELOG.md`, read only when needed. Sessions read only the parts of long files the task needs.
+- Why: Dan's plan (his Notion page "Claude Code: handoffs and decision logs," October 27, 2026): "when a long session gets summarized, Claude Code reloads CLAUDE.md from disk, but HANDOFF.md is too big to come back." And the October 28 token check: every request sends the whole conversation again, so the notes read at the start are paid for on every request. Dan chose "A," both pull requests.
+- Turned down: `@path` imports (Claude Code's docs say they don't reduce what's read); deleting old notes (everything moved instead).

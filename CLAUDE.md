@@ -46,6 +46,16 @@ Only one pull request at a time from the branch: wait for a merge before startin
 When Dan says "do the rest," Claude works through the build plan one pull request at a time, starting the next one as soon as the last merges.
 
 
+## Handoffs and decisions
+
+- HANDOFF.md is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
+- Each app folder has PROGRESS.md (where it stands and the next step; rewritten, under about 100 lines) and DECISIONS.md (each decision with its reason, in Dan's words when he gave them, and what was turned down; only added to). Website decisions go in the root DECISIONS.md.
+- Every pull request updates its project's PROGRESS.md and adds any new decisions to DECISIONS.md, so nothing depends on the chat.
+- Before changing something a past decision settled, check DECISIONS.md and ask Dan.
+- When Dan switches projects or says he's stepping away, or after about five merged pull requests in one session, suggest /handoff, then /clear and /pickup [project].
+- The full pull request history is in CHANGELOG.md and on GitHub. Read it only when needed.
+- Every request sends the whole conversation again, and so do check-ins and pull request wake-ups (Claude Code's docs, checked October 28, 2026). So a fresh session costs less than a long one, and long files like an app's SPEC.md are read only in the parts the task needs.
+
 ## Rules for working here
 
 - Explain every change in plain words a beginner can follow: what changed, why, and how to check it.
