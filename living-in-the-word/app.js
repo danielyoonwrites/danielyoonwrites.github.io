@@ -102,7 +102,7 @@ function showQuestions() {
   document.querySelector('.no-questions').hidden = questions.length > 0 || asking;
   list.querySelectorAll('textarea').forEach(fitHeight);
 
-  // The AI's commentary for the leader, if it wrote one (a fold-out; see closeLeaderNote)
+  // The AI's commentary for the leader, if it wrote one (a fold-out; see openLeaderNote)
   document.querySelector('.leader-note').hidden = !leaderNote;
   fill('.leader-note-text', leaderNote);
   updateSaveButton();
@@ -119,9 +119,10 @@ window.addEventListener('resize', () => {
   document.querySelectorAll('.question-list textarea').forEach(fitHeight);
 });
 
-// The commentary for the leader starts closed for each new set of questions
-function closeLeaderNote() {
-  document.querySelector('#questions .leader-note').open = false;
+// The commentary for the leader starts open for each new set of questions (the owner's
+// choice, October 28, 2026: it reads well enough to show right away). Tap it to close it.
+function openLeaderNote() {
+  document.querySelector('#questions .leader-note').open = true;
 }
 
 // The general questions, when the AI helper can't answer
@@ -173,7 +174,7 @@ function startStudy(text) {
   fill('.passage-name', passage);
   questions = [];
   leaderNote = '';
-  closeLeaderNote();
+  openLeaderNote();
   edited = false;
   questionsFor = passage;
   setStatus('');
@@ -564,7 +565,7 @@ async function requestSuggestions() {
 
   questions = result.questions;
   leaderNote = result.leaderNote || '';
-  closeLeaderNote();
+  openLeaderNote();
   edited = false;
   setStatus('Written for this passage. Read each one, and change anything before you use it.');
   showQuestions();
@@ -852,7 +853,7 @@ function openStudy(study) {
   passage = study.passage;
   questions = study.questions.slice();
   leaderNote = study.note || '';
-  closeLeaderNote();
+  openLeaderNote();
   edited = false;
   questionsFor = passage;
   fill('.passage-name', passage);
