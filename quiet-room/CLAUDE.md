@@ -4,8 +4,8 @@ A shared, calm study room for the owner's young adults group. It lives in this f
 
 ## Start here
 
-- At the start of every session, read `SPEC.md` and `PROGRESS.md`, then continue from "Next" in `PROGRESS.md`.
-- Update `PROGRESS.md` in every pull request: where we are, decisions, answered and open questions, next step.
+- At the start of every session, read `PROGRESS.md` (where it stands), `DECISIONS.md` (choices and their reasons) and `SPEC.md`, then continue from "Next step" in `PROGRESS.md`.
+- Update `PROGRESS.md` in every pull request (where it stands, what's waiting on Dan, the next step), and add each new decision to `DECISIONS.md`.
 
 ## Rules for working here
 
