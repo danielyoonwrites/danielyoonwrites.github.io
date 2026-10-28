@@ -1,58 +1,51 @@
-# Quiet Room: progress
+# Quiet room: progress (updated October 28, 2026)
 
-The handoff file. Any new session, or a session after its memory was compressed, reads this first and picks up from "Next". Every pull request updates it.
+The app: https://danielyoonwrites.github.io/quiet-room. Read `SPEC.md` (what it does and why), `DECISIONS.md` (choices and their reasons) and `CLAUDE.md`.
 
-Last updated: October 24, 2026
+The handoff file. Any new session, or a session after its memory was compressed, reads this first and picks up from "Next step." Every pull request updates it.
 
-## Where we are
+## Where it stands
+- Paused after step 1 since October 24, 2026 (see "Next step").
+- Step 1 built and live (October 24, 2026, pull request 19): `quiet-room/index.html` and `quiet-room/style.css`, a page with the title, the line under it, "The room opens soon," and a link back to the website. No live features or Firebase yet.
+- `SPEC.md`, `CLAUDE.md` and this file are merged (pull request 17). `DECISIONS.md` was added on October 28, 2026, in the notes cleanup.
+- Build plan (one pull request per step, each with a check the owner does):
+  1. Page with no live features: room name, the line under it, "The room opens soon," link back to the website (done, pull request 19)
+  2. Six original avatar drawings (next)
+  3. Firebase setup in the console, walked through step by step; database in locked mode
+  4. Security rules and tests, before any feature uses them
+  5. Join: name, avatar, what you're doing
+  6. Live room
+  7. Focusing or on a break; change what you're doing
+  8. Stepped away, hiding and cleaning up stale seats
+  9. Personal timer (25, 50 or none), worked out from its start time
+  10. Phone polish, including iPhone Safari
+  11. Trial run with 2 or 3 friends
+- Facts checked (October 2026):
+  - Spark plan: 100 simultaneous connections (can't be raised), 1 GB stored, 10 GB a month downloaded.
+  - New account creation: 100 per hour per internet address (Firebase Auth limits page; not confirmed for anonymous sign-ups specifically).
 
-- Step 1 built (October 24): `quiet-room/index.html` and `quiet-room/style.css`, a page with the title, the line under it, "The room opens soon," and a link back to the website. No live features or Firebase yet.
-- `SPEC.md`, `CLAUDE.md` and this file are merged (pull request 17).
+## Waiting on Dan
+No open questions right now (ask one at a time when they come). Labels like "Focusing," "On a break," "Stepped away" and the activity names come from the spec.
+1. Say when you want to pick the Quiet room back up; nothing here is urgent. To start, open https://claude.ai/code, start a new session with this repository, set the effort to High, and paste `/pickup quiet room` (or, without the skill: "Read HANDOFF.md, then quiet-room/PROGRESS.md, DECISIONS.md and CLAUDE.md, and continue from the next step.").
+2. Say yes to, or change, two ideas that are only proposed. Both are written out in https://github.com/danielyoonwrites/danielyoonwrites.github.io/blob/main/quiet-room/DECISIONS.md:
+   - Stale seats (not yet approved): every browser hides a seat that has been "stepped away" for more than 15 minutes, and then anyone signed in may delete it. The plan shapes the security rules, so it's needed before step 4. The spec also asks for its tradeoffs, which aren't written down yet: Claude explains them when asking.
+   - Status on an avatar: a small label, with "stepped away" slightly faded.
+3. At step 5 (Join), decide whether the room link needs a secret code. Anyone can see the `quiet-room` folder in the public repository (https://github.com/danielyoonwrites/danielyoonwrites.github.io/tree/main/quiet-room), so the room's privacy can't rest on the page address alone.
 
-## Decisions
+## Open pull requests
+None for the Quiet room (checked on GitHub, October 28, 2026). Pull requests 17, 18 and 19 were merged on October 24, 2026. This notes cleanup (part 2, planned as pull request 82) adds `DECISIONS.md` and this layout, if it isn't merged yet.
 
-- The app lives in the `quiet-room/` folder of the website repository, so it publishes at https://danielyoonwrites.github.io/quiet-room through the existing publish workflow.
-- Firebase JavaScript SDK 13.1.0 from the CDN, modular API (Firebase docs and npm, October 2026).
-- Room name: "Quiet room" (sentence case on the page). Chosen October 24 over "Study room" and "Work room."
-- Line under the title, written by the owner (October 24): "A quiet place to read, study, or work alongside friends. No notifications, no games, no distractions."
-- No age rule on the page (October 24): the owner decided it isn't needed, since people can't communicate. Revisit if chat is ever added. No line asking people to keep the link within the group either (October 24); the owner will mention it when he shares the link.
-- The page asks search engines not to list it (`noindex`), since the room is shared by link.
-- Small words in step 1 (owner can change them in the pull request): footer "Made by Daniel Yoon" linking to https://danielyoonwrites.github.io; until joining works, "The room opens soon."
-- Avatars (October 24): cute blobs with faces, the owner's idea. Six presets, one drawing each; status shown as a small label, with "stepped away" slightly faded (proposed). Saved in the database as a short label like "avatar-3" so the rules can accept only the six, and a later avatar builder can add more. A rough sketch of six (Moon, Sprout, Pebble, Reader, Scarf, Sleepy) was shown October 24; final drawings come in step 2 and must use only the Moon jar colors.
-- Remember each person's name, avatar and activity in their own browser (not the database), so returning on the same browser is one tap. Proposed October 24; the owner didn't object. Anonymous sign-in keeps the same account on the same browser; a new device, private window, cleared data or (on iPhone Safari) about 7 days of Safari use without visiting means a new account.
-- Stale seats (proposed, not yet approved by the owner): each seat stores `online` and `lastSeen`; Firebase's `onDisconnect` marks it offline with the server time ("stepped away"); every browser hides seats away more than 15 minutes; the rules let anyone signed in delete a seat only when it has been away more than 15 minutes by the server's clock. Everything else about a seat can only be changed by its owner.
+## Next step
+Paused after step 1 (merged in pull request 19, October 24, 2026) while Dan built a small side project, `fewer-spam-calls/`. Still paused on October 28, 2026. Pick up here when he's ready:
+1. Step 2: draw the six blob avatars in Moon jar colors only. Fix from the sketch: no near-white fill, give Sleepy open eyes, smooth Scarf's bottom edge. Show previews before the pull request.
+2. Then step 3, Firebase setup: Dan does the clicking in the console, one step at a time, after checking the current Firebase docs. The database starts in locked mode.
 
-## Build plan (one pull request per step, each with a check the owner does)
+Effort: High for most steps; Extra high for step 4 (security rules) and step 8 (stepped away and stale seats).
 
-1. Page with no live features: room name, the line under it, "The room opens soon," link back to the website
-2. Six original avatar drawings
-3. Firebase setup in the console, walked through step by step; database in locked mode
-4. Security rules and tests, before any feature uses them
-5. Join: name, avatar, what you're doing
-6. Live room
-7. Focusing or on a break; change what you're doing
-8. Stepped away, hiding and cleaning up stale seats
-9. Personal timer (25, 50 or none), worked out from its start time
-10. Phone polish, including iPhone Safari
-11. Trial run with 2 or 3 friends
+## Dead ends
+- Loading the rules into Firebase's emulator with the Firebase CLI, in Claude's cloud sessions: the session's network filter blocks that request. Run the database emulator jar directly instead (steps in `CLAUDE.md`, "Testing the rules"; it worked in October 2026).
 
-## Open questions (ask one at a time)
-
-None right now. Labels like "Focusing," "On a break," "Stepped away" and the activity names come from the spec.
-
-Answered:
-- Room name: "Quiet room" (October 24).
-- Line under the title: chosen October 24 (see Decisions).
-- Weekly quiet hour: not needed yet (October 24). Moved to "Ideas for later" in `SPEC.md`.
-- New idea from the owner: tracking what you got done (chapters read, minutes studied). Added to "Ideas for later", not Stage 1.
-
-## Facts checked (October 2026)
-
-- Spark plan: 100 simultaneous connections (can't be raised), 1 GB stored, 10 GB a month downloaded.
-- New account creation: 100 per hour per internet address (Firebase Auth limits page; not confirmed for anonymous sign-ups specifically).
-- Firebase's database emulator runs in Claude's cloud sessions when started directly; see `CLAUDE.md`.
-
-## Next
-
-- Paused after step 1 (merged in pull request 19, October 24) while the owner builds a small side project, `fewer-spam-calls/`. Pick up here when he's ready.
-- Then step 2: draw the six blob avatars in Moon jar colors only. Fix from the sketch: no near-white fill, give Sleepy open eyes, smooth Scarf's bottom edge. Show previews before the pull request.
+## How to check it works
+- Step 1, on a phone: open https://danielyoonwrites.github.io/quiet-room. It shows "Quiet room," Dan's line under it and "The room opens soon." At the bottom, "Made by Daniel Yoon" opens https://danielyoonwrites.github.io.
+- Once the room is built, the spec's checks (`SPEC.md`, "How we'll know it works"): with two browsers open, a status change in one shows in the other within a few seconds; closing one tab makes that avatar show "stepped away," then disappear after 15 minutes; a test proves one person can't change another person's seat.
+- The rules (from step 4): `quiet-room/database.rules.json` (not made yet), with tests next to it. Firebase's database emulator runs in Claude's cloud sessions when started directly; see `CLAUDE.md`. If it can't run, Dan gets checks to run in the Rules Playground in the Firebase console.

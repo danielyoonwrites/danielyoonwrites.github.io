@@ -1,6 +1,8 @@
 # Fewer spam calls
 
-A one-page guide at https://danielyoonwrites.github.io/fewer-spam-calls. The plan, the checked facts and the build steps are in `SPEC.md`. Read it first, and keep its "Build plan" up to date.
+Read `PROGRESS.md` first (where it stands and the next step), then `DECISIONS.md` (choices and their reasons) and `SPEC.md`.
+
+A one-page guide at https://danielyoonwrites.github.io/fewer-spam-calls. The plan, the checked facts and the build steps are in `SPEC.md`. Keep its "Build plan" up to date.
 
 ## Rules for working here
 

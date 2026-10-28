@@ -1,6 +1,8 @@
 # First step smaller
 
-A little app for facing something you've been putting off, one small step at a time. It lives in this folder and is published at https://danielyoonwrites.github.io/first-step-smaller. Read `SPEC.md` first, and keep its "Build plan" up to date.
+Read `PROGRESS.md` first (where it stands and the next step), then `DECISIONS.md` (choices and their reasons) and `SPEC.md`.
+
+A little app for facing something you've been putting off, one small step at a time. It lives in this folder and is published at https://danielyoonwrites.github.io/first-step-smaller. Keep the "Build plan" in `SPEC.md` up to date.
 
 ## Rules for working here
 

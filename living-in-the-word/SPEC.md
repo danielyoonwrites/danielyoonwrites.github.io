@@ -2,6 +2,29 @@
 
 A little app at https://danielyoonwrites.github.io/living-in-the-word (folder `living-in-the-word/` in the website repository). Planned with the owner, October 2026.
 
+Sections (read only the ones the task needs):
+- Who it's for
+- What it does
+- How it works
+- The questions
+- Stage 2: questions written for the specific passage (next, see AI-PLAN.md)
+- Saved studies (October 26, 2026)
+- Safety and limits (the owner's request, October 26, 2026)
+- Works without reception (October 26, 2026)
+- The back gesture (October 28, 2026)
+- Typed passage names (October 28, 2026)
+- Choose from the Bible (October 26, 2026)
+- Words on the start screen (the owner's, October 26, 2026; use them exactly)
+- The look: "Paper and ink" (October 26, 2026)
+- The Bible text (ESV, October 26, 2026)
+- Must-haves
+- Not in stage 1
+- Name
+- How we'll know it works
+- Tech notes
+- Build plan (one pull request each, each with a check the owner does)
+- Open questions (ask one at a time)
+
 ## Who it's for
 
 - Stage 1: the owner, preparing Bible study discussion questions for his small group. He reviews every question before anyone sees it.
