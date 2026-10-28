@@ -40,3 +40,9 @@ Each decision with its reason, oldest first. Only add to this file; if a decisio
 - Decision: "Phil 2" becomes "Philippians 2" (and similar) before anything is sent; "A note on this reading" starts open.
 - Why: Dan: "I typed in Phil 2 instead of Philippians 2... it writes it as Phil 2 instead of autocorrect to Philippians," and "the 'for the leader' tab is open for the Bible study but the 'note on this reading' is closed for daily Bible reading."
 - Turned down: nothing recorded.
+
+### October 28, 2026: Android's back gesture goes back one screen (pull request 80)
+- Decision: the app adds one history entry for each screen in its Back list (`visited` in `app.js`, renamed from `history`) after a tap, and takes entries away when the list gets shorter. The back gesture then goes back one screen, like the Back button, and closes the app only from the start screen.
+- Why: Dan chose it first ("A") after the store plan's double-check found that the back gesture closed the installed app from any screen.
+- Turned down: adding one entry again right after each back gesture (simpler, but Chrome then marks it skippable, so the next gesture closes the app: seen in Chromium's code and in a test); the CloseWatcher API (Chrome only, not Safari or Firefox).
+- Revisit if: the gesture skips a screen or closes the app early on Dan's phone.

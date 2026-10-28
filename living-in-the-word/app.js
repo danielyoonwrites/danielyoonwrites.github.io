@@ -24,7 +24,7 @@ let questions = [];      // the questions on screen, with any edits
 let leaderNote = '';     // the AI's commentary for the leader, if it wrote one
 let questionsFor = '';   // the passage those questions belong to
 let edited = false;      // true once the leader changes, removes or adds a question
-let history = [];        // screens visited, so Back can go to the one before
+let visited = [];        // screens visited, so Back can go to the one before
 
 const screens = [...document.querySelectorAll('.screen')];
 
@@ -33,7 +33,7 @@ const screens = [...document.querySelectorAll('.screen')];
 
 function show(id) {
   const now = screens.find((screen) => screen.classList.contains('active'));
-  if (now && now.id !== id) history.push(now.id);
+  if (now && now.id !== id) visited.push(now.id);
   if (id === 'home') {
     updatePlanStatus();   // the start screen always shows where the plan is,
     updateAccount();      // and who's signed in
@@ -47,13 +47,79 @@ function show(id) {
   const typing = ['passage', 'passcode', 'sign-in', 'sign-in-code'].includes(id);
   const target = typing ? screen.querySelector('input') : screen.querySelector('h1, h2');
   if (target) target.focus({ preventScroll: true });
+
+  // Once this tap's work is done (so changes to "visited" right after this count too),
+  // keep the phone's back gesture in step. See "The back gesture" below.
+  queueMicrotask(matchBackGesture);
 }
 
 function goBack() {
-  const previous = history.pop();
+  const previous = visited.pop();
   if (!previous) return;
   show(previous);
-  history.pop();   // show() just added the screen we left; going Back shouldn't come back to it
+  visited.pop();   // show() just added the screen we left; going Back shouldn't come back to it
+}
+
+
+// ---------- The back gesture ----------
+// On Android, the back gesture (and the browser's own Back button) goes back through the
+// page's history, and closes the app when there's nothing to go back to. This app changes
+// screens without loading new pages, so it adds one history entry for each screen in
+// "visited", and takes entries away when "visited" gets shorter (like "Back to the start").
+// Then the back gesture works like the Back button, and closes the app only from the start
+// screen. See STORE-PLAN.md, step 1.
+// Entries are added only after a tap, never right after a back gesture: Chrome treats a page
+// that adds entries by itself as a trap, and makes the gesture skip them.
+
+window.history.scrollRestoration = 'manual';   // show() starts each screen at the top itself
+let steps = 0;            // history entries this app has added; kept equal to visited.length
+let catchingUp = false;   // true while the app takes its own entries away
+
+function matchBackGesture() {
+  if (catchingUp) return;   // wait until the last change has finished (see "popstate" below)
+  while (steps < visited.length) {
+    steps += 1;
+    window.history.pushState({ step: steps }, '');
+  }
+  if (steps > visited.length) {
+    catchingUp = true;
+    window.history.go(visited.length - steps);
+  }
+}
+
+// The browser moved through the history: the back gesture, the browser's Back or Forward
+// button, or the app taking its own entries away
+window.addEventListener('popstate', (event) => {
+  const step = (event.state && event.state.step) || 0;
+  steps = step;
+  if (catchingUp) {
+    catchingUp = false;
+    matchBackGesture();   // in case the screens changed again meanwhile
+  } else if (step < visited.length) {
+    while (visited.length > step) goBack();   // back one screen (more, if they went further)
+  } else if (step > visited.length) {
+    // Forward: the app can't go forward again, so it stays where it is
+    catchingUp = true;
+    window.history.go(visited.length - step);
+  }
+});
+
+// After the page reloads (or the phone reopens it), the app starts again at the start screen,
+// but its old entries are still in the history. Go back past them, so that the back gesture
+// still closes the app from the start screen.
+const stepAtStart = (window.history.state && window.history.state.step) || 0;
+if (stepAtStart > 0) {
+  steps = stepAtStart;
+  catchingUp = true;
+  window.history.go(-stepAtStart);
+  // If the browser didn't keep the old entries, nothing happens: start counting afresh
+  setTimeout(() => {
+    if (!catchingUp) return;
+    catchingUp = false;
+    steps = 0;
+    window.history.replaceState({ step: 0 }, '');
+    matchBackGesture();
+  }, 1000);
 }
 
 // Fills every element matching the selector with the same words
@@ -629,7 +695,7 @@ async function requestSuggestions() {
 // A phone that's signed in has its own daily limit and stays signed in for about 90 days.
 // While sign-ups are being built, a phone can still use the passcode instead.
 
-let signInFrom = null;        // the screen (and its Back history) to return to after signing in
+let signInFrom = null;        // the screen (and its Back list) to return to after signing in
 let afterSignIn = () => {};   // then what to do, like writing the questions that were asked for
 let codeSentTo = '';          // the address the code was sent to
 
@@ -650,7 +716,7 @@ const SIGN_IN_PROBLEMS = {
 // Remembers where signing in was asked for, so it can come back there
 function rememberSignInFrom(then) {
   const now = screens.find((screen) => screen.classList.contains('active'));
-  signInFrom = { screen: now ? now.id : 'home', history: history.slice() };
+  signInFrom = { screen: now ? now.id : 'home', visited: visited.slice() };
   afterSignIn = then;
 }
 
@@ -671,12 +737,12 @@ function signInMessage(screenId, text) {
 
 // Back to the screen where signing in was asked for, then on with what was asked
 function finishSignIn() {
-  const from = signInFrom || { screen: 'home', history: [] };
+  const from = signInFrom || { screen: 'home', visited: [] };
   const then = afterSignIn;
   signInFrom = null;
   afterSignIn = () => {};
   show(from.screen);
-  history = from.history;
+  visited = from.visited;
   then();
   retryPassageText();   // the passage text waits for signing in too
 }
@@ -1149,7 +1215,7 @@ document.querySelector('#plan-setup form').addEventListener('submit', (event) =>
   saved.plan = setupChoices();
   writeSaved(saved);
   readingAhead = false;
-  history = ['home'];   // Back from today's reading goes to the start, not to setup
+  visited = ['home'];   // Back from today's reading goes to the start, not to setup
   showToday(false);
 });
 
@@ -1305,10 +1371,10 @@ function updatePlanStatus() {
 }
 
 function goHome() {
-  history = [];
+  visited = [];
   updatePlanStatus();
   show('home');
-  history = [];
+  visited = [];
 }
 
 Object.assign(actions, {
@@ -1319,13 +1385,13 @@ Object.assign(actions, {
     writeSaved(saved);
     readingAhead = false;
     showToday();
-    history = ['home'];   // Back goes to the start
+    visited = ['home'];   // Back goes to the start
   },
 
   'read-ahead'() {
     readingAhead = true;
     showToday();
-    history = ['home'];
+    visited = ['home'];
   },
 
   'new-plan'() {
@@ -1333,7 +1399,7 @@ Object.assign(actions, {
     delete saved.plan;
     writeSaved(saved);
     showSetup();
-    history = ['home'];
+    visited = ['home'];
   },
 
   // "Questions for this reading": asks the AI (signing in first, if this phone can't ask yet)
