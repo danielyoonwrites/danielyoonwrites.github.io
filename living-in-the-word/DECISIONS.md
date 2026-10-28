@@ -107,7 +107,7 @@ Each decision with its reason, oldest first. Only add to this file; if a decisio
 - Decision: the esv.org link became a big row, "Read John 15 on esv.org," instead of small grey text (Dan asked); in pull request 58 it became a boxed button.
 - Why: not recorded.
 
-### October 26, 2026: next, saving, working without reception, and a passage picker (no pull request)
+### October 26, 2026: Dan's next wishes, in his order (no pull request)
 - Decision: Dan's next big wishes, in his order: (1) saving studies (built in pull request 57), (2) working without reception (pull request 59), (3) a passage picker (pull request 66).
 - Why: he wanted the app to remember studies and work where there's no reception, like an app on a phone, and a way to pick the passage instead of always typing it.
 
@@ -133,7 +133,7 @@ Each decision with its reason, oldest first. Only add to this file; if a decisio
 
 ### October 26, 2026: no automatic retry on another model (pull request 61)
 - Decision: the server no longer asks Anthropic to retry a declined request on another model; a decline shows the general questions.
-- Why: an independent security review (a separate Claude agent) found it. For Sonnet 5.5 the retry only covered declines about cybersecurity or building other AI models, so it never helped Bible questions and could only help someone misusing the app.
+- Why: a fix found by an independent security review (a separate Claude agent). For Sonnet 5.5 the retry only covered declines about cybersecurity or building other AI models, so it never helped Bible questions and could only help someone misusing the app.
 
 ### October 26, 2026: daily limits, with Dan's numbers (pull request 62)
 - Decision: 20 sets of questions a day for each internet connection, 60 for everyone together, and a lockout after 10 wrong passcodes in a day from one connection. The counts start over at midnight Pacific time and keep only a scrambled code for each connection, never the internet address, for today and yesterday.
@@ -141,7 +141,7 @@ Each decision with its reason, oldest first. Only add to this file; if a decisio
 - Revisit if: sign-up step S6: raise the 60 for everyone to about 200, or remove it.
 
 ### October 26, 2026: sign-ups, invite only at first (pull request 64)
-- Decision: only people Dan invites (his small group and people he chooses) can use the AI helper. Each person gets their own daily limit (20, the same number as now) and everyone together keeps 60, and the shared passcode goes away once sign-ups work, both at step S6. Replaces the passcode of pull request 39.
+- Decision: only people Dan invites (his small group and people he chooses) can use the AI helper. At step S6, each person gets their own daily limit (20, the same number as now), everyone together keeps 60, and the shared passcode goes away: sign-ups replace the passcode of pull request 39.
 - Why: Dan asked for sign-ups so people don't need the shared passcode. No reason recorded for invite only.
 - Revisit if: Dan wants it open to anyone, maybe with subscriptions.
 
@@ -184,7 +184,7 @@ Each decision with its reason, oldest first. Only add to this file; if a decisio
 
 ### October 26, 2026: 3 to 5 questions (pull request 69)
 - Decision: the AI writes 3 to 5 questions instead of exactly 5 (Dan's rule), leaving out any that would repeat another or don't fit the passage. The first (what it says) and the last (prayer) are always written: Claude's choice, which Dan merged without changes. On the start screen, "five questions" became "three to five questions." Replaces the 5 questions of pull request 51.
-- Why: Judges 19 repeated itself and forced a question that didn't fit. The rule is so the AI doesn't repeat itself or make up questions that don't fit.
+- Why: on Judges 19, questions 1 and 2 repeated each other, and a question was forced that didn't fit. The rule is so the AI doesn't repeat itself or make up questions that don't fit.
 
 ### October 26, 2026: general words for hard things, and only what the passage shows about God (pull request 69)
 - Decision: the questions and the note for the leader use general words like "sexual violence," never graphic terms, and show only what the passage itself shows about God (Dan's feedback).
