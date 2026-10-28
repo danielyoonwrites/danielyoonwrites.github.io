@@ -1,6 +1,6 @@
 # Living in the Word
 
-A little app that turns a Bible passage into discussion questions for a small group. It lives in this folder and is published at https://danielyoonwrites.github.io/living-in-the-word. Read `SPEC.md` first, and keep its "Build plan" up to date.
+A little app that turns a Bible passage into discussion questions for a small group. It lives in this folder and is published at https://danielyoonwrites.github.io/living-in-the-word. Read `PROGRESS.md` first (where things stand and the next step), then `DECISIONS.md` (choices and their reasons) and `SPEC.md`. Keep `SPEC.md`'s "Build plan" up to date. Every pull request updates `PROGRESS.md` and adds any new decision to `DECISIONS.md`.
 
 ## Rules for working here
 

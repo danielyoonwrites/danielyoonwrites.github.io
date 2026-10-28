@@ -5,25 +5,27 @@ Last updated October 28, 2026 (Pacific time), in the fourth session, so the next
 This repository is public. Keep personal details out of this file.
 
 
-## Where things stand (end of the third session, October 26, 2026)
+## Where things stand (end of the fourth session, October 28, 2026)
 
 Read this part first; everything below it is the detail.
 
-Update, fourth session (October 27 and 28, 2026): the Notion save below is done; Dan asked what it takes to get the app into the Google Play and Apple stores (research in his Notion, "Living in the Word app"; he has a MacBook); then he chose to start sign-ups, with a daily limit for each person "since I am not charging yet." Pull request 73 builds sign-up step S3, signing in with an email code (`living-in-the-word/SIGNUP-PLAN.md`, "What S3 built").
+Living in the Word now keeps its own short notes: `living-in-the-word/PROGRESS.md` (where it stands, what's waiting on Dan, the next step, dead ends) and `living-in-the-word/DECISIONS.md` (each choice from October 27 on, with Dan's reasons). Read those for the app.
 
-Waiting on Dan:
-1. Done October 28, 2026: pull request 73 merged, both secrets saved, the new `worker.js` pasted, and Dan signed in live with an email code ("ok it works").
-2. Pull request 74: the model changed to Opus 5.5 (Dan wasn't happy with the depth of Sonnet's questions). After merging, paste the newest `worker.js` into Cloudflare again (same steps), then compare the questions; the `?test` link shows each answer's cost.
-3. After that: sign-up step S4, his invite page.
-4. The Anthropic API key expires November 24, 2026. Before then, make a new key and replace the Cloudflare secret `ANTHROPIC_API_KEY` (remind him in good time, with every step).
-5. Smaller checks, if not done yet: a spend limit in the Claude Console ($10 suggested); a passcode of four or more random words; two-step sign-in on his Cloudflare account; the home screen app in Airplane Mode; Share inside KakaoTalk; his review of the general questions' wording (`SPEC.md`, "The questions").
+In the fourth session (October 27 and 28, 2026), pull requests 73 to 77 were merged: sign-up step S3 (signing in with an email code, and a daily limit for each person; Dan signed in live), Opus 5.5 instead of Sonnet 5.5 (Dan found the questions deeper; about 3 cents a set), "For the leader" open from the start, the magazine look with readability fixes, and typed names written out in full ("Phil 2" becomes "Philippians 2"). The Notion save from the third session is done, and each step since is in his Notion page "Living in the Word app (Oct 2026)."
 
-Done October 27, 2026 (the fourth session): the Notion save that was listed as the first thing to do. It went into his "Living in the Word app (Oct 2026)" page, with the app-store research after it. The note kept for the record: save to Dan's Notion Master Notes, in one write. It was missing pull requests 58 to 71 and the research from the third session: how hard a real phone app would be, the sign-up options and their costs, the web address, the verse numbering behind the passage picker (the NASB, ESV and NIV; 3 John 15; the 16 verses in footnotes), the hard-passage guidance and its test runs, and the commentary's cost. Also his standing rules from that session: every answer stands on its own; the NASB, ESV and NIV over the KJV; for hard passages, gentle words and no questions about God's silence.
+Waiting on Dan (full steps in `living-in-the-word/PROGRESS.md`):
+1. Check pull request 77 on his phone (type `phil 2`; open today's reading).
+2. The Anthropic API key expires November 24, 2026: a new key, saved in Cloudflare as `ANTHROPIC_API_KEY`. Remind him in good time, with every step.
+3. Smaller checks, if not done: a spend limit in the Claude Console ($10 suggested); a passcode of four or more random words; two-step sign-in on Cloudflare; Share inside KakaoTalk; his review of the general questions' wording.
+
+Next: ask Dan whether to build sign-up step S4 (his invite page) or do his notes cleanup first.
 
 Choices Dan made that later work must keep:
 - The passage picker's verse numbers follow the NASB, ESV and NIV.
 - The AI writes 3 to 5 questions. The first (what the passage says) and the last (prayer) are always written; that was Claude's choice, and Dan merged it without changes.
 - Hard passages: general words like "sexual violence," never graphic terms; never a question about God's silence, where God was, or why he didn't stop it (in Dan's words, such questions "can hurt people's faith").
+- The AI writes with Opus 5.5 (Dan's choice, October 28, 2026, for deeper questions; pricing to cover it waits until the app goes public).
+- The look is "Magazine" (October 28, 2026), with nothing under 13 pixels except verse numbers; see `living-in-the-word/SPEC.md`, "The look."
 - The commentary for the leader: about 100 words, in a fold-out (open from the start since October 28, 2026, Dan's choice; closed until tapped before), written in the same request as the questions to keep costs down.
 
 Parked (raise only when it becomes relevant):
@@ -93,6 +95,8 @@ When Dan says "do the rest," Claude works through the build plan one pull reques
 - **Browser caching:** GitHub Pages lets browsers keep files for 10 minutes (`cache-control: max-age=600`). When a page's CSS or JavaScript changes, raise the `?v=` number on its links, or phones mix old and new files.
 - **The stop hook** requires all changes to be committed and pushed before ending a turn.
 - **Bible sites are blocked** by the session's network rule (the proxy answers 403): Bible Gateway, Bible Hub, esv.org, Wikipedia, biblestudytools.com and christianity.com, as of October 26, 2026. For verse data, attach public GitHub datasets with `add_repo` (read): `thiagobodruk/bible` (JSON for the KJV, NASB 2020, ESV, NIV and more; its verses aren't numbered, so line up neighboring verses to find a gap) and `scrollmapper/bible_databases` (large: clone with a blob filter and check out only the file you need). Web search works for confirming a verse's wording or footnote.
+- **Also blocked (October 27 and 28, 2026):** support.google.com (Google Play's help), w3.org, resend.com (its docs) and docs.pwabuilder.com. Reachable: developer.apple.com (the App Review Guidelines and the Human Interface Guidelines, also as `.md` pages), developer.android.com, code.claude.com, and raw.githubusercontent.com for public repositories (PWABuilder's docs are in github.com/pwa-builder/pwabuilder, `docs/builder/`; Resend's request format is in github.com/resend/resend-node).
+- **Testing the server and the app together (October 28, 2026):** load `server/worker.js` in Node as a module, with a stand-in for D1 built on Node's own SQLite (`node:sqlite`; run each batch as one transaction) and a replaced `fetch` for Resend and the AI. Use a fresh copy of the module for each new database (the Worker remembers it made its tables). For the app, Playwright's `page.route` on the Worker's address can answer with the real `worker.fetch`. In a Node ES module, load Playwright with `createRequire(import.meta.url)('playwright')`.
 - **Testing the AI's instructions without the real key** (it's only in Cloudflare): give separate Sonnet helpers (the Agent tool, model `sonnet`) the exact system prompt built from `server/worker.js` (GUIDANCE plus the pattern, saved to a file) and one passage each, without telling them what's being tested; run the old instructions too, for comparison. Each run takes about 6 to 10 minutes. They're stand-ins for the app's own answers: always say so to Dan. Example lists in the guidance get copied into questions, so describe the goal instead of listing options.
 
 
@@ -201,7 +205,9 @@ https://danielyoonwrites.github.io/living-in-the-word (live, not listed in searc
 Open https://claude.ai/code, start a new session with this repository, set the effort (High for most work), and paste one of these:
 
 - Continue Living in the Word:
-  > Read HANDOFF.md ("Where things stand" first), then living-in-the-word/CLAUDE.md and SPEC.md. First save the Notion notes it lists. Then help me with what's waiting, one step at a time.
+  > /pickup living in the word
+
+  (or, without the skill: Read HANDOFF.md, then living-in-the-word/PROGRESS.md, DECISIONS.md and CLAUDE.md. Then help me with what's waiting, one step at a time.)
 - Feedback on First step smaller, after using it:
   > Read HANDOFF.md, then first-step-smaller/CLAUDE.md and SPEC.md. Here's what I noticed while using it: [notes].
 - Continue the Quiet room:
