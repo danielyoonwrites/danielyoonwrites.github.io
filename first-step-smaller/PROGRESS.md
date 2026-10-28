@@ -16,7 +16,7 @@ The app: https://danielyoonwrites.github.io/first-step-smaller (live, not listed
 ## Waiting on Dan
 1. The daily trial (build plan step 5): use https://danielyoonwrites.github.io/first-step-smaller on your phone every day for a couple of weeks, with real things you've been putting off. Note what annoys you, and any words on the screens you'd change. Then send Claude your notes.
 2. A backup check: in Chrome on your phone, open https://danielyoonwrites.github.io/first-step-smaller, tap "Backup and delete" on the start screen, then "Save a backup." Check that the file (`first-step-smaller-backup-<date>.json`) lands in Downloads.
-3. Before listing it publicly, on a real iPhone: in Safari, open https://danielyoonwrites.github.io/first-step-smaller, add a task, close Safari and open the page again; the task should still be there. Reports say Safari may delete a site's saved data after 7 days without a visit (unconfirmed), so look again after more than a week away.
+3. Before listing it publicly, on a real iPhone (a suggested test, put together from the checks in `SPEC.md`; not one the spec spells out): in Safari, open https://danielyoonwrites.github.io/first-step-smaller, add a task, close Safari and open the page again; the task should still be there. Reports say Safari may delete a site's saved data after 7 days without a visit (unconfirmed), so look again after more than a week away.
 4. Before listing https://danielyoonwrites.github.io/first-step-smaller publicly: a trademark search for the name "First step smaller" (a web search found no app with the name).
 
 ## Open pull requests
