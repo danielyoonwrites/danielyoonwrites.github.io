@@ -64,7 +64,7 @@ Facts rechecked October 24, 2026 by opening each official page from GitHub (thro
 
 ## Design
 
-Same Moon jar design as the website (see the website's `CLAUDE.md`), with these changes for older readers:
+Same Moon jar design as the website (see `.claude/rules/moon-jar.md`; it was in the website's `CLAUDE.md` until October 28, 2026), with these changes for older readers:
 - Body text 20px instead of 18px.
 - Buttons and choices at least 48px tall, easy to tap.
 - Steps numbered, with one short instruction per line.
