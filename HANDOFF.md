@@ -23,7 +23,7 @@ This repository is public. Keep personal details out of this file.
 
 - Fourth session (October 27 and 28): pull requests 73 to 78 for Living in the Word (signing in with an email code, Opus 5.5, the magazine look, typed names written out in full) and its own PROGRESS and DECISIONS files.
 - Fifth session (October 28): pull request 79, the plan for phones and app stores, double-checked in seven research passes; 80, Android's back gesture goes back one screen; 81 and 82, the notes cleanup, after Dan asked how to spend fewer tokens on reading these notes (the findings are on his Notion page "Claude Code: handoffs and decision logs").
-- Next: ask Dan which comes next for Living in the Word: the "check it" line that Anthropic's terms require (store plan step 4, recommended), install help (step 2), or sign-up step S4 (his invite page).
+- Next: ask Dan how the back swipe test went (pull request 80), then which comes next for Living in the Word: the "check it" line that Anthropic's terms require (store plan step 4, recommended), install help (step 2), or sign-up step S4 (his invite page). Pull request 83 holds these handoff notes.
 
 
 ## Waiting on Dan

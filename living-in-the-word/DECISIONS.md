@@ -238,6 +238,12 @@ Each decision with its reason, oldest first. Only add to this file; if a decisio
 - Why: Dan: "I typed in Phil 2 instead of Philippians 2... it writes it as Phil 2 instead of autocorrect to Philippians," and "the 'for the leader' tab is open for the Bible study but the 'note on this reading' is closed for daily Bible reading."
 - Turned down: nothing recorded.
 
+### October 28, 2026: the plan for phones and app stores, free steps first (pull request 79)
+- Decision: `STORE-PLAN.md` sets the order. First the free steps that help on every path (the back gesture, install help, a tidier app description with screenshots, the "check it" line, a privacy page, a backup for saved studies, "Delete my account," "Report this question," a review account). Then maybe Google Play's internal testing, and Apple's App Store only if iPhone members ask for it. Dan merged it after asking for a double-check.
+- Why: Dan asked to "prepare this app even more for eventually phone download and then eventually for app stores," then: "I really want to make sure app development for Android and Apple go right so double check and research again." The research found the home-screen web app is already a complete way to have the app, and that store apps now fall under state age laws that need native code (Texas now; California and Alabama from January 1, 2027).
+- Turned down (in the plan): TestFlight as the lasting way to share the app (its builds expire after 90 days); Capacitor (it needs npm, against this repository's rules, and moves saved studies to a new address); an email link as the "Report" button (Google wants reporting without leaving the app).
+- Revisit if: Dan decides to go to the stores. Then the owner's decisions in `STORE-PLAN.md` ("Decisions only the owner makes") come first, one at a time.
+
 ### October 28, 2026: Android's back gesture goes back one screen (pull request 80)
 - Decision: the app adds one history entry for each screen in its Back list (`visited` in `app.js`, renamed from `history`) after a tap, and takes entries away when the list gets shorter. The back gesture then goes back one screen, like the Back button, and closes the app only from the start screen.
 - Why: Dan chose it first ("A") after the store plan's double-check found that the back gesture closed the installed app from any screen.
