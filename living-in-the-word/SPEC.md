@@ -149,9 +149,18 @@ The owner asked for a big visual update: the app doesn't have to look like his w
 Colors (in `style.css`, at the top)
 - paper `#F3EFE7`: the background. Warm, never pure white.
 - ink `#1D1B18`: main text and the main buttons (solid ink with paper-colored words).
-- muted `#6B655C`: labels, hints, small print. Checked: about 5 to 1 against paper and 4.5 to 1 against soft, enough for small text.
+- muted `#57524A` (darker since October 28, 2026; it was `#6B655C`): labels, hints, small print. Checked with the WCAG formula: 6.8 to 1 against paper and 6.1 to 1 against soft (it was 5.0 and 4.5, right at the limit).
 - line `#DCD4C7`: thin lines between rows only.
 - soft `#E9E3D8`: the shaded box behind the AI's notes.
+
+The magazine look (the owner's choice, October 28, 2026, from two mockups, "Magazine" and "Quiet column"; inspired by Kinfolk pages he shared):
+- Start screen: today's date between two thin lines like a dateline ("WEDNESDAY" on the left, "OCTOBER 28" on the right); the title and the line under it centered; the three choices like a table of contents, with the number in its own column; "Signed in as" centered.
+- Each screen's small label, title and tip are centered; under a passage or reading name, a short line. Text you read and type stays left-aligned.
+- Questions are numbered i., ii., iii. in italic, centered above each question, which is a little bigger (about 24 pixels).
+- The commentary for the leader and the note on a reading sit in the soft shaded box, under a small capital "FOR THE LEADER."
+- The big start-screen title is the app's name. In the mockup it was a made-up headline; the owner can give his own words for it.
+
+Readability (the owner asked, October 28, 2026; research in his Notion): nothing is smaller than 13 pixels except the ESV verse numbers (about 12). Labels 13.5, Back and button words 14, quiet buttons 13 and in ink instead of grey. Apple's Human Interface Guidelines (opened October 28, 2026): 17 points normal and 11 the minimum for iPhone text, larger for thin fonts; 4.5 to 1 contrast up to 17 points.
 
 Type (Google Fonts)
 - EB Garamond, Regular and Italic, for everything you read: titles, questions, notes.

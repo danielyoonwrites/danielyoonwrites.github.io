@@ -1244,10 +1244,11 @@ function showFinished(plan) {
   show('reading-done');
 }
 
-// What the start screen says: today's date at the top, like "Monday, October 26",
+// What the start screen says: today's date at the top, like "Monday" and "October 26",
 // and where the plan is, under "Bible reading plan companion" (nothing until a plan is set up)
 function updatePlanStatus() {
-  fill('.today-date', new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }));
+  fill('.today-day', new Date().toLocaleDateString('en-US', { weekday: 'long' }));
+  fill('.today-date', new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' }));
   const count = savedStudies().length;
   fill('.saved-count', count === 0 ? 'Save a study’s questions to keep them here, on this phone.'
     : (count === 1 ? '1 study' : count + ' studies') + ' saved on this phone.');
