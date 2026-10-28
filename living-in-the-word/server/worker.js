@@ -141,7 +141,9 @@ Here the commentary for the leader is a short note for the reader instead: speak
 
 // ---------- Models and prices ----------
 // The owner chose Sonnet 5.5 on October 26, 2026, after a side-by-side test on John 1.
-// The others stay in the list only to price an answer if the model is ever changed.
+// Then Opus 5.5 on October 28, 2026, to see whether its questions go deeper (he wasn't happy
+// with their depth). Opus costs about twice as much per answer as Sonnet (prices below).
+// To go back, change MODEL to 'claude-sonnet-5-5'. The others stay in the list only to price an answer if the model is ever changed.
 // Prices in US dollars per million tokens, from https://platform.claude.com/docs/en/about-claude/pricing
 // (checked October 25, 2026). Used only to show what each answer cost.
 const MODELS = {
@@ -149,7 +151,7 @@ const MODELS = {
   'claude-sonnet-5-5': { input: 2,    output: 10 },
   'claude-haiku-5-5':  { input: 0.10, output: 0.50 },
 };
-const MODEL = 'claude-sonnet-5-5';
+const MODEL = 'claude-opus-5-5';
 
 // The longest an answer can be, thinking included (a hard limit that also caps the cost:
 // with Opus 5.5, 4,000 tokens is at most 8 cents of writing).
