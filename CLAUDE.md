@@ -5,7 +5,46 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
 
 ## Start here
 
-- At the start of a new session, read `HANDOFF.md`: who the owner is, how he likes to work, the workarounds for this environment, and where each project stands.
+- At the start of a new session, read `HANDOFF.md`: where each project stands and what's waiting on Dan. How Dan likes to work is below, in "Working with Dan."
+- Before working around a blocked site, testing a live page, or fixing Notion prompts, read `CLOUD-NOTES.md`.
+- The website's own rules (its pages, publishing and Latest posts, the words already chosen, and its links) are in `.claude/rules/website.md`, and the "Moon jar" design is in `.claude/rules/moon-jar.md`. Claude Code loads them by itself when working on the files they name at the top: the website's pages, and for the design also Fewer spam calls, First step smaller and Quiet room.
+
+## Working with Dan
+
+### Who you're working with
+
+- The owner is Daniel Yoon (writes as "Dan"): a writer and pastor in Southern California, Korean American, new to coding. He's building a series of small apps with AI, each a step harder than the last, and he makes the design decisions: what to build, what to leave out, and why.
+- He learns by doing: explain every change in plain words, one small change per pull request, and give him a check he can do himself before merging.
+- How he likes instructions:
+  - Numbered steps, with the full link inside each step (never "the link above") and the exact button or tab to click.
+  - Every answer stands on its own (Dan's rule, October 26, 2026, after Claude said "the steps are two messages up"): repeat every step, link, name and value in full each time, even if it was given before. Never "see above" or "as before."
+  - For anything he pastes (like `server/worker.js` into Cloudflare), give the direct links to copy it: the GitHub file page (`https://github.com/danielyoonwrites/danielyoonwrites.github.io/blob/main/<path>`, with its "Copy raw file" button) and the raw page (`https://raw.githubusercontent.com/danielyoonwrites/danielyoonwrites.github.io/main/<path>`), plus exactly where to paste it.
+  - Ask one question at a time, with options and a recommendation.
+  - Accuracy matters most. Check facts against official sources before stating them, say clearly when something couldn't be checked, and never guess.
+  - Start feedback with what works, then up to three ranked problems, each with a fix.
+  - End each reply with one concrete next action.
+- He wants as little friction as possible: Claude does the follow-up work on its own (see "How the work flows"), and he doesn't want to be the messenger.
+- He tests on his phone (Android, Chrome, sometimes inside the KakaoTalk in-app browser) and sends screenshots. He catches friction fast (an odd question, an extra screen), so show screenshots before every pull request.
+- His design rules, learned the hard way: keep pages short on a phone (tabs, fold-outs, one level per screen); no long lists; one thing per screen in apps.
+- His Bibles: he likes the NASB, ESV and NIV more than the KJV (October 26, 2026). Anything about verse numbers or Bible wording follows those three.
+- He's a pastor: with Scripture, care for hurting people comes first. For passages of tragedy he asked for gentle, general words and no questions about God's silence (October 26, 2026; details in `living-in-the-word/SPEC.md`, "The questions").
+- He keeps notes in Notion: a "Master Notes" page with one page per topic. Save important decisions and checked facts there, in one write per finished piece of work.
+
+
+### How the work flows
+
+1. Claude works on the branch it's given (each session gets its own; the second session used `ccr-4cf7b8b6-sypqs8`, the third `ccr-c34f8c4c-6bmdd8`) and restarts it from `main` after each merge: `git fetch origin main && git checkout -B <branch> FETCH_HEAD`.
+2. Claude opens a pull request with a plain-words description and a "How to check it" list.
+   Right after opening it, Claude subscribes to the pull request's activity (`subscribe_pr_activity`), so the merge wakes the session. Dan should never have to say "it merged." Claude also sets one backup check-in about 50 minutes later (`send_later`), and cancels it when the merge arrives.
+3. Dan reviews and merges on GitHub (Conversation tab, Merge pull request, Confirm merge).
+4. GitHub Actions publishes the site (workflow `.github/workflows/publish.yml`; GitHub Pages source is set to "GitHub Actions"). It takes a minute or two; check for a green mark next to **main** at https://github.com/danielyoonwrites/danielyoonwrites.github.io/actions
+5. Dan checks on his phone.
+6. When the merge wakes the session, Claude does the follow-up on its own: checks that the publish run on main succeeded, restarts the branch from main, updates the project's page in Dan's Master Notes (Notion), then tells Dan in one short message. Auto mode only skips permission prompts; it doesn't let Claude see GitHub between messages, and each new session has to subscribe again.
+
+Only one pull request at a time from the branch: wait for a merge before starting the next one, or the new work lands in the open pull request.
+
+When Dan says "do the rest," Claude works through the build plan one pull request at a time, starting the next one as soon as the last merges.
+
 
 ## Rules for working here
 
@@ -15,68 +54,13 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
 - Keep the code simple and commented so the owner can edit it later.
 - Every page must look good on a phone first, then on a computer.
 
-## Pages
+## Projects in this repository
 
-- Home (`index.html`), Writing (`writing.html`), Projects (`projects.html`), About (`about.html`).
-- The menu shows Writing, Projects, About. There's no Home link: the name "Daniel Yoon" goes to Home. Four links didn't fit on one line on a small phone (360px wide, checked October 2026).
-- Projects is for two kinds of readers. All projects come first and stay short (label, name, one friendly line, link), so every project shows near the top. The "How I built it" notes (what I wanted, the problem, what I decided, the trade-off) come after, in their own section as fold-outs, for anyone checking how he thinks. Never put the notes inside the project list: they push the next project out of sight (the owner's rule, October 2026). The page says once, at the top, that he builds them with AI. Quiet room is listed as in progress with no link, because the room is shared by private link.
-- Keep pages short on a phone (the owner's rule, October 2026): people won't scroll far. Use tabs or fold-outs instead of long lists.
-  - Writing: two tabs, "Start here" and "Latest" (`tabs.js`). Without JavaScript both lists show.
-  - Projects: the "How I built it" notes are fold-outs (HTML's own `<details>`), closed until tapped.
-  - Post opening lines stop after 3 lines (`.post-excerpt` in `style.css`).
-- One shared stylesheet: `style.css`. Pages link it as `style.css?v=2`: raise the number on every page whenever `style.css` changes, so phones don't keep an old copy (GitHub Pages lets browsers keep files for 10 minutes). The same for `tabs.js?v=1`.
 - `quiet-room/` is a separate web app with its own `CLAUDE.md` and `SPEC.md`.
 - `fewer-spam-calls/` is a one-page guide with its own `CLAUDE.md` and `SPEC.md`.
 - `first-step-smaller/` is a little app (planned October 2026) with its own `CLAUDE.md` and `SPEC.md`.
 - `living-in-the-word/` is a little app for Bible study questions (planned October 2026) with its own `CLAUDE.md` and `SPEC.md`.
 
-## Publishing and Latest posts
+## Privacy
 
-- GitHub Pages publishes through the workflow `.github/workflows/publish.yml` (Pages source: GitHub Actions). It runs on every merge to main, once a day, and on "Run workflow". On other branches the publish step is skipped, so the build can be tested safely.
-- Before publishing, `scripts/latest-posts.js` fills "Latest posts" on `writing.html` with the 4 newest posts. It reads Substack's post list through Jina Reader (r.jina.ai, header `X-Return-Format: text`), then the feed through Jina. It changes only the published copy, never the file in the repository.
-- Don't edit between the `LATEST POSTS START` and `LATEST POSTS END` lines. The text there is the fallback if the posts can't be loaded.
-- What was tested (October 2026): Substack's Cloudflare blocks GitHub's computers and Claude's sessions. Jina Reader works from GitHub but answers 401 to visitors' browsers without a key. AllOrigins, rss2json, codetabs and corsproxy.io don't work.
-- GitHub turns off scheduled workflows after 60 days without repository activity; turn it back on in the Actions tab.
-
-## Content
-
-- The voice is like the Substack: writing, family life, the shy Korean voice.
-- Readers: millennial Asian Christians. Faith is part of what the site is about.
-- Pastor work is not the focus of the Home or Writing pages. The About page can say more (a short paragraph). Never word it so it sounds like just a job.
-
-Words already chosen (use them exactly)
-- Home: "Korean American dad. Professional overthinker, amateur life-enjoyer, tired parent of two toddlers. A millennial Asian Christian writing the things we usually don’t say out loud."
-- About: the three paragraphs in `about.html`, written by the owner.
-- Email for readers: thingsdanwrites@gmail.com (his writing email).
-
-## Links
-
-- Substack, The Shy Korean: https://thingsdandoes.substack.com
-  Sign up with a celadon Subscribe button linking to https://thingsdandoes.substack.com/subscribe. Don't use Substack's embed form: its white box and gold button can't be restyled and clash with the design.
-- Instagram: https://www.instagram.com/theshykoreandad/
-
-## Design system: "Moon jar" (matches the Substack)
-
-Colors
-- porcelain `#F1EFEA`: background of every page. Never pure white.
-- ink `#1E1C1A`: all main text.
-- celadon `#386F61`: links, buttons and small labels. Never a background behind body text.
-- stone `#6B655C`: secondary text: dates, captions, small print.
-- glaze `#DCE6DF`: thin divider lines only.
-
-Type
-- All English in Libre Baskerville (Google Fonts), Regular and Italic only. Never bold, including headings.
-- Any Korean in Nanum Myeongjo ExtraBold (weight 800, Google Fonts).
-- Name in the header: Libre Baskerville Regular, never italic.
-- Small labels: uppercase, letter spacing about 0.14em, celadon.
-- Sizes are chosen for phones, not the 1080px Instagram images. Starting point: body 18px with line height about 1.6, text column no wider than about 36em.
-
-Layout and words
-- Left-aligned text, calm open space.
-- Square corners on images and blocks (no border-radius).
-- No logo image. "Daniel Yoon" in the header is the only mark.
-- Real photos only: window light, ordinary things. No stock images.
-- Sentence case. No exclamation marks. No emoji.
-
-Privacy
 - Never show the owner's kids' faces, names or schools, in text, images or file names.

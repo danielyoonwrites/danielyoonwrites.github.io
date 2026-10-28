@@ -4,7 +4,7 @@ A little app for facing something you've been putting off, one small step at a t
 
 ## Rules for working here
 
-- Same rules as the website's `CLAUDE.md`: plain words for a beginner, one small change per pull request with a check the owner does, no build tools, Moon jar design, phone first.
+- Same rules as the website's `CLAUDE.md`: plain words for a beginner, one small change per pull request with a check the owner does, no build tools, Moon jar design (in `.claude/rules/moon-jar.md`, which Claude Code loads by itself when working in this folder), phone first.
 - It's a little app, not a therapy tool. Never claim it treats or fixes anything.
 - Kind words only: no streaks, no guilt, no red marks. Stopping is always fine.
 - One thing per screen, with big buttons and short sentences.
