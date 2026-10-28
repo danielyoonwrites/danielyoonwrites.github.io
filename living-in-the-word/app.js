@@ -1,8 +1,9 @@
 // Living in the Word: shows one screen at a time. It writes 3 to 5 questions for a Bible
 // passage with the AI helper (they stay only while the page is open), and keeps a
 // daily reading plan (saved on this phone).
-// Only the passage name is sent anywhere, to the app's own small server (the AI helper,
-// see AI-PLAN.md). See SPEC.md for the plan.
+// Only the passage name is sent to the app's own small server (the AI helper, see
+// AI-PLAN.md), and to sign in, the email address you type (see "Signing in" below).
+// See SPEC.md for the plan.
 
 
 // ---------- General questions ----------
@@ -33,14 +34,17 @@ const screens = [...document.querySelectorAll('.screen')];
 function show(id) {
   const now = screens.find((screen) => screen.classList.contains('active'));
   if (now && now.id !== id) history.push(now.id);
-  if (id === 'home') updatePlanStatus();   // the start screen always shows where the plan is
+  if (id === 'home') {
+    updatePlanStatus();   // the start screen always shows where the plan is,
+    updateAccount();      // and who's signed in
+  }
   screens.forEach((screen) => screen.classList.toggle('active', screen.id === id));
   window.scrollTo(0, 0);
 
-  // The passage screen puts the cursor in the box; the others move to the heading
+  // Screens for typing put the cursor in the box; the others move to the heading
   const screen = document.getElementById(id);
   screen.querySelectorAll('.gentle-error').forEach((note) => { note.hidden = true; });
-  const typing = id === 'passage' || id === 'passcode';
+  const typing = ['passage', 'passcode', 'sign-in', 'sign-in-code'].includes(id);
   const target = typing ? screen.querySelector('input') : screen.querySelector('h1, h2');
   if (target) target.focus({ preventScroll: true });
 }
@@ -181,16 +185,16 @@ function startStudy(text) {
   if (!(asking && samePassage(askingFor, passage))) writeQuestions();
 }
 
-// Asks the AI helper for questions (the passcode first, if this phone doesn't have it yet)
+// Asks the AI helper for questions (signing in first, if this phone isn't signed in
+// and doesn't have the passcode)
 function writeQuestions() {
   if (!SERVER_URL) {
     useGeneralQuestions();
     return;
   }
-  if (!passcode) {
+  if (!canAsk()) {
     if (!questions.length) useGeneralQuestions();   // what's there if the leader goes Back
-    afterPasscode = requestSuggestions;
-    askPasscode(false);
+    startSignIn(requestSuggestions);
     return;
   }
   requestSuggestions();
@@ -350,20 +354,37 @@ if (!navigator.share) {
 // change it in the Content-Security-Policy line in index.html too, or the browser blocks it.
 const SERVER_URL = 'https://living-in-the-word.danyoonsignup.workers.dev/';
 
-// The passcode is saved on this phone only, under the app's own name in the browser's storage
+// The passcode, or the sign-in, is saved on this phone only, under the app's own name in the
+// browser's storage. A phone that's signed in sends its session key (see "Signing in")
+// instead of the passcode; signing in replaces the passcode on that phone.
 const STORAGE_KEY = 'living-in-the-word';
 let passcode = readSaved().passcode || '';
+let session = readSaved().session || '';     // this phone's session key, once signed in
+let signedInAs = readSaved().email || '';    // the email address it's signed in with
 let asking = false;   // true while waiting for the AI
 let latestRequest = 0;   // counts requests, so only the newest one changes the screen
 let askingFor = '';      // the passage the AI is writing for, while asking
-let afterPasscode = requestSuggestions;   // what to do once a passcode is typed
 
 // The test link (the address with ?test) shows what each answer cost
 const testMode = new URLSearchParams(window.location.search).has('test');
 
+// True if this phone can ask the AI helper: it's signed in, or it has the passcode
+function canAsk() {
+  return Boolean(session || passcode);
+}
+
+// Sends a message to the AI helper, with this phone's session key if it's signed in
+// (in a header, never in the address), or else with the passcode
+function askServer(message, signal) {
+  const headers = { 'content-type': 'application/json' };
+  if (session) headers.authorization = 'Bearer ' + session;
+  else message = { ...message, passcode };
+  return fetch(SERVER_URL, { method: 'POST', headers, body: JSON.stringify(message), signal });
+}
+
 // What's saved on this phone, as one piece of JSON:
-//   { version: 1, passcode: '...', plan: { ... } }   (the plan is described in the reading plan part)
-// Later steps add recent studies.
+//   { version: 1, passcode: '...', session: '...', email: '...', studies: [ ... ], plan: { ... } }
+//   (studies are described in "Saved studies", the plan in the reading plan part)
 function readSaved() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -381,6 +402,8 @@ function tidySaved(saved) {
   const text = (value) => (typeof value === 'string' ? value : '');
   const onlyText = (list) => list.filter((item) => typeof item === 'string');
   if (typeof saved.passcode === 'string') clean.passcode = saved.passcode;
+  if (typeof saved.session === 'string') clean.session = saved.session;
+  if (typeof saved.email === 'string') clean.email = saved.email;
   if (Array.isArray(saved.studies)) {
     clean.studies = saved.studies
       .filter((study) => study && typeof study.passage === 'string' && Array.isArray(study.questions))
@@ -418,13 +441,15 @@ function savePasscode(code) {
   writeSaved(saved);
 }
 
-function askPasscode(wrong) {
+// The passcode screen: from "Have a passcode?" on the sign-in screen, or when a saved
+// passcode stops working (wrong: true, then: what to do once a new one is typed)
+function askPasscode(wrong, then) {
+  if (then) rememberSignInFrom(then);
   document.getElementById('passcode-text').value = '';
   show('passcode');
   document.querySelector('#passcode .wrong-passcode').hidden = !wrong;
 }
 
-// The passcode screen
 document.querySelector('#passcode form').addEventListener('submit', (event) => {
   event.preventDefault();
   const code = document.getElementById('passcode-text').value.trim();
@@ -434,9 +459,7 @@ document.querySelector('#passcode form').addEventListener('submit', (event) => {
     return;
   }
   savePasscode(code);
-  goBack();   // back to where the passcode was asked for
-  afterPasscode();
-  retryPassageText();   // the passage text waits for the passcode too
+  finishSignIn();   // back to where it was asked for, and on with what was asked
 });
 
 function setStatus(text) {
@@ -489,12 +512,7 @@ async function requestSuggestions() {
   const stop = new AbortController();
   const timer = setTimeout(() => stop.abort(), 120000);   // give up after 2 minutes
   try {
-    const response = await fetch(SERVER_URL, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ passcode, passage: forPassage, method: 'study' }),
-      signal: stop.signal,
-    });
+    const response = await askServer({ passage: forPassage, method: 'study' }, stop.signal);
     result = await response.json();
   } catch (error) {
     result = { error: 'offline' };
@@ -519,8 +537,15 @@ async function requestSuggestions() {
     savePasscode('');
     setStatus('');
     if (!questions.length) useGeneralQuestions();
-    afterPasscode = requestSuggestions;
-    askPasscode(true);
+    askPasscode(true, requestSuggestions);
+    return;
+  }
+  // This phone's sign-in ran out (after about 90 days) or was turned off: sign in again
+  if (result.error === 'signed-out') {
+    forgetSignIn();
+    setStatus('');
+    if (!questions.length) useGeneralQuestions();
+    startSignIn(requestSuggestions, true);
     return;
   }
   if (!result.error && !result.knownPassage) {
@@ -552,6 +577,223 @@ async function requestSuggestions() {
     cost.hidden = false;
   }
 }
+
+
+
+// ---------- Signing in ----------
+// Sign-up step S3 (see SIGNUP-PLAN.md): type your email address, get a 6-digit code by
+// email, and type it here. Only the owner and the people he invites can sign in. The server
+// checks, and answers the same way for any address, so nobody can find out who's invited.
+// A phone that's signed in has its own daily limit and stays signed in for about 90 days.
+// While sign-ups are being built, a phone can still use the passcode instead.
+
+let signInFrom = null;        // the screen (and its Back history) to return to after signing in
+let afterSignIn = () => {};   // then what to do, like writing the questions that were asked for
+let codeSentTo = '';          // the address the code was sent to
+
+// Kind words for each problem with signing in
+const SIGN_IN_PROBLEMS = {
+  'bad-email': 'That doesn’t look like an email address. Check it and try again.',
+  'too-many-codes': 'Too many codes were asked for today. Try again tomorrow.',
+  'not-set-up': 'Signing in by email isn’t set up yet.',
+  'email-failed': 'The email couldn’t be sent just now. Try again in a minute.',
+  'code-expired': 'That code has run out. Tap “Send a new code” to get another.',
+  'too-many-tries': 'Too many wrong codes were tried from this internet connection today. Try again tomorrow.',
+  // An older copy of the server (before sign-ins) answers this to everything about signing in
+  'wrong-passcode': 'Signing in by email isn’t set up yet.',
+  offline: 'Couldn’t reach the AI helper. Check your connection and try again.',
+  other: 'Something went wrong. Try again in a moment.',
+};
+
+// Remembers where signing in was asked for, so it can come back there
+function rememberSignInFrom(then) {
+  const now = screens.find((screen) => screen.classList.contains('active'));
+  signInFrom = { screen: now ? now.id : 'home', history: history.slice() };
+  afterSignIn = then;
+}
+
+// Opens the sign-in screen. again: true when this phone's sign-in ran out
+function startSignIn(then, again = false) {
+  rememberSignInFrom(then);
+  document.getElementById('sign-in-email').value = codeSentTo || signedInAs;
+  show('sign-in');
+  if (again) signInMessage('sign-in', 'You’ve been signed out. Sign in again to keep using the AI helper.');
+}
+
+// A gentle message on a sign-in screen ('' hides it)
+function signInMessage(screenId, text) {
+  const note = document.querySelector('#' + screenId + ' .sign-in-message');
+  note.textContent = text;
+  note.hidden = !text;
+}
+
+// Back to the screen where signing in was asked for, then on with what was asked
+function finishSignIn() {
+  const from = signInFrom || { screen: 'home', history: [] };
+  const then = afterSignIn;
+  signInFrom = null;
+  afterSignIn = () => {};
+  show(from.screen);
+  history = from.history;
+  then();
+  retryPassageText();   // the passage text waits for signing in too
+}
+
+// Keeps the sign-in on this phone. It replaces the passcode, which this phone no longer needs.
+function keepSignIn(key, email) {
+  session = key;
+  signedInAs = email;
+  passcode = '';
+  const saved = readSaved();
+  delete saved.passcode;
+  saved.session = key;
+  saved.email = email;
+  writeSaved(saved);
+}
+
+// Forgets the sign-in on this phone. Saved studies and the reading plan stay.
+function forgetSignIn() {
+  if (!codeSentTo) codeSentTo = signedInAs;   // to fill in the address next time
+  session = '';
+  signedInAs = '';
+  const saved = readSaved();
+  delete saved.session;
+  delete saved.email;
+  writeSaved(saved);
+}
+
+// The start screen's last line: who's signed in on this phone, with Sign out, or Sign in.
+// message replaces it for now, like "Signed out."
+function updateAccount(message = '') {
+  const status = document.querySelector('.account-status');
+  status.textContent = message || (session ? 'Signed in as ' + signedInAs + '.' : '');
+  status.hidden = !status.textContent;
+  document.querySelector('[data-action="sign-in"]').hidden = Boolean(session) || !SERVER_URL;
+  document.querySelector('[data-action="sign-out"]').hidden = !session;
+}
+
+// Sends a sign-in message to the server (never with the session key or the passcode)
+async function signInRequest(message) {
+  try {
+    const response = await fetch(SERVER_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(message),
+    });
+    return await response.json();
+  } catch (error) {
+    return { error: 'offline' };
+  }
+}
+
+// Asks the server to email a code. Returns true if it's on its way.
+async function sendCode(email, screenId, button) {
+  const words = button.textContent;
+  button.disabled = true;
+  button.textContent = 'Sending…';
+  const result = await signInRequest({ action: 'send-code', email });
+  button.disabled = false;
+  button.textContent = words;
+  if (!result.sent) {
+    // On the test link, the email service's own reason too, like an address that isn't verified yet
+    const detail = testMode && result.detail ? ' (Resend: ' + result.detail + ')' : '';
+    signInMessage(screenId, (SIGN_IN_PROBLEMS[result.error] || SIGN_IN_PROBLEMS.other) + detail);
+    return false;
+  }
+  codeSentTo = email;
+  fill('.code-sent-to', email);
+  return true;
+}
+
+// The first sign-in screen: the email address
+document.querySelector('#sign-in form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const email = document.getElementById('sign-in-email').value.trim();
+  if (!email) {
+    signInMessage('sign-in', 'Type your email address first.');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    signInMessage('sign-in', SIGN_IN_PROBLEMS['bad-email']);
+    return;
+  }
+  signInMessage('sign-in', '');
+  const sent = await sendCode(email, 'sign-in', document.querySelector('#sign-in [type="submit"]'));
+  // (only if the person is still on this screen, and didn't go Back while it was sending)
+  if (sent && document.getElementById('sign-in').classList.contains('active')) {
+    document.getElementById('sign-in-code-text').value = '';
+    show('sign-in-code');
+  }
+});
+
+// The second sign-in screen: the code from the email
+document.querySelector('#sign-in-code form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const code = document.getElementById('sign-in-code-text').value.replace(/\D/g, '');
+  if (code.length !== 6) {
+    signInMessage('sign-in-code', 'Type the 6-digit code from the email.');
+    return;
+  }
+  signInMessage('sign-in-code', '');
+  const button = document.querySelector('#sign-in-code [type="submit"]');
+  button.disabled = true;
+  button.textContent = 'Signing in…';
+  const result = await signInRequest({ action: 'check-code', email: codeSentTo, code });
+  button.disabled = false;
+  button.textContent = 'Sign in';
+  if (result.session) {
+    keepSignIn(result.session, result.email || codeSentTo);
+    finishSignIn();
+    return;
+  }
+  if (result.error === 'wrong-code') {
+    signInMessage('sign-in-code', result.triesLeft > 0
+      ? 'That code didn’t work. Check it and try again.'
+      : 'That code didn’t work, and it can’t be tried again. Tap “Send a new code” to get another.');
+    return;
+  }
+  signInMessage('sign-in-code', SIGN_IN_PROBLEMS[result.error] || SIGN_IN_PROBLEMS.other);
+});
+
+Object.assign(actions, {
+  // "Sign in" on the start screen
+  'sign-in'() {
+    startSignIn(() => {});
+  },
+
+  // "Sign out" on the start screen: this phone forgets its key, and the server stops accepting it
+  async 'sign-out'() {
+    const key = session;
+    forgetSignIn();
+    updateAccount('Signed out. Your saved studies and reading plan are still on this phone.');
+    try {
+      await fetch(SERVER_URL, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + key },
+        body: JSON.stringify({ action: 'sign-out' }),
+      });
+    } catch (error) {
+      // Without reception the server isn't told, but the phone has forgotten the key,
+      // and the server stops accepting it after 90 days anyway
+    }
+  },
+
+  // "Have a passcode? Use it instead" (until sign-ups are finished, in step S6)
+  'use-passcode'() {
+    askPasscode(false);
+  },
+
+  // "Send a new code" (the earlier code stops working)
+  async 'new-code'() {
+    signInMessage('sign-in-code', '');
+    if (await sendCode(codeSentTo, 'sign-in-code', document.querySelector('[data-action="new-code"]'))) {
+      document.getElementById('sign-in-code-text').value = '';
+      signInMessage('sign-in-code', 'A new code is on its way. The earlier one no longer works.');
+    }
+  },
+});
+
+updateAccount();
 
 
 
@@ -690,13 +932,9 @@ async function showPassageText(screenId, name) {
   if (ownBible) ownBible.hidden = false;
 
   let result = { error: 'not-connected' };
-  if (SERVER_URL && passcode) {
+  if (SERVER_URL && canAsk()) {
     try {
-      const response = await fetch(SERVER_URL, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ passcode, passage: name, want: 'text' }),
-      });
+      const response = await askServer({ passage: name, want: 'text' });
       result = await response.json();
     } catch (error) {
       result = { error: 'offline' };
@@ -731,7 +969,7 @@ function fillScripture(target, text) {
   });
 }
 
-// After the passcode is typed, the screen showing now tries its text again
+// After signing in (or typing the passcode), the screen showing now tries its text again
 function retryPassageText() {
   const screenId = document.getElementById('today').classList.contains('active') ? 'today' : 'questions';
   if (!textWanted[screenId]) return;
@@ -895,7 +1133,7 @@ function showToday(keepHistory = true) {
   early.textContent = 'Your plan starts ' + showDate(plan.start) + '. You can read ahead, or come back then.';
 
   // The AI's questions for this reading if they're saved; otherwise the general ones,
-  // and the AI is asked (when it's set up and this phone has the passcode)
+  // and the AI is asked (when it's set up and this phone is signed in or has the passcode)
   shownReading = plan.done;
   showWriting('today', readingRequest === plan.done);   // still writing this one's questions?
   const saved = plan.questions && plan.questions[questionsKey(plan.done)];
@@ -903,7 +1141,7 @@ function showToday(keepHistory = true) {
   setReadingStatus('');
   document.querySelector('.reading-ai').hidden = true;
   if (!saved && SERVER_URL) {
-    if (passcode && !readingFailed.has(plan.done)) fetchReadingQuestions(plan.done);
+    if (canAsk() && !readingFailed.has(plan.done)) fetchReadingQuestions(plan.done);
     else document.querySelector('.reading-ai').hidden = false;
   }
 
@@ -945,11 +1183,7 @@ async function fetchReadingQuestions(n) {
 
   let result;
   try {
-    const response = await fetch(SERVER_URL, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ passcode, passage: name, method: 'personal' }),
-    });
+    const response = await askServer({ passage: name, method: 'personal' });
     result = await response.json();
   } catch (error) {
     result = { error: 'offline' };
@@ -963,10 +1197,11 @@ async function fetchReadingQuestions(n) {
   if (!now || now.book !== plan.book || now.perDay !== plan.perDay || now.start !== plan.start) return;
   const onScreen = shownReading === n && document.getElementById('today').classList.contains('active');
 
-  if (result.error === 'wrong-passcode') {
-    savePasscode('');
+  if (result.error === 'wrong-passcode' || result.error === 'signed-out') {
+    if (result.error === 'signed-out') forgetSignIn();
+    else savePasscode('');
     if (onScreen) {
-      setReadingStatus('The passcode didn’t work.');
+      setReadingStatus(result.error === 'signed-out' ? 'You’ve been signed out. Sign in again to get questions for this reading.' : 'The passcode didn’t work.');
       document.querySelector('.reading-ai').hidden = false;
     }
     return;
@@ -1058,15 +1293,15 @@ Object.assign(actions, {
     history = ['home'];
   },
 
-  // "Questions for this reading": asks the AI (for the passcode first, if this phone doesn't have it)
+  // "Questions for this reading": asks the AI (signing in first, if this phone can't ask yet)
   'reading-ai'() {
     readingFailed.delete(shownReading);   // asked for on purpose: try again
-    if (passcode) {
-      fetchReadingQuestions(shownReading);
+    const reading = shownReading;
+    if (canAsk()) {
+      fetchReadingQuestions(reading);
       return;
     }
-    afterPasscode = () => fetchReadingQuestions(shownReading);
-    askPasscode(false);
+    startSignIn(() => fetchReadingQuestions(reading));
   },
 
   'end-plan'() {

@@ -1,6 +1,6 @@
 # Plan: sign-ups (stage 3)
 
-So people can use the AI helper without the shared passcode, each with their own daily limit, and so the app can have subscriptions someday. Planned with the owner on October 26, 2026, after the security work (pull requests 61 to 63). Nothing here is built yet: this plan is for the owner to read and approve first.
+So people can use the AI helper without the shared passcode, each with their own daily limit, and so the app can have subscriptions someday. Planned with the owner on October 26, 2026, after the security work (pull requests 61 to 63). Step S3, signing in with an email code and a daily limit for each person, was built on October 28, 2026 (see "What S3 built"); the other steps aren't built yet.
 
 ## Decided (October 26, 2026)
 
@@ -10,7 +10,7 @@ So people can use the AI helper without the shared passcode, each with their own
   - **Google:** "Continue with Google." Free.
   - **Apple: later, if wanted.** It needs Apple's developer membership, 99 USD a year.
 - **The owner's own web address** (the owner's choice, about $11 a year). Sign-in emails come from it, and the AI helper's server can live at it. It's also needed for Google's sign-in screen and later for subscriptions.
-- **Each person has their own daily limit** (20 sets of questions a day, the same number as now), and everyone together keeps 60 a day.
+- **Each person has their own daily limit** (20 sets of questions a day, the same number as now), and everyone together keeps 60 a day. On October 28, 2026, the owner asked for it to come with sign-ins, in step S3, rather than wait for step S6: "built in limits per account for now, since I am not charging yet."
 - **The shared passcode goes away** once sign-ups work.
 
 Still open (asked one at a time when we get there):
@@ -100,7 +100,7 @@ Email codes work either way, which is part of why they're in the plan.
 
 S1. This plan. Check: read it, and choose the web address's name. Done October 26, 2026 (pull request 64; the name is `danielyoonwrites.com`).
 
-S2. The owner's setup, no code, one step at a time with screenshots:
+S2. The owner's setup, no code, one step at a time with screenshots (the clicks are in "What S3 built," under "The owner's steps"):
 - buy the web address at Cloudflare (done October 26, 2026)
 - set up Resend and prove the address is yours (started October 26, 2026, with `mail.danielyoonwrites.com`; waiting for "Verified")
 - save the new keys in Cloudflare as secrets: `RESEND_API_KEY` (a Sending-access key, only for that address) and `OWNER_EMAIL`
@@ -109,15 +109,49 @@ The Google "client ID" moved to S5, when Google sign-in is built.
 
 Check: a test email arrives.
 
-S3. Sign in with an email code, in the server and the app. During the change, the passcode still works too. The owner's own email address can sign in right away. Check: sign in on your phone with a code, and sign out.
+S3. Sign in with an email code, in the server and the app. During the change, the passcode still works too. The owner's own email address can sign in right away. Built October 28, 2026, with each person's own daily limit (the owner's request); see "What S3 built." Check: sign in on your phone with a code, write questions, and sign out.
 
 S4. The owner's page: invite by email, see who's invited and today's use, turn someone off. Check: invite one person from your group; they sign in.
 
 S5. "Continue with Google." First the owner makes a Google "client ID" and saves it in Cloudflare as the secret `GOOGLE_CLIENT_ID`. Check: sign in with Google on your phone, and on an iPhone if someone in the group has one.
 
-S6. Limits for each person, and the passcode removed. Check: a day of normal use.
+S6. The passcode removed (each person's limit came early, in S3). Then the sign-in screen loses "Have a passcode?", and the server's scrambled code for each connection needs a secret of its own instead of the passcode (`connectionCode` in `server/worker.js`). Check: a day of normal use.
 
 Later: Apple, moving the app, saved studies in the account, subscriptions.
+
+## What S3 built (October 28, 2026)
+
+For the person:
+- At the bottom of the start screen: "Sign in," or "Signed in as dan@example.com." with "Sign out." Signing out says the saved studies and reading plan are still on the phone (they are: only the sign-in is forgotten).
+- Asking the AI on a phone that isn't signed in (and has no passcode) opens "Sign in": the email address, then "Email me a code." Then "Check your email": "If [the address] is invited, a 6-digit code is on its way," the code, and "Sign in." Also "Send a new code" and "Use a different email." After signing in, the app goes back to where it was and writes the questions that were asked for.
+- The words don't say whether an address is invited: the server answers the same way for any address, so nobody can use the app to find out who's in the group (Claude's choice, for the owner to change if he'd rather say "not invited").
+- "Have a passcode? Use it instead" stays on the sign-in screen until step S6. Signing in replaces the passcode on that phone.
+- The email comes from `Living in the Word <sign-in@mail.danielyoonwrites.com>`, with the code in the subject ("123456 is your Living in the Word code"), so it shows in the phone's notification.
+
+Inside (`server/worker.js`, "Signing in"):
+- Three new tables in the same D1 database, made by the server the first time it's needed: `people` (email, name, the date invited, on or off; step S4 fills it), `codes` (one at a time for each address, scrambled), `sessions` (one for each signed-in phone, its key scrambled).
+- A code works for 10 minutes and 5 tries. Each try is used up before the code is compared, so tries sent at the same moment can't add up to more. A new code replaces the old one.
+- Limits on codes: 5 a day for one address, 30 code requests a day from one internet connection (a group on one Wi-Fi shares it), 90 emails a day in all (Resend's free plan sends 100 a day: search results that include Resend's own pages, October 28, 2026). Wrong codes count toward the same 10 wrong tries a day per connection as wrong passcodes.
+- A phone stays signed in for 90 days. Its key (64 random letters and numbers) travels in the request's Authorization header, never in the web address. The server keeps only a scrambled copy (SHA-256), so the database alone can't sign anyone in. Sign out deletes it. A key that's unknown, ran out, or belongs to someone turned off gets "signed-out," and the app asks to sign in again.
+- Daily limits: someone signed in has their own 20 a day, wherever they are (counted as `person:` plus their address); a phone with the passcode still counts with its connection. Everyone together keeps 60 a day. Someone signed in isn't stopped by wrong passcodes tried on their Wi-Fi.
+- If Resend refuses an email, its reason comes back to the app and shows only on the test link (the address with `?test`), to help with setup. Anything that looks like a Resend key is blanked out first.
+- Nothing about a person goes to the AI: it's still sent only the passage name.
+
+Known limits:
+- Someone who knows an invited address could try to guess its code: at most 5 codes a day, 5 tries each, so 25 guesses out of a million a day, and every code emails the real person. Wrong tries from one connection stop at 10 a day.
+- The answer for an invited address takes a moment longer (an email is sent), so a determined person timing the answers could tell who's invited. Not prevented; it would take effort for little gain.
+- The session key is kept in the browser's storage for the whole website (danielyoonwrites.github.io), like the passcode is now (see SPEC.md, "Safety and limits"). Moving the app to its own address (parked) would separate them.
+
+Tested before the pull request (not with the real Resend or Cloudflare, which Claude can't reach): 67 checks of `server/worker.js` with stand-ins for D1 (Node's own SQLite), Resend and the AI, including 20 wrong codes sent at once (only 5 compared) and 30 requests at once for one person (only 20 reach the AI); and 54 checks of the app in Chromium at 320, 360 and 1280 wide, with the real `server/worker.js` behind it, including the app with today's older server (sign-in says it isn't set up yet, and the passcode still works).
+
+The owner's steps, in order (the labels come from earlier sessions and search results, and may be worded a little differently):
+1. Resend (https://resend.com, signed in as `danyoonsignup`): Domains. `mail.danielyoonwrites.com` must say "Verified."
+2. Resend: API Keys, Create API key. Name it `living-in-the-word`, choose "Sending access," and choose the domain `mail.danielyoonwrites.com`. Copy the key: Resend shows it only once.
+3. Cloudflare: Workers & Pages, `living-in-the-word`, Settings, Variables and Secrets, Add. Type: Secret. Name: `RESEND_API_KEY`. Value: the key. Save (Deploy).
+4. The same place: Add, Type: Secret, Name: `OWNER_EMAIL`, Value: the owner's own email address (the one he'll sign in with). Save (Deploy).
+5. After the pull request is merged: paste the new `server/worker.js` into the Worker (Edit code, pick the Latest version, select all, paste, Deploy).
+6. Check: open the app, tap "Sign in" at the bottom of the start screen, and sign in with the code from the email. Write questions, then sign out. If the email doesn't come, try again on the test link (the address with `?test`): it shows Resend's reason.
+
 
 ## Tech notes
 
