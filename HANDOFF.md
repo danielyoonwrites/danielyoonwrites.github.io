@@ -1,6 +1,6 @@
 # Handoff: where everything stands
 
-Last updated October 28, 2026 (Pacific time), with the notes cleanup (pull requests 81 and 82). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
+Last updated October 28, 2026 (Pacific time), in the sixth session. This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
 
 - How to work with Dan, and the rules for every project: `CLAUDE.md`.
 - Each project: its folder's `PROGRESS.md` (where it stands, the next step), `DECISIONS.md` (choices and their reasons) and `SPEC.md`. The website's decisions are in the root `DECISIONS.md`.
@@ -23,12 +23,12 @@ This repository is public. Keep personal details out of this file.
 
 - Fourth session (October 27 and 28): pull requests 73 to 78 for Living in the Word (signing in with an email code, Opus 5.5, the magazine look, typed names written out in full) and its own PROGRESS and DECISIONS files.
 - Fifth session (October 28): pull request 79, the plan for phones and app stores, double-checked in seven research passes; 80, Android's back gesture goes back one screen; 81 and 82, the notes cleanup, after Dan asked how to spend fewer tokens on reading these notes (the findings are on his Notion page "Claude Code: handoffs and decision logs").
-- Next: ask Dan how the back swipe test went (pull request 80), then which comes next for Living in the Word: the "check it" line that Anthropic's terms require (store plan step 4, recommended), install help (step 2), or sign-up step S4 (his invite page). Pull request 83 holds these handoff notes.
+- Sixth session (October 28): Dan checked pull request 80 on his phone with the < button, and it works (his phone uses the three buttons, not swipes). Next: Dan's choice of what comes next for Living in the Word: the "check it" line that Anthropic's terms require (store plan step 4, recommended), install help (step 2), or sign-up step S4 (his invite page).
 
 
 ## Waiting on Dan
 
-1. Living in the Word: check pull requests 80 (the back gesture) and 77 (typed names) on his phone. The steps are in `living-in-the-word/PROGRESS.md`.
+1. Living in the Word: check pull request 77 (typed names) on his phone (80, the back button, was checked October 28). The steps are in `living-in-the-word/PROGRESS.md`.
 2. The Anthropic API key expires November 24, 2026: a new key, saved in Cloudflare as `ANTHROPIC_API_KEY`. Remind him in good time, with every step (in `living-in-the-word/PROGRESS.md`).
 3. Smaller checks, if not done: a spend limit in the Claude Console ($10 suggested); a passcode of four or more random words; two-step sign-in on Cloudflare; Share inside KakaoTalk; his review of the general questions' wording.
 4. The other apps: Fewer spam calls needs the Samsung steps checked on a real Samsung phone; First step smaller waits for his daily trial. Details in each `PROGRESS.md`.

@@ -24,7 +24,7 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
   - Start feedback with what works, then up to three ranked problems, each with a fix.
   - End each reply with one concrete next action.
 - He wants as little friction as possible: Claude does the follow-up work on its own (see "How the work flows"), and he doesn't want to be the messenger.
-- He tests on his phone (Android, Chrome, sometimes inside the KakaoTalk in-app browser) and sends screenshots. He catches friction fast (an odd question, an extra screen), so show screenshots before every pull request.
+- He tests on his phone (Android, Chrome, sometimes inside the KakaoTalk in-app browser) and sends screenshots. His phone uses the three buttons at the bottom (|||, ○, <), not swipe gestures, so test steps say "tap <" for Back (October 28, 2026). He catches friction fast (an odd question, an extra screen), so show screenshots before every pull request.
 - His design rules, learned the hard way: keep pages short on a phone (tabs, fold-outs, one level per screen); no long lists; one thing per screen in apps.
 - His Bibles: he likes the NASB, ESV and NIV more than the KJV (October 26, 2026). Anything about verse numbers or Bible wording follows those three.
 - He's a pastor: with Scripture, care for hurting people comes first. For passages of tragedy he asked for gentle, general words and no questions about God's silence (October 26, 2026; details in `living-in-the-word/SPEC.md`, "The questions").
