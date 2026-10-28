@@ -283,6 +283,7 @@ h2 {
 
 /* ---------- Typing boxes: just a line to write on ---------- */
 input[type="text"],
+input[type="email"],
 input[type="password"],
 input[type="date"],
 select {
@@ -302,6 +303,7 @@ select {
 
 /* While typing, the line gets thicker */
 input[type="text"]:focus,
+input[type="email"]:focus,
 input[type="password"]:focus,
 input[type="date"]:focus,
 select:focus {
@@ -635,6 +637,41 @@ select {
 
 .test-cost {
   margin: 0 0 1rem;
+}
+
+
+/* ---------- Signing in (sign-up step S3) ---------- */
+
+/* "Type your email address..." under the heading */
+.sign-in-text {
+  margin: 0;
+}
+
+/* A long email address breaks onto the next line instead of running off the screen */
+.code-sent-to,
+.account-status {
+  overflow-wrap: anywhere;
+}
+
+/* While a code is being sent or checked, the button waits */
+#sign-in .primary:disabled,
+#sign-in-code .primary:disabled,
+#sign-in-code .quiet:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* "Signed in as ...", with Sign out (or just Sign in), at the bottom of the start screen */
+.account {
+  margin-top: 2.25rem;
+}
+
+.account .note {
+  margin: 0;
+}
+
+.account .quiet {
+  margin-top: 0.25rem;
 }
 
 

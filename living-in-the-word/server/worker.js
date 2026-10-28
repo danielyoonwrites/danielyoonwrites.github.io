@@ -1,15 +1,18 @@
 // Living in the Word: the small server for the AI helper (a Cloudflare Worker).
 //
 // What it does: the app sends a passage name (like "John 4:1-26"), whether it's for
-// a group study or the reading plan, and the passcode. This server checks the passcode,
-// checks that the passage really is a Bible passage and that today's limits aren't used up,
-// asks Claude (Anthropic's AI) for 3 to 5 questions about it, and sends them back.
+// a group study or the reading plan, and either the phone's sign-in (see "Signing in")
+// or the passcode. This server checks them, checks that the passage really is a Bible
+// passage and that today's limits aren't used up, asks Claude (Anthropic's AI) for 3 to 5
+// questions about it, and sends them back.
 // It can also send back the passage itself, from Crossway's free ESV API (see "The Bible text" below).
 //
 // Why a server: the website is public, so a key in the app could be copied.
 // The keys and the passcode are NOT in this file. They're saved in Cloudflare's
-// dashboard as secrets named ANTHROPIC_API_KEY, ESV_API_KEY and PASSCODE (see AI-PLAN.md).
-// The daily counts are in a Cloudflare D1 database connected as DB (see "Daily limits").
+// dashboard as secrets named ANTHROPIC_API_KEY, ESV_API_KEY and PASSCODE (see AI-PLAN.md),
+// and RESEND_API_KEY and OWNER_EMAIL for signing in (see SIGNUP-PLAN.md).
+// The daily counts and the sign-ins are in a Cloudflare D1 database connected as DB
+// (see "Daily limits" and "Signing in").
 //
 // How to update it: copy this whole file into the Worker's code editor in
 // Cloudflare's dashboard, then Deploy. Keep this copy in the repository the same.
@@ -263,19 +266,41 @@ function looksLikePassage(text) {
 // ---------- Daily limits ----------
 // How many sets of questions the AI may write each day, so nobody can use up the credits
 // (the owner's choice, October 26, 2026). Every set counts: a study, a reading-plan day,
-// or "Write new questions." Wrong passcodes are counted too, so nobody can guess the
-// passcode by trying thousands of times. The counts start over at midnight Pacific time.
-const DAILY_LIMIT_EACH = 20;       // sets of questions for each internet connection
+// or "Write new questions." Someone signed in has their own count, wherever they are
+// (the owner's choice, October 28, 2026); a phone using the passcode counts with its
+// internet connection. Wrong passcodes and wrong sign-in codes are counted too, so nobody
+// can guess them by trying thousands of times. The counts start over at midnight Pacific time.
+const DAILY_LIMIT_EACH = 20;       // sets of questions for each person signed in, or each internet connection using the passcode
 const DAILY_LIMIT_ALL = 60;        // sets of questions for everyone together
-const WRONG_PASSCODE_LIMIT = 10;   // wrong passcodes for each internet connection
+const WRONG_LIMIT = 10;            // wrong passcodes or sign-in codes from each internet connection
 
 // The counts are kept in a small Cloudflare database (D1), connected to this Worker under
-// the name DB (see AI-PLAN.md). One row a day for everyone, and for each connection:
-//   day "2026-10-26", who "everyone" or "questions:9f2c..." or "wrong:9f2c...", count 7
+// the name DB (see AI-PLAN.md). One row a day for everyone, and for each person or connection:
+//   day "2026-10-26", who "everyone", "person:dan@example.com", "questions:9f2c...",
+//   "wrong:9f2c...", "codes:dan@example.com", "code-asks:9f2c..." or "emails", count 7
 // Each connection gets a scrambled code instead of its internet address, so the address
 // itself is never kept. Days before yesterday are deleted.
 
-const TABLE = 'CREATE TABLE IF NOT EXISTS usage (day TEXT NOT NULL, who TEXT NOT NULL, count INTEGER NOT NULL, PRIMARY KEY (day, who))';
+// The database's tables. The server makes any that are missing (see makeTables).
+//   usage: the daily counts above
+//   people: who may sign in besides the owner (the owner's page adds them, sign-up step S4)
+//   codes: sign-in codes, kept only scrambled, one at a time for each email address
+//   sessions: one row for each signed-in phone, its key kept only scrambled
+const TABLES = [
+  'CREATE TABLE IF NOT EXISTS usage (day TEXT NOT NULL, who TEXT NOT NULL, count INTEGER NOT NULL, PRIMARY KEY (day, who))',
+  "CREATE TABLE IF NOT EXISTS people (email TEXT PRIMARY KEY, name TEXT NOT NULL DEFAULT '', invited TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1)",
+  'CREATE TABLE IF NOT EXISTS codes (email TEXT PRIMARY KEY, code TEXT NOT NULL, expires INTEGER NOT NULL, tries INTEGER NOT NULL DEFAULT 0)',
+  'CREATE TABLE IF NOT EXISTS sessions (key TEXT PRIMARY KEY, email TEXT NOT NULL, expires INTEGER NOT NULL)',
+];
+
+// Makes the tables the first time they're needed, then remembers they're there until
+// Cloudflare restarts the Worker. ("IF NOT EXISTS" leaves tables that are already there alone.)
+let tablesMade = false;
+async function makeTables(env) {
+  if (tablesMade) return;
+  for (const sql of TABLES) await env.DB.prepare(sql).run();
+  tablesMade = true;
+}
 
 // The date in Pacific time, like "2026-10-26" (in UTC if the time zone isn't available)
 function dayInPacific(time = Date.now()) {
@@ -290,30 +315,24 @@ function dayInPacific(time = Date.now()) {
   }
 }
 
+// Scrambles text one way (SHA-256), so what's kept can't be turned back into the original
+async function scramble(text) {
+  const bytes = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)));
+  return [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 // The scrambled code for the phone's internet connection. The passcode is mixed in,
 // so the code can't be turned back into the address.
 async function connectionCode(request, env, day) {
   const address = request.headers.get('CF-Connecting-IP') || 'unknown';
-  const data = new TextEncoder().encode(env.PASSCODE + '|' + day + '|' + address);
-  const bytes = new Uint8Array(await crypto.subtle.digest('SHA-256', data));
-  return [...bytes.slice(0, 12)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  return (await scramble(env.PASSCODE + '|' + day + '|' + address)).slice(0, 24);
 }
 
 // Today's counts for the given names, like { everyone: 7, 'questions:9f2c...': 2 }
 async function readCounts(env, day, names) {
   const marks = names.map(() => '?').join(', ');
-  const read = () => env.DB.prepare('SELECT who, count FROM usage WHERE day = ? AND who IN (' + marks + ')')
+  const { results } = await env.DB.prepare('SELECT who, count FROM usage WHERE day = ? AND who IN (' + marks + ')')
     .bind(day, ...names).all();
-  let answer;
-  try {
-    answer = await read();
-  } catch (error) {
-    // The very first time (or if the table was deleted), make the table, then read again
-    if (!/no such table/i.test(String(error && error.message))) throw error;
-    await env.DB.prepare(TABLE).run();
-    answer = await read();
-  }
-  const { results } = answer;
   const counts = {};
   names.forEach((name) => { counts[name] = 0; });
   results.forEach((row) => { counts[row.who] = row.count; });
@@ -336,6 +355,178 @@ async function addOne(env, day, names) {
   const counts = {};
   results[results.length - 1].results.forEach((row) => { counts[row.who] = row.count; });
   return counts;
+}
+
+
+// ---------- Signing in (sign-up step S3, see SIGNUP-PLAN.md) ----------
+// Instead of the shared passcode, a person types their email address, gets a 6-digit code
+// by email and types it into the app. That phone then gets a long random key of its own
+// (a "session"), which the app sends with each request. Only the owner (his address is saved
+// in Cloudflare as the secret OWNER_EMAIL) and the people he invites can sign in. While
+// sign-ups are being built, the passcode still works too (it goes away in step S6).
+// The emails go out through Resend (resend.com), with a key saved in Cloudflare as the
+// secret RESEND_API_KEY. Nothing about a person is ever sent to the AI.
+const EMAIL_FROM = 'Living in the Word <sign-in@mail.danielyoonwrites.com>';
+const CODE_MINUTES = 10;    // a code works for 10 minutes
+const CODE_TRIES = 5;       // and for 5 tries
+const SESSION_DAYS = 90;    // a phone stays signed in for about 90 days
+const CODES_EACH = 5;       // codes a day for each email address
+const CODE_ASKS_EACH = 30;  // codes asked for a day from each internet connection (a group on one Wi-Fi shares it)
+const EMAILS_ALL = 90;      // sign-in emails a day for everyone (Resend's free plan sends 100 a day)
+const SIGNED_OUT = 'signed-out';
+
+// An email address in lowercase, or '' if it doesn't look like one
+function cleanEmail(text) {
+  if (typeof text !== 'string') return '';
+  const email = text.trim().toLowerCase();
+  return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : '';
+}
+
+// True if this address may sign in: the owner's, or one he invited and hasn't turned off
+async function mayUseApp(env, email) {
+  if (email && email === cleanEmail(env.OWNER_EMAIL)) return true;
+  const person = await env.DB.prepare('SELECT active FROM people WHERE email = ?').bind(email).first();
+  return Boolean(person && person.active === 1);
+}
+
+// A 6-digit code, every one equally likely. (4,294,000,000 is a whole number of millions,
+// so the rare numbers above it are skipped instead of making some codes likelier.)
+function newCode() {
+  const number = new Uint32Array(1);
+  do {
+    crypto.getRandomValues(number);
+  } while (number[0] >= 4294000000);
+  return String(number[0] % 1000000).padStart(6, '0');
+}
+
+// A long random key for a signed-in phone: 64 letters and numbers, impossible to guess
+function newKey() {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+// The session key the app sent, from the Authorization header, or '' if there isn't one
+function sessionKey(request) {
+  return (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '').trim();
+}
+
+// Who's signed in on the phone that sent this request: their email address; '' if the
+// request carries no session key; or SIGNED_OUT if the key is wrong, ran out, or belongs
+// to someone the owner turned off
+async function signedInPerson(request, env) {
+  const key = sessionKey(request);
+  if (!key) return '';
+  if (!/^[0-9a-f]{64}$/.test(key)) return SIGNED_OUT;
+  const session = await env.DB.prepare('SELECT email, expires FROM sessions WHERE key = ?')
+    .bind(await scramble(key)).first();
+  if (!session || session.expires < Date.now()) return SIGNED_OUT;
+  return (await mayUseApp(env, session.email)) ? session.email : SIGNED_OUT;
+}
+
+// "Email me a code": sends a new code to an address that may sign in. The answer is the
+// same for any address, so nobody can use it to find out who's invited.
+async function sendCode(input, request, env, cors) {
+  const email = cleanEmail(input.email);
+  if (!email) return reply({ error: 'bad-email' }, 400, cors);
+  if (!env.RESEND_API_KEY || !cleanEmail(env.OWNER_EMAIL)) return reply({ error: 'not-set-up' }, 503, cors);
+
+  const day = dayInPacific();
+  const asks = 'code-asks:' + await connectionCode(request, env, day);
+  if ((await addOne(env, day, [asks]))[asks] > CODE_ASKS_EACH) return reply({ error: 'too-many-codes' }, 429, cors);
+  if (!(await mayUseApp(env, email))) return reply({ sent: true }, 200, cors);
+
+  const mine = 'codes:' + email;
+  const counts = await addOne(env, day, [mine, 'emails']);
+  if (counts[mine] > CODES_EACH || counts.emails > EMAILS_ALL) return reply({ error: 'too-many-codes' }, 429, cors);
+
+  // A new code replaces any earlier one for this address. Only a scrambled copy is kept.
+  const code = newCode();
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM codes WHERE expires < ?').bind(Date.now()),
+    env.DB.prepare('INSERT OR REPLACE INTO codes (email, code, expires, tries) VALUES (?, ?, ?, 0)')
+      .bind(email, await scramble(email + '|' + code), Date.now() + CODE_MINUTES * 60000),
+  ]);
+  const problem = await emailCode(env.RESEND_API_KEY, email, code);
+  // Resend's reason goes back too, so the test link can show it (like a web address
+  // that isn't verified yet). It never holds a key.
+  if (problem) return reply({ error: 'email-failed', detail: problem }, 502, cors);
+  return reply({ sent: true }, 200, cors);
+}
+
+// The email with the code, sent through Resend's API. The request is the same one
+// Resend's own code library sends (github.com/resend/resend-node, read October 28, 2026).
+// Returns '' when it's sent, or else Resend's reason.
+async function emailCode(apiKey, email, code) {
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'authorization': 'Bearer ' + apiKey,
+        'content-type': 'application/json',
+        'user-agent': 'living-in-the-word',
+      },
+      body: JSON.stringify({
+        from: EMAIL_FROM,
+        to: [email],
+        subject: code + ' is your Living in the Word code',
+        text: 'Your code to sign in to Living in the Word:\n\n' + code + '\n\n' +
+          'Type it into the app within ' + CODE_MINUTES + ' minutes. If you didn’t ask for it, you can ignore this email.',
+      }),
+    });
+    if (response.ok) return '';
+    const answer = await response.json().catch(() => ({}));
+    return String(answer.message || 'Resend answered ' + response.status)
+      .replace(/re_\w+/g, 're_…')   // never pass on anything that looks like a Resend key
+      .slice(0, 200);
+  } catch (error) {
+    return 'Resend couldn’t be reached';
+  }
+}
+
+// "Sign in": checks the code, and gives the phone its own session key. Each check uses up
+// one of the code's tries before the code is compared, so tries sent at the same moment
+// can't add up to more than CODE_TRIES.
+async function checkCode(input, request, env, cors) {
+  const email = cleanEmail(input.email);
+  const code = typeof input.code === 'string' ? input.code.replace(/\D/g, '') : '';
+  if (!email || code.length !== 6) return reply({ error: 'wrong-code' }, 400, cors);
+
+  const day = dayInPacific();
+  const wrong = 'wrong:' + await connectionCode(request, env, day);
+  if ((await readCounts(env, day, [wrong]))[wrong] >= WRONG_LIMIT) return reply({ error: 'too-many-tries' }, 429, cors);
+
+  const [, found] = await env.DB.batch([
+    env.DB.prepare('UPDATE codes SET tries = tries + 1 WHERE email = ?').bind(email),
+    env.DB.prepare('SELECT code, expires, tries FROM codes WHERE email = ?').bind(email),
+  ]);
+  const saved = found.results[0];
+  if (!saved || saved.expires < Date.now() || saved.tries > CODE_TRIES) return reply({ error: 'code-expired' }, 401, cors);
+  if (saved.code !== await scramble(email + '|' + code)) {
+    await addOne(env, day, [wrong]);
+    return reply({ error: 'wrong-code', triesLeft: CODE_TRIES - saved.tries }, 401, cors);
+  }
+  // The owner may have turned this person off since the code was sent
+  if (!(await mayUseApp(env, email))) return reply({ error: 'code-expired' }, 401, cors);
+
+  // The right code: it's used up, old sessions are cleared out, and this phone gets its key.
+  // Only a scrambled copy of the key is kept, so the database alone can't sign anyone in.
+  const key = newKey();
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM codes WHERE email = ?').bind(email),
+    env.DB.prepare('DELETE FROM sessions WHERE expires < ?').bind(Date.now()),
+    env.DB.prepare('INSERT INTO sessions (key, email, expires) VALUES (?, ?, ?)')
+      .bind(await scramble(key), email, Date.now() + SESSION_DAYS * 86400000),
+  ]);
+  return reply({ session: key, email }, 200, cors);
+}
+
+// "Sign out": this phone's key stops working
+async function signOut(request, env, cors) {
+  const key = sessionKey(request);
+  if (/^[0-9a-f]{64}$/.test(key)) {
+    await env.DB.prepare('DELETE FROM sessions WHERE key = ?').bind(await scramble(key)).run();
+  }
+  return reply({ signedOut: true }, 200, cors);
 }
 
 
@@ -423,31 +614,43 @@ export default {
       return reply({ error: 'bad-request' }, 400, cors);
     }
 
-    // Today's counts for this connection (see "Daily limits"). Without the database,
-    // nothing goes further: the limits are what keep the credits safe.
+    // Without the database, nothing goes further: the limits are what keep the credits safe
+    // (see "Daily limits"), and the sign-ins are kept there too.
     if (!env.DB) return reply({ error: 'not-set-up' }, 503, cors);
     const day = dayInPacific();
-    const code = await connectionCode(request, env, day);
-    const mine = 'questions:' + code;
-    const wrong = 'wrong:' + code;
-    let counts;
+    let mine;   // the name of the daily count for this person, or for this connection
     try {
-      counts = await readCounts(env, day, [mine, wrong, 'everyone']);
+      await makeTables(env);
+
+      // Signing in and out (see "Signing in")
+      if (input.action === 'send-code') return await sendCode(input, request, env, cors);
+      if (input.action === 'check-code') return await checkCode(input, request, env, cors);
+      if (input.action === 'sign-out') return await signOut(request, env, cors);
+
+      // Who's asking is checked before anything costs money: someone signed in on this
+      // phone, or a phone with the passcode
+      const person = await signedInPerson(request, env);
+      if (person === SIGNED_OUT) return reply({ error: 'signed-out' }, 401, cors);
+      if (person) {
+        mine = 'person:' + person;
+      } else {
+        const code = await connectionCode(request, env, day);
+        const wrong = 'wrong:' + code;
+        // Too many wrong tries from this connection today: no more until tomorrow
+        if ((await readCounts(env, day, [wrong]))[wrong] >= WRONG_LIMIT) return reply({ error: 'too-many-tries' }, 429, cors);
+        // A wrong passcode is counted
+        if (!env.PASSCODE || typeof input.passcode !== 'string' || input.passcode !== env.PASSCODE) {
+          try {
+            await addOne(env, day, [wrong]);
+          } catch (error) {
+            // Not counted this time; the answer is the same
+          }
+          return reply({ error: 'wrong-passcode' }, 401, cors);
+        }
+        mine = 'questions:' + code;
+      }
     } catch (error) {
       return reply({ error: 'ai-unavailable' }, 503, cors);
-    }
-
-    // Too many wrong passcodes from this connection today: no more tries until tomorrow
-    if (counts[wrong] >= WRONG_PASSCODE_LIMIT) return reply({ error: 'too-many-tries' }, 429, cors);
-
-    // The passcode is checked before anything costs money. A wrong one is counted.
-    if (!env.PASSCODE || typeof input.passcode !== 'string' || input.passcode !== env.PASSCODE) {
-      try {
-        await addOne(env, day, [wrong]);
-      } catch (error) {
-        // Not counted this time; the answer is the same
-      }
-      return reply({ error: 'wrong-passcode' }, 401, cors);
     }
 
     const passage = typeof input.passage === 'string' ? input.passage.trim() : '';
@@ -477,11 +680,12 @@ export default {
     }
 
     // Today's limits, before the AI is asked. A set is counted even if the AI then fails.
-    if (counts[mine] >= DAILY_LIMIT_EACH || counts.everyone >= DAILY_LIMIT_ALL) {
-      return reply({ error: 'daily-limit' }, 429, cors);
-    }
     let after;
     try {
+      const counts = await readCounts(env, day, [mine, 'everyone']);
+      if (counts[mine] >= DAILY_LIMIT_EACH || counts.everyone >= DAILY_LIMIT_ALL) {
+        return reply({ error: 'daily-limit' }, 429, cors);
+      }
       after = await addOne(env, day, [mine, 'everyone']);
     } catch (error) {
       return reply({ error: 'ai-unavailable' }, 503, cors);
@@ -595,7 +799,7 @@ async function askClaude(apiKey, passage, pattern) {
 function corsHeaders(origin) {
   const headers = {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'content-type',
+    'Access-Control-Allow-Headers': 'content-type, authorization',
     'Access-Control-Max-Age': '86400',
     'Vary': 'Origin',
   };

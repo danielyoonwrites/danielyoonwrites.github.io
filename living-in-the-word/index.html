@@ -33,8 +33,8 @@
 
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=19">
-  <script src="app.js?v=23" defer></script>
+  <link rel="stylesheet" href="style.css?v=20">
+  <script src="app.js?v=24" defer></script>
 </head>
 <body>
 
@@ -69,6 +69,14 @@
         <!-- app.js fills this in, like "3 studies saved on this phone." -->
         <span class="row-text saved-count"></span>
       </button>
+
+      <!-- Who's signed in on this phone, with Sign out; or Sign in (sign-up step S3).
+           app.js fills it in, like "Signed in as dan@example.com." -->
+      <div class="account">
+        <p class="note account-status" hidden></p>
+        <button type="button" class="quiet" data-action="sign-in" hidden>Sign in</button>
+        <button type="button" class="quiet" data-action="sign-out" hidden>Sign out</button>
+      </div>
       <noscript><p class="note">This app needs JavaScript turned on in your browser.</p></noscript>
     </section>
 
@@ -298,7 +306,8 @@
       <div class="writing-placeholder" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
       <ol class="reflect-list" role="list"></ol>
       <p class="note reading-status" role="status" hidden></p>
-      <!-- Shown when the AI helper is set up but this phone has no passcode yet -->
+      <!-- Shown when the AI helper is set up but this phone isn't signed in (and has no passcode),
+           or its questions couldn't be written -->
       <button type="button" class="quiet reading-ai" data-action="reading-ai" hidden>Questions for this reading</button>
 
       <button type="button" class="primary" data-action="done-reading">Done for today</button>
@@ -319,7 +328,51 @@
       <button type="button" class="quiet" data-action="home">Back to the start</button>
     </section>
 
-    <!-- The AI helper's passcode, asked once and saved on this phone -->
+    <!-- Sign in, 1: the email address (sign-up step S3, see SIGNUP-PLAN.md).
+         "novalidate" lets app.js show its own gentle messages instead of the browser's. -->
+    <section class="screen" id="sign-in">
+      <header class="top-bar">
+        <button type="button" class="back" data-action="back">Back</button>
+        <span class="wordmark">Living in the Word</span>
+      </header>
+      <form novalidate>
+        <p class="label">AI helper</p>
+        <h2 tabindex="-1">Sign in</h2>
+        <p class="sign-in-text">Type your email address, and you’ll get a code by email.</p>
+        <label class="field-label" for="sign-in-email">Email address</label>
+        <input id="sign-in-email" type="email" autocomplete="email" autocapitalize="none" spellcheck="false">
+        <p class="hint">The AI helper is invite only for now.</p>
+        <p class="gentle-error sign-in-message" hidden></p>
+        <button type="submit" class="primary">Email me a code</button>
+      </form>
+      <!-- While sign-ups are being built, the passcode still works (it goes away in step S6) -->
+      <button type="button" class="quiet" data-action="use-passcode">Have a passcode? Use it instead</button>
+    </section>
+
+    <!-- Sign in, 2: the code from the email. The server answers the same way for any address,
+         so nobody can find out who's invited: hence "If ... is invited". -->
+    <section class="screen" id="sign-in-code">
+      <header class="top-bar">
+        <button type="button" class="back" data-action="back">Back</button>
+        <span class="wordmark">Living in the Word</span>
+      </header>
+      <form novalidate>
+        <p class="label">AI helper</p>
+        <h2 tabindex="-1">Check your email</h2>
+        <!-- app.js fills in the address -->
+        <p class="sign-in-text">If <span class="code-sent-to"></span> is invited, a 6-digit code is on its way.</p>
+        <label class="field-label" for="sign-in-code-text">Code</label>
+        <input id="sign-in-code-text" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="12" spellcheck="false">
+        <p class="hint">It works for 10 minutes. Nothing yet? Check your spam folder.</p>
+        <p class="gentle-error sign-in-message" hidden></p>
+        <button type="submit" class="primary">Sign in</button>
+      </form>
+      <button type="button" class="quiet" data-action="new-code">Send a new code</button>
+      <button type="button" class="quiet" data-action="back">Use a different email</button>
+    </section>
+
+    <!-- The AI helper's passcode, asked once and saved on this phone. Reached from the sign-in
+         screen, or when a saved passcode stops working. It goes away in sign-up step S6. -->
     <section class="screen" id="passcode">
       <header class="top-bar">
         <button type="button" class="back" data-action="back">Back</button>
