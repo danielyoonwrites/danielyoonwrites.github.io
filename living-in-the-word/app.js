@@ -139,14 +139,55 @@ function useGeneralQuestions() {
 document.querySelector('#passage form').addEventListener('submit', (event) => {
   event.preventDefault();
   const box = document.getElementById('passage-text');
-  const text = box.value.trim().replace(/\s+/g, ' ');
+  const text = tidyPassage(box.value.trim().replace(/\s+/g, ' '));
   if (!text) {
     document.querySelector('#passage .gentle-error').hidden = false;
     box.focus();
     return;
   }
+  box.value = text;   // the box shows the full name too, like "Philippians 2"
   startStudy(text);
 });
+
+// A short or lowercase book name, written out the way Bibles print it (the owner asked,
+// October 28, 2026, after "Phil 2" stayed "Phil 2"): "phil 2" becomes "Philippians 2",
+// "1 cor 13" becomes "1 Corinthians 13", "Psalms 23" becomes "Psalm 23". The same rules
+// as the server's passage check (looksLikePassage in server/worker.js); keep OTHER_NAMES
+// the same in both. Anything it doesn't recognize, or more than one passage at once
+// (like "John 3; Romans 5"), stays exactly as typed.
+const OTHER_NAMES = {
+  gn: 'genesis', lv: 'leviticus', nm: 'numbers', dt: 'deuteronomy',
+  jgs: 'judges', jdg: 'judges', jdgs: 'judges', sm: 'samuel', kgs: 'kings', jb: 'job',
+  pss: 'psalms', prv: 'proverbs', qoh: 'ecclesiastes', qoheleth: 'ecclesiastes',
+  sg: 'songofsolomon', songofsongs: 'songofsolomon', cant: 'songofsolomon', canticles: 'songofsolomon',
+  dn: 'daniel', jl: 'joel', hb: 'habakkuk', hg: 'haggai',
+  mt: 'matthew', mk: 'mark', mrk: 'mark', lk: 'luke', jn: 'john', jhn: 'john',
+  phil: 'philippians', phlm: 'philemon', phm: 'philemon', tm: 'timothy',
+  jas: 'james', pt: 'peter', rv: 'revelation', revelations: 'revelation',
+};
+const NUMBER_WORDS = { first: '1', '1st': '1', i: '1', second: '2', '2nd': '2', ii: '2', third: '3', '3rd': '3', iii: '3' };
+
+function tidyPassage(text) {
+  const match = /^(?:(first|second|third|1st|2nd|3rd|i{1,3})\s+|([123])\s*)?([a-z][a-z.\s]*?)\.?\s*(\d[\d\s:,–—-]*)?$/i.exec(text);
+  if (!match) return text;
+  const [, numberWord, digit, nameWords, place] = match;
+  const number = digit || NUMBER_WORDS[(numberWord || '').toLowerCase()] || '';
+  const name = nameWords.toLowerCase().replace(/[^a-z]/g, '');
+  const keys = BOOKS.map(([book]) => book.toLowerCase().replace(/[^a-z0-9]/g, ''));
+  let index = keys.indexOf(number + name);
+  if (index < 0 && OTHER_NAMES[name]) index = keys.indexOf(number + OTHER_NAMES[name]);
+  if (index < 0 && name.length >= 2) {
+    // The start of exactly one book's name, like "gen" or "1 cor" ("jo" could be five books)
+    const starts = keys.filter((key) => key.startsWith(number + name));
+    if (starts.length === 1) index = keys.indexOf(starts[0]);
+  }
+  if (index < 0) return text;
+  const numbers = (place || '').trim();
+  let book = BOOKS[index][0];
+  // One psalm is "Psalm 23"; several are "Psalms 1–3"
+  if (book === 'Psalms' && /^\d+(\s*:.*)?$/.test(numbers)) book = 'Psalm';
+  return numbers ? book + ' ' + numbers : book;
+}
 
 // Opens the questions for a passage, typed in the box or chosen from the Bible
 function startStudy(text) {
@@ -1161,7 +1202,7 @@ function showReflect(questions, note) {
   });
   const noteBox = document.querySelector('.reading-note');
   noteBox.hidden = !note;
-  noteBox.open = false;   // closed until tapped, each time a reading shows
+  noteBox.open = true;    // open each time a reading shows, like "For the leader" (the owner's choice, October 28, 2026)
   fill('.reading-note-text', note || '');
 }
 
