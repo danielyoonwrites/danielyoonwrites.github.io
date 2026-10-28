@@ -1,7 +1,7 @@
 # Living in the Word: progress (updated October 28, 2026)
 
 The app: https://danielyoonwrites.github.io/living-in-the-word (live, not listed in search engines).
-Read `SPEC.md` (what it does and why), `SIGNUP-PLAN.md` (sign-ups), `AI-PLAN.md` (the AI helper) and `DECISIONS.md` (choices and their reasons). Earlier history: the root `HANDOFF.md`, "Project 5."
+Read `SPEC.md` (what it does and why), `SIGNUP-PLAN.md` (sign-ups), `STORE-PLAN.md` (phones and app stores), `AI-PLAN.md` (the AI helper) and `DECISIONS.md` (choices and their reasons). Earlier history: the root `HANDOFF.md`, "Project 5."
 
 ## Where things stand
 - Done and checked:
@@ -11,7 +11,8 @@ Read `SPEC.md` (what it does and why), `SIGNUP-PLAN.md` (sign-ups), `AI-PLAN.md`
   - "For the leader" starts open (pull request 75): seen open in Dan's screenshot.
 - Done, not checked on a phone yet:
   - Pull request 77: a typed short name is written out in full ("Phil 2" becomes "Philippians 2"), and "A note on this reading" starts open. Tested in Chromium only.
-- Open pull requests: only the one carrying these notes, if it isn't merged yet.
+- Planned, not built: `STORE-PLAN.md` (October 28, 2026), the steps toward Android install, Google Play and maybe Apple's App Store, after Dan asked to prepare the app for phones and app stores.
+- Open pull requests: only the one carrying the store plan, if it isn't merged yet.
 
 ## Waiting on Dan
 1. Check pull request 77 on his phone: open https://danielyoonwrites.github.io/living-in-the-word/, tap "Prepare for a Bible study," type `phil 2`, tap "Go deeper with AI": the title should say "Philippians 2." Then open today's reading: "A note on this reading" should be open.
@@ -20,7 +21,7 @@ Read `SPEC.md` (what it does and why), `SIGNUP-PLAN.md` (sign-ups), `AI-PLAN.md`
 4. Smaller checks, if not done: a spend limit in the Claude Console ($10 suggested); a passcode of four or more random words; two-step sign-in on Cloudflare; Share inside KakaoTalk; his review of the general questions' wording (`SPEC.md`, "The questions"); a trademark search for the name before any store listing.
 
 ## Next step
-Sign-up step S4: Dan's invite page (invite by email, see who's invited and today's use, turn someone off), as planned in `SIGNUP-PLAN.md`, "Build steps." Ask Dan first whether he wants S4 next or the notes cleanup from his Notion page "Claude Code: handoffs and decision logs" (two notes-only pull requests).
+Ask Dan which comes first, one question: store plan step 1 (Android install: an Android line in the home screen tip and an "Install the app" button in Chrome; recommended, since he and most of his group use Android and it helps right away), sign-up step S4 (his invite page), or the notes cleanup from his Notion page "Claude Code: handoffs and decision logs."
 
 ## Dead ends
 - Reading Google's help pages (support.google.com), w3.org and Resend's docs (resend.com/docs) from the session: blocked by the network policy (the proxy answers 403). Use web search and mark facts as from search results. Resend's API request format was taken from its own code library on GitHub instead (https://github.com/resend/resend-node).
