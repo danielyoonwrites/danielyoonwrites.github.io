@@ -1796,6 +1796,65 @@ const installTip = document.querySelector('.install-tip');
 if (installTip) installTip.hidden = fromHomeScreen;
 
 
+// ---------- Install help (store plan step 2) ----------
+// In Chrome, "Install the app" on the start screen opens Chrome's own install window. Chrome
+// offers it with its "beforeinstallprompt" event, which never comes on iPhones, in Firefox or
+// inside KakaoTalk, and the window can only open from a tap (Chromium's source code).
+// Everywhere else, "Add the app to your home screen" shows the steps for this phone.
+// Neither shows once the app is opened from the home screen, or just after it's installed.
+
+let installWindow = null;        // Chrome's offer to install, kept until the button is tapped
+let installed = fromHomeScreen;
+
+function updateInstallButtons() {
+  document.querySelector('[data-action="install-now"]').hidden = installed || !installWindow;
+  document.querySelector('[data-action="install-how"]').hidden = installed || Boolean(installWindow);
+}
+
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();   // the button shows instead of Chrome's own small banner
+  installWindow = event;
+  updateInstallButtons();
+});
+
+window.addEventListener('appinstalled', () => {
+  installed = true;
+  installWindow = null;
+  updateInstallButtons();
+});
+
+updateInstallButtons();
+
+// The steps for this phone: KakaoTalk's first (nothing installs from inside it), then the
+// iPhone's or Android's. On a computer, both.
+function showInstallHelp() {
+  const agent = navigator.userAgent;
+  const kakao = /KAKAOTALK/i.test(agent);
+  const iphone = /iPhone|iPad|iPod/.test(agent);
+  const android = /Android/.test(agent);
+  document.querySelector('.install-kakao').hidden = !kakao;
+  document.querySelector('.install-iphone').hidden = kakao || android;
+  document.querySelector('.install-android').hidden = kakao || iphone;
+  show('install');
+}
+
+Object.assign(actions, {
+  // Opens Chrome's install window (each offer opens only once; if it's closed, the steps show instead)
+  async 'install-now'() {
+    const offer = installWindow;
+    if (!offer) return;
+    installWindow = null;
+    try {
+      await offer.prompt();
+    } catch (error) {
+      // Chrome didn't open it this time
+    }
+    updateInstallButtons();
+  },
+  'install-how': showInstallHelp,
+});
+
+
 document.addEventListener('click', (event) => {
   const button = event.target.closest('[data-action]');
   if (button && actions[button.dataset.action]) actions[button.dataset.action]();
