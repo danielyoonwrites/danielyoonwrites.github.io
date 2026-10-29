@@ -34,7 +34,7 @@
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
   <link rel="stylesheet" href="style.css?v=25">
-  <script src="app.js?v=32" defer></script>
+  <script src="app.js?v=33" defer></script>
 </head>
 <body>
 
@@ -453,7 +453,7 @@
       <p class="sign-in-text">Only the people you invite can sign in. Only you can see this page.</p>
       <button type="button" class="primary" data-action="invite">Invite someone</button>
       <button type="button" class="quiet" data-action="send-link">Send the app’s link</button>
-      <p class="hint">Inviting doesn’t email them, so send them the link yourself.</p>
+      <p class="hint">Inviting emails them the app’s link and how to sign in. You can also send the link yourself, in KakaoTalk or a text.</p>
       <!-- Like "Invited Sarah." or "Loading…" -->
       <p class="people-status" role="status" hidden></p>
       <!-- The daily AI limits, and today's use (the owner's choice "A", October 29, 2026).
@@ -476,12 +476,12 @@
       <form novalidate>
         <p class="label">AI helper</p>
         <h2 tabindex="-1">Invite someone</h2>
-        <p class="sign-in-text">They can sign in with this email address right away.</p>
+        <p class="sign-in-text">They’ll get an email with the app’s link, and can sign in with this address right away.</p>
         <label class="field-label" for="invite-email">Their email address</label>
         <input id="invite-email" type="email" autocomplete="off" autocapitalize="none" spellcheck="false">
         <label class="field-label" for="invite-name">Their name</label>
         <input id="invite-name" type="text" autocomplete="off" maxlength="60">
-        <p class="hint">Optional, so you know who it is. Only you see it.</p>
+        <p class="hint">Optional. The email greets them with it (“Hi Sarah,”), and your list shows it.</p>
         <p class="gentle-error" hidden></p>
         <button type="submit" class="primary">Invite</button>
       </form>

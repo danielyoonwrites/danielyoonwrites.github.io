@@ -941,6 +941,23 @@ const PEOPLE_PROBLEMS = {
   other: 'Something went wrong. Try again in a moment.',
 };
 
+// What the invite email's problems mean, for the message after inviting
+const INVITE_EMAIL_PROBLEMS = {
+  'too-many-emails': 'today’s email limit is reached',
+  'not-set-up': 'email isn’t set up',
+  'email-failed': 'the email couldn’t be sent',
+};
+
+// The message after inviting: whether the invite email went (an older server sends none)
+function invitedWords(result, who) {
+  if (result.emailed) return 'Invited ' + who + ', and emailed them the app’s link and how to sign in.';
+  if (!result.problem) return 'Invited ' + who + '. They can sign in now.';
+  // On the test link, the email service's own reason too
+  const detail = testMode && result.detail ? ' (Resend: ' + result.detail + ')' : '';
+  return 'Invited ' + who + ', but ' + (INVITE_EMAIL_PROBLEMS[result.problem] || INVITE_EMAIL_PROBLEMS['email-failed']) +
+    detail + '. Tap “Send the app’s link” to send it yourself.';
+}
+
 // The server says whether someone is the owner when they sign in. A phone signed in before
 // this page existed (October 2026) doesn't know yet. Only the owner could sign in then, so it
 // shows "Invite people", and the server checks anyway.
@@ -1098,8 +1115,8 @@ document.querySelector('#invite form').addEventListener('submit', async (event) 
   document.getElementById('invite-name').value = '';
   goBack();   // to the list
   showPeople(result);
-  setPeopleStatus(name ? 'Invited ' + name + '. They can sign in with ' + email + ' now.'
-    : 'Invited ' + email + '. They can sign in now.');
+  const saved = result.people.find((person) => person.email === email);   // its name, even if none was typed now
+  setPeopleStatus(invitedWords(result, (saved && saved.name) || email));
 });
 
 Object.assign(actions, {
