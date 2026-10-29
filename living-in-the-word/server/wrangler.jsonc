@@ -1,0 +1,35 @@
+// Living in the Word: the settings Cloudflare uses to deploy the server (worker.js).
+//
+// After each merge to main that changes this folder, Cloudflare deploys worker.js by itself
+// (Workers Builds, set up October 29, 2026; see DECISIONS.md). At each deploy these settings
+// replace the ones in Cloudflare's dashboard, so change them here, not there.
+// The secrets (the keys, the passcode and OWNER_EMAIL) stay in the dashboard: deploys never
+// delete them. No secret ever goes in this file: the repository is public.
+{
+  // Must match the Worker's name in Cloudflare, or the deploy stops
+  "name": "living-in-the-word",
+  "main": "worker.js",
+
+  // The date the Worker was made in the dashboard (October 26, 2026). Keep it: a later date
+  // can change how Cloudflare runs the code.
+  "compatibility_date": "2026-10-26",
+
+  // The app talks to the server at living-in-the-word.danyoonsignup.workers.dev
+  "workers_dev": true,
+
+  // Keep any plain-text variables set in the dashboard (all the settings there are secrets now)
+  "keep_vars": true,
+
+  // Keep the Worker's logs on, as they were in the dashboard
+  "observability": { "enabled": true },
+
+  // The database for the daily limits and the sign-ins (see "Daily limits" in worker.js).
+  // The ID only names the database; using it needs the owner's Cloudflare sign-in.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "living-in-the-word-limits",
+      "database_id": "d6bff3f8-4118-49a2-a6ce-325e6276cf0e"
+    }
+  ]
+}
