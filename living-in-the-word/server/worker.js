@@ -300,7 +300,8 @@ const WRONG_LIMIT = 10;            // wrong passcodes or sign-in codes from each
 // The counts are kept in a small Cloudflare database (D1), connected to this Worker under
 // the name DB (see AI-PLAN.md). One row a day for everyone, and for each person or connection:
 //   day "2026-10-26", who "everyone", "person:dan@example.com", "questions:9f2c...",
-//   "wrong:9f2c...", "codes:dan@example.com", "code-asks:9f2c..." or "emails", count 7
+//   "wrong:9f2c...", "codes:dan@example.com", "invites:dan@example.com", "code-asks:9f2c..."
+//   or "emails", count 7
 // Each connection gets a scrambled code instead of its internet address, so the address
 // itself is never kept. Days before yesterday are deleted.
 
@@ -482,10 +483,20 @@ async function sendCode(input, request, env, cors) {
   return reply({ sent: true }, 200, cors);
 }
 
-// The email with the code, sent through Resend's API. The request is the same one
-// Resend's own code library sends (github.com/resend/resend-node, read October 28, 2026).
-// Returns '' when it's sent, or else Resend's reason.
-async function emailCode(apiKey, email, code) {
+// The email with the code. Returns '' when it's sent, or else Resend's reason.
+function emailCode(apiKey, email, code) {
+  return sendEmail(apiKey, {
+    to: [email],
+    subject: code + ' is your Living in the Word code',
+    text: 'Your code to sign in to Living in the Word:\n\n' + code + '\n\n' +
+      'Type it into the app within ' + CODE_MINUTES + ' minutes. If you didn’t ask for it, you can ignore this email.',
+  });
+}
+
+// Sends one email through Resend's API, from EMAIL_FROM. The request is the same one
+// Resend's own code library sends (github.com/resend/resend-node, read October 28, 2026;
+// its "reply_to" read October 29, 2026). Returns '' when it's sent, or else Resend's reason.
+async function sendEmail(apiKey, message) {
   try {
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -494,13 +505,7 @@ async function emailCode(apiKey, email, code) {
         'content-type': 'application/json',
         'user-agent': 'living-in-the-word',
       },
-      body: JSON.stringify({
-        from: EMAIL_FROM,
-        to: [email],
-        subject: code + ' is your Living in the Word code',
-        text: 'Your code to sign in to Living in the Word:\n\n' + code + '\n\n' +
-          'Type it into the app within ' + CODE_MINUTES + ' minutes. If you didn’t ask for it, you can ignore this email.',
-      }),
+      body: JSON.stringify({ from: EMAIL_FROM, ...message }),
     });
     if (response.ok) return '';
     const answer = await response.json().catch(() => ({}));
@@ -565,10 +570,13 @@ async function signOut(request, env, cors) {
 // "Invite people" only to him, and this server checks again on every request, from the
 // phone's session key (never the passcode). He sees who's invited and how many sets of
 // questions each person used today, invites someone, and turns someone off or back on.
-// Invited people can sign in right away. No email is sent to them: the owner sends them the
-// app's link himself. Names are kept only for the owner's list, never sent to the AI.
+// Invited people can sign in right away, and get an email with the app's link and how to
+// sign in (see "The invite email"). Names are kept only for the owner's list and that email,
+// never sent to the AI.
 const OWNER_ACTIONS = ['people', 'invite', 'turn-off', 'turn-on'];
 const NAME_LONGEST = 60;   // letters in a name, at most
+const INVITES_EACH = 3;    // invite emails a day to one address (each tap of Invite sends one)
+const APP_LINK = 'https://danielyoonwrites.github.io/living-in-the-word/';
 
 // A name as typed, on one line, at most NAME_LONGEST letters
 function cleanName(text) {
@@ -591,12 +599,16 @@ async function ownerPage(input, request, env, cors) {
     if (isOwner(env, email)) return reply({ error: 'is-owner' }, 400, cors);
   }
 
+  let invite = {};   // after an invite: whether the email went, like { emailed: true }
   if (input.action === 'invite') {
     // Inviting someone again turns them back on, and changes their name if a new one is typed
     await env.DB.prepare(
       'INSERT INTO people (email, name, invited, active) VALUES (?, ?, ?, 1) ' +
       "ON CONFLICT (email) DO UPDATE SET active = 1, name = CASE WHEN excluded.name = '' THEN people.name ELSE excluded.name END",
     ).bind(email, cleanName(input.name), dayInPacific()).run();
+    // The email greets them by the name on the list, even if none was typed this time
+    const saved = await env.DB.prepare('SELECT name FROM people WHERE email = ?').bind(email).first();
+    invite = await emailInvite(env, email, saved ? saved.name : '');
   }
 
   if (input.action === 'turn-off') {
@@ -613,7 +625,34 @@ async function ownerPage(input, request, env, cors) {
     await env.DB.prepare('UPDATE people SET active = 1 WHERE email = ?').bind(email).run();
   }
 
-  return reply(await listPeople(env, person), 200, cors);
+  return reply({ ...invite, ...await listPeople(env, person) }, 200, cors);
+}
+
+// The invite email, in the owner's words (his choice "A", October 29, 2026). Each tap of
+// Invite sends one: at most INVITES_EACH a day to one address, and within the day's
+// EMAILS_ALL for everyone (shared with the sign-in codes). Replies go to the owner.
+// Returns { emailed: true }, or { emailed: false, problem, detail } (the person is invited
+// either way; the owner can still send the app's link himself).
+async function emailInvite(env, email, name) {
+  if (!env.RESEND_API_KEY) return { emailed: false, problem: 'not-set-up' };
+  const mine = 'invites:' + email;
+  const counts = await addOne(env, dayInPacific(), [mine, 'emails']);
+  if (counts[mine] > INVITES_EACH || counts.emails > EMAILS_ALL) return { emailed: false, problem: 'too-many-emails' };
+  const problem = await sendEmail(env.RESEND_API_KEY, {
+    to: [email],
+    reply_to: cleanEmail(env.OWNER_EMAIL),
+    subject: 'Dan invited you to Living in the Word',
+    text: (name ? 'Hi ' + name + ',' : 'Hi,') + '\n\n' +
+      'I’d like to invite you to Living in the Word, a small app I made for our Bible studies. ' +
+      'It prepares discussion questions for a passage, and it can keep a daily reading plan with you.\n\n' +
+      'To start:\n' +
+      '1. Open ' + APP_LINK + '\n' +
+      '2. Tap “Sign in” at the bottom of the start screen.\n' +
+      '3. Type this email address, ' + email + ', then the 6-digit code that arrives by email.\n\n' +
+      'Dan',
+  });
+  // Resend's reason goes back too, so the test link can show it. It never holds a key.
+  return problem ? { emailed: false, problem: 'email-failed', detail: problem } : { emailed: true };
 }
 
 // The owner's list: everyone invited, by name (or address), with how many sets of questions
