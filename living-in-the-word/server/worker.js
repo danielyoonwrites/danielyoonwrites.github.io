@@ -118,19 +118,21 @@ The questions
 // each passage, the methods' templates got in the way. Then 5 questions instead of 4, the
 // 5th about prayer (October 26, 2026). Then 3 to 5 (the owner's rule, October 26, 2026, after
 // Judges 19), so the AI never repeats itself or makes up a question that doesn't fit; the
-// first and the last are always written. "study" is for a small group; "personal" is for one
+// first and the last are always written. Then question 2 also asks why what the passage
+// shows about God matters there (the owner's words, October 29, 2026, after a Romans 14
+// question 2 asked only who Jesus is). "study" is for a small group; "personal" is for one
 // day of the reading plan. Edit the words between the ` marks.
 const PATTERNS = {
   study: `A small group study. Write 3 to 5 questions, in this order:
 1. One question on what the passage says: what happens, who is involved, or what stands out.
-2. One question on what the passage shows about God: the Father, the Son or the Holy Spirit.
+2. One question on what the passage shows about God: the Father, the Son or the Holy Spirit. Guide the group a bit: not just who God is, but why that matters in this specific passage.
 3. One question on what it means for our hearts: what we love, trust, fear or hope in, in light of the gospel.
 4. One question inviting one concrete response this week.
 5. One question on what the group can pray about together, drawn from this passage.
 Always write the first and the last. Leave out any of the others that would repeat another question or doesn't fit this passage well, rather than making one up.`,
   personal: `Personal reading, one day of a reading plan, for one person's quiet time with God, not a group. Speak to the reader as "you." Write 3 to 5 questions, in this order:
 1. One question that helps the reader notice what this reading says.
-2. One question on what it shows about God.
+2. One question on what it shows about God. Guide the reader a bit: not just who God is, but why that matters in this specific reading.
 3. One question about the reader's heart: what they love, trust, fear or hope in.
 4. One question inviting one way to live it out today.
 5. One question that turns the reading into prayer: thanks, trust, lament, repentance or asking.
