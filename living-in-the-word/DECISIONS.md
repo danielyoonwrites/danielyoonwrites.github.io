@@ -39,7 +39,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 28, 2026: daily limits: 20 sets a day for each signed-in person (or each connection using the passcode), 60 for everyone, and 10 wrong passcodes or codes a day for each connection. The counts start over at midnight Pacific time.
 - October 26, 2026: invite only; sign in with an email code (built) or Google (step S5, later); Apple only if wanted. The passcode goes away at step S6.
 - October 28, 2026: sign-in codes have 6 digits and last 10 minutes or 5 tries; a phone stays signed in 90 days; the app never says whether an address is invited.
-- October 26, 2026: emails go through Resend, from `sign-in@mail.danielyoonwrites.com`. Dan's web address `danielyoonwrites.com` has auto-renew off: remind him once, in September 2027.
+- October 26, 2026: emails go through Resend, from `sign-in@mail.danielyoonwrites.com`. Dan's web address `danielyoonwrites.com` has auto-renew off and expires October 26, 2027: remind him once, in September 2027 (sign-in and invite emails depend on it).
 - October 29, 2026: the owner's page ("Invite people"), only for Dan: two screens; "Turn off" signs someone out everywhere; rows stay in place.
 - October 29, 2026: "Daily AI limits" explained on the owner's page; no "testing only" note (only Dan sees it).
 - October 29, 2026: each tap of "Invite" emails the person in Dan's words, with replies going to his address; at most 3 a day to one address.
