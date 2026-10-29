@@ -5,6 +5,7 @@ Each decision about the website with its reason, oldest first. Each app keeps it
 ### October 24, 2026: plain HTML and CSS on GitHub Pages, edited by hand (pull request 1)
 - Decision: a personal website, hosted free on GitHub Pages, in plain HTML and CSS. No build tools: no npm, no frameworks, no generators. The code stays simple and commented, and every page shares one stylesheet, `style.css`.
 - Why: the owner is a beginner and edits the files by hand; the code stays simple and commented so the owner can edit it later.
+- Status: one exception since October 29, 2026 (Dan chose it): Cloudflare runs its own deploy tool, Wrangler, on its computers to deploy Living in the Word's server (`living-in-the-word/DECISIONS.md`, "Cloudflare deploys the server by itself"). Nothing runs on Dan's computer.
 
 ### October 24, 2026: phone first (pull request 1)
 - Decision: every page must look good on a phone first, then on a computer.
