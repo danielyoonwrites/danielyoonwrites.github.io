@@ -290,3 +290,15 @@ Each decision with its reason, oldest first. Only add to this file; if a decisio
 - Why: Dan, after pasting `worker.js` by hand for pull request 89: "Is there a way to connect Claude to cloud flare to automate this update every time". He chose "A" from three options. Cloudflare's docs (read as their source on GitHub, October 29, 2026): it deploys on each push to the chosen branch, the free plan has 3,000 build minutes a month, it makes its own API key, and Wrangler never deletes secrets. This runs Cloudflare's npm tool, Wrangler, on Cloudflare's computers: an exception to the repository's "no npm" rule, which Claude named before Dan chose (the root `CLAUDE.md` says so now).
 - Turned down: "B", a GitHub Actions workflow (Dan would create a Cloudflare API token and keep it, with his account ID, in GitHub's secrets); "C", pasting by hand each time.
 - Revisit if: builds fail, the free build minutes run short, or a setting is changed in Cloudflare's dashboard (the next deploy replaces it with `wrangler.jsonc`).
+- Result: pull request 91's merge was the first automatic deploy (build 70ac8d9c succeeded, October 29, 2026).
+
+### October 29, 2026: Cloudflare's preview builds off (no pull request)
+- Decision: Dan turned off preview builds (builds of branches other than `main`).
+- Why: they run `npx wrangler preview`, which failed on Claude's branch: "Your Wrangler configuration is missing a `previews` block" (Dan's screenshot of the build log). The app doesn't use preview copies of the server.
+- Turned down: adding a `previews` block, as the error suggested: it would point preview copies of the server, running unmerged code, at the live database.
+
+### October 29, 2026: the daily limits explained on the owner's page (pull request 92)
+- Decision: a "Daily AI limits" section above the list: "To keep the AI's cost safe, each person can write up to 20 sets of questions a day, and everyone together up to 60. A set is one Bible study, one reading-plan day, or one tap of "Write new questions." The counts start over at midnight Pacific time." Then "Today you've used 13 of your 20. Everyone together has used 13 of 60, counting phones that use the passcode." The words are in `index.html`; the numbers come from the server.
+- Why: Dan, about "Today you've used 13 of your 20 sets of questions. Everyone together: 13 of 60.": "give more context than that." He chose "A." He also asked for a note that it's "only for testing purposes for now and will be removed when the real app is done" if everyone can see it. Only the owner sees this page (the server checks), so there's no note.
+- Turned down: "B," a shorter line ("each study or reading counts as one ... Resets at midnight Pacific time"); the testing note.
+- Next: Dan: "Finally I wish sending an invite would email the person the invite." That reverses the S4 choice of no invite email, in its own pull request, with his words.
