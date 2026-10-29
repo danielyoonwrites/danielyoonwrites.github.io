@@ -571,11 +571,13 @@ document.querySelector('#passcode form').addEventListener('submit', (event) => {
 });
 
 // The "check it" line, shown with the AI's words. Anthropic's Commercial Terms (section D.3)
-// say the people using the app must be told to check the AI's facts. The wording is the
-// owner's choice (October 29, 2026): it also says a pastor wrote the AI's guidelines.
+// say the people using the app must be told to check the AI's facts, and its Usage Policy
+// asks chatbots and AI agents to say that people are dealing with AI. The owner's choice,
+// October 29, 2026.
+// ("Guidelines by a pastor" was left out: it could sound like a pastor checked each set.)
 const CHECK_IT = {
-  study: 'Guidelines by a pastor, words by AI. AI can make mistakes, so check what it says against your Bible, and change anything before you use it.',
-  reading: 'Guidelines by a pastor, words by AI. AI can make mistakes, so check what it says against your Bible.',
+  study: 'Written by AI, which can make mistakes. Check what it says against your Bible, and change anything before you use it.',
+  reading: 'Written by AI, which can make mistakes. Check what it says against your Bible.',
 };
 
 function setStatus(text) {
