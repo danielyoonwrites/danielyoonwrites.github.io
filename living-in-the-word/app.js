@@ -1825,16 +1825,14 @@ window.addEventListener('appinstalled', () => {
 
 updateInstallButtons();
 
-// The steps for this phone: KakaoTalk's first (nothing installs from inside it), then the
-// iPhone's or Android's. On a computer, both.
+// The steps for this phone, the iPhone's or Android's; on a computer, both. Each starts with
+// opening the page in Safari or Chrome, which also covers a link opened inside another app.
 function showInstallHelp() {
   const agent = navigator.userAgent;
-  const kakao = /KAKAOTALK/i.test(agent);
   const iphone = /iPhone|iPad|iPod/.test(agent);
   const android = /Android/.test(agent);
-  document.querySelector('.install-kakao').hidden = !kakao;
-  document.querySelector('.install-iphone').hidden = kakao || android;
-  document.querySelector('.install-android').hidden = kakao || iphone;
+  document.querySelector('.install-iphone').hidden = android;
+  document.querySelector('.install-android').hidden = iphone;
   show('install');
 }
 
