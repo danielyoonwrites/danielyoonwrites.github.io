@@ -44,3 +44,5 @@ Moved from `HANDOFF.md` on October 28, 2026. Read this before working around a b
   - A 400 or 403 answer shows in the console as "Failed to load resource": that's not a script error.
   - "Sign out" in a test really signs that key out on the stand-in server, so later steps need a fresh sign-in. The server allows 5 codes a day for one address.
   - Full-page screenshots draw the sticky top bar where the page was scrolled: scroll to the top first.
+- **Cloudflare's docs (October 29, 2026):** developers.cloudflare.com doesn't connect from the session. Read their source instead: `git clone --depth 1 --filter=blob:none --sparse https://github.com/cloudflare/cloudflare-docs`, then `git sparse-checkout set src/content/docs/workers/ci-cd` (or the folder needed; the main branch is `production`).
+- **Checking `wrangler.jsonc` without deploying:** copy `worker.js` and `wrangler.jsonc` to the scratchpad and run `npx --yes wrangler@latest deploy --dry-run --outdir out` there (Wrangler 4.155.0 on October 29, 2026). It lists the bindings it would use.
