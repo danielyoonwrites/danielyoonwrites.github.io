@@ -33,8 +33,8 @@
 
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=24">
-  <script src="app.js?v=31" defer></script>
+  <link rel="stylesheet" href="style.css?v=25">
+  <script src="app.js?v=32" defer></script>
 </head>
 <body>
 
@@ -456,8 +456,13 @@
       <p class="hint">Inviting doesn’t email them, so send them the link yourself.</p>
       <!-- Like "Invited Sarah." or "Loading…" -->
       <p class="people-status" role="status" hidden></p>
-      <!-- Like "Today you've used 2 of your 20 sets of questions. Everyone together: 7 of 60." -->
-      <p class="note people-today" hidden></p>
+      <!-- The daily AI limits, and today's use (the owner's choice "A", October 29, 2026).
+           Edit the words here; app.js fills in the numbers from the server. -->
+      <div class="people-limits" hidden>
+        <p class="label">Daily AI limits</p>
+        <p class="note">To keep the AI’s cost safe, each person can write up to <span class="limit-each"></span> sets of questions a day, and everyone together up to <span class="limit-all"></span>. A set is one Bible study, one reading-plan day, or one tap of “Write new questions.” The counts start over at midnight Pacific time.</p>
+        <p class="note">Today you’ve used <span class="used-you"></span> of your <span class="limit-each"></span>. Everyone together has used <span class="used-all"></span> of <span class="limit-all"></span>, counting phones that use the passcode.</p>
+      </div>
       <ul class="people-list" role="list"></ul>
       <p class="note no-people" hidden>No one invited yet.</p>
     </section>

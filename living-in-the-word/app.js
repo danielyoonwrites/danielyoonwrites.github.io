@@ -1025,10 +1025,12 @@ function showPeople(result) {
     list.append(item);
   });
   document.querySelector('.no-people').hidden = result.people.length > 0;
-  const today = document.querySelector('.people-today');
-  today.textContent = 'Today you’ve used ' + result.you + ' of your ' + result.each + ' sets of questions. ' +
-    'Everyone together: ' + result.everyone + ' of ' + result.all + '.';
-  today.hidden = false;
+  // "Daily AI limits": the words are in index.html; the numbers come from the server
+  fill('.limit-each', String(result.each));
+  fill('.limit-all', String(result.all));
+  fill('.used-you', String(result.you));
+  fill('.used-all', String(result.everyone));
+  document.querySelector('.people-limits').hidden = false;
 }
 
 // Asks the server for the list
@@ -1105,7 +1107,7 @@ Object.assign(actions, {
   people() {
     document.querySelector('.people-list').textContent = '';
     document.querySelector('.no-people').hidden = true;
-    document.querySelector('.people-today').hidden = true;
+    document.querySelector('.people-limits').hidden = true;
     show('people');
     loadPeople();
   },

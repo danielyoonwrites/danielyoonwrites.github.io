@@ -698,6 +698,15 @@ select {
   overflow-wrap: anywhere;
 }
 
+/* "Daily AI limits": why there's a limit, and today's use, above the list */
+.people-limits {
+  margin-top: 2rem;
+}
+
+.people-limits .note {
+  margin: 0.5rem 0 0;
+}
+
 /* One row for each invited person, with thin lines between them, like Saved studies */
 .people-list {
   margin: 1.5rem 0 0;
