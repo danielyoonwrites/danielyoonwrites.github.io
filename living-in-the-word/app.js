@@ -2,7 +2,8 @@
 // passage with the AI helper (they stay only while the page is open), and keeps a
 // daily reading plan (saved on this phone).
 // Only the passage name is sent to the app's own small server (the AI helper, see
-// AI-PLAN.md), and to sign in, the email address you type (see "Signing in" below).
+// AI-PLAN.md), and to sign in, the email address you type (see "Signing in" below). On the
+// owner's page, the addresses and names he types go there too (see "The owner's page").
 // See SPEC.md for the plan.
 
 
@@ -44,7 +45,7 @@ function show(id) {
   // Screens for typing put the cursor in the box; the others move to the heading
   const screen = document.getElementById(id);
   screen.querySelectorAll('.gentle-error').forEach((note) => { note.hidden = true; });
-  const typing = ['passage', 'passcode', 'sign-in', 'sign-in-code'].includes(id);
+  const typing = ['passage', 'passcode', 'sign-in', 'sign-in-code', 'invite'].includes(id);
   const target = typing ? screen.querySelector('input') : screen.querySelector('h1, h2');
   if (target) target.focus({ preventScroll: true });
 
@@ -469,6 +470,7 @@ const STORAGE_KEY = 'living-in-the-word';
 let passcode = readSaved().passcode || '';
 let session = readSaved().session || '';     // this phone's session key, once signed in
 let signedInAs = readSaved().email || '';    // the email address it's signed in with
+let owner = readSaved().owner;               // true if that's the owner's address (see "The owner's page")
 let asking = false;   // true while waiting for the AI
 let latestRequest = 0;   // counts requests, so only the newest one changes the screen
 let askingFor = '';      // the passage the AI is writing for, while asking
@@ -491,7 +493,7 @@ function askServer(message, signal) {
 }
 
 // What's saved on this phone, as one piece of JSON:
-//   { version: 1, passcode: '...', session: '...', email: '...', studies: [ ... ], plan: { ... } }
+//   { version: 1, passcode: '...', session: '...', email: '...', owner: true, studies: [ ... ], plan: { ... } }
 //   (studies are described in "Saved studies", the plan in the reading plan part)
 function readSaved() {
   try {
@@ -512,6 +514,7 @@ function tidySaved(saved) {
   if (typeof saved.passcode === 'string') clean.passcode = saved.passcode;
   if (typeof saved.session === 'string') clean.session = saved.session;
   if (typeof saved.email === 'string') clean.email = saved.email;
+  if (typeof saved.owner === 'boolean') clean.owner = saved.owner;
   if (Array.isArray(saved.studies)) {
     clean.studies = saved.studies
       .filter((study) => study && typeof study.passage === 'string' && Array.isArray(study.questions))
@@ -758,14 +761,18 @@ function finishSignIn() {
 }
 
 // Keeps the sign-in on this phone. It replaces the passcode, which this phone no longer needs.
-function keepSignIn(key, email) {
+// isOwner: true or false from the server (an older server doesn't say)
+function keepSignIn(key, email, isOwner) {
   session = key;
   signedInAs = email;
+  owner = typeof isOwner === 'boolean' ? isOwner : undefined;
   passcode = '';
   const saved = readSaved();
   delete saved.passcode;
   saved.session = key;
   saved.email = email;
+  if (owner === undefined) delete saved.owner;
+  else saved.owner = owner;
   writeSaved(saved);
 }
 
@@ -774,19 +781,22 @@ function forgetSignIn() {
   if (!codeSentTo) codeSentTo = signedInAs;   // to fill in the address next time
   session = '';
   signedInAs = '';
+  owner = undefined;
   const saved = readSaved();
   delete saved.session;
   delete saved.email;
+  delete saved.owner;
   writeSaved(saved);
 }
 
-// The start screen's last line: who's signed in on this phone, with Sign out, or Sign in.
-// message replaces it for now, like "Signed out."
+// The start screen's last line: who's signed in on this phone, with Sign out (and "Invite
+// people" for the owner), or Sign in. message replaces it for now, like "Signed out."
 function updateAccount(message = '') {
   const status = document.querySelector('.account-status');
   status.textContent = message || (session ? 'Signed in as ' + signedInAs + '.' : '');
   status.hidden = !status.textContent;
   document.querySelector('[data-action="sign-in"]').hidden = Boolean(session) || !SERVER_URL;
+  document.querySelector('[data-action="people"]').hidden = !mayOpenPeople();
   document.querySelector('[data-action="sign-out"]').hidden = !session;
 }
 
@@ -860,7 +870,7 @@ document.querySelector('#sign-in-code form').addEventListener('submit', async (e
   button.disabled = false;
   button.textContent = 'Sign in';
   if (result.session) {
-    keepSignIn(result.session, result.email || codeSentTo);
+    keepSignIn(result.session, result.email || codeSentTo, result.owner);
     finishSignIn();
     return;
   }
@@ -912,6 +922,221 @@ Object.assign(actions, {
 });
 
 updateAccount();
+
+
+// ---------- The owner's page (sign-up step S4) ----------
+// Only the owner sees "Invite people" on the start screen, under "Signed in as ...". It opens
+// the list of the people he invited, with how many sets of questions each used today, and
+// "Turn off" for each. "Invite someone" adds a person, who can sign in with that address right
+// away. The app doesn't email them: "Send the app's link" opens the phone's share menu, to send
+// it in a message. The server checks that it's the owner on every request (see "The owner's
+// page" in server/worker.js). Nothing about a person is sent to the AI.
+
+// Kind words for each problem on the owner's page
+const PEOPLE_PROBLEMS = {
+  'bad-email': 'That doesn’t look like an email address. Check it and try again.',
+  'is-owner': 'That’s your own address. You can always sign in.',
+  'not-owner': 'Only the app’s owner can open this page.',
+  offline: 'Couldn’t reach the server. Check your connection and try again.',
+  other: 'Something went wrong. Try again in a moment.',
+};
+
+// The server says whether someone is the owner when they sign in. A phone signed in before
+// this page existed (October 2026) doesn't know yet. Only the owner could sign in then, so it
+// shows "Invite people", and the server checks anyway.
+function mayOpenPeople() {
+  return Boolean(session) && owner !== false;
+}
+
+// Remembers what the server said: this phone is signed in as the owner, or not
+function keepOwner(isOwner) {
+  owner = isOwner;
+  const saved = readSaved();
+  saved.owner = isOwner;
+  writeSaved(saved);
+  updateAccount();
+}
+
+// A message on the list screen, like "Invited Sarah." ('' hides it)
+function setPeopleStatus(text) {
+  const status = document.querySelector('.people-status');
+  status.textContent = text;
+  status.hidden = !text;
+}
+
+// A gentle message on the invite screen ('' hides it)
+function inviteMessage(text) {
+  const note = document.querySelector('#invite .gentle-error');
+  note.textContent = text;
+  note.hidden = !text;
+}
+
+// Sends a message for the owner's page, with this phone's session key
+async function askPeople(message) {
+  try {
+    const response = await askServer(message);
+    return await response.json();
+  } catch (error) {
+    return { error: 'offline' };
+  }
+}
+
+// Answers any request on this page can get. Returns true if signing in again is needed
+// (then: what to do after that).
+function peopleProblem(result, then) {
+  if (result.error === 'signed-out') {
+    forgetSignIn();
+    startSignIn(then, true);
+    return true;
+  }
+  if (result.error === 'not-owner') keepOwner(false);   // hides "Invite people"
+  return false;
+}
+
+// The list: one row for each person, with today's use, and Turn off (or Turn on)
+function showPeople(result) {
+  const list = document.querySelector('.people-list');
+  list.textContent = '';
+  result.people.forEach((person) => {
+    const who = person.name || person.email;
+    const item = document.createElement('li');
+    item.classList.toggle('is-off', !person.on);
+    const name = document.createElement('span');
+    name.className = 'person-name';
+    name.textContent = who;
+    item.append(name);
+    if (person.name) {
+      const email = document.createElement('span');
+      email.className = 'person-text';
+      email.textContent = person.email;
+      item.append(email);
+    }
+    const use = document.createElement('span');
+    use.className = 'person-text';
+    use.textContent = person.on ? 'Used ' + person.today + ' of ' + result.each + ' today' : 'Turned off';
+    item.append(use);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'quiet';
+    button.textContent = person.on ? 'Turn off' : 'Turn on';
+    button.setAttribute('aria-label', button.textContent + ' ' + who);
+    button.addEventListener('click', () => turnPerson(person, button));
+    item.append(button);
+    list.append(item);
+  });
+  document.querySelector('.no-people').hidden = result.people.length > 0;
+  const today = document.querySelector('.people-today');
+  today.textContent = 'Today you’ve used ' + result.you + ' of your ' + result.each + ' sets of questions. ' +
+    'Everyone together: ' + result.everyone + ' of ' + result.all + '.';
+  today.hidden = false;
+}
+
+// Asks the server for the list
+async function loadPeople() {
+  setPeopleStatus('Loading…');
+  const result = await askPeople({ action: 'people' });
+  if (!document.getElementById('people').classList.contains('active')) return;   // they've left this screen
+  if (peopleProblem(result, loadPeople)) return;
+  if (!Array.isArray(result.people)) {
+    setPeopleStatus(PEOPLE_PROBLEMS[result.error] || PEOPLE_PROBLEMS.other);
+    return;
+  }
+  if (owner !== true) keepOwner(true);
+  setPeopleStatus('');
+  showPeople(result);
+}
+
+// "Turn off" (after asking first) or "Turn on" on a person's row
+async function turnPerson(person, button) {
+  const who = person.name || person.email;
+  if (person.on && !window.confirm('Turn off ' + who + '? They’ll be signed out, and can’t sign in until you turn them back on.')) return;
+  button.disabled = true;
+  button.textContent = person.on ? 'Turning off…' : 'Turning on…';
+  const result = await askPeople({ action: person.on ? 'turn-off' : 'turn-on', email: person.email });
+  if (!document.getElementById('people').classList.contains('active')) return;
+  if (peopleProblem(result, loadPeople)) return;
+  if (!Array.isArray(result.people)) {
+    button.disabled = false;
+    button.textContent = person.on ? 'Turn off' : 'Turn on';
+    setPeopleStatus(PEOPLE_PROBLEMS[result.error] || PEOPLE_PROBLEMS.other);
+    return;
+  }
+  showPeople(result);
+  setPeopleStatus(person.on ? who + ' is turned off.' : who + ' can sign in again.');
+}
+
+// The invite screen: their email address, and a name so the owner knows who it is
+document.querySelector('#invite form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const email = document.getElementById('invite-email').value.trim().toLowerCase();
+  const name = document.getElementById('invite-name').value.trim();
+  if (!email) {
+    inviteMessage('Type their email address first.');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    inviteMessage(PEOPLE_PROBLEMS['bad-email']);
+    return;
+  }
+  inviteMessage('');
+  const button = document.querySelector('#invite [type="submit"]');
+  button.disabled = true;
+  button.textContent = 'Inviting…';
+  const result = await askPeople({ action: 'invite', email, name });
+  button.disabled = false;
+  button.textContent = 'Invite';
+  if (!document.getElementById('invite').classList.contains('active')) return;
+  // (after signing in again, it comes back here with the words still typed in)
+  if (peopleProblem(result, () => {})) return;
+  if (!Array.isArray(result.people)) {
+    inviteMessage(PEOPLE_PROBLEMS[result.error] || PEOPLE_PROBLEMS.other);
+    return;
+  }
+  document.getElementById('invite-email').value = '';
+  document.getElementById('invite-name').value = '';
+  goBack();   // to the list
+  showPeople(result);
+  setPeopleStatus(name ? 'Invited ' + name + '. They can sign in with ' + email + ' now.'
+    : 'Invited ' + email + '. They can sign in now.');
+});
+
+Object.assign(actions, {
+  // "Invite people" on the start screen (only for the owner)
+  people() {
+    document.querySelector('.people-list').textContent = '';
+    document.querySelector('.no-people').hidden = true;
+    document.querySelector('.people-today').hidden = true;
+    show('people');
+    loadPeople();
+  },
+
+  // "Invite someone": the invite screen
+  invite() {
+    setPeopleStatus('');
+    show('invite');
+  },
+
+  // "Send the app's link": through the phone's share menu, or copied where there isn't one
+  async 'send-link'() {
+    const link = new URL('./', window.location.href).href;   // the app's address, without "?test"
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Living in the Word', url: link });
+        return;
+      } catch (error) {
+        if (error.name === 'AbortError') return;   // closing the share menu without choosing is fine
+      }
+    }
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(link);
+      copied = true;
+    } catch (error) {
+      copied = copyTheOldWay(link);
+    }
+    setPeopleStatus(copied ? 'Copied the app’s link. Paste it into a message to them.' : 'The app’s link: ' + link);
+  },
+});
 
 
 

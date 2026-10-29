@@ -1,6 +1,6 @@
 # Plan: sign-ups (stage 3)
 
-So people can use the AI helper without the shared passcode, each with their own daily limit, and so the app can have subscriptions someday. Planned with the owner on October 26, 2026, after the security work (pull requests 61 to 63). Step S3, signing in with an email code and a daily limit for each person, was built on October 28, 2026 (see "What S3 built"); the other steps aren't built yet.
+So people can use the AI helper without the shared passcode, each with their own daily limit, and so the app can have subscriptions someday. Planned with the owner on October 26, 2026, after the security work (pull requests 61 to 63). Step S3, signing in with an email code and a daily limit for each person, was built on October 28, 2026 (see "What S3 built"), and step S4, the owner's page, on October 29, 2026 (see "What S4 built"); the other steps aren't built yet.
 
 ## Decided (October 26, 2026)
 
@@ -111,7 +111,7 @@ Check: a test email arrives.
 
 S3. Sign in with an email code, in the server and the app. During the change, the passcode still works too. The owner's own email address can sign in right away. Built October 28, 2026, with each person's own daily limit (the owner's request); see "What S3 built." Check: sign in on your phone with a code, write questions, and sign out.
 
-S4. The owner's page: invite by email, see who's invited and today's use, turn someone off. Check: invite one person from your group; they sign in.
+S4. The owner's page: invite by email, see who's invited and today's use, turn someone off. Check: invite one person from your group; they sign in. Built October 29, 2026 (pull request 89); see "What S4 built."
 
 S5. "Continue with Google." First the owner makes a Google "client ID" and saves it in Cloudflare as the secret `GOOGLE_CLIENT_ID`. Check: sign in with Google on your phone, and on an iPhone if someone in the group has one.
 
@@ -151,6 +151,26 @@ The owner's steps, in order (the labels come from earlier sessions and search re
 4. The same place: Add, Type: Secret, Name: `OWNER_EMAIL`, Value: the owner's own email address (the one he'll sign in with). Save (Deploy).
 5. After the pull request is merged: paste the new `server/worker.js` into the Worker (Edit code, pick the Latest version, select all, paste, Deploy).
 6. Check: open the app, tap "Sign in" at the bottom of the start screen, and sign in with the code from the email. Write questions, then sign out. If the email doesn't come, try again on the test link (the address with `?test`): it shows Resend's reason.
+
+
+## What S4 built (October 29, 2026)
+
+For the owner:
+- "Invite people" at the bottom of the start screen, between "Signed in as ..." and "Sign out." Only the owner sees it.
+- The "Invite people" screen: "Only the people you invite can sign in. Only you can see this page." Then "Invite someone," "Send the app's link" (the phone's share menu, or the link copied where there's none), and "Inviting doesn't email them, so send them the link yourself." A line for today: "Today you've used 1 of your 20 sets of questions. Everyone together: 3 of 60." Then everyone invited, by name (or address): the name, the address, "Used 2 of 20 today" (or "Turned off"), and "Turn off" (or "Turn on").
+- The "Invite someone" screen: their email address, and their name (optional; only the owner sees it). They can sign in with that address right away. Inviting someone again turns them back on, and changes the name if a new one is typed.
+- "Turn off" asks first: "Turn off Sarah Kim? They'll be signed out, and can't sign in until you turn them back on." They're signed out on every phone, and a code they asked for stops working. Their row stays in its place, in grey. "Turn on" lets them sign in again, with a new code.
+
+Inside (`server/worker.js` and `app.js`, both under "The owner's page"):
+- Four new requests: `people`, `invite`, `turn-off` and `turn-on`. Each needs the phone's session key, and its address must be `OWNER_EMAIL`; the passcode never opens them. Each answer is the whole list again, with today's counts (`person:` plus the address, and `everyone`).
+- The owner's own address can't be invited, turned off or turned on (testing found that turning it off would have signed him out everywhere).
+- Names: one line, at most 60 letters, kept in the `people` table for the owner's list only, never sent to the AI. The app shows them as plain text, never as HTML.
+- Signing in now answers `owner: true` or `false`, and the app keeps it with the sign-in (`owner` in the saved data). A phone signed in before S4 doesn't know yet: only the owner could sign in then, so it shows "Invite people," and the list's first answer settles it. If the server ever answers "not-owner," the button goes away.
+- No email goes to invited people (Claude's choice, in the screenshots the owner approved): the owner tells them himself, and the app sends fewer emails.
+
+Tested before the pull request (not with the real Cloudflare or Resend): 60 checks of `server/worker.js` with stand-ins for D1 (Node's own SQLite), Resend and the AI, including someone who isn't the owner trying every request, the passcode alone, a made-up key, another website, turning off (signed out, no new code, an earlier code stops working), turning back on, inviting again, long names, emoji and a name that looks like code; and 70 checks of the app in Chromium at 320, 360 and 1280 wide, with the real `server/worker.js` behind it, including Back and the back gesture, a phone signed in before S4, someone who isn't the owner, a sign-in that ran out, and no connection.
+
+The owner's steps: after merging, paste the new `server/worker.js` into the Worker (the steps are in `PROGRESS.md` and the pull request), then the check above.
 
 
 ## Tech notes

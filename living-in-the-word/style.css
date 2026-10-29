@@ -689,6 +689,65 @@ select {
 }
 
 
+/* ---------- The owner's page (sign-up step S4) ---------- */
+
+/* "Invited Sarah." or "Loading…", in italic under the buttons */
+.people-status {
+  margin: 1rem 0 0;
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+/* One row for each invited person, with thin lines between them, like Saved studies */
+.people-list {
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.people-list li {
+  padding: 1rem 0 0.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.people-list li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+/* The name (or the address, if there's no name), then the address and today's use */
+.person-name {
+  display: block;
+  font-size: 1.375rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.person-text {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.people-list .quiet {
+  margin-top: 0.25rem;
+}
+
+/* Someone who's turned off is in grey */
+.people-list .is-off .person-name {
+  color: var(--muted);
+}
+
+/* While a change or an invite is being sent, its button waits */
+.people-list .quiet:disabled,
+#invite .primary:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+
 /* ---------- While the AI writes ----------
    app.js marks the screen as "writing" until the questions arrive. */
 

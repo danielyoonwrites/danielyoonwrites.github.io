@@ -6,6 +6,7 @@
 // passage and that today's limits aren't used up, asks Claude (Anthropic's AI) for 3 to 5
 // questions about it, and sends them back.
 // It can also send back the passage itself, from Crossway's free ESV API (see "The Bible text" below).
+// And it keeps the owner's list of the people who may sign in (see "The owner's page").
 //
 // Why a server: the website is public, so a key in the app could be copied.
 // The keys and the passcode are NOT in this file. They're saved in Cloudflare's
@@ -402,9 +403,15 @@ function cleanEmail(text) {
   return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : '';
 }
 
+// True if this address is the owner's (saved in Cloudflare as the secret OWNER_EMAIL)
+function isOwner(env, email) {
+  const owner = cleanEmail(env.OWNER_EMAIL);
+  return Boolean(owner) && email === owner;
+}
+
 // True if this address may sign in: the owner's, or one he invited and hasn't turned off
 async function mayUseApp(env, email) {
-  if (email && email === cleanEmail(env.OWNER_EMAIL)) return true;
+  if (isOwner(env, email)) return true;
   const person = await env.DB.prepare('SELECT active FROM people WHERE email = ?').bind(email).first();
   return Boolean(person && person.active === 1);
 }
@@ -537,7 +544,8 @@ async function checkCode(input, request, env, cors) {
     env.DB.prepare('INSERT INTO sessions (key, email, expires) VALUES (?, ?, ?)')
       .bind(await scramble(key), email, Date.now() + SESSION_DAYS * 86400000),
   ]);
-  return reply({ session: key, email }, 200, cors);
+  // owner: true tells the app to show "Invite people" (see "The owner's page")
+  return reply({ session: key, email, owner: isOwner(env, email) }, 200, cors);
 }
 
 // "Sign out": this phone's key stops working
@@ -547,6 +555,91 @@ async function signOut(request, env, cors) {
     await env.DB.prepare('DELETE FROM sessions WHERE key = ?').bind(await scramble(key)).run();
   }
   return reply({ signedOut: true }, 200, cors);
+}
+
+
+// ---------- The owner's page (sign-up step S4, see SIGNUP-PLAN.md) ----------
+// Only the owner, signed in with his own address (OWNER_EMAIL), can use these. The app shows
+// "Invite people" only to him, and this server checks again on every request, from the
+// phone's session key (never the passcode). He sees who's invited and how many sets of
+// questions each person used today, invites someone, and turns someone off or back on.
+// Invited people can sign in right away. No email is sent to them: the owner sends them the
+// app's link himself. Names are kept only for the owner's list, never sent to the AI.
+const OWNER_ACTIONS = ['people', 'invite', 'turn-off', 'turn-on'];
+const NAME_LONGEST = 60;   // letters in a name, at most
+
+// A name as typed, on one line, at most NAME_LONGEST letters
+function cleanName(text) {
+  if (typeof text !== 'string') return '';
+  const name = text.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
+  return Array.from(name).slice(0, NAME_LONGEST).join('');   // (Array.from keeps emoji whole)
+}
+
+// Everything on the owner's page comes here. Each answer carries the whole list again,
+// so the app always shows what's really saved.
+async function ownerPage(input, request, env, cors) {
+  const person = await signedInPerson(request, env);
+  if (!person || person === SIGNED_OUT) return reply({ error: 'signed-out' }, 401, cors);
+  if (!isOwner(env, person)) return reply({ error: 'not-owner' }, 403, cors);
+
+  // Invite, Turn off and Turn on are each about one person, never the owner himself
+  const email = cleanEmail(input.email);
+  if (input.action !== 'people') {
+    if (!email) return reply({ error: 'bad-email' }, 400, cors);
+    if (isOwner(env, email)) return reply({ error: 'is-owner' }, 400, cors);
+  }
+
+  if (input.action === 'invite') {
+    // Inviting someone again turns them back on, and changes their name if a new one is typed
+    await env.DB.prepare(
+      'INSERT INTO people (email, name, invited, active) VALUES (?, ?, ?, 1) ' +
+      "ON CONFLICT (email) DO UPDATE SET active = 1, name = CASE WHEN excluded.name = '' THEN people.name ELSE excluded.name END",
+    ).bind(email, cleanName(input.name), dayInPacific()).run();
+  }
+
+  if (input.action === 'turn-off') {
+    // Turned off: signed out on every phone, any code they asked for stops working,
+    // and they can't sign in until they're turned back on
+    await env.DB.batch([
+      env.DB.prepare('UPDATE people SET active = 0 WHERE email = ?').bind(email),
+      env.DB.prepare('DELETE FROM sessions WHERE email = ?').bind(email),
+      env.DB.prepare('DELETE FROM codes WHERE email = ?').bind(email),
+    ]);
+  }
+
+  if (input.action === 'turn-on') {
+    await env.DB.prepare('UPDATE people SET active = 1 WHERE email = ?').bind(email).run();
+  }
+
+  return reply(await listPeople(env, person), 200, cors);
+}
+
+// The owner's list: everyone invited, by name (or address), with how many sets of questions
+// each used today. Someone turned off stays in their place, so their row doesn't jump away.
+// Also the owner's own count, and everyone's together (phones with the passcode count there too).
+async function listPeople(env, owner) {
+  const [people, usage] = await env.DB.batch([
+    env.DB.prepare('SELECT email, name, invited, active FROM people'),
+    env.DB.prepare("SELECT who, count FROM usage WHERE day = ? AND (who = 'everyone' OR who LIKE 'person:%')")
+      .bind(dayInPacific()),
+  ]);
+  const used = {};
+  usage.results.forEach((row) => { used[row.who] = row.count; });
+  const list = people.results.map((row) => ({
+    email: row.email,
+    name: row.name,
+    invited: row.invited,
+    on: row.active === 1,
+    today: used['person:' + row.email] || 0,
+  }));
+  list.sort((a, b) => (a.name || a.email).localeCompare(b.name || b.email));
+  return {
+    people: list,
+    you: used['person:' + owner] || 0,
+    everyone: used.everyone || 0,
+    each: DAILY_LIMIT_EACH,
+    all: DAILY_LIMIT_ALL,
+  };
 }
 
 
@@ -646,6 +739,9 @@ export default {
       if (input.action === 'send-code') return await sendCode(input, request, env, cors);
       if (input.action === 'check-code') return await checkCode(input, request, env, cors);
       if (input.action === 'sign-out') return await signOut(request, env, cors);
+
+      // The owner's page (see "The owner's page")
+      if (OWNER_ACTIONS.includes(input.action)) return await ownerPage(input, request, env, cors);
 
       // Who's asking is checked before anything costs money: someone signed in on this
       // phone, or a phone with the passcode
