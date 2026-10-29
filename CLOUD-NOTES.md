@@ -38,3 +38,9 @@ Moved from `HANDOFF.md` on October 28, 2026. Read this before working around a b
 - **Testing the server's request to Anthropic (October 28, 2026):** copy `server/worker.js` to a `.mjs` file, add a line at the end that exports `askClaude` and the settings, replace `globalThis.fetch` with a stand-in that records the request and answers like Anthropic, then check the model, effort, system prompt and the cost worked out.
 - **Testing install help (October 29, 2026):** headless Chromium never offers to install, so dispatch a stand-in `beforeinstallprompt` event with its own `prompt()` function; give each Playwright context an iPhone, Android or KakaoTalk user agent to check which steps show; fake `navigator.standalone` to test an iPhone that opened the app from its home screen.
 - **Screenshots for Dan (October 29, 2026):** stand-in AI words show in the pictures, so make them fit the passage on screen and say they're stand-ins (a note about Philippians 3 on a Philippians 1 screen nearly went out).
+- **Testing the owner's page (October 29, 2026):**
+  - Launch Chromium with `proxy: { server: process.env.HTTPS_PROXY, bypass: '127.0.0.1,localhost' }` so Google's fonts load in screenshots. The browser already trusts the session's proxy.
+  - `innerText` gives words the way CSS shows them (quiet buttons in capitals), so match them without caring about capitals.
+  - A 400 or 403 answer shows in the console as "Failed to load resource": that's not a script error.
+  - "Sign out" in a test really signs that key out on the stand-in server, so later steps need a fresh sign-in. The server allows 5 codes a day for one address.
+  - Full-page screenshots draw the sticky top bar where the page was scrolled: scroll to the top first.
