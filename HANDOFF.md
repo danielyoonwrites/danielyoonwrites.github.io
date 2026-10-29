@@ -1,6 +1,6 @@
 # Handoff: where everything stands
 
-Last updated October 29, 2026, in the seventh session (with pull request 93). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
+Last updated October 29, 2026, at the end of the seventh session (with pull request 94). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
 
 - How to work with Dan, and the rules for every project: `CLAUDE.md`.
 - Each project: its folder's `PROGRESS.md` (where it stands, the next step), `DECISIONS.md` (choices and their reasons) and `SPEC.md`. The website's decisions are in the root `DECISIONS.md`.
@@ -16,21 +16,21 @@ This repository is public. Keep personal details out of this file.
 - **Quiet room** (paused after step 1): https://danielyoonwrites.github.io/quiet-room, `quiet-room/PROGRESS.md`.
 - **Fewer spam calls** (built, one check left): https://danielyoonwrites.github.io/fewer-spam-calls, `fewer-spam-calls/PROGRESS.md`.
 - **First step smaller** (built, the owner's trial next): https://danielyoonwrites.github.io/first-step-smaller, `first-step-smaller/PROGRESS.md`.
-- **Living in the Word** (the AI helper live on Sonnet 5.5, signing in with an email code, the "check it" line, install help, the owner's invite page in pull request 89; the plan for phones and app stores under way): https://danielyoonwrites.github.io/living-in-the-word, `living-in-the-word/PROGRESS.md`. The store plan is `living-in-the-word/STORE-PLAN.md`.
+- **Living in the Word** (the AI helper live on Sonnet 5.5, signing in with an email code, the owner's invite page with an invite email, install help, the "check it" line; the server deploys by itself through Cloudflare; the plan for phones and app stores under way): https://danielyoonwrites.github.io/living-in-the-word, `living-in-the-word/PROGRESS.md`. The store plan is `living-in-the-word/STORE-PLAN.md`.
 
 
 ## Where things stand (October 29, 2026)
 
 - Fourth session (October 27 and 28): pull requests 73 to 78 for Living in the Word (signing in with an email code, Opus 5.5, the magazine look, typed names written out in full) and its own PROGRESS and DECISIONS files.
 - Fifth session (October 28): pull request 79, the plan for phones and app stores, double-checked in seven research passes; 80, Android's back gesture goes back one screen; 81 and 82, the notes cleanup, after Dan asked how to spend fewer tokens on reading these notes (the findings are on his Notion page "Claude Code: handoffs and decision logs").
-- Sixth session (October 28 and 29): the back button checked on Dan's phone (pull request 80; his phone uses the three buttons, not swipes). After Claude's research on cost and speed, Sonnet 5.5 at high effort replaced Opus (84; "it seems useable"); question 2 now asks why what the passage shows about God matters there (85; "better now"); the "check it" line Anthropic's terms require (86, checked); install help for Android and iPhone (87, not checked yet). Pull request 88 holds these handoff notes.
-- Seventh session (October 29): pull request 88 merged; Dan installed the app on his phone (install help works) and asked how updates work (nothing to download again; the details are on his Notion page). Pull request 89: the owner's page, sign-up step S4 ("Invite people"), checked open on his phone. Pull requests 90 and 91: Cloudflare deploys the server by itself after each merge (Workers Builds; Dan chose "A"; the first deploy succeeded; preview builds off). Pull request 92: "Daily AI limits" explained on the owner's page. Pull request 93: the invite email, in Dan's words.
-- Next: Dan merges pull request 93 (the invite email) and does the invite check (invite one person, who gets the email and signs in). Then ask which comes next: a start-screen line saying a pastor wrote the AI's guidelines, store plan step 3 (the manifest tidy-up), or the next sign-up step (S5 or S6).
+- Sixth session (October 28 and 29): the back button checked on Dan's phone (pull request 80; his phone uses the three buttons, not swipes). After Claude's research on cost and speed, Sonnet 5.5 at high effort replaced Opus (84; "it seems useable"); question 2 now asks why what the passage shows about God matters there (85; "better now"); the "check it" line Anthropic's terms require (86, checked); install help for Android and iPhone (87; Dan installed the app with it on October 29). Pull request 88 holds these handoff notes.
+- Seventh session (October 29): pull requests 89 to 93. The owner's page, sign-up step S4 ("Invite people"; opens on Dan's phone). Cloudflare deploys the server by itself after each merge (Workers Builds; Dan's "A"; no more pasting `worker.js`). "Daily AI limits" explained on the owner's page. Each invite now emails the person, in Dan's words. Pull request 94: these notes, the "In force" list in `living-in-the-word/DECISIONS.md`, and the checks saved in `living-in-the-word/tests/`.
+- Next: ask how Dan's test invite went (the email, signing in, a reply reaching him). Then ask which comes next: a start-screen line saying a pastor wrote the AI's guidelines, store plan step 3 (the manifest tidy-up), or the next sign-up step (S5 or S6).
 
 
 ## Waiting on Dan
 
-1. Living in the Word: merge pull request 93 (the invite email), and invite one person from the group, who gets the email and signs in; check pull request 77 (typed names) on his phone. The steps are in `living-in-the-word/PROGRESS.md`.
+1. Living in the Word: merge pull request 94 (these notes); send himself a test invite from "Invite people," then invite one person from the group; check pull request 77 (typed names) on his phone. The steps are in `living-in-the-word/PROGRESS.md`.
 2. The Anthropic API key expires November 24, 2026: a new key, saved in Cloudflare as `ANTHROPIC_API_KEY`. Remind him in good time, with every step (in `living-in-the-word/PROGRESS.md`).
 3. Smaller checks, if not done: a spend limit in the Claude Console ($10 suggested); a passcode of four or more random words; two-step sign-in on Cloudflare; Share inside KakaoTalk; his review of the general questions' wording.
 4. The other apps: Fewer spam calls needs the Samsung steps checked on a real Samsung phone; First step smaller waits for his daily trial. Details in each `PROGRESS.md`.

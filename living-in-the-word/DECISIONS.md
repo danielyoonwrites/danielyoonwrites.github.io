@@ -1,6 +1,56 @@
 # Living in the Word: decisions
 
-Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces. The decisions from before October 27, 2026 were copied in on October 28, 2026 from the root `HANDOFF.md` ("Project 5"), `SPEC.md`, `AI-PLAN.md` and `SIGNUP-PLAN.md`; those files keep their own text too. When the notes give no reason, an entry says "not recorded."
+The "In force" list right below is every decision that still holds, one line each; it's rewritten at each handoff. The log under it has each decision with its reason, oldest first, and is only added to: if a decision changes, add a new entry that says which one it replaces, and one "Status" line on the old entry. The decisions from before October 27, 2026 were copied in on October 28, 2026 from the root `HANDOFF.md` ("Project 5"), `SPEC.md`, `AI-PLAN.md` and `SIGNUP-PLAN.md`; those files keep their own text too. When the notes give no reason, an entry says "not recorded."
+
+## In force (rewritten October 29, 2026, at the end of the seventh session)
+
+**Who it's for, and how the work goes**
+- October 25, 2026: stages: Dan's small group first, then anyone online later (stage 3). Dan reviews every question, and nothing is shared on its own.
+- October 25, 2026: the name "Living in the Word"; a trademark search before any public launch or store listing.
+- October 25, 2026: Claude's effort: High for most steps; Extra high was for building the AI helper.
+- October 29, 2026: the checks live in `living-in-the-word/tests/`; run them after any change to `app.js` or `server/worker.js`.
+
+**The questions and the AI**
+- October 25, 2026: the AI gets only the passage name and whether it's for a group study or the reading plan: no Bible text, nothing personal.
+- October 25, 2026: Dan's own theological guidance goes with every request (in `server/worker.js`, `GUIDANCE`).
+- October 26, 2026: no study methods; the AI writes right away, in a set order: what it says, God, the heart, a response, prayer.
+- October 26, 2026: 3 to 5 questions, always the first and the last; short, one thing each, no quotes, correct grammar.
+- October 26, 2026: passages of suffering get pastoral care; general words like "sexual violence," never graphic terms; only what the passage itself shows about God.
+- October 26, 2026: no questions about God's silence, where God was, or why he didn't stop it (Dan: such questions "can hurt people's faith").
+- October 28, 2026: the commentary for the leader (about 100 words, written with the questions) and the reading's note start open.
+- October 29, 2026: Sonnet 5.5 at `high` effort, with "Think the problem through before you answer."; uneven sets get guidance fixes, not a model switch.
+- October 29, 2026: question 2 asks why what the passage shows about God matters there.
+- October 29, 2026: the "check it" line wherever the AI's words show; a "pastor wrote the guidelines" line may go on the start screen, never inside that warning.
+- October 26, 2026: the ESV text is on hold: only a "Read it on esv.org" button. Don't ask Dan to set up the key.
+
+**The look and the screens**
+- October 26, 2026: the "Paper and ink" look; October 28, 2026: the magazine layout, and no text under 13 pixels except verse numbers.
+- October 26, 2026: Dan's own words on the start screen, exactly (`SPEC.md`, "Words on the start screen").
+- October 26, 2026: "Go deeper with AI," a loading screen with placeholder lines, and a clean screen when a passage isn't recognized.
+- October 26, 2026: saved studies stay on the phone; the Save button says what it saves; "Remove" sits under the Save bar.
+- October 26, 2026: the home screen icon is the full name in EB Garamond, and the name under it is "In the Word."
+- October 26, 2026: verse numbers follow the NASB, ESV and NIV; "Choose from the Bible" sits above the typing box.
+- October 28, 2026: typed short names are written out in full ("Phil 2" becomes "Philippians 2").
+- October 25, 2026: a daily reading plan with no streaks or guilt, with AI questions for each reading, saved with the plan.
+- October 25, 2026: Share and Copy first; "Lead the study" (one question at a time) and a printable page are still to build.
+
+**Safety, limits and sign-ups**
+- October 26, 2026: only real Bible passages reach the AI (the server checks first); no automatic retry on another model.
+- October 28, 2026: daily limits: 20 sets a day for each signed-in person (or each connection using the passcode), 60 for everyone, and 10 wrong passcodes or codes a day for each connection. The counts start over at midnight Pacific time.
+- October 26, 2026: invite only; sign in with an email code (built) or Google (step S5, later); Apple only if wanted. The passcode goes away at step S6.
+- October 28, 2026: sign-in codes have 6 digits and last 10 minutes or 5 tries; a phone stays signed in 90 days; the app never says whether an address is invited.
+- October 26, 2026: emails go through Resend, from `sign-in@mail.danielyoonwrites.com`. Dan's web address `danielyoonwrites.com` has auto-renew off and expires October 26, 2027: remind him once, in September 2027 (sign-in and invite emails depend on it).
+- October 29, 2026: the owner's page ("Invite people"), only for Dan: two screens; "Turn off" signs someone out everywhere; rows stay in place.
+- October 29, 2026: "Daily AI limits" explained on the owner's page; no "testing only" note (only Dan sees it).
+- October 29, 2026: each tap of "Invite" emails the person in Dan's words, with replies going to his address; at most 3 a day to one address.
+
+**Phones, stores and the server**
+- October 27 and 28, 2026: no app store for now; the free steps of `STORE-PLAN.md` first, in its order.
+- October 28, 2026: Android's back gesture goes back one screen, like Back.
+- October 29, 2026: install help: "Install the app" in Chrome, or the steps for iPhone and Android; no KakaoTalk step.
+- October 29, 2026: Cloudflare deploys the server on every merge (Workers Builds, settings in `server/wrangler.jsonc`, build watch paths `*`): the one exception to "no npm." Preview builds stay off.
+
+## Log (oldest first)
 
 ### October 25, 2026: first for Dan's small group, then anyone online (pull request 36)
 - Decision: stage 1, Dan uses the app to prepare his small group's studies, with no AI; stage 2 adds AI questions written for the passage; stage 3 opens it to anyone online, like other small group leaders. Dan reviews every question before anyone sees it, and nothing is shared on its own. Stage 1 sends nothing anywhere and keeps studies only on the phone (no accounts, analytics or tracking), and shows no Bible text until translation rules are checked.
@@ -284,6 +334,7 @@ Each decision with its reason, oldest first. Only add to this file; if a decisio
 - Why: Dan chose "a" (S4) from three next steps, then "A" after seeing the screenshots. The details were Claude's choices, listed with the screenshots for him to change: no invite email, so people hear about it from him and the app sends fewer emails; two screens, for his "one thing per screen" rule; the app learns he's the owner the first time he opens the page, so he doesn't have to sign out and in again.
 - Turned down: an email to each invited person (more emails from the app, and more wording to approve); the list and the form on one long screen; moving turned-off people to the end of the list (in testing, the row jumped away from where it was tapped, and the message about it was out of sight at the top); asking Dan to sign out and in again so the app knows he's the owner.
 - Revisit if: people in the group miss the link or ask for an email, or the list gets long.
+- Status: its "no email to invited people" part was replaced by October 29, 2026: the invite email (pull request 93).
 
 ### October 29, 2026: Cloudflare deploys the server by itself (pull request 90)
 - Decision: Cloudflare's own GitHub connection (Workers Builds) deploys `server/` after each merge to main. The settings are in `server/wrangler.jsonc`: the Worker's name, `worker.js`, the compatibility date 2026-10-26 (from Dan's dashboard), the `DB` database (`living-in-the-word-limits`, its ID from Dan), logs on, and dashboard variables kept. Secrets stay in the dashboard. Build watch paths stay at `*`, so every merge builds: Cloudflare's docs don't say whether the paths count from the top of the repository or from the root directory, and a wrong guess would quietly stop every build. A build takes about a minute of the 3,000 free minutes a month (Claude's estimate). Dan connected it on October 29, 2026, just after pull request 90 merged, so the first automatic deploy is pull request 91.
@@ -308,3 +359,11 @@ Each decision with its reason, oldest first. Only add to this file; if a decisio
 - Why: Dan: "Finally I wish sending an invite would email the person the invite." It reverses the S4 choice of no invite email (Claude's, in the screenshots he approved). Replies to an email signed "Dan" would otherwise go to the sign-in address, which has no inbox for them. The `reply_to` field was read in Resend's own library (github.com/resend/resend-node, October 29, 2026).
 - Turned down: "B," the shortest words ("Dan invited you to Living in the Word, an app for Bible study questions...").
 - Revisit if: invitees reply and Dan would rather not share that address, or the emails land in spam.
+- Status: Dan merged it as is, replies to his address included (October 29, 2026). Not checked with a real email yet.
+
+### October 29, 2026: the checks saved in the repository (pull request 94)
+- Decision: Claude's checks are saved in `living-in-the-word/tests/`: `server-test.mjs` (74 checks of `server/worker.js`, with stand-ins for the database, Resend and the AI) and `app-test.mjs` (76 checks of the app in Chromium). Each runs with one command from the repository folder (`PROGRESS.md`, "How to run and check it").
+- Decided by: Dan's handoff instructions ("If you wrote checks this session (tests, Playwright scripts), save them in the project"); the files are Claude's.
+- Why: until now each session rewrote its checks ("the scripts aren't in the repository"), which costs time and tokens, and old checks can catch a change that breaks something.
+- Turned down: keeping them out of the repository, the earlier habit (Why: not recorded).
+- Note: like every file here, they're published with the website. They hold only stand-in values (made-up keys, addresses and passcode).
