@@ -1197,6 +1197,34 @@ footer p {
   margin-right: auto;
 }
 
+/* "Install the app" or "Add the app to your home screen", centered under it (store plan step 2) */
+#home .install {
+  text-align: center;
+}
+
+#home .install .quiet {
+  margin: 0 auto;
+}
+
+/* The steps for this phone, numbered 1, 2, 3 */
+.install-steps {
+  margin: 0 0 2rem;
+}
+
+.install-steps p {
+  margin: 0;
+}
+
+.install-steps ol {
+  margin: 0.75rem 0 0;
+  padding-left: 1.5rem;
+}
+
+.install-steps li {
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
 /* Each screen's heading, centered: the small label above, the title, the tip under it */
 .screen > .label,
 .screen > h2,

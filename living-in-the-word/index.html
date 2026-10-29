@@ -33,8 +33,8 @@
 
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=22">
-  <script src="app.js?v=29" defer></script>
+  <link rel="stylesheet" href="style.css?v=23">
+  <script src="app.js?v=30" defer></script>
 </head>
 <body>
 
@@ -80,6 +80,14 @@
         <p class="note account-status" hidden></p>
         <button type="button" class="quiet" data-action="sign-in" hidden>Sign in</button>
         <button type="button" class="quiet" data-action="sign-out" hidden>Sign out</button>
+      </div>
+
+      <!-- Install help (store plan step 2): in Chrome, "Install the app" opens Chrome's own
+           install window; elsewhere, "Add the app to your home screen" shows the steps for this
+           phone. Both stay hidden once the app is opened from the home screen (app.js). -->
+      <div class="install">
+        <button type="button" class="quiet" data-action="install-now" hidden>Install the app</button>
+        <button type="button" class="quiet" data-action="install-how" hidden>Add the app to your home screen</button>
       </div>
       <noscript><p class="note">This app needs JavaScript turned on in your browser.</p></noscript>
     </section>
@@ -245,7 +253,41 @@
       <p class="note no-saved" hidden>Nothing saved yet. Prepare a study, then tap Save under its questions to keep them here.</p>
       <p class="note">Saved only on this phone, in this browser. Clearing the browser’s data clears them too.</p>
       <!-- Hidden when the app is already opened from the home screen (app.js, "Works without reception") -->
-      <p class="note install-tip">Tip: add the app to your home screen, and it opens even without reception. On an iPhone, tap Share in Safari, then Add to Home Screen.</p>
+      <p class="note install-tip">Tip: add the app to your home screen from the start screen, and it opens even without reception.</p>
+    </section>
+
+    <!-- Install help: the steps for this phone, iPhone or Android (the owner's choice, October 29,
+         2026). app.js shows the right ones ("Install help"). The menu names come from search
+         results (October 29, 2026). -->
+    <section class="screen" id="install">
+      <header class="top-bar">
+        <button type="button" class="back" data-action="back">Back</button>
+        <span class="wordmark">Living in the Word</span>
+      </header>
+      <p class="label">On your phone</p>
+      <h2 tabindex="-1">Add the app to your home screen</h2>
+      <p class="study-tip">Then it opens like an app, even without reception.</p>
+
+      <div class="install-steps install-iphone" hidden>
+        <p class="label">On an iPhone</p>
+        <ol>
+          <li>Open this page in Safari.</li>
+          <li>Tap ⋯ beside the address, then Share. On older iPhones, tap Share at the bottom.</li>
+          <li>Scroll down and tap Add to Home Screen.</li>
+          <li>If you see “Open as Web App,” leave it on. Then tap Add.</li>
+        </ol>
+      </div>
+
+      <div class="install-steps install-android" hidden>
+        <p class="label">On Android</p>
+        <ol>
+          <li>Open this page in Chrome.</li>
+          <li>Tap ⋮, Chrome’s menu.</li>
+          <li>Tap Install app, or Add to Home screen, then Install.</li>
+        </ol>
+      </div>
+
+      <p class="note">Already on your home screen? Open it from there.</p>
     </section>
 
     <!-- Reading plan: set it up once. Chapter counts are at the top of the reading plan part of app.js. -->

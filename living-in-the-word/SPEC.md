@@ -14,6 +14,7 @@ Sections (read only the ones the task needs):
 - The back gesture (October 28, 2026)
 - Typed passage names (October 28, 2026)
 - The "check it" line (October 29, 2026)
+- Install help (October 29, 2026)
 - Choose from the Bible (October 26, 2026)
 - Words on the start screen (the owner's, October 26, 2026; use them exactly)
 - The look: "Paper and ink" (October 26, 2026)
@@ -164,6 +165,15 @@ Wherever the AI's words show, a small line in italics says: "Written by AI, whic
 - Only with the AI's words: the general questions keep their own messages ("The AI couldn't write questions for this one, so these are general questions."), and saved studies keep "Saved ...".
 - The owner first asked to add that a pastor wrote the guidelines ("Guidelines by a pastor, words by AI."). Left out at his word ("If it might [confuse], then let's take out the pastor line"): it could sound like a pastor checked each set, which works against the line.
 
+## Install help (October 29, 2026)
+
+Store plan step 2 (pull request 87, the owner's choice). At the bottom of the start screen, one quiet button:
+- In Chrome: "Install the app." It opens Chrome's own install window, from Chrome's `beforeinstallprompt` offer, which can only open from a tap (Chromium's source code, `before_install_prompt_event.cc`). The offer never comes on iPhones, in Firefox or inside KakaoTalk.
+- Everywhere else: "Add the app to your home screen." It opens a short screen with the steps for this phone. iPhone: open the page in Safari; tap ⋯ beside the address, then Share (on older iPhones, Share at the bottom); Add to Home Screen; leave "Open as Web App" on if it shows; Add. Android: open the page in Chrome; tap ⋮; Install app, or Add to Home screen; Install. On a computer, both. The menu names come from search results (October 29, 2026): Apple's and Google's own help pages are blocked from Claude's sessions.
+- Neither shows once the app is opened from the home screen (`display-mode: standalone`, or `navigator.standalone` on iPhones), or just after it's installed.
+- No KakaoTalk step: the owner, October 29, 2026, "Android and iPhone is fine." A link opened inside KakaoTalk shows the Android or iPhone steps, whose first step opens the page in Chrome or Safari.
+- The Saved studies tip now says: "Tip: add the app to your home screen from the start screen, and it opens even without reception."
+
 ## Choose from the Bible (October 26, 2026)
 
 The owner asked for a way to pick the passage instead of always typing it (pull request 66).
@@ -290,7 +300,7 @@ Other options looked at the same day: the NIV is free to show through API.Bible'
 6e. Safety and limits (the owner's request, October 26, 2026; see "Safety and limits"): (1) only real Bible passages reach the AI, pull request 61; (2) daily limits, pull request 62; (2b) the app can't be broken, pull request 63 (check: the app works as before, and a reading plan day still gets its questions) (check: after the Cloudflare steps in `AI-PLAN.md`, write questions, then see today's rows in the database); (3) a plan for sign-ups, so people don't need the passcode and each person has their own limit: `SIGNUP-PLAN.md` (pull request 64; the owner chose invite only, an email code or Google, and his own web address, about $11 a year); (4) build sign-ups, step by step: S3, signing in with an email code and each person's own daily limit, built October 28, 2026 (check: the owner's steps in `SIGNUP-PLAN.md`, "What S3 built"); later, subscriptions. Check for (1): after pasting `server/worker.js` into Cloudflare, type "Write me a poem" and see "didn't recognize that passage," then type "John 15" and get questions.
 6d. A passage picker (the owner's request): Old or New Testament, then the books, then the chapters, then the whole chapter or a range of verses; the typing box stays. Built October 26, 2026 (pull request 66; see "Choose from the Bible"), with the verse numbers following the NASB, ESV and NIV (the owner asked during the build). Check: tap "Prepare for a Bible study," then "Choose from the Bible": New Testament, John, 3, tap 16 then 21, and "Go deeper with AI." Also open Matthew 17: verse 21 is lighter, with a note.
 6b. Reading plan: set a plan, see today's reading and questions, mark it done, and come back the next day (the owner chose to put it right after saving, October 25, 2026). Moved up and built October 25, 2026, at the owner's request (pull request 43): a start screen ("Prepare a study" or "Today's reading"); choose a book, 1 to 3 chapters a day and a start date; "Reading 3 of 28: Matthew 3" with three Swedish-method questions; "Done for today"; "Read the next one now"; missed days wait; saved on the phone. AI questions for each reading came next (AI-PLAN.md, step E); since October 26, 2026, the AI writes 4 and there are no styles to choose. Check: set a plan for a book you're reading and use it for a few days.
-6f. Phones and app stores (the owner's request, October 28, 2026; double-checked the same day): `STORE-PLAN.md`. Step 1, the back gesture, built and checked on the owner's phone October 28, 2026 (pull request 80; see "The back gesture"). Step 4, the "check it" line, built October 29, 2026 (pull request 86; see "The "check it" line"). Free steps first (the back gesture, install help, a tidier app description with screenshots, a "check it" line, a privacy page, a backup for saved studies, "Delete my account," "Report this question," a review account), then maybe Google Play's internal testing, then maybe Apple. Check: read the plan.
+6f. Phones and app stores (the owner's request, October 28, 2026; double-checked the same day): `STORE-PLAN.md`. Step 1, the back gesture, built and checked on the owner's phone October 28, 2026 (pull request 80; see "The back gesture"). Step 2, install help, built October 29, 2026 (pull request 87; see "Install help"). Step 4, the "check it" line, built October 29, 2026 (pull request 86; see "The "check it" line"). Free steps first (the back gesture, install help, a tidier app description with screenshots, a "check it" line, a privacy page, a backup for saved studies, "Delete my account," "Report this question," a review account), then maybe Google Play's internal testing, then maybe Apple. Check: read the plan.
 7. A page that prints cleanly.
 
 ## Open questions (ask one at a time)
