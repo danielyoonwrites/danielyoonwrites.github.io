@@ -15,7 +15,7 @@
 // The daily counts and the sign-ins are in a Cloudflare D1 database connected as DB
 // (see "Daily limits" and "Signing in").
 //
-// How it's updated: after each merge to main that changes this folder, Cloudflare deploys
+// How it's updated: after each merge to main, Cloudflare deploys
 // this file by itself (Workers Builds, since October 29, 2026), with the settings in
 // wrangler.jsonc next to it. If that ever stops working, copy this whole file into the
 // Worker's code editor in Cloudflare's dashboard, then Deploy.

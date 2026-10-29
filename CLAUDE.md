@@ -38,7 +38,7 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
    Right after opening it, Claude subscribes to the pull request's activity (`subscribe_pr_activity`), so the merge wakes the session. Dan should never have to say "it merged." Claude also sets one backup check-in about 50 minutes later (`send_later`), and cancels it when the merge arrives.
 3. Dan reviews and merges on GitHub (Conversation tab, Merge pull request, Confirm merge).
 4. GitHub Actions publishes the site (workflow `.github/workflows/publish.yml`; GitHub Pages source is set to "GitHub Actions"). It takes a minute or two; check for a green mark next to **main** at https://github.com/danielyoonwrites/danielyoonwrites.github.io/actions
-   A merge that changes `living-in-the-word/server/` also deploys the server: Cloudflare builds it (Workers Builds) and shows its own check next to the merge, so Dan no longer pastes `worker.js` into Cloudflare.
+   Every merge also deploys Living in the Word's server: Cloudflare builds it (Workers Builds; its build watch paths are left at `*`, so it runs on every merge) and shows its own check next to the merge, so Dan no longer pastes `worker.js` into Cloudflare.
 5. Dan checks on his phone.
 6. When the merge wakes the session, Claude does the follow-up on its own: checks that the publish run on main succeeded, restarts the branch from main, updates the project's page in Dan's Master Notes (Notion), then tells Dan in one short message. Auto mode only skips permission prompts; it doesn't let Claude see GitHub between messages, and each new session has to subscribe again.
 
