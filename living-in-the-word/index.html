@@ -33,8 +33,8 @@
 
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=21">
-  <script src="app.js?v=28" defer></script>
+  <link rel="stylesheet" href="style.css?v=22">
+  <script src="app.js?v=29" defer></script>
 </head>
 <body>
 
@@ -299,6 +299,9 @@
       <!-- When the passage itself can't show: a big link to it on esv.org (app.js adds the passage name) -->
       <p class="esv-only" hidden><a class="esv-link" href="https://www.esv.org/" target="_blank" rel="noopener">Read it on esv.org</a></p>
       <p class="note reading-early" hidden></p>
+
+      <!-- The "check it" line, when the AI wrote this reading's questions (CHECK_IT in app.js) -->
+      <p class="note reading-check" hidden></p>
 
       <!-- The AI's short note on this reading, in a fold-out that starts open -->
       <details class="reading-note" hidden>

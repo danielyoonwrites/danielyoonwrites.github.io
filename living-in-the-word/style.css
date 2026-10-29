@@ -643,7 +643,8 @@ select {
   cursor: wait;
 }
 
-.suggest-status {
+.suggest-status,
+.reading-check {
   margin: 0 0 1.25rem;
   font-style: italic;
 }

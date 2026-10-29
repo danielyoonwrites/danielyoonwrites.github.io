@@ -570,6 +570,16 @@ document.querySelector('#passcode form').addEventListener('submit', (event) => {
   finishSignIn();   // back to where it was asked for, and on with what was asked
 });
 
+// The "check it" line, shown with the AI's words. Anthropic's Commercial Terms (section D.3)
+// say the people using the app must be told to check the AI's facts, and its Usage Policy
+// asks chatbots and AI agents to say that people are dealing with AI. The owner's choice,
+// October 29, 2026.
+// ("Guidelines by a pastor" was left out: it could sound like a pastor checked each set.)
+const CHECK_IT = {
+  study: 'Written by AI, which can make mistakes. Check what it says against your Bible, and change anything before you use it.',
+  reading: 'Written by AI, which can make mistakes. Check what it says against your Bible.',
+};
+
 function setStatus(text) {
   const status = document.querySelector('.suggest-status');
   status.textContent = text;
@@ -674,7 +684,7 @@ async function requestSuggestions() {
   leaderNote = result.leaderNote || '';
   openLeaderNote();
   edited = false;
-  setStatus('Written for this passage. Read each one, and change anything before you use it.');
+  setStatus(CHECK_IT.study);
   showQuestions();
 
   if (testMode) {
@@ -1245,7 +1255,7 @@ function showToday(keepHistory = true) {
   shownReading = plan.done;
   showWriting('today', readingRequest === plan.done);   // still writing this one's questions?
   const saved = plan.questions && plan.questions[questionsKey(plan.done)];
-  showReflect(saved ? saved.questions : READING_QUESTIONS, saved ? saved.note : '');
+  showReflect(saved ? saved.questions : READING_QUESTIONS, saved ? saved.note : '', Boolean(saved));
   setReadingStatus('');
   document.querySelector('.reading-ai').hidden = true;
   if (!saved && SERVER_URL) {
@@ -1257,8 +1267,9 @@ function showToday(keepHistory = true) {
   show('today');
 }
 
-// Shows the questions to think about, and the AI's note if there is one
-function showReflect(questions, note) {
+// Shows the questions to think about, the AI's note if there is one, and the "check it"
+// line when the AI wrote them (byAI)
+function showReflect(questions, note, byAI) {
   const list = document.querySelector('.reflect-list');
   list.textContent = '';
   questions.forEach((question) => {
@@ -1270,6 +1281,11 @@ function showReflect(questions, note) {
   noteBox.hidden = !note;
   noteBox.open = true;    // open each time a reading shows, like "For the leader" (the owner's choice, October 28, 2026)
   fill('.reading-note-text', note || '');
+
+  // The "check it" line, only when the AI wrote these (not with the general questions)
+  const check = document.querySelector('.reading-check');
+  check.textContent = byAI ? CHECK_IT.reading : '';
+  check.hidden = !byAI;
 }
 
 function setReadingStatus(text) {
@@ -1328,7 +1344,7 @@ async function fetchReadingQuestions(n) {
   now.questions[key] = { questions: result.questions, note: result.leaderNote || '' };
   writeSaved(saved);
   if (onScreen) {
-    showReflect(result.questions, result.leaderNote || '');
+    showReflect(result.questions, result.leaderNote || '', true);
     setReadingStatus('');
   }
 }
