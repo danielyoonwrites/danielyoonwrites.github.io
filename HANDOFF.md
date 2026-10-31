@@ -27,7 +27,7 @@ This repository is public. Keep personal details out of this file.
 
 ## Waiting on Dan
 
-1. Merge pull request 101 (the website's rules load only for its own files; notes only, nothing to paste): https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/101, Conversation tab, Merge pull request, Confirm merge.
+1. Merge pull request 102 (Living in the Word: the test link says how long the wait was): https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/102, Conversation tab, Merge pull request, Confirm merge. Then the wait check, item 2 in `living-in-the-word/PROGRESS.md`.
 2. Living in the Word: everything waiting, with every step, is in `living-in-the-word/PROGRESS.md` ("Waiting on Dan"): the next-chapter check, the Matthew 1 check, the invite test, and the smaller checks.
 3. The Anthropic API key expires November 24, 2026: a new key, saved in Cloudflare as `ANTHROPIC_API_KEY`. Remind him in good time, with every step (in `living-in-the-word/PROGRESS.md`).
 4. The other apps: Fewer spam calls needs the Samsung steps checked on a real Samsung phone; First step smaller waits for his daily trial. Details in each `PROGRESS.md`.

@@ -52,7 +52,7 @@ export function makeD1() {
 
 // ---- Stand-ins for Resend and Anthropic
 export const mail = [];
-export const ai = { calls: 0 };
+export const ai = { calls: 0, delay: 0 };   // delay: milliseconds the stand-in AI takes (for the timing checks)
 globalThis.fetch = async (url, init) => {
   if (String(url).startsWith('https://api.resend.com/')) {
     const body = JSON.parse(init.body);
@@ -65,6 +65,7 @@ globalThis.fetch = async (url, init) => {
   if (String(url).startsWith('https://api.anthropic.com/')) {
     ai.calls += 1;
     ai.last = JSON.parse(init.body);   // what the server sent, for the guidance checks
+    if (ai.delay) await new Promise((resolve) => setTimeout(resolve, ai.delay));
     const answer = { known_passage: true, leader_note: 'A short note.', questions: ['What stands out?', 'What does it show about God?', 'How will you respond?'] };
     return new Response(JSON.stringify({
       model: 'claude-sonnet-5-5', stop_reason: 'end_turn',
@@ -319,6 +320,15 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   check('wrong passcode still refused', wrongPasscode.status === 401 && wrongPasscode.body.error === 'wrong-passcode');
   const preflight = await worker3.fetch(new Request('https://w.example/', { method: 'OPTIONS', headers: { Origin: ORIGIN } }), env3);
   check('preflight allows the Authorization header', preflight.status === 204 && /authorization/.test(preflight.headers.get('Access-Control-Allow-Headers')));
+
+  // 21. How long the AI took (aiSeconds, for the test link): in seconds, to one decimal place
+  check('aiSeconds: about 0 when the AI answers at once', viaPasscode.body.aiSeconds >= 0 && viaPasscode.body.aiSeconds < 0.5, JSON.stringify(viaPasscode.body));
+  ai.delay = 1200;
+  const timed = await call(worker3, env3, { passage: 'John 2', method: 'study', passcode: env3.PASSCODE });
+  ai.delay = 0;
+  const seconds = timed.body.aiSeconds;
+  check('aiSeconds: 1.2 seconds is about 1.2', seconds >= 1.1 && seconds < 2.5, JSON.stringify(timed.body));
+  check('aiSeconds: one decimal place', Number.isInteger(Math.round(seconds * 10)) && String(seconds).split('.')[1]?.length <= 1, String(seconds));
 
   console.log(passed + ' passed, ' + failed + ' failed');
   process.exit(failed ? 1 : 0);

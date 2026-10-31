@@ -916,12 +916,17 @@ async function askClaude(apiKey, passage, pattern) {
   // the general questions instead.
   // https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback
 
+  // How long the AI takes, for the test link (?test): Cloudflare's clock stands still while code
+  // runs, but moves on across a request like this one, so this times just the AI's part.
+  // https://github.com/cloudflare/cloudflare-docs/blob/production/src/content/docs/workers/runtime-apis/performance.mdx
+  const started = Date.now();
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
   });
   const result = await response.json();
+  const aiSeconds = Math.round((Date.now() - started) / 100) / 10;   // like 38.4
 
   // The monthly spending limit, a rate limit, or the month's credits were used up
   if (response.status === 429 || (result.error && /usage limits|credit balance/i.test(result.error.message || ''))) {
@@ -952,6 +957,7 @@ async function askClaude(apiKey, passage, pattern) {
     inputTokens: usage.input_tokens || 0,
     outputTokens: usage.output_tokens || 0,
     cost,   // in US dollars, like 0.031
+    aiSeconds,
   };
 }
 

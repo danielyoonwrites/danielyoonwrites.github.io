@@ -293,6 +293,7 @@ function startStudy(text) {
   show('questions');
   showQuestions();
   if (ready) {
+    showTestLine(null);
     prepareStudyAhead(passage);   // and the chapter after it
     return;
   }
@@ -482,8 +483,30 @@ let latestRequest = 0;   // counts requests, so only the newest one changes the 
 let askingFor = '';      // the passage the AI is writing for, while asking
 let studyAhead = null;   // { passage, answer, taken } while the next chapter's questions are written ahead
 
-// The test link (the address with ?test) shows what each answer cost
+// The test link (the address with ?test) shows what each answer cost, and how long it took
 const testMode = new URLSearchParams(window.location.search).has('test');
+
+// Fills in the test line under the questions. Added October 31, 2026 (the owner's choice: see
+// how long the questions take before changing anything). `waited` is in seconds, from "Go deeper
+// with AI" until the questions came; the server says how long the AI's part took (aiSeconds).
+// With no answer (result null), the questions were written ahead and showed at once.
+function showTestLine(result, waited, fromAhead) {
+  if (!testMode) return;
+  const line = document.querySelector('.test-cost');
+  if (!result) {
+    line.textContent = 'Written ahead, so no wait.';
+  } else {
+    const ai = typeof result.aiSeconds === 'number' ? result.aiSeconds.toFixed(1) : '';
+    let wait = 'You waited ' + waited.toFixed(1) + ' seconds';
+    if (ai && fromAhead) wait += '; it was already being written ahead (the AI took ' + ai + ' in all).';
+    else if (ai) wait += '; the AI took ' + ai + ' of them.';
+    else wait += '.';   // an older copy of the server, before aiSeconds
+    line.textContent = result.inputTokens.toLocaleString() + ' tokens in, ' +
+      result.outputTokens.toLocaleString() + ' out. About ' +
+      (result.cost * 100).toFixed(2) + ' cents. ' + wait;
+  }
+  line.hidden = false;
+}
 
 // True if this phone can ask the AI helper: it's signed in, or it has the passcode
 function canAsk() {
@@ -642,12 +665,15 @@ async function requestSuggestions() {
   const forPassage = passage;
 
   let result = null;
+  let fromAhead = false;
+  const started = Date.now();   // for the test line: how long the wait was
   const stop = new AbortController();
   const timer = setTimeout(() => stop.abort(), 120000);   // give up after 2 minutes
   try {
     if (studyAhead && samePassage(studyAhead.passage, forPassage)) {
       // Already being written ahead (after the chapter before it): wait for that answer
       studyAhead.taken = true;
+      fromAhead = true;
       result = await studyAhead.answer;
     } else {
       const response = await askServer({ passage: forPassage, method: 'study' }, stop.signal);
@@ -657,6 +683,7 @@ async function requestSuggestions() {
     result = { error: 'offline' };
   }
   clearTimeout(timer);
+  const waited = (Date.now() - started) / 1000;
 
   // A newer request started while waiting (a new passage was typed): it changes the screen instead
   if (thisRequest !== latestRequest) return;
@@ -708,13 +735,7 @@ async function requestSuggestions() {
   setStatus(CHECK_IT.study);
   showQuestions();
 
-  if (testMode) {
-    const cost = document.querySelector('.test-cost');
-    cost.textContent = result.inputTokens.toLocaleString() + ' tokens in, ' +
-      result.outputTokens.toLocaleString() + ' out. About ' +
-      (result.cost * 100).toFixed(2) + ' cents.';
-    cost.hidden = false;
-  }
+  showTestLine(result, waited, fromAhead);
   prepareStudyAhead(forPassage);   // then the next chapter's, quietly
 }
 

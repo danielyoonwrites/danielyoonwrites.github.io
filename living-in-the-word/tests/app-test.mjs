@@ -12,7 +12,7 @@ import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import os from 'node:os';
 import path from 'node:path';
-import { makeD1, freshWorker, makeEnv, call, signIn } from './server-test.mjs';
+import { makeD1, freshWorker, makeEnv, call, signIn, ai } from './server-test.mjs';
 
 const require = createRequire(import.meta.url);
 let playwright;
@@ -506,6 +506,7 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
   check('Y1: Philippians 1 shows its questions and the "check it" line', (await text(page, '.passage-name')) === 'Philippians 1'
     && (await page.locator('.question-list textarea').count()) === 3 && (await text(page, '.suggest-status')) === CHECK);
   check('Y2: Philippians 2 written ahead, once, and kept', times('Philippians 2') === 1 && (await kept(page)) === 'Philippians 2', JSON.stringify(asked));
+  check('Y2: without ?test, no test line', !(await visible(page, '.test-cost')));
 
   // Y3. Philippians 2 (typed "phil 2") opens at once, without asking again; Philippians 3 is next
   await typePassage(page, 'phil 2');
@@ -561,6 +562,65 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
     check('Y8: not signed in: nothing asked for', asked.length === before && !(await saved(page)).ahead, JSON.stringify(asked.slice(before)));
     await context.close();
   }
+}
+
+// ---- Z. The test link (?test) says how long the wait was, and the AI's part of it
+// (the owner's choice, October 31, 2026: measure before changing anything). Someone new is
+// invited for this, so the owner's daily limit from W and Y doesn't get in the way.
+{
+  await call(worker, env, { action: 'invite', email: 'timer@example.com', name: 'Timer' }, { key: ownerKey3 });
+  const timerKey = (await signIn(worker, env, 'timer@example.com', '198.51.100.61')).body.session;
+  const typePassage = async (page, typed) => {
+    const now = await active(page);
+    if (now === 'home') await page.click('[data-action="study"]');
+    else if (now !== 'passage') await page.click('#questions .back');
+    await page.fill('#passage-text', typed);
+    await page.click('#passage button[type="submit"]');
+  };
+  const questionsShow = (page) => page.waitForFunction(() => document.querySelectorAll('.question-list textarea').length > 0
+    && !document.getElementById('questions').classList.contains('writing'));
+  const aheadIs = (page, passage) => page.waitForFunction((p) => (JSON.parse(localStorage.getItem('living-in-the-word')).ahead || {}).passage === p, passage);
+  const line = (page) => text(page, '.test-cost');
+
+  const { context, page, errors } = await newPhone();
+  await page.goto(APP + '?test');
+  await page.evaluate((key) => localStorage.setItem('living-in-the-word', JSON.stringify({ version: 1, session: key, email: 'timer@example.com' })), timerKey);
+  await page.goto(APP + '?test');
+  await page.waitForLoadState('networkidle');
+  ai.delay = 1200;   // the stand-in AI takes 1.2 seconds
+
+  // Z1. Mark 1: the cost, then "You waited ... seconds; the AI took ... of them."
+  await typePassage(page, 'Mark 1');
+  await questionsShow(page);
+  const z1 = (await line(page)).match(/^100 tokens in, 50 out\. About 0\.07 cents\. You waited (\d+\.\d) seconds; the AI took (\d+\.\d) of them\.$/);
+  check('Z1: the test line shows the wait and the AI\'s part', Boolean(z1) && (await visible(page, '.test-cost')), await line(page));
+  check('Z1: the AI took about 1.2 seconds, and the wait was at least that', Boolean(z1) && Number(z1[2]) >= 1.1 && Number(z1[2]) < 2.5 && Number(z1[1]) >= Number(z1[2]), z1 && z1.join(' '));
+  await page.screenshot({ path: SHOTS + 'z1-test-line.png' });
+  await noSideScroll(page, 'Z1 test line, 360 wide');
+
+  // Z2. Mark 2 was written ahead: it opens at once, and the line says so
+  await aheadIs(page, 'Mark 2');
+  holdAnswer('Mark 3');   // Mark 3, written ahead next, waits until released (for Z3)
+  await typePassage(page, 'Mark 2');
+  check('Z2: written ahead: "no wait"', (await line(page)) === 'Written ahead, so no wait.' && (await visible(page, '.test-cost')), await line(page));
+
+  // Z3. Mark 3 opened while it's still being written ahead: the line says that, with the AI's time
+  await waitUntil(() => asked.includes('Mark 3|study'));
+  await typePassage(page, 'Mark 3');
+  await new Promise((r) => setTimeout(r, 300));
+  release();
+  hold = null;
+  await questionsShow(page);
+  check('Z3: already being written ahead', /^100 tokens in, 50 out\. About 0\.07 cents\. You waited \d+\.\d seconds; it was already being written ahead \(the AI took \d+\.\d in all\)\.$/.test(await line(page)), await line(page));
+
+  // Z4. A small phone (320 wide): no sideways scroll with the longest line
+  await page.setViewportSize({ width: 320, height: 640 });
+  await noSideScroll(page, 'Z3 test line, 320 wide');
+  await page.evaluate(() => document.querySelector('.test-cost').scrollIntoView({ block: 'center' }));
+  await page.screenshot({ path: SHOTS + 'z4-test-line-320.png' });
+  ai.delay = 0;
+  check('Z: no errors', errors.length === 0, errors.join(' | '));
+  await context.close();
 }
 
 await browser.close();

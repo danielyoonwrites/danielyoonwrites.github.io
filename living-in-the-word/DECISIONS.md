@@ -31,6 +31,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 26, 2026: saved studies stay on the phone; the Save button says what it saves; "Remove" sits under the Save bar.
 - October 31, 2026: the reading plan writes the next reading's questions ahead, quietly, one reading ahead only.
 - October 31, 2026: "Prepare for a Bible study" writes the next chapter's questions ahead after a whole chapter (one set kept on the phone, used once).
+- October 31, 2026: the test link (`?test`) shows how long the wait was and the AI's part of it; the wait is measured before changing anything about speed.
 - October 26, 2026: the home screen icon is the full name in EB Garamond, and the name under it is "In the Word."
 - October 26, 2026: verse numbers follow the NASB, ESV and NIV; "Choose from the Bible" sits above the typing box.
 - October 28, 2026: typed short names are written out in full ("Phil 2" becomes "Philippians 2").
@@ -129,6 +130,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - Decision: Sonnet 5.5 becomes the only model, and the test link (`?test`) shows only the cost of each answer.
 - Why: not recorded. Dan picked it after trying John 1 with all three models.
 - Turned down: Opus 5.5 and Haiku 5.5.
+- Status: the test link also shows how long the wait was since October 31, 2026 ("measure the wait before changing anything," pull request 102).
 
 ### October 26, 2026: 5 questions, the fifth about praying together (pull request 51)
 - Decision: 5 questions instead of 4, the 5th about praying together (Dan's choice); the reading plan gets 5 too (one way to live it out today, then prayer). Replaces the 4 questions of pull request 50. The button says "Write questions with AI," with a line under it saying it writes 5 new study questions.
@@ -398,3 +400,11 @@ The "In force" list right below is every decision that still holds, one line eac
 - Turned down: pre-writing every chapter; keeping every answer on the server; Opus 5.5 in fast mode for group studies (still the option for section-by-section weeks); book summaries to make it faster (Dan's idea: "writing some helpful summaries of each book so that doesn't need to be thought out every time"). Claude found summaries unlikely to speed things up much: Anthropic calls effort "the main control for how much Claude Sonnet 5.5 thinks," and most of the thinking is about the chapter itself. They could still help consistency, tested on one book first ("(B)" in Claude's question; not chosen for now).
 - Cost: the same per study; about 2 cents wasted when the next chapter isn't used.
 - Revisit if: the section-by-section weeks' wait bothers Dan (then fast mode), or sets written ahead often go unused.
+- Result: Dan, October 31, 2026, after trying Philippians 1 and then 2: "Yes it works thank you." The first chapter still felt slow (next entry).
+
+### October 31, 2026: measure the wait before changing anything (pull request 102)
+- Decision: the test link (`?test`) also says how long the wait was, after the cost, like "You waited 41.3 seconds; the AI took 39.8 of them." The app times from "Go deeper with AI" until the questions come (`showTestLine` in `app.js`); the server times only its own request to the AI and sends that back as `aiSeconds` (`askClaude` in `server/worker.js`). A set written ahead says "Written ahead, so no wait."; one opened while it's still being written ahead says so, with the AI's whole time. Only in "Prepare for a Bible study," like the cost (the reading plan shows no test line). Nothing about the questions or the AI changes.
+- Why: Dan, after the next chapter opened at once: "Yes it works thank you. I still feel like the questions for Philippians 1 really take very long to load." No wait had been timed before (the October 28 and 31 speed choices went by feel), so the seconds show how long "very long" is, whether the AI's part is most of it, and give a before-and-after if anything changes. Claude offered "(a)" Opus 5.5 in fast mode only for the set someone waits for (Claude's recommendation), "(b)" measuring first, and "(c)" leaving it. Dan chose "B".
+- Checked for the options (Anthropic's reference in Claude Code's claude-api skill, last updated October 6, 2026): fast mode on Opus 5.5 is $8 / $40 per million tokens (twice Opus 5.5's $4 / $20), "up to 2.5x higher output tokens per second", a research preview, on Claude's own API only; Sonnet 5.5 is $2 / $10. Not re-checked: that fast mode needs the Start tier or higher (the morning's research, in pull request 96's entry). For the timing, Cloudflare's docs (`cloudflare/cloudflare-docs` on GitHub, `workers/runtime-apis/performance.mdx`, read October 31, 2026): a Worker's timers "only advance or increment after I/O occurs," and wrapping a subrequest in them measures it, so the server's clock times just the AI's request.
+- Turned down for now: "(a)" fast mode for the set someone waits for (about 6 cents a set instead of about 2.3, by Claude's estimate from the Romans 14 costs; Dan found Opus's questions deeper on October 28, but the first chapter's set could read differently from the ones written ahead on Sonnet); "(c)" leaving it.
+- Revisit when: Dan has the seconds for a first chapter or two. Then "(a)" or "(c)".
