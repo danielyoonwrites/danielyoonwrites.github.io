@@ -29,6 +29,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 26, 2026: Dan's own words on the start screen, exactly (`SPEC.md`, "Words on the start screen").
 - October 26, 2026: "Go deeper with AI," a loading screen with placeholder lines, and a clean screen when a passage isn't recognized.
 - October 26, 2026: saved studies stay on the phone; the Save button says what it saves; "Remove" sits under the Save bar.
+- October 31, 2026: the reading plan writes the next reading's questions ahead, quietly, one reading ahead only.
 - October 26, 2026: the home screen icon is the full name in EB Garamond, and the name under it is "In the Word."
 - October 26, 2026: verse numbers follow the NASB, ESV and NIV; "Choose from the Bible" sits above the typing box.
 - October 28, 2026: typed short names are written out in full ("Phil 2" becomes "Philippians 2").
@@ -376,3 +377,10 @@ The "In force" list right below is every decision that still holds, one line eac
 - Decided by: Dan (the rule, October 31, 2026); the wording is Claude's, in his words where possible, for him to change.
 - Turned down: nothing else was offered.
 - Revisit if: a passage that does tell of hard things (Matthew 2, Judges 19) stops getting its heads-up, or questions start skipping what a passage does stress.
+
+### October 31, 2026: the reading plan's questions ready ahead (pull request 96)
+- Decision: once the open reading's questions are saved, the app quietly asks the AI for the next reading's too and saves them with the plan, so the next reading opens with its questions ready (`prepareAhead` in `app.js`). Only one reading ahead. Nothing shows on screen while it's written, unless that reading is opened first ("Read the next one now"), which then shows the usual "Writing questions for ..." until they arrive. Same sign-in, same daily limits; no change to the server or the AI's settings.
+- Why: Dan, October 31, 2026: "I noticed this sonnet version is still quite slow, maybe as slow as Opus... Is it my guidelines and directions that is causing this? How can I fix that and improve it for speed without losing the accuracy and the good question generation I currently have? If there is not a way, then don't change anything." Claude found the wait is mostly the AI's hidden thinking (the "high" effort and "Think the problem through" line since October 28), not the guidance's length, and that lowering effort would lower quality (Anthropic's Sonnet 5.5 guide, read October 31, 2026). Of the three options, Dan chose "(a)": "Let's do a."
+- Turned down: "(b)" Opus 5.5 in fast mode (up to 2.5 times faster writing, but about 6 cents a set instead of about 2.3, by Claude's estimate, and it needs the Start tier or higher); "(c)" changing nothing; `medium` effort, Haiku 5.5, streaming and a shorter guidance (Claude didn't recommend them; reasons in `PROGRESS.md`, "Speed").
+- Cost: the same per reading, since each reading's questions are written once either way. If a plan ends early, at most one set goes unused. If the app is closed within about half a minute of opening a reading, the next one's set may not arrive; then it's written when that reading opens, as before (that set may still be billed).
+- Revisit if: the wait for "Prepare for a Bible study" still bothers Dan (then fast mode, option "(b)"), or sets written ahead often go unused.

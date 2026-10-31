@@ -1484,6 +1484,7 @@ function showToday(keepHistory = true) {
   }
   if (plan.lastDone === today() && !readingAhead) {
     showDoneToday(plan, keepHistory);
+    prepareAhead();   // tomorrow's questions, if they aren't ready yet
     return;
   }
 
@@ -1497,15 +1498,17 @@ function showToday(keepHistory = true) {
   // The AI's questions for this reading if they're saved; otherwise the general ones,
   // and the AI is asked (when it's set up and this phone is signed in or has the passcode)
   shownReading = plan.done;
-  showWriting('today', readingRequest === plan.done);   // still writing this one's questions?
+  const writing = readingRequest === plan.done;   // still writing this one's questions (maybe ahead of time)?
+  showWriting('today', writing);
   const saved = plan.questions && plan.questions[questionsKey(plan.done)];
   showReflect(saved ? saved.questions : READING_QUESTIONS, saved ? saved.note : '', Boolean(saved));
-  setReadingStatus('');
+  setReadingStatus(writing ? writingText(readingName(plan, plan.done)) : '');
   document.querySelector('.reading-ai').hidden = true;
   if (!saved && SERVER_URL) {
     if (canAsk() && !readingFailed.has(plan.done)) fetchReadingQuestions(plan.done);
     else document.querySelector('.reading-ai').hidden = false;
   }
+  prepareAhead();   // the next reading's questions, quietly
 
   if (!keepHistory) screens.forEach((screen) => screen.classList.remove('active'));
   show('today');
@@ -1538,16 +1541,23 @@ function setReadingStatus(text) {
   status.hidden = !text;
 }
 
-// Asks the AI helper for questions on reading number n, and saves them with the plan
+function writingText(name) {
+  return 'Writing questions for ' + name + '. This can take up to a minute.';
+}
+
+// Asks the AI helper for questions on reading number n, and saves them with the plan.
+// Only the reading on screen shows that the AI is writing; the next one (prepareAhead) is quiet.
 async function fetchReadingQuestions(n) {
   if (readingRequest === n) return;
   readingRequest = n;
-  document.querySelector('.reading-ai').hidden = true;
   const plan = readSaved().plan;
   const name = readingName(plan, n);
   const key = questionsKey(n);
-  setReadingStatus('Writing questions for ' + name + '. This can take up to a minute.');
-  showWriting('today', shownReading === n);
+  if (shownReading === n) {
+    document.querySelector('.reading-ai').hidden = true;
+    setReadingStatus(writingText(name));
+    showWriting('today', true);
+  }
 
   let result;
   try {
@@ -1556,7 +1566,7 @@ async function fetchReadingQuestions(n) {
   } catch (error) {
     result = { error: 'offline' };
   }
-  readingRequest = null;
+  if (readingRequest === n) readingRequest = null;   // (a newer plan's request keeps its place)
   if (shownReading === n) showWriting('today', false);
 
   // The plan was ended or changed while waiting: these questions don't belong anymore
@@ -1591,6 +1601,24 @@ async function fetchReadingQuestions(n) {
     showReflect(result.questions, result.leaderNote || '', true);
     setReadingStatus('');
   }
+  prepareAhead();   // then the next reading's, quietly
+}
+
+// Questions ready ahead (the owner's choice, October 31, 2026): once the open reading's
+// questions are saved, the AI quietly writes the next reading's too, so it opens with them
+// ready instead of a wait of up to a minute. Only one reading ahead, so ending a plan early
+// leaves at most one set unused. Each set still counts toward the daily limits.
+function prepareAhead() {
+  const plan = readSaved().plan;
+  if (!plan || !SERVER_URL || !canAsk() || readingRequest !== null) return;
+  const questions = plan.questions || {};
+  const doneToday = plan.lastDone === today() && !readingAhead;
+  // The open reading comes first: wait until its questions are saved
+  if (!doneToday && !questions[questionsKey(plan.done)]) return;
+  // After "Done for today", the next reading is tomorrow's; otherwise it's the one after this
+  const next = doneToday ? plan.done : plan.done + 1;
+  if (next >= readingsIn(plan) || questions[questionsKey(next)] || readingFailed.has(next)) return;
+  fetchReadingQuestions(next);
 }
 
 function showDoneToday(plan, keepHistory = true) {
@@ -1658,6 +1686,7 @@ Object.assign(actions, {
     const saved = readSaved();
     delete saved.plan;
     writeSaved(saved);
+    readingRequest = null;   // a set still being written belonged to the old plan
     showSetup();
     visited = ['home'];
   },
@@ -1678,6 +1707,7 @@ Object.assign(actions, {
     const saved = readSaved();
     delete saved.plan;
     writeSaved(saved);
+    readingRequest = null;   // a set still being written belonged to the old plan
     goHome();
   },
 });

@@ -31,6 +31,7 @@ mkdirSync(SHOTS, { recursive: true });
 // Serve the repository folder, like GitHub Pages does, and wait until it answers
 const repository = fileURLToPath(new URL('../../', import.meta.url));
 const webServer = spawn('python3', ['-m', 'http.server', '8765', '--bind', '127.0.0.1'], { cwd: repository, stdio: 'ignore' });
+process.on('exit', () => webServer.kill());   // even when a check stops the run early
 // (node:http, because server-test.mjs replaces fetch with its stand-ins)
 const answers = () => new Promise((resolve) => {
   http.get(APP, (response) => { response.resume(); resolve(response.statusCode === 200); }).on('error', () => resolve(false));
@@ -57,6 +58,8 @@ const worker = await freshWorker();
 const env = makeEnv(makeD1());
 let offline = false;
 let requests = 0;
+const asked = [];   // each set of questions asked for, like "Philippians 2|personal"
+let hold = null;    // { passage, waiting }: that passage's answer waits until released (section W)
 
 const browser = await chromium.launch({
   proxy: process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY, bypass: '127.0.0.1,localhost' } : undefined,
@@ -77,7 +80,14 @@ async function newPhone(width = 360, height = 740) {
     const headers = Object.fromEntries(Object.entries(await request.allHeaders()).filter(([name]) => !name.startsWith(':')));
     headers['cf-connecting-ip'] = '203.0.113.9';
     const init = { method: request.method(), headers };
-    if (request.method() === 'POST') init.body = request.postData();
+    if (request.method() === 'POST') {
+      init.body = request.postData();
+      const sent = JSON.parse(init.body || '{}');
+      if (sent.passage && !sent.want) {
+        asked.push(sent.passage + '|' + sent.method);
+        if (hold && hold.passage === sent.passage) await hold.waiting;
+      }
+    }
     const response = await worker.fetch(new Request(WORKER, init), env);
     await route.fulfill({ status: response.status, headers: Object.fromEntries(response.headers), body: await response.text() });
   });
@@ -355,6 +365,113 @@ const ownerKey = (await signIn(worker, env, 'owner@example.com')).body.session;
     await page.screenshot({ path: SHOTS + 'list-' + width + '.png', fullPage: true });
     await page.click('[data-action="invite"]');
     await noSideScroll(page, 'invite ' + width);
+    await context.close();
+  }
+}
+
+// ---- W. The reading plan: the next reading's questions are written ahead, quietly
+// (the owner's choice, October 31, 2026)
+{
+  const ownerKey3 = (await signIn(worker, env, 'owner@example.com', '198.51.100.60')).body.session;
+  const times = (passage) => asked.filter((item) => item === passage + '|personal').length;
+  const waitUntil = async (test) => { for (let i = 0; i < 60 && !test(); i += 1) await new Promise((r) => setTimeout(r, 100)); };
+  const writing = (page) => page.evaluate(() => document.getElementById('today').classList.contains('writing'));
+  const startPlan = async (page, book) => {
+    await page.click('[data-action="reading"]');
+    await page.selectOption('#plan-book', book);
+    await page.click('#plan-setup button[type="submit"]');
+    await page.waitForFunction(() => !document.querySelector('.reading-check').hidden);
+  };
+  let release;
+  const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolve) => { release = resolve; }) }; };
+
+  const { context, page, errors } = await newPhone();
+  await signedInAs(page, ownerKey3, 'owner@example.com', true);
+
+  // W1, W2. A plan: Philippians, 1 chapter a day. Chapter 1's questions, then chapter 2's,
+  // quietly: nothing about chapter 2 shows on chapter 1's screen while it's written
+  holdAnswer('Philippians 2');
+  await startPlan(page, 'Philippians');
+  check('W1: Philippians 1 opens with the AI questions', (await text(page, '.reading-name')) === 'Philippians 1' && (await page.locator('.reflect-list li').count()) === 3);
+  await waitUntil(() => times('Philippians 2') > 0);
+  check('W2: Philippians 2 asked for ahead', times('Philippians 2') === 1, JSON.stringify(asked));
+  check('W2: quietly (no writing lines or message on Philippians 1)', !(await writing(page)) && !(await visible(page, '.reading-status')) && (await page.locator('.reflect-list li').count()) === 3);
+  await page.screenshot({ path: SHOTS + 'w2-reading-while-the-next-is-written.png', fullPage: true });
+
+  // W3. "Read the next one now" while chapter 2's are still being written: it says so, then shows them
+  await page.click('[data-action="done-reading"]');
+  check('W3: Done for today', (await active(page)) === 'reading-done');
+  await page.click('[data-action="read-ahead"]');
+  check('W3: Philippians 2 says it is being written', (await text(page, '.reading-name')) === 'Philippians 2' && (await writing(page)) && (await text(page, '.reading-status')) === 'Writing questions for Philippians 2. This can take up to a minute.');
+  release();
+  hold = null;
+  await page.waitForFunction(() => !document.querySelector('.reading-check').hidden);
+  check('W3: then its questions show', !(await writing(page)) && !(await visible(page, '.reading-status')) && (await page.locator('.reflect-list li').count()) === 3);
+  check('W3: Philippians 2 asked for only once', times('Philippians 2') === 1, JSON.stringify(asked));
+
+  // W4. Then chapter 3's, and only one reading ahead
+  await page.waitForFunction(() => Boolean(JSON.parse(localStorage.getItem('living-in-the-word')).plan.questions['five-2']));
+  await new Promise((r) => setTimeout(r, 300));
+  check('W4: Philippians 3 written ahead and saved', times('Philippians 3') === 1, JSON.stringify(asked));
+  check('W4: only one ahead (not Philippians 4)', times('Philippians 4') === 0, JSON.stringify(asked));
+
+  // W5. The next day: chapter 3 opens with its questions ready, and chapter 4's are written ahead
+  await page.click('[data-action="done-reading"]');
+  await page.evaluate(() => {
+    const all = JSON.parse(localStorage.getItem('living-in-the-word'));
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    all.plan.lastDone = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    localStorage.setItem('living-in-the-word', JSON.stringify(all));
+  });
+  await page.goto(APP);
+  await page.waitForLoadState('networkidle');
+  await page.click('[data-action="reading"]');
+  check('W5: Philippians 3 opens with its questions, no wait', (await text(page, '.reading-name')) === 'Philippians 3' && !(await writing(page)) && (await visible(page, '.reading-check')));
+  check('W5: Philippians 3 not asked for again', times('Philippians 3') === 1, JSON.stringify(asked));
+  await page.screenshot({ path: SHOTS + 'w5-next-day-ready.png', fullPage: true });
+  await waitUntil(() => times('Philippians 4') > 0);
+  check('W5: Philippians 4 written ahead', times('Philippians 4') === 1, JSON.stringify(asked));
+
+  // W6. The last reading: nothing past the end
+  await page.click('[data-action="done-reading"]');
+  await page.click('[data-action="read-ahead"]');
+  await new Promise((r) => setTimeout(r, 500));
+  check('W6: nothing asked for past the last reading', asked.filter((item) => item.startsWith('Philippians')).length === 4, JSON.stringify(asked));
+  check('W: no errors', errors.length === 0, errors.join(' | '));
+  await context.close();
+
+  // W7. A phone that isn't signed in asks for nothing ahead
+  {
+    const before = asked.length;
+    const { context, page } = await newPhone();
+    await page.goto(APP);
+    await page.click('[data-action="reading"]');
+    await page.selectOption('#plan-book', 'Philippians');
+    await page.click('#plan-setup button[type="submit"]');
+    await new Promise((r) => setTimeout(r, 500));
+    check('W7: not signed in: nothing asked for', asked.length === before, JSON.stringify(asked.slice(before)));
+    check('W7: "Questions for this reading" shows instead', await visible(page, '[data-action="reading-ai"]'));
+    await context.close();
+  }
+
+  // W8. Ending the plan while the next reading is being written: that answer isn't kept
+  {
+    const { context, page, errors } = await newPhone();
+    await signedInAs(page, ownerKey3, 'owner@example.com', true);
+    page.on('dialog', (dialog) => dialog.accept());
+    const before = times('Philippians 2');
+    holdAnswer('Philippians 2');
+    await startPlan(page, 'Philippians');
+    await waitUntil(() => times('Philippians 2') > before);
+    await page.click('[data-action="end-plan"]');
+    await startPlan(page, 'Jude');
+    release();
+    hold = null;
+    await new Promise((r) => setTimeout(r, 500));
+    const plan = (await saved(page)).plan;
+    check('W8: the new plan keeps only its own questions', plan.book === 'Jude' && Object.keys(plan.questions || {}).join() === 'five-0', JSON.stringify(plan));
+    check('W8: no errors', errors.length === 0, errors.join(' | '));
     await context.close();
   }
 }
