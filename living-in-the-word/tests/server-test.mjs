@@ -64,6 +64,7 @@ globalThis.fetch = async (url, init) => {
   }
   if (String(url).startsWith('https://api.anthropic.com/')) {
     ai.calls += 1;
+    ai.last = JSON.parse(init.body);   // what the server sent, for the guidance checks
     const answer = { known_passage: true, leader_note: 'A short note.', questions: ['What stands out?', 'What does it show about God?', 'How will you respond?'] };
     return new Response(JSON.stringify({
       model: 'claude-sonnet-5-5', stop_reason: 'end_turn',
@@ -183,6 +184,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   check('owner used 1 today', counts.body.you === 1, JSON.stringify(counts.body));
   check('everyone together 4 (passcode too)', counts.body.everyone === 4, JSON.stringify(counts.body));
   check('the AI was asked 4 times', ai.calls === 4, String(ai.calls));
+  // The guidance goes with every request, with the owner's rule of October 31, 2026
+  const guidance = (ai.last && ai.last.system) || '';
+  check('guidance: no attention the text itself doesn\'t draw', guidance.includes('Don\'t draw attention to something the text itself doesn\'t draw attention to.'));
+  check('guidance: heads-up only for what the passage itself tells', guidance.includes('heads-up when the passage itself tells of'));
+  check('the AI gets only the passage name', JSON.stringify(ai.last.messages) === JSON.stringify([{ role: 'user', content: 'Passage: Psalm 1' }]), JSON.stringify(ai.last && ai.last.messages));
 
   // 9. Errors when inviting
   const bad = await call(worker, env, { action: 'invite', email: 'not an address' }, { key: ownerKey });
