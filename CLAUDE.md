@@ -49,12 +49,13 @@ When Dan says "do the rest," Claude works through the build plan one pull reques
 
 ## Handoffs and decisions
 
-- HANDOFF.md is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
+- HANDOFF.md is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines. It points to each app's PROGRESS.md for what's waiting there instead of copying it, and each session's summary goes to CHANGELOG.md ("Session summaries"), not HANDOFF.md.
 - Each app folder has PROGRESS.md (where it stands and the next step; rewritten, under about 100 lines) and DECISIONS.md (each decision with its reason, in Dan's words when he gave them, and what was turned down; only added to). Website decisions go in the root DECISIONS.md.
 - Every pull request updates its project's PROGRESS.md and adds any new decisions to DECISIONS.md, so nothing depends on the chat.
 - Before changing something a past decision settled, check DECISIONS.md and ask Dan.
 - When Dan switches projects or says he's stepping away, or after about five merged pull requests in one session, suggest /handoff, then /clear and /pickup [project].
 - The full pull request history is in CHANGELOG.md and on GitHub. Read it only when needed.
+- To compare a branch with main, list the changed files first (`git diff --stat`), then read only the parts needed: CHANGELOG.md's pull request list is a few very long lines.
 - Every request sends the whole conversation again, and so do check-ins and pull request wake-ups (Claude Code's docs, checked October 28, 2026). So a fresh session costs less than a long one, and long files like an app's SPEC.md are read only in the parts the task needs.
 
 ## Rules for working here
@@ -75,3 +76,7 @@ When Dan says "do the rest," Claude works through the build plan one pull reques
 ## Privacy
 
 - Never show the owner's kids' faces, names or schools, in text, images or file names.
+
+## Compact instructions
+
+When a long session is summarized, keep: each open pull request (its number, what it changes, its checks, and whether Dan merged it); what Dan chose, in his exact words, with dates; what's waiting on Dan and the next step; anything marked unverified, still marked; and any decision not yet written to a DECISIONS.md. Leave out tool output and file contents that are already saved in the repository.
