@@ -22,12 +22,12 @@ This repository is public. Keep personal details out of this file.
 ## Where things stand (October 31, 2026)
 
 - Latest: the eighth session (October 29 and 31, 2026), pull requests 95 to 100. Its summary, and each earlier session's, is in `CHANGELOG.md` ("Session summaries"). Where each project stands is in its `PROGRESS.md`.
-- Next: a fresh session with `/pickup living in the word`. Before the next step, one quick test (root `DECISIONS.md`, "Leaner pickups"): read `living-in-the-word/index.html` with the Read tool, and see whether the website's rules (`.claude/rules/website.md` and `moon-jar.md`) load. If they do, their `*.html` pattern matches files in subfolders too.
+- Next: `/pickup living in the word`. The ninth session (October 31, 2026) found that the website's rules (`.claude/rules/website.md` and `moon-jar.md`) also loaded for Living in the Word's files, and fixed it in pull request 101 (root `DECISIONS.md`, "the website's rules load only for its own files"). Living in the Word's next step is in its `PROGRESS.md`.
 
 
 ## Waiting on Dan
 
-1. Merge pull request 100 (the eighth session's handoff notes): https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/100, Conversation tab, Merge pull request, Confirm merge.
+1. Merge pull request 101 (the website's rules load only for its own files; notes only, nothing to paste): https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/101, Conversation tab, Merge pull request, Confirm merge.
 2. Living in the Word: everything waiting, with every step, is in `living-in-the-word/PROGRESS.md` ("Waiting on Dan"): the next-chapter check, the Matthew 1 check, the invite test, and the smaller checks.
 3. The Anthropic API key expires November 24, 2026: a new key, saved in Cloudflare as `ANTHROPIC_API_KEY`. Remind him in good time, with every step (in `living-in-the-word/PROGRESS.md`).
 4. The other apps: Fewer spam calls needs the Samsung steps checked on a real Samsung phone; First step smaller waits for his daily trial. Details in each `PROGRESS.md`.

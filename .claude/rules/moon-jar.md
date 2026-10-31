@@ -1,16 +1,18 @@
 ---
 paths:
-  - "*.html"
-  - "style.css"
-  - "tabs.js"
-  - "fewer-spam-calls/**"
-  - "first-step-smaller/**"
-  - "quiet-room/**"
+  - "/*.html"
+  - "/style.css"
+  - "/tabs.js"
+  - "/fewer-spam-calls/**"
+  - "/first-step-smaller/**"
+  - "/quiet-room/**"
 ---
 
 # The "Moon jar" design
 
 Moved from `CLAUDE.md` on October 28, 2026, so that it loads only when Claude works on the website's pages or on the apps that use this look (Fewer spam calls, First step smaller and Quiet room). Living in the Word has its own look, "Paper and ink" (`living-in-the-word/SPEC.md`).
+
+Each pattern in `paths` at the top starts with `/`, which means "at the top of the repository." Without it, a pattern like `*.html` matches in every folder, Living in the Word's too (October 31, 2026; root `DECISIONS.md`). A new app with this look gets its own line, like `"/its-folder/**"`.
 
 ## Design system: "Moon jar" (matches the Substack)
 
