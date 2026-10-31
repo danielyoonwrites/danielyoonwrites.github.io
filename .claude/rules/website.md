@@ -1,15 +1,17 @@
 ---
 paths:
-  - "*.html"
-  - "style.css"
-  - "tabs.js"
-  - "scripts/**"
-  - ".github/workflows/**"
+  - "/*.html"
+  - "/style.css"
+  - "/tabs.js"
+  - "/scripts/**"
+  - "/.github/workflows/**"
 ---
 
 # The website's own rules
 
 Moved from `CLAUDE.md` on October 28, 2026, so that they load only when Claude works on the website's own files (the pages at the top of the repository, `style.css`, `tabs.js`, `scripts/` and `.github/workflows/`). The rules for every project, and the privacy rule, stay in `CLAUDE.md`. The "Moon jar" design is in `moon-jar.md`, next to this file.
+
+Each pattern in `paths` at the top starts with `/`, which means "at the top of the repository." Without it, a pattern like `*.html` or `style.css` matches in every folder (Claude Code matches them the way `.gitignore` files do), so these rules also loaded for the apps' pages (October 31, 2026; root `DECISIONS.md`).
 
 ## Pages
 
