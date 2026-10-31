@@ -21,7 +21,7 @@ This repository is public. Keep personal details out of this file.
 
 ## Where things stand (October 31, 2026)
 
-- Latest: the eighth session (October 31, 2026), pull requests 95 to 100. Its summary, and each earlier session's, is in `CHANGELOG.md` ("Session summaries"). Where each project stands is in its `PROGRESS.md`.
+- Latest: the eighth session (October 29 and 31, 2026), pull requests 95 to 100. Its summary, and each earlier session's, is in `CHANGELOG.md` ("Session summaries"). Where each project stands is in its `PROGRESS.md`.
 - Next: a fresh session with `/pickup living in the word`. Before the next step, one quick test (root `DECISIONS.md`, "Leaner pickups"): read `living-in-the-word/index.html` with the Read tool, and see whether the website's rules (`.claude/rules/website.md` and `moon-jar.md`) load. If they do, their `*.html` pattern matches files in subfolders too.
 
 
@@ -36,7 +36,7 @@ This repository is public. Keep personal details out of this file.
 ## Parked (raise only when it becomes relevant)
 
 - Google sign-in (step S5) if the app ever goes to Apple's App Store: Google blocks its sign-in inside an app's built-in browser view (Google's 2021 developer blog, through search results), and Apple's rule 4.8 then asks for an equal private option like Sign in with Apple. Email codes avoid both. Raise it at S5.
-- Sign-ups after S3: S4 to S6, then Apple sign-in, moving the app to `danielyoonwrites.com` (with a way to bring saved studies along), saved studies in the account, subscriptions, and the total daily cap at S6 (raise it to about 200, or remove it).
+- Sign-ups after S4 (built October 29, 2026): S5 and S6, then Apple sign-in, moving the app to `danielyoonwrites.com` (with a way to bring saved studies along), saved studies in the account, subscriptions, and the total daily cap at S6 (raise it to about 200, or remove it).
 - The reading plan says "Psalms 23" where Bibles say "Psalm 23" (the picker already says "Psalm 23").
 - An Android line in the home screen tip, Korean book names, and moving saved studies from Safari into an iPhone home screen app.
 - Don't mention the domain's auto-renew until September 2027.

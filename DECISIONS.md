@@ -125,6 +125,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Turned down: shortening the decision entries (their quotes and "Turned down" lines are the "why"); trimming Living in the Word's `CLAUDE.md` rules (a small saving, and they're the safety rails); `@path` imports and deleting history (turned down October 28).
 - To test: the website's rules (`website.md` and `moon-jar.md`) loaded in a Living in the Word session after Claude read `living-in-the-word/index.html`. Their `paths` say `*.html`, and Claude Code's memory page (read October 31, 2026) says `*.md` means "Markdown files in the project root." Test in a fresh session before changing the patterns.
 - Revisit if: pickups still feel heavy (then measure with `/context`, as the Notion page suggests), or a detail turns out to be missing after a pickup.
+- Status: its "Dan pastes the new wording" part was replaced by October 31, 2026: the `/pickup` skill lives in the repository (pull request 99).
 
 ### October 31, 2026: the `/pickup` skill lives in the repository (pull request 99)
 - Decision: the new `/pickup` wording (the 3 newest decision entries in full instead of 10, and listing a branch's changed files first) is a project skill at `.claude/skills/pickup/SKILL.md`. In this repository, `/pickup` runs it; the copy on Dan's claude.ai account runs here only under its full name, `/anthropic-skills:pickup`, and still works everywhere else. `/handoff` stays on his account.
