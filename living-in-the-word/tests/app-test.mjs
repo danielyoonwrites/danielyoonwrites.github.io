@@ -369,12 +369,17 @@ const ownerKey = (await signIn(worker, env, 'owner@example.com')).body.session;
   }
 }
 
+// For sections W and Y: one more sign-in for the owner (the server sends 5 codes a day to one
+// address), waiting until something happens, and holding one passage's answer back
+const ownerKey3 = (await signIn(worker, env, 'owner@example.com', '198.51.100.60')).body.session;
+const waitUntil = async (test) => { for (let i = 0; i < 60 && !test(); i += 1) await new Promise((r) => setTimeout(r, 100)); };
+let release;
+const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolve) => { release = resolve; }) }; };
+
 // ---- W. The reading plan: the next reading's questions are written ahead, quietly
 // (the owner's choice, October 31, 2026)
 {
-  const ownerKey3 = (await signIn(worker, env, 'owner@example.com', '198.51.100.60')).body.session;
   const times = (passage) => asked.filter((item) => item === passage + '|personal').length;
-  const waitUntil = async (test) => { for (let i = 0; i < 60 && !test(); i += 1) await new Promise((r) => setTimeout(r, 100)); };
   const writing = (page) => page.evaluate(() => document.getElementById('today').classList.contains('writing'));
   const startPlan = async (page, book) => {
     await page.click('[data-action="reading"]');
@@ -382,9 +387,6 @@ const ownerKey = (await signIn(worker, env, 'owner@example.com')).body.session;
     await page.click('#plan-setup button[type="submit"]');
     await page.waitForFunction(() => !document.querySelector('.reading-check').hidden);
   };
-  let release;
-  const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolve) => { release = resolve; }) }; };
-
   const { context, page, errors } = await newPhone();
   await signedInAs(page, ownerKey3, 'owner@example.com', true);
 
@@ -472,6 +474,91 @@ const ownerKey = (await signIn(worker, env, 'owner@example.com')).body.session;
     const plan = (await saved(page)).plan;
     check('W8: the new plan keeps only its own questions', plan.book === 'Jude' && Object.keys(plan.questions || {}).join() === 'five-0', JSON.stringify(plan));
     check('W8: no errors', errors.length === 0, errors.join(' | '));
+    await context.close();
+  }
+}
+
+// ---- Y. Prepare for a Bible study: the next chapter's questions are written ahead, quietly
+// (the owner's choice, October 31, 2026)
+{
+  const CHECK = 'Written by AI, which can make mistakes. Check what it says against your Bible, and change anything before you use it.';
+  const times = (passage) => asked.filter((item) => item === passage + '|study').length;
+  const writing = (page) => page.evaluate(() => document.getElementById('questions').classList.contains('writing'));
+  const kept = async (page) => ((await saved(page)).ahead || {}).passage || '';
+  const typePassage = async (page, typed) => {
+    const now = await active(page);
+    if (now === 'home') await page.click('[data-action="study"]');
+    else if (now !== 'passage') await page.click('#questions .back');
+    await page.fill('#passage-text', typed);
+    await page.click('#passage button[type="submit"]');
+  };
+  const questionsShow = (page) => page.waitForFunction(() => document.querySelectorAll('.question-list textarea').length > 0
+    && !document.getElementById('questions').classList.contains('writing'));
+
+  const { context, page, errors } = await newPhone();
+  await signedInAs(page, ownerKey3, 'owner@example.com', true);
+
+  // Y1, Y2. Philippians 1, then Philippians 2's questions written ahead, quietly
+  await typePassage(page, 'Philippians 1');
+  await questionsShow(page);
+  await waitUntil(() => times('Philippians 2') > 0);
+  await page.waitForFunction(() => (JSON.parse(localStorage.getItem('living-in-the-word')).ahead || {}).passage === 'Philippians 2');
+  check('Y1: Philippians 1 shows its questions and the "check it" line', (await text(page, '.passage-name')) === 'Philippians 1'
+    && (await page.locator('.question-list textarea').count()) === 3 && (await text(page, '.suggest-status')) === CHECK);
+  check('Y2: Philippians 2 written ahead, once, and kept', times('Philippians 2') === 1 && (await kept(page)) === 'Philippians 2', JSON.stringify(asked));
+
+  // Y3. Philippians 2 (typed "phil 2") opens at once, without asking again; Philippians 3 is next
+  await typePassage(page, 'phil 2');
+  check('Y3: Philippians 2 opens at once', (await text(page, '.passage-name')) === 'Philippians 2' && !(await writing(page))
+    && (await page.locator('.question-list textarea').count()) === 3 && (await text(page, '.suggest-status')) === CHECK);
+  check('Y3: not asked for again', times('Philippians 2') === 1, JSON.stringify(asked));
+  await page.screenshot({ path: SHOTS + 'y3-next-chapter-ready.png' });   // the phone's screen (the Save bar stays at its bottom)
+  await waitUntil(() => times('Philippians 3') > 0);
+  await page.waitForFunction(() => (JSON.parse(localStorage.getItem('living-in-the-word')).ahead || {}).passage === 'Philippians 3');
+  check('Y3: Philippians 3 written ahead next (the used set is gone)', times('Philippians 3') === 1 && (await kept(page)) === 'Philippians 3');
+
+  // Y4, Y5. Some verses, or a book's last chapter: nothing is written ahead
+  await typePassage(page, 'John 4:1-26');
+  await questionsShow(page);
+  await typePassage(page, 'Philippians 4');
+  await questionsShow(page);
+  await new Promise((r) => setTimeout(r, 500));
+  check('Y4: nothing ahead after some verses', asked.filter((item) => item.startsWith('John')).join() === 'John 4:1-26|study', JSON.stringify(asked));
+  check('Y5: nothing past a book\'s last chapter', times('Philippians 5') === 0 && (await kept(page)) === 'Philippians 3', JSON.stringify(asked));
+
+  // Y6. The next chapter opened while it's still being written: it waits for that answer, not a second one
+  holdAnswer('Romans 2');
+  await typePassage(page, 'Romans 1');
+  await questionsShow(page);
+  await waitUntil(() => times('Romans 2') > 0);
+  await typePassage(page, 'Romans 2');
+  check('Y6: says it is writing Romans 2', (await writing(page)) && (await text(page, '.suggest-status')) === 'Writing questions for Romans 2. This can take up to a minute.');
+  release();
+  hold = null;
+  await questionsShow(page);
+  check('Y6: then its questions show, asked for only once', (await text(page, '.passage-name')) === 'Romans 2' && times('Romans 2') === 1
+    && (await text(page, '.suggest-status')) === CHECK, JSON.stringify(asked));
+  await waitUntil(() => times('Romans 3') > 0);
+  check('Y6: then Romans 3 is written ahead', times('Romans 3') === 1, JSON.stringify(asked));
+  await page.waitForFunction(() => (JSON.parse(localStorage.getItem('living-in-the-word')).ahead || {}).passage === 'Romans 3');
+
+  // Y7. One psalm: the next psalm ("Psalm 24"), replacing the set kept before
+  await typePassage(page, 'Psalm 23');
+  await questionsShow(page);
+  await waitUntil(() => times('Psalm 24') > 0);
+  await page.waitForFunction(() => (JSON.parse(localStorage.getItem('living-in-the-word')).ahead || {}).passage === 'Psalm 24');
+  check('Y7: Psalm 24 after Psalm 23, and only one set kept', times('Psalm 24') === 1 && (await kept(page)) === 'Psalm 24');
+  check('Y: no errors', errors.length === 0, errors.join(' | '));
+  await context.close();
+
+  // Y8. A phone that isn't signed in asks for nothing ahead
+  {
+    const before = asked.length;
+    const { context, page } = await newPhone();
+    await page.goto(APP);
+    await typePassage(page, 'Philippians 1');
+    await new Promise((r) => setTimeout(r, 500));
+    check('Y8: not signed in: nothing asked for', asked.length === before && !(await saved(page)).ahead, JSON.stringify(asked.slice(before)));
     await context.close();
   }
 }
