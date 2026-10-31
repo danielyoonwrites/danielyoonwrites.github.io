@@ -55,6 +55,7 @@ When Dan says "do the rest," Claude works through the build plan one pull reques
 - Before changing something a past decision settled, check DECISIONS.md and ask Dan.
 - When Dan switches projects or says he's stepping away, or after about five merged pull requests in one session, suggest /handoff, then /clear and /pickup [project].
 - The full pull request history is in CHANGELOG.md and on GitHub. Read it only when needed.
+- `/pickup` in this repository runs `.claude/skills/pickup/SKILL.md` (a project skill, since October 31, 2026), not the copy on Dan's claude.ai account: change the wording there, in a pull request. `/handoff` is still the one on his account.
 - To compare a branch with main, list the changed files first (`git diff --stat`), then read only the parts needed: CHANGELOG.md's pull request list is a few very long lines.
 - Every request sends the whole conversation again, and so do check-ins and pull request wake-ups (Claude Code's docs, checked October 28, 2026). So a fresh session costs less than a long one, and long files like an app's SPEC.md are read only in the parts the task needs.
 
