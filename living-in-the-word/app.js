@@ -276,20 +276,26 @@ function startStudy(text) {
     return;
   }
 
-  // A new passage starts fresh
+  // A new passage starts fresh, with its questions at once if they were written ahead
+  // (see "Next chapter ahead"; not while the AI is still writing another passage's)
+  const ready = asking ? null : takeReadyAhead(text);
   showNotFound(false);
   passage = text;
   fill('.passage-name', passage);
-  questions = [];
-  leaderNote = '';
+  questions = ready ? ready.questions : [];
+  leaderNote = ready ? ready.note : '';
   openLeaderNote();
   edited = false;
   questionsFor = passage;
-  setStatus('');
+  setStatus(ready ? CHECK_IT.study : '');
   document.querySelector('.test-cost').hidden = true;
   showPassageText('questions', passage);
   show('questions');
   showQuestions();
+  if (ready) {
+    prepareStudyAhead(passage);   // and the chapter after it
+    return;
+  }
   // Ask the AI, unless it's already writing for this same passage (Back, then the button again)
   if (!(asking && samePassage(askingFor, passage))) writeQuestions();
 }
@@ -474,6 +480,7 @@ let owner = readSaved().owner;               // true if that's the owner's addre
 let asking = false;   // true while waiting for the AI
 let latestRequest = 0;   // counts requests, so only the newest one changes the screen
 let askingFor = '';      // the passage the AI is writing for, while asking
+let studyAhead = null;   // { passage, answer, taken } while the next chapter's questions are written ahead
 
 // The test link (the address with ?test) shows what each answer cost
 const testMode = new URLSearchParams(window.location.search).has('test');
@@ -493,8 +500,9 @@ function askServer(message, signal) {
 }
 
 // What's saved on this phone, as one piece of JSON:
-//   { version: 1, passcode: '...', session: '...', email: '...', owner: true, studies: [ ... ], plan: { ... } }
-//   (studies are described in "Saved studies", the plan in the reading plan part)
+//   { version: 1, passcode: '...', session: '...', email: '...', owner: true, studies: [ ... ], plan: { ... },
+//     ahead: { passage: 'Philippians 2', questions: [ ... ], note: '...' } }
+//   (studies are described in "Saved studies", the plan in the reading plan part, ahead in "Next chapter ahead")
 function readSaved() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -519,6 +527,10 @@ function tidySaved(saved) {
     clean.studies = saved.studies
       .filter((study) => study && typeof study.passage === 'string' && Array.isArray(study.questions))
       .map((study) => ({ passage: study.passage, questions: onlyText(study.questions), note: text(study.note), saved: text(study.saved) }));
+  }
+  const ahead = saved.ahead;
+  if (ahead && typeof ahead.passage === 'string' && Array.isArray(ahead.questions)) {
+    clean.ahead = { passage: ahead.passage, questions: onlyText(ahead.questions), note: text(ahead.note) };
   }
   const plan = saved.plan;
   if (plan && typeof plan.book === 'string' && typeof plan.start === 'string'
@@ -633,8 +645,14 @@ async function requestSuggestions() {
   const stop = new AbortController();
   const timer = setTimeout(() => stop.abort(), 120000);   // give up after 2 minutes
   try {
-    const response = await askServer({ passage: forPassage, method: 'study' }, stop.signal);
-    result = await response.json();
+    if (studyAhead && samePassage(studyAhead.passage, forPassage)) {
+      // Already being written ahead (after the chapter before it): wait for that answer
+      studyAhead.taken = true;
+      result = await studyAhead.answer;
+    } else {
+      const response = await askServer({ passage: forPassage, method: 'study' }, stop.signal);
+      result = await response.json();
+    }
   } catch (error) {
     result = { error: 'offline' };
   }
@@ -697,6 +715,58 @@ async function requestSuggestions() {
       (result.cost * 100).toFixed(2) + ' cents.';
     cost.hidden = false;
   }
+  prepareStudyAhead(forPassage);   // then the next chapter's, quietly
+}
+
+
+// ---------- Next chapter ahead ----------
+// For a group that goes through a book chapter by chapter (the owner's choice, October 31,
+// 2026): once the AI's questions for a whole chapter show, it quietly writes the next
+// chapter's and keeps them on this phone, so that chapter opens at once. Only one set is
+// kept, and it's used once. Not after some verses (like John 4:1-26): the next passage
+// can't be guessed. Each set counts toward the daily limits like any other.
+
+// The chapter after a whole chapter, like "Philippians 2" after "Philippians 1" or "Psalm 24"
+// after "Psalm 23"; '' for anything else (some verses, several chapters, a book's last chapter)
+function nextChapter(text) {
+  const match = /^(.+) (\d+)$/.exec(text);
+  if (!match) return '';
+  const book = BOOKS.find(([name]) => name === (match[1] === 'Psalm' ? 'Psalms' : match[1]));
+  const chapter = Number(match[2]);
+  return book && chapter < book[1] ? match[1] + ' ' + (chapter + 1) : '';
+}
+
+// The questions written ahead for this passage, if there are any (they're used once)
+function takeReadyAhead(text) {
+  const saved = readSaved();
+  const ready = saved.ahead;
+  if (!ready || !samePassage(ready.passage, text) || !ready.questions.length) return null;
+  delete saved.ahead;
+  writeSaved(saved);
+  return ready;
+}
+
+function prepareStudyAhead(fromPassage) {
+  const next = nextChapter(fromPassage);
+  if (!next || !SERVER_URL || !canAsk() || studyAhead || findStudy(next)) return;
+  const kept = readSaved().ahead;
+  if (kept && samePassage(kept.passage, next)) return;   // already ready
+  const stop = new AbortController();
+  const timer = setTimeout(() => stop.abort(), 120000);   // give up after 2 minutes
+  const answer = askServer({ passage: next, method: 'study' }, stop.signal)
+    .then((response) => response.json())
+    .catch(() => ({ error: 'offline' }));
+  const mine = { passage: next, answer, taken: false };
+  studyAhead = mine;
+  answer.then((result) => {
+    clearTimeout(timer);
+    studyAhead = null;
+    // Opened while it was written (it's on screen already), or it didn't work: nothing to keep
+    if (mine.taken || result.error || !result.knownPassage || !Array.isArray(result.questions) || !result.questions.length) return;
+    const saved = readSaved();
+    saved.ahead = { passage: next, questions: result.questions, note: result.leaderNote || '' };
+    writeSaved(saved);
+  });
 }
 
 
