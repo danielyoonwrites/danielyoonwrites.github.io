@@ -16,6 +16,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 26, 2026: no study methods; the AI writes right away, in a set order: what it says, God, the heart, a response, prayer.
 - October 26, 2026: 3 to 5 questions, always the first and the last; short, one thing each, no quotes, correct grammar.
 - October 26, 2026: passages of suffering get pastoral care; general words like "sexual violence," never graphic terms; only what the passage itself shows about God.
+- October 31, 2026: don't draw attention to something the text itself doesn't (a genealogy's names don't bring in the sins in those people's stories); the leader's heads-up is only for hard things the passage itself tells of.
 - October 26, 2026: no questions about God's silence, where God was, or why he didn't stop it (Dan: such questions "can hurt people's faith").
 - October 28, 2026: the commentary for the leader (about 100 words, written with the questions) and the reading's note start open.
 - October 29, 2026: Sonnet 5.5 at `high` effort, with "Think the problem through before you answer."; uneven sets get guidance fixes, not a model switch.
@@ -231,6 +232,7 @@ The "In force" list right below is every decision that still holds, one line eac
 ### October 26, 2026: pastoral care for passages of suffering, violence or evil (pull request 68)
 - Decision: a new section in the AI's guidance (Dan's request): name what happened soberly, without graphic detail, and stay with it; make room for lament (added to the reading plan's prayer question too); notice how the author presents it; care for the people in the room; honest hard questions; a response that fits; and a heads-up for the leader. For every passage, a question never offers a list of options. The line that God's judgments aren't a pattern for us was Claude's, for Dan to review.
 - Why: a Matthew 2 question named the children killed in Bethlehem, then turned in the same breath to praying "for those who don't yet know Jesus." Dan asked that passages like Exodus 1, Matthew 2, Esther 9 and Judges 19 never be taken lightly or glossed over, but handled gracefully and tactfully.
+- Status: since October 31, 2026, the heads-up for the leader is only for hard things the passage itself tells of (October 31, 2026: "don't draw attention to something the text itself doesn't," pull request 95).
 
 ### October 26, 2026: 3 to 5 questions (pull request 69)
 - Decision: the AI writes 3 to 5 questions instead of exactly 5 (Dan's rule), leaving out any that would repeat another or don't fit the passage. The first (what it says) and the last (prayer) are always written: Claude's choice, which Dan merged without changes. On the start screen, "five questions" became "three to five questions." Replaces the 5 questions of pull request 51.
@@ -367,3 +369,10 @@ The "In force" list right below is every decision that still holds, one line eac
 - Why: until now each session rewrote its checks ("the scripts aren't in the repository"), which costs time and tokens, and old checks can catch a change that breaks something.
 - Turned down: keeping them out of the repository, the earlier habit (Why: not recorded).
 - Note: like every file here, they're published with the website. They hold only stand-in values (made-up keys, addresses and passcode).
+
+### October 31, 2026: don't draw attention to something the text itself doesn't (pull request 95)
+- Decision: one more rule in the AI's guidance (`GUIDANCE` in `server/worker.js`, step 7 of "How to read the passage"): "Don't draw attention to something the text itself doesn't draw attention to. When a passage only names someone, as a genealogy does, don't bring up sins, abuse or violence from their story elsewhere in the Bible, in the questions or in the commentary for the leader. This isn't hiding anything; it lets the passage's own emphasis lead." The heads-up for the leader now says "when the passage itself tells of things like the death of children or sexual violence." For the group study and the reading plan (the guidance is shared).
+- Why: the reading plan's note on Matthew 1 said several of the genealogy's stories "involve sexual sin, abuse of power, or violence. David's treatment of Bathsheba and Uriah is one example, so be ready to treat it soberly if it comes up." Dan: "we don't need to include the mention of sexual sin and abuse of power because that isn't even a prominent part of the genealogy, so don't draw attention to something that the text does not necessarily draw attention to. Of course that does not mean to ignore it or anything, but just that we don't need to draw attention to everything that the text itself does not."
+- Decided by: Dan (the rule, October 31, 2026); the wording is Claude's, in his words where possible, for him to change.
+- Turned down: nothing else was offered.
+- Revisit if: a passage that does tell of hard things (Matthew 2, Judges 19) stops getting its heads-up, or questions start skipping what a passage does stress.
