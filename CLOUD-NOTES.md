@@ -10,6 +10,7 @@ Moved from `HANDOFF.md` on October 28, 2026. Read this before working around a b
 - If a new session still asks for Notion, check that the file is on main and the tool names in it match the ones in the popup.
 - The fourth session (October 27, 2026) still asked, though the file was on main and the names matched. Claude Code's docs (the permissions and MCP pages, read that day) say a claude.ai connector's own tool setting of "ask" prompts on every call, in every mode, and allow rules don't skip it. So Dan was asked to open https://claude.ai/customize/connectors, then Notion, then "Your tool permissions," and allow only "Update Notion page" and "Create pages in Markdown" (plus the read tools if needed; never delete or move). It takes effect from the next session; whether it worked isn't known yet. In the seventh session (October 29, 2026) Claude's Notion writes went through without a refusal; whether Dan was asked each time wasn't checked.
 - Until it works: one Notion write per finished piece of work.
+- Changing a line on a Notion page that has code formatting (backticks) can fail with "No matches found" (October 31, 2026): Notion stores the text differently. Add a new line at the end instead (insert at the end), without fetching a long page.
 
 
 ## Limits of Claude's cloud sessions, and the workarounds that worked

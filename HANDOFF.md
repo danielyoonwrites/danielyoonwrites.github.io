@@ -1,6 +1,6 @@
 # Handoff: where everything stands
 
-Last updated October 31, 2026, in the eighth session (with pull request 99). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
+Last updated October 31, 2026, at the end of the eighth session (with pull request 100). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
 
 - How to work with Dan, and the rules for every project: `CLAUDE.md`.
 - Each project: its folder's `PROGRESS.md` (where it stands, the next step), `DECISIONS.md` (choices and their reasons) and `SPEC.md`. The website's decisions are in the root `DECISIONS.md`.
@@ -21,15 +21,16 @@ This repository is public. Keep personal details out of this file.
 
 ## Where things stand (October 31, 2026)
 
-- Latest: the eighth session (October 31, 2026), pull requests 95 to 99. Its summary, and each earlier session's, is in `CHANGELOG.md` ("Session summaries"). Where each project stands is in its `PROGRESS.md`.
+- Latest: the eighth session (October 31, 2026), pull requests 95 to 100. Its summary, and each earlier session's, is in `CHANGELOG.md` ("Session summaries"). Where each project stands is in its `PROGRESS.md`.
 - Next: a fresh session with `/pickup living in the word`. Before the next step, one quick test (root `DECISIONS.md`, "Leaner pickups"): read `living-in-the-word/index.html` with the Read tool, and see whether the website's rules (`.claude/rules/website.md` and `moon-jar.md`) load. If they do, their `*.html` pattern matches files in subfolders too.
 
 
 ## Waiting on Dan
 
-1. Living in the Word: everything waiting, with every step, is in `living-in-the-word/PROGRESS.md` ("Waiting on Dan"): the next-chapter check, the Matthew 1 check, the invite test, and the smaller checks.
-2. The Anthropic API key expires November 24, 2026: a new key, saved in Cloudflare as `ANTHROPIC_API_KEY`. Remind him in good time, with every step (in `living-in-the-word/PROGRESS.md`).
-3. The other apps: Fewer spam calls needs the Samsung steps checked on a real Samsung phone; First step smaller waits for his daily trial. Details in each `PROGRESS.md`.
+1. Merge pull request 100 (the eighth session's handoff notes): https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/100, Conversation tab, Merge pull request, Confirm merge.
+2. Living in the Word: everything waiting, with every step, is in `living-in-the-word/PROGRESS.md` ("Waiting on Dan"): the next-chapter check, the Matthew 1 check, the invite test, and the smaller checks.
+3. The Anthropic API key expires November 24, 2026: a new key, saved in Cloudflare as `ANTHROPIC_API_KEY`. Remind him in good time, with every step (in `living-in-the-word/PROGRESS.md`).
+4. The other apps: Fewer spam calls needs the Samsung steps checked on a real Samsung phone; First step smaller waits for his daily trial. Details in each `PROGRESS.md`.
 
 
 ## Parked (raise only when it becomes relevant)

@@ -2,6 +2,30 @@
 
 Each decision about the website with its reason, oldest first. Each app keeps its own DECISIONS.md in its folder. Only add to this file; if a decision changes, add a new entry that says which one it replaces. Copied in on October 28, 2026 from CLAUDE.md, the .claude/rules files and HANDOFF.md.
 
+## In force (built October 31, 2026, at the end of the eighth session)
+
+Every decision below that still holds, one line each; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
+
+**The website**
+- October 24, 2026: plain HTML and CSS on GitHub Pages, edited by hand; no build tools (one exception since October 29: Cloudflare's Wrangler deploys Living in the Word's server); JavaScript where it helps.
+- October 24, 2026: phone first; short pages, with tabs and fold-outs instead of long lists.
+- October 24, 2026: the "Moon jar" design: its five colors, Libre Baskerville never bold, left-aligned, square corners, no logo, sentence case.
+- October 24, 2026: never show the kids' faces, names or schools.
+- October 24, 2026: the Substack's voice, for millennial Asian Christians; pastor work isn't the focus of Home or Writing.
+- October 24, 2026: Dan's words, exactly, on Home and About; thingsdanwrites@gmail.com for readers.
+- October 24, 2026: a celadon Subscribe button, not Substack's form; four hand-picked posts under "Start here."
+- October 24, 2026: Latest posts filled in on GitHub through Jina Reader, before each publish.
+- October 24, 2026: the menu is Writing, Projects, About (no Home link); Projects lists every project first, then "How I built it" as fold-outs.
+- October 24, 2026: version numbers on the stylesheet and script links, raised on every change.
+
+**The notes and handoffs**
+- October 24 and 28, 2026: `HANDOFF.md` is a short index read at the start of each session; each app has a `PROGRESS.md` and a `DECISIONS.md`; history is in `CHANGELOG.md`.
+- October 28, 2026: the website's rules live in `.claude/rules/`, loaded only for the files they name.
+- October 31, 2026: leaner pickups: each fact keeps one home, nothing deleted; `CLAUDE.md` has "Compact instructions."
+- October 31, 2026: `/pickup` runs the project skill in `.claude/skills/pickup/`, which reads the 3 newest decision entries in full.
+
+## Log (oldest first)
+
 ### October 24, 2026: plain HTML and CSS on GitHub Pages, edited by hand (pull request 1)
 - Decision: a personal website, hosted free on GitHub Pages, in plain HTML and CSS. No build tools: no npm, no frameworks, no generators. The code stays simple and commented, and every page shares one stylesheet, `style.css`.
 - Why: the owner is a beginner and edits the files by hand; the code stays simple and commented so the owner can edit it later.
