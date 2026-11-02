@@ -7,7 +7,7 @@ Each decision about the website with its reason, oldest first. Each app keeps it
 Every decision below that still holds, one line each; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
 **The website**
-- October 24, 2026: plain HTML and CSS on GitHub Pages, edited by hand; no build tools (one exception since October 29: Cloudflare's Wrangler deploys Living in the Word's server); JavaScript where it helps.
+- October 24, 2026: plain HTML and CSS on GitHub Pages, edited by hand; no build tools (one exception since October 29: Cloudflare's Wrangler deploys Living in the Word's server); JavaScript where it helps. Kept November 2, 2026, after Dan asked whether it helps.
 - October 24, 2026: phone first; short pages, with tabs and fold-outs instead of long lists.
 - October 24, 2026: the "Moon jar" design: its five colors, Libre Baskerville never bold, left-aligned, square corners, no logo, sentence case.
 - October 24, 2026: never show the kids' faces, names or schools.
@@ -141,3 +141,9 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Checked: with the same `ignore` library (versions 5 and 7), against every file in the repository: `website.md` matches the four pages, `style.css`, `tabs.js`, `scripts/` and `.github/`; `moon-jar.md` matches those pages, `style.css` and `tabs.js` plus the three apps' folders; neither matches any file in `living-in-the-word/`.
 - Turned down: "(b)" leaving the patterns as they were and noting it (about 1,400 tokens in each Living in the Word session, and the website's rules in the other apps' sessions); naming each file (it still matches the apps' own `index.html` and `style.css`).
 - Revisit if: a new app uses the Moon jar look (add `"/its-folder/**"` to `moon-jar.md`); the website gets a new folder of its own files; or a Claude Code update changes how `paths` match (then test again in a fresh session: read `living-in-the-word/index.html`, where neither should load, then `index.html`, where both should).
+
+### November 2, 2026: no build tools, kept after Dan asked whether the rule helps (pull request 110)
+- Decision: keep "No build tools: no npm, no frameworks, no generators" (October 24, 2026, above). A library an app needs comes as a ready-made file saved in its folder (the video editor's Mediabunny) or from its maker's CDN (Quiet room's Firebase).
+- Why: Dan, while planning the video editor: "why is there a no npm rule? Does that help in any way? If not then use npm." Claude's answer: it helps in three ways. (1) The files on GitHub are exactly what runs on the phone, so Dan can open any of them, read it and change it by hand, and the change is live after the publish run. (2) There's no build step, so a merge can't be held up by a build that fails. (3) There are no package updates and warnings to keep up with: a saved library changes only when an update is chosen on purpose. And npm wouldn't help the video editor much: Mediabunny comes as one ready-made file (its docs: it can be included "directly with a script tag"), and npm's one gain there, a smaller download by keeping only the parts the app uses, is small (the whole file is about 187 KB compressed, less than a phone photo).
+- Turned down: npm with a build step on GitHub's computers (nothing would run on Dan's computer, but the files he reads would no longer be the files that run).
+- Revisit if: an app needs a library that only works through npm, or Dan wants to learn npm and build tools as their own step.
