@@ -86,6 +86,14 @@ p { margin: 8px 0; }
 .small { color: var(--soft); font-size: 15px; }
 .working-note { color: var(--soft); }
 
+/* The SVG looks live in index.html but take no room on the page */
+.looks {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
 /* ---------- The video ---------- */
 .stage {
   display: flex;
@@ -98,6 +106,13 @@ video {
   max-width: 36rem;
   max-height: 45vh;
   background: #000000;
+}
+/* The playing video on "The look" is exactly the size of its picture, with no black bars inside it,
+   so a look that lifts the darks (like Milky) doesn't turn the bars gray */
+#preview {
+  width: auto;
+  height: auto;
+  max-width: 100%;
 }
 
 /* ---------- Tabs: Filter and Lighting ---------- */
@@ -156,6 +171,16 @@ video {
   color: var(--dark-text);
   font-weight: 700;
 }
+/* Each look: its English name, with the Korean word under it */
+.chip .en,
+.chip .ko { display: block; }
+.chip .ko {
+  margin-top: 2px;
+  color: var(--soft);
+  font-size: 14px;
+  font-weight: 400;
+}
+.chip[aria-checked="true"] .ko { color: #3d3d3d; }
 
 /* The lighting sliders: the name and the number on one line, the slider under them */
 .slider {

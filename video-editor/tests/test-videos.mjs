@@ -47,6 +47,43 @@ export function makeTestVideos() {
   };
 }
 
+// A color chart (made with ffmpeg): patches of black, grays, white, skin, sky, green, wood and red, on a
+// beige wall, 540 by 960, 2 seconds, no sound. PATCHES gives each patch's place and color, for checking
+// how each look changes them.
+export const PATCHES = {
+  black: { x: 20, y: 20, color: [16, 16, 16] },
+  darkGray: { x: 195, y: 20, color: [64, 64, 64] },
+  gray: { x: 370, y: 20, color: [128, 128, 128] },
+  white: { x: 20, y: 200, color: [240, 240, 240] },
+  skin: { x: 195, y: 200, color: [230, 180, 150] },
+  sky: { x: 370, y: 200, color: [140, 185, 235] },
+  green: { x: 20, y: 380, color: [60, 140, 70] },
+  wood: { x: 195, y: 380, color: [160, 110, 70] },
+  red: { x: 370, y: 380, color: [200, 60, 60] },
+};
+export const PATCH_SIZE = 150;
+export function makeChart() {
+  const file = VIDEOS + 'chart.mp4';
+  if (existsSync(file)) return file;
+  const hex = (c) => '0x' + c.map((v) => v.toString(16).padStart(2, '0')).join('');
+  const boxes = Object.values(PATCHES)
+    .map((p) => `drawbox=x=${p.x}:y=${p.y}:w=${PATCH_SIZE}:h=${PATCH_SIZE}:color=${hex(p.color)}@1:t=fill`).join(',');
+  ffmpeg(['-f', 'lavfi', '-i', 'color=c=0xD2C8BE:s=540x960:r=30:d=2', '-vf', boxes + ',format=yuv420p',
+    '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '12', '-an', file]);
+  return file;
+}
+
+// The average color of a patch's middle, from a video file (as ffmpeg shows it)
+export function patchColor(file, patch, at = 0.5, width = 540) {
+  const scale = width / 540;
+  const inset = 30;
+  const size = Math.round((PATCH_SIZE - 2 * inset) * scale);
+  const run = spawnSync('ffmpeg', ['-v', 'error', '-ss', String(at), '-i', file, '-vf',
+    `crop=${size}:${size}:${Math.round((patch.x + inset) * scale)}:${Math.round((patch.y + inset) * scale)},scale=1:1:flags=area,format=rgb24`,
+    '-frames:v', '1', '-f', 'rawvideo', '-']);
+  return [...run.stdout];
+}
+
 // What ffprobe says about a file: its picture and sound
 export function probe(file) {
   const run = spawnSync('ffprobe', ['-v', 'error', '-show_entries',

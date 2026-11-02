@@ -17,15 +17,19 @@ const MB = window.Mediabunny;
 
 // ---------- Settings ----------
 
-// The filters. "css" is a CSS filter: the same words work on the playing video (the preview) and
-// on the canvas each frame is drawn on (the new video), so what you see is what you get.
+// The looks: Korean styles (the owner's choice "a", November 2, 2026), plus Original and Black and
+// white. "css" is a CSS filter: the same words work on the playing video (the preview) and on the
+// canvas each frame is drawn on (the new video), so what you see is what you get. "url(#look-...)"
+// points to an SVG filter near the top of index.html, where each look's numbers are.
 const FILTERS = [
-  { id: 'none', name: 'None', css: '' },
-  { id: 'bw', name: 'Black and white', css: 'grayscale(1)' },
-  { id: 'warm', name: 'Warm', css: 'sepia(0.3) saturate(1.2)' },
-  { id: 'vivid', name: 'Vivid', css: 'saturate(1.4) contrast(1.08)' },
-  { id: 'soft', name: 'Soft', css: 'contrast(0.88) saturate(0.85) brightness(1.04)' },
-  { id: 'film', name: 'Old film', css: 'sepia(0.75) contrast(1.05)' },
+  { id: 'none', name: 'Original', ko: '원본', css: '' },
+  { id: 'milky', name: 'Milky', ko: '우유빛', css: 'url(#look-milky)' },
+  { id: 'peach', name: 'Peach', ko: '복숭아', css: 'url(#look-peach)' },
+  { id: 'glow', name: 'Soft glow', ko: '뽀샤시', css: 'url(#look-glow)' },
+  { id: 'cafe', name: 'Café', ko: '카페', css: 'url(#look-cafe)' },
+  { id: 'clear', name: 'Clear', ko: '맑음', css: 'url(#look-clear)' },
+  { id: 'film', name: 'Film', ko: '필름', css: 'url(#look-film)' },
+  { id: 'bw', name: 'Black and white', ko: '흑백', css: 'grayscale(1)' },
 ];
 
 // What every new video is made like, so it fits Instagram's, TikTok's and YouTube Shorts' upload
@@ -129,6 +133,19 @@ function lookFilter() {
   return parts.filter(Boolean).join(' ');
 }
 
+// The soft glow's blur is a share of the picture's width (data-glow in index.html), so the glow looks
+// the same on the small preview and in the full-size video. This sets it for a picture that many pixels wide.
+function setGlowFor(width) {
+  for (const blur of document.querySelectorAll('[data-glow]')) {
+    blur.setAttribute('stdDeviation', String(Math.max(0.5, Number(blur.dataset.glow) * width)));
+  }
+}
+function fitGlowToPreview() {
+  if (state.making) return; // while a video is being made, the glow stays sized for the full picture
+  const width = el('preview').getBoundingClientRect().width;
+  if (width) setGlowFor(width);
+}
+
 // Shows a problem in plain words, with the technical details underneath for Claude
 function showProblem(where, words, error) {
   const box = el(where);
@@ -208,7 +225,10 @@ const SCREENS = ['start', 'look', 'making', 'done'];
 
 function show(name) {
   for (const screen of SCREENS) el(screen + '-screen').hidden = screen !== name;
-  if (name === 'look') el('preview').play().catch(() => {});
+  if (name === 'look') {
+    el('preview').play().catch(() => {});
+    fitGlowToPreview();
+  }
   else el('preview').pause();
   if (name !== 'done') el('result').pause();
   window.scrollTo(0, 0);
@@ -291,7 +311,15 @@ function buildChips() {
     chip.className = 'chip';
     chip.setAttribute('role', 'radio');
     chip.dataset.filter = filter.id;
-    chip.textContent = filter.name;
+    // The English name, with the Korean word under it
+    const name = document.createElement('span');
+    name.className = 'en';
+    name.textContent = filter.name;
+    const korean = document.createElement('span');
+    korean.className = 'ko';
+    korean.lang = 'ko';
+    korean.textContent = filter.ko;
+    chip.append(name, korean);
     chip.addEventListener('click', () => {
       state.filter = filter.id;
       updateLook();
@@ -390,6 +418,7 @@ async function makeVideo() {
   } catch (error) { /* the video still gets made */ }
 
   let canvas = null;
+  setGlowFor(size.width); // the glow, sized for the full-size picture
   try {
     // AAC sound: built into Chrome on the owner's phone (the phone test, November 2, 2026); the
     // add-on is only for a phone or browser without it
@@ -408,9 +437,14 @@ async function makeVideo() {
         allowTransformationMetadata: false, // turn the picture upright now, instead of a "turn it" note in the file
         frameRate: fps,                     // a steady number of frames each second
         quality: new MB.Quality({ bitrate: chooseBitrate(size, fps), bitrateMode: 'variable' }),
-        // Each frame is drawn onto a canvas with the look: the same CSS filter as the preview
+        // Each frame is drawn onto a canvas with the look: the same CSS filter as the preview.
+        // (A normal canvas, not an OffscreenCanvas: only a normal one can use the SVG looks.)
         process: (sample) => {
-          if (!canvas) canvas = new OffscreenCanvas(sample.displayWidth, sample.displayHeight);
+          if (!canvas) {
+            canvas = document.createElement('canvas');
+            canvas.width = sample.displayWidth;
+            canvas.height = sample.displayHeight;
+          }
           const context = canvas.getContext('2d');
           context.filter = filter || 'none';
           sample.draw(context, 0, 0);
@@ -460,6 +494,7 @@ async function makeVideo() {
     state.conversion = null;
     state.making = false;
     input.dispose();
+    fitGlowToPreview(); // the glow, sized for the preview again
     if (screenLock) screenLock.release().catch(() => {});
   }
 }
@@ -655,6 +690,8 @@ el('brightness').addEventListener('input', () => { state.brightness = Number(el(
 el('contrast').addEventListener('input', () => { state.contrast = Number(el('contrast').value); updateLook(); });
 el('reset-light').addEventListener('click', () => { state.brightness = 0; state.contrast = 0; updateLook(); });
 el('make').addEventListener('click', makeVideo);
+el('preview').addEventListener('loadedmetadata', fitGlowToPreview);
+window.addEventListener('resize', fitGlowToPreview);
 el('stop').addEventListener('click', stopMaking);
 el('share').addEventListener('click', share);
 el('new-video').addEventListener('click', startOver);

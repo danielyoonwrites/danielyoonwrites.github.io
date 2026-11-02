@@ -96,6 +96,16 @@ self.addEventListener('fetch', (event) => {
 // Tries the internet first. Uses the copy on the phone when there's no
 // reception, or when the internet is slower than WAIT.
 async function newestOrCopy(event, request) {
+  // A file with a version number in its address (like app.js?v=36) never changes: a changed
+  // file gets a new number in index.html. So when the phone has that exact version, it's used
+  // at once, without the internet. This keeps an older page with its own older script:
+  // GitHub Pages ignores the ?v= part, so the internet would send the newest app.js, which
+  // doesn't fit an older page, and no button would work (found in the audit, November 2, 2026).
+  if (new URL(request.url).searchParams.has('v')) {
+    const exact = await findCopy(request, false);
+    if (exact) return exact;
+  }
+
   const fromInternet = fetch(request).then((response) => {
     // Keep the newest copy (fonts come back "opaque": fine to keep, just unreadable to us)
     if (response.ok || response.type === 'opaque') {
@@ -118,7 +128,9 @@ async function newestOrCopy(event, request) {
   // No reception: the copy of this file, whatever its version. Only slow: the exact same
   // version only (style.css?v=15, not ?v=14), so a newer page never runs with an older script.
   const copy = await findCopy(request, noReception);
-  return copy || fromInternet;   // no copy yet: keep waiting for the internet
+  // No copy of this version yet: keep waiting for the internet. If it fails after all
+  // (a connection that hangs, then drops), use any version, as without reception.
+  return copy || fromInternet.catch(() => findCopy(request, true));
 }
 
 // One copy per file: style.css?v=14 and style.css?v=15 count as the same file
