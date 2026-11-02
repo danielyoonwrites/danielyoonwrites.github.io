@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <!-- Makes the page fit phone screens. "resizes-content" makes the page shorter when the
-       keyboard opens, so the note you're typing stays above the keyboard. -->
+       keyboard opens, so what you're typing stays above the keyboard. -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <!-- A safety rule for the browser (a "Content-Security-Policy"): this page may only run its own
        script (app.js) and use its own style.css and Google's fonts. It talks to no server yet.
@@ -25,35 +25,55 @@
 
   <!-- The app's own look: "Paper and ink," like Living in the Word (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=2">
-  <script src="app.js?v=2" defer></script>
+  <link rel="stylesheet" href="style.css?v=3">
+  <script src="app.js?v=3" defer></script>
 </head>
 <body>
 
-  <!-- The thin bar at the top: the app's name, and whether your notes are saved -->
-  <header class="bar top">
-    <span class="name">Idea board</span>
-    <!-- Not read out by screen readers on every save: it changes after every letter you type -->
-    <span class="status" id="status"></span>
-  </header>
+  <!-- Screen 1: your boards, newest first -->
+  <section class="screen list-screen" id="list-screen" aria-labelledby="list-title">
+    <header class="bar top">
+      <span class="name">Idea board</span>
+    </header>
+    <div class="list-scroll">
+      <h1 class="title" id="list-title" tabindex="-1">Your boards</h1>
+      <ul class="boards" id="boards"></ul>
+      <p class="empty-list" id="no-boards" hidden>No boards yet.</p>
+      <p class="small" id="list-note">Your boards are saved on this device for now.</p>
+    </div>
+  </section>
 
-  <!-- The board. Everything on it sits on the "world," which app.js moves and zooms. -->
-  <main class="board" id="board" aria-label="Your board. Drag an empty spot to move around. Pinch to zoom.">
-    <div class="world" id="world"></div>
-    <p class="empty" id="empty" hidden>Nothing here yet. Add a note to start.</p>
-  </main>
+  <!-- Screen 2: one board. Everything on it sits on the "world," which app.js moves and zooms. -->
+  <div class="screen board-screen" id="board-screen" hidden>
+    <header class="bar top board-bar">
+      <button type="button" class="quiet" id="to-boards" aria-label="Back to your boards">← Boards</button>
+      <span class="board-name" id="board-name"></span>
+      <button type="button" class="quiet" id="edit-board" aria-label="Rename or remove this board">Edit</button>
+    </header>
+    <main class="board" id="board" aria-label="Your board. Drag an empty spot to move around. Pinch to zoom.">
+      <div class="world" id="world"></div>
+      <p class="empty" id="empty" hidden>Nothing here yet. Add a note to start.</p>
+      <!-- Not read out by screen readers on every save: it changes after every letter you type -->
+      <span class="status" id="status"></span>
+    </main>
+  </div>
 
   <!-- At the bottom of the screen: "Note removed. Undo" (for a few seconds after "Remove"),
        then the buttons. On a narrow screen, or with the phone's zoom turned up, the buttons
        go onto two rows instead of running off the edges. -->
   <div class="bottom">
     <div class="removed" id="removed" role="status" hidden>
-      <span>Note removed.</span>
+      <span id="removed-words">Note removed.</span>
       <button type="button" id="undo">Undo</button>
     </div>
 
-    <!-- Phones pinch to zoom, so the − and + only show on a computer -->
-    <nav class="tools" aria-label="Board tools">
+    <!-- On the list of boards -->
+    <nav class="tools" id="list-tools" aria-label="Your boards">
+      <button type="button" class="primary" id="new-board">New board</button>
+    </nav>
+
+    <!-- On a board. Phones pinch to zoom, so the − and + only show on a computer. -->
+    <nav class="tools" id="board-tools" aria-label="Board tools" hidden>
       <button type="button" class="outline" id="show-all">Show all</button>
       <button type="button" class="outline zoom" id="zoom-out" aria-label="Zoom out">−</button>
       <button type="button" class="outline zoom" id="zoom-in" aria-label="Zoom in">+</button>
@@ -61,13 +81,34 @@
     </nav>
   </div>
 
-  <!-- The note on its own screen, with a big box to type in -->
+  <!-- A note on its own screen, with a big box to type in -->
   <section class="editor" id="editor" aria-label="Your note" hidden>
     <div class="bar">
       <button type="button" class="quiet" id="remove-note">Remove</button>
       <button type="button" class="primary" id="done">Done</button>
     </div>
     <textarea id="note-text" placeholder="Type your note" aria-label="Your note"></textarea>
+  </section>
+
+  <!-- A board's name on its own screen: for a new board, or to rename or remove one -->
+  <section class="editor" id="board-settings" aria-labelledby="board-name-label" hidden>
+    <div class="bar">
+      <button type="button" class="quiet" id="remove-board">Remove board</button>
+      <button type="button" class="primary" id="board-done">Done</button>
+    </div>
+    <div class="settings">
+      <label class="label" id="board-name-label" for="board-name-input">Board name</label>
+      <input type="text" id="board-name-input" maxlength="80" autocomplete="off" enterkeyhint="done"
+             placeholder="Like “Sermon series” or “Chapter two”">
+      <p class="small" id="board-count"></p>
+
+      <!-- Asks before removing a whole board -->
+      <div class="confirm" id="confirm-remove" hidden>
+        <p id="confirm-words"></p>
+        <button type="button" class="primary" id="confirm-yes">Remove</button>
+        <button type="button" class="outline" id="confirm-no">Keep it</button>
+      </div>
+    </div>
   </section>
 
   <noscript><p class="empty">Idea board needs JavaScript turned on.</p></noscript>

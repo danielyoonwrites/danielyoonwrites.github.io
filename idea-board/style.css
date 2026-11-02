@@ -78,13 +78,36 @@ textarea:focus-visible,
 }
 
 .top {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 2;
+  flex: none;
   min-height: calc(52px + env(safe-area-inset-top));
   padding-top: env(safe-area-inset-top);   /* clear of the phone's camera and clock */
+}
+
+/* On a board: "Boards" on the left, the board's name in the middle, "Edit" on the right.
+   On a narrow screen the name goes onto its own line. */
+.board-bar {
+  flex-wrap: wrap;
+  gap: 0 12px;
+}
+
+.board-name {
+  flex: 1 1 8rem;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 19px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Very narrow (or the phone's zoom turned up): "Boards" and "Edit" on the first line, the name under them */
+@media (max-width: 300px) {
+  .board-name {
+    order: 3;
+    flex-basis: 100%;
+    padding-bottom: 8px;
+    text-align: left;
+  }
 }
 
 /* Small capital labels */
@@ -96,22 +119,142 @@ textarea:focus-visible,
   text-transform: uppercase;
 }
 
+/* "Saved on this device," in the board's top right corner */
 .status {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  z-index: 1;
+  padding: 2px 6px;
+  background: var(--paper);
   color: var(--muted);
   letter-spacing: 0.08em;
   text-transform: none;
-  text-align: right;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+/* A few seconds after "Saved on this device," it fades, so it doesn't sit over a note */
+.status.faded {
+  opacity: 0;
+}
+
+
+/* ---------- The screens: the list of boards, and a board ---------- */
+
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+}
+
+/* The list scrolls if there are many boards; the space at the bottom is for "New board" */
+.list-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 24px 128px;
+}
+
+.title {
+  margin: 36px 0 24px;
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.title:focus {
+  outline: none;
+}
+
+.boards {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.boards li {
+  border-top: 1px solid var(--line);
+}
+
+.boards li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+/* One board in the list: its name, how many notes, and an arrow */
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "name arrow" "count arrow";
+  align-items: center;
+  gap: 2px 12px;
+  width: 100%;
+  min-height: 72px;
+  padding: 12px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+}
+
+.row:active {
+  opacity: 0.75;
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.row-name {
+  grid-area: name;
+  font-family: var(--serif);
+  font-size: 22px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.row-count {
+  grid-area: count;
+  font-size: 13.5px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.row-arrow {
+  grid-area: arrow;
+  font-size: 20px;
+}
+
+.empty-list {
+  margin: 28px 0;
+  color: var(--muted);
+  font-style: italic;
+  text-align: center;
+}
+
+/* Small print */
+.small {
+  max-width: 32rem;
+  margin: 24px auto 0;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 13.5px;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  text-align: center;
 }
 
 
 /* ---------- The board ---------- */
 
 .board {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: calc(52px + env(safe-area-inset-top));   /* just under the bar at the top */
+  position: relative;
+  flex: 1;          /* the rest of the screen, under the bar */
+  min-height: 0;
   overflow: hidden;
   touch-action: none;   /* the app moves and zooms the board itself */
   cursor: grab;
@@ -266,6 +409,7 @@ textarea:focus-visible,
 
 /* "Remove": small quiet words */
 .quiet {
+  min-width: 48px;
   min-height: 48px;   /* Android's guide: tap targets at least 48 by 48 */
   padding: 0;
   border: none;
@@ -354,4 +498,76 @@ textarea:focus-visible,
 .editor textarea::placeholder {
   color: var(--muted);
   font-style: italic;
+}
+
+
+/* ---------- A board's name on its own screen ---------- */
+
+.settings {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 28px 24px;
+  overflow-y: auto;
+}
+
+.label {
+  display: block;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 13.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* A single line to write on */
+.settings input {
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px 0;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 26px;
+}
+
+.settings input:focus {
+  outline: none;
+  border-bottom-width: 3px;   /* the line gets thicker while you type */
+  padding-bottom: 6px;
+}
+
+.settings input::placeholder {
+  color: var(--muted);
+  font-size: 22px;
+  font-style: italic;
+}
+
+.settings .small {
+  margin-top: 12px;
+  text-align: left;
+}
+
+/* "Remove “Sermon series” and its 3 notes?" */
+.confirm {
+  margin-top: 36px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.confirm p {
+  margin: 0 0 16px;
+  font-size: 21px;
+  line-height: 1.4;
+}
+
+.confirm button {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
 }

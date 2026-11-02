@@ -1,5 +1,5 @@
-// Idea board: one big board of typed notes (build step 2 in SPEC.md).
-// For now the board is saved only in this browser, on this device, in IndexedDB
+// Idea board: boards of typed notes (build steps 2 and 3 in SPEC.md).
+// For now the boards are saved only in this browser, on this device, in IndexedDB
 // (the browser's own storage, which can hold photos later). Nothing is sent anywhere.
 // Signing in and saving to your account come in build steps 6 and 7.
 
@@ -12,13 +12,14 @@
 // x and y are where a note's top-left corner sits on the board, in board pixels.
 // The last item in the list is drawn on top.
 //
-// Where you were looking (how far the board is moved, and the zoom) is kept separately,
+// Where you were looking on each board (how far it's moved, and the zoom) is kept separately,
 // in localStorage, because it belongs to this device, not to the board.
 
 const DB_NAME = 'idea-board';
 const STORE = 'boards';
 const VIEW_KEY = 'idea-board-view:';   // followed by the board's id
 const DATA_VERSION = 1;                 // raise it if what's saved ever changes shape
+const UNTITLED = 'Untitled board';      // the name of a board saved without one
 
 const NOTE_WIDTH = 220;        // board pixels, the same as .note in style.css
 const MIN_ZOOM = 0.2;
@@ -28,24 +29,33 @@ const SAVE_DELAY = 400;        // milliseconds after the last change, before sav
 const UNDO_TIME = 8000;        // milliseconds that "Note removed. Undo" stays
 
 let db = null;                 // the open database, or null if this browser won't save
-let board = null;              // the board on the screen
+let boards = [];               // every board on this device
+let board = null;              // the board on the screen (null on the list of boards)
+let screen = 'list';           // 'list' or 'board'
 let readOnly = false;          // true if a newer version of the app saved this board
 let view = { x: 0, y: 0, zoom: 1 };   // how far the board is moved on the screen, and the zoom
 let editing = null;            // the note open on its own screen
 let editingIsNew = false;      // true while a just-added note is open
-let editorInHistory = false;   // true while the note screen has its own step in the Back history
-let lastRemoved = null;        // { item, index }, for Undo
+let settingsMode = null;       // 'new' or 'rename' while a board's name is open on its own screen
+let leaving = false;           // true between tapping "Done" (or "Boards") and the screen closing
+let lastRemoved = null;        // for Undo: { kind: 'note', item, index } or { kind: 'board', record }
 let removedTimer = null;
 let saveTimer = null;
 let viewTimer = null;
 
-const boardEl = document.getElementById('board');
-const worldEl = document.getElementById('world');
-const emptyEl = document.getElementById('empty');
-const statusEl = document.getElementById('status');
-const editorEl = document.getElementById('editor');
-const noteText = document.getElementById('note-text');
-const removedEl = document.getElementById('removed');
+const $ = (id) => document.getElementById(id);
+const listScreen = $('list-screen');
+const boardScreen = $('board-screen');
+const boardsEl = $('boards');
+const boardEl = $('board');
+const worldEl = $('world');
+const emptyEl = $('empty');
+const statusEl = $('status');
+const editorEl = $('editor');
+const noteText = $('note-text');
+const settingsEl = $('board-settings');
+const nameInput = $('board-name-input');
+const removedEl = $('removed');
 
 
 // ---------- Small helpers ----------
@@ -64,12 +74,33 @@ function clampZoom(zoom) {
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom));
 }
 
+// "Saving," "Saved on this device" or a problem, in the board's corner. "Saved" fades after a few
+// seconds, so it doesn't sit over a note; anything else stays until it changes.
+let statusTimer = null;
 function showStatus(words) {
   statusEl.textContent = words;
+  statusEl.classList.remove('faded');
+  clearTimeout(statusTimer);
+  if (words === 'Saved on this device') statusTimer = setTimeout(() => statusEl.classList.add('faded'), 3000);
 }
 
 function findItem(id) {
   return board.items.find((item) => item.id === id);
+}
+
+function notesOf(record) {
+  return record.items.filter((item) => item.type === 'note');
+}
+
+// "No notes yet," "1 note" or "3 notes"
+function howManyNotes(record) {
+  const count = notesOf(record).length;
+  if (count === 0) return 'No notes yet';
+  return count === 1 ? '1 note' : `${count} notes`;
+}
+
+function nameOf(record) {
+  return (record.name || '').trim() || UNTITLED;
 }
 
 // A finger's (or the mouse's) place on the board area of the screen
@@ -101,10 +132,13 @@ function readAllBoards() {
   });
 }
 
-function writeBoard(record) {
+// Writes one board (or, with remove, deletes it), and waits until it's really saved
+function changeBoard(record, remove) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(STORE, 'readwrite');
-    transaction.objectStore(STORE).put(record);   // the browser copies the board right here
+    const store = transaction.objectStore(STORE);
+    if (remove) store.delete(record.id);
+    else store.put(record);   // the browser copies the board right here
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);
     transaction.onabort = () => reject(transaction.error);
@@ -113,7 +147,7 @@ function writeBoard(record) {
 
 // Saves a moment after the last change, so dragging a note doesn't save 60 times a second
 function saveSoon() {
-  if (!db || readOnly) return;
+  if (!db || readOnly || !board) return;
   showStatus('Saving');
   clearTimeout(saveTimer);
   saveTimer = setTimeout(saveNow, SAVE_DELAY);
@@ -122,10 +156,10 @@ function saveSoon() {
 async function saveNow() {
   clearTimeout(saveTimer);
   saveTimer = null;
-  if (!db || readOnly) return;
+  if (!db || readOnly || !board) return;
   board.changed = now();
   try {
-    await writeBoard(board);
+    await changeBoard(board);
     showStatus('Saved on this device');
   } catch (error) {
     showStatus('Couldn’t save on this device');
@@ -144,6 +178,7 @@ function saveViewSoon() {
 
 function saveView() {
   clearTimeout(viewTimer);
+  if (!board) return;
   try {
     localStorage.setItem(VIEW_KEY + board.id, JSON.stringify(view));
   } catch (error) {
@@ -151,31 +186,136 @@ function saveView() {
   }
 }
 
+// True if this device remembers where you were on the board
 function loadView() {
   try {
     const saved = JSON.parse(localStorage.getItem(VIEW_KEY + board.id));
     if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y) && Number.isFinite(saved.zoom)) {
       view = { x: saved.x, y: saved.y, zoom: clampZoom(saved.zoom) };
+      return true;
     }
   } catch (error) {
     // Nothing saved, or it can't be read: start at the beginning
   }
+  return false;
 }
 
 // Before the page closes or goes to the background, save anything still waiting
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') {
     if (saveTimer) saveNow();
-    if (board) saveView();
+    saveView();
   }
 });
 
 
-// ---------- Drawing the board ----------
+// ---------- Going from screen to screen (and the phone's Back button) ----------
+//
+// The screens: the list of boards, then a board, then on top of a board either a note or the
+// board's name. Each step deeper adds a step to the browser's Back history, so the phone's
+// Back button (<) goes back one step instead of leaving the app. "Done" and "Boards" go back
+// the same way. Whenever the history moves, followHistory() shows what that step should show.
+
+function goDeeper(step) {
+  history.pushState({ ideaBoard: step }, '');
+}
+
+function goBack(steps = 1) {
+  if (leaving) return;   // a second quick tap mustn't go back a step too far
+  leaving = true;
+  setTimeout(() => { leaving = false; }, 1000);   // just in case the history doesn't move
+  history.go(-steps);
+}
+
+window.addEventListener('popstate', (event) => followHistory(event.state && event.state.ideaBoard));
+
+function followHistory(step) {
+  leaving = false;
+  if (editing && step !== 'note') closeEditor();
+  if (settingsMode && step !== 'settings') closeSettings();
+  if (screen === 'board' && (!step || step === 'list')) showList();
+}
+
+
+// ---------- The list of boards ----------
+
+function showList() {
+  if (board) {
+    if (saveTimer) saveNow();
+    saveView();
+  }
+  board = null;
+  screen = 'list';
+  if (lastRemoved && lastRemoved.kind === 'note') clearRemoved();   // that note stays removed
+  boardScreen.hidden = true;
+  listScreen.hidden = false;
+  $('board-tools').hidden = true;
+  $('list-tools').hidden = false;
+  renderList();
+}
+
+function renderList() {
+  boards.sort((a, b) => String(b.changed).localeCompare(String(a.changed)));   // newest first
+  boardsEl.replaceChildren(...boards.map(boardRow));
+  $('no-boards').hidden = boards.length > 0;
+}
+
+function boardRow(record) {
+  const row = document.createElement('li');
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'row';
+  button.dataset.id = record.id;
+  const name = document.createElement('span');
+  name.className = 'row-name';
+  name.textContent = nameOf(record);   // always as plain words, never as code
+  const count = document.createElement('span');
+  count.className = 'row-count';
+  count.textContent = howManyNotes(record);
+  const arrow = document.createElement('span');
+  arrow.className = 'row-arrow';
+  arrow.setAttribute('aria-hidden', 'true');
+  arrow.textContent = '→';
+  button.append(name, count, arrow);
+  row.append(button);
+  return row;
+}
+
+boardsEl.addEventListener('click', (event) => {
+  const row = event.target.closest('.row');
+  const record = row && boards.find((each) => each.id === row.dataset.id);
+  if (!record) return;
+  goDeeper('board');
+  openBoard(record);
+});
+
+
+// ---------- One board ----------
+
+function openBoard(record) {
+  board = record;
+  screen = 'board';
+  readOnly = board.version > DATA_VERSION;   // saved by a newer version: show it, never write over it
+  if (lastRemoved && lastRemoved.kind === 'board') clearRemoved();   // that board stays removed
+  view = { x: 0, y: 0, zoom: 1 };
+  const remembered = loadView();
+  listScreen.hidden = true;
+  boardScreen.hidden = false;
+  $('list-tools').hidden = true;
+  $('board-tools').hidden = false;
+  $('board-name').textContent = nameOf(board);
+  render();
+  // The first time this device opens a board with notes on it, show them all
+  if (!remembered && notesOf(board).length) showAll(false);
+  if (readOnly) showStatus('Reload the page to get the newest version');
+  else showStatus(db ? 'Saved on this device' : 'This browser won’t save here');
+}
+
+$('to-boards').addEventListener('click', () => goBack());
 
 function render() {
   // Only notes for now. Anything else (from a later version) is kept, just not drawn.
-  const notes = board.items.filter((item) => item.type === 'note');
+  const notes = notesOf(board);
   worldEl.replaceChildren(...notes.map(noteElement));
   emptyEl.hidden = notes.length > 0;
   applyView();
@@ -227,9 +367,8 @@ function zoomFromCenter(factor) {
 }
 
 // "Show all": moves and zooms so every note fits on the screen
-function showAll() {
-  const notes = board.items.filter((item) => item.type === 'note');
-  if (!notes.length) {
+function showAll(gliding = true) {
+  if (!notesOf(board).length) {
     view = { x: 0, y: 0, zoom: 1 };
     applyView();
     saveViewSoon();
@@ -256,7 +395,7 @@ function showAll() {
     x: margin + (width - (right - left) * zoom) / 2 - left * zoom,
     y: margin + (height - (bottom - top) * zoom) / 2 - top * zoom,
   };
-  glide();
+  if (gliding) glide();
   applyView();
   saveViewSoon();
 }
@@ -264,13 +403,13 @@ function showAll() {
 // How much of the bottom of the board the buttons cover (two rows on a narrow screen)
 function roomForButtons() {
   const boardRect = boardEl.getBoundingClientRect();
-  const toolsRect = document.querySelector('.tools').getBoundingClientRect();
+  const toolsRect = $('board-tools').getBoundingClientRect();
   return Math.max(0, boardRect.bottom - toolsRect.top) + 8;
 }
 
 // Each note's outline on the board, in board pixels (a note grows taller with more words)
 function noteOutlines() {
-  return board.items.filter((item) => item.type === 'note').map((item) => {
+  return notesOf(board).map((item) => {
     const el = worldEl.querySelector(`[data-id="${item.id}"]`);
     const height = el ? el.offsetHeight : NOTE_WIDTH;
     return { left: item.x, top: item.y, right: item.x + NOTE_WIDTH, bottom: item.y + height };
@@ -366,6 +505,7 @@ boardEl.addEventListener('pointermove', (event) => {
     const dy = p.y - gesture.startY;
     if (!gesture.dragging) {
       if (Math.hypot(dx, dy) < MOVE_BEFORE_DRAG) return;   // still a tap, so far
+      if (readOnly) return;
       gesture.dragging = true;
       gesture.el.classList.add('dragging');
       bringToFront(gesture.item, gesture.el);
@@ -407,7 +547,7 @@ function pointerEnded(event) {
     } else if (event.type === 'pointerup') {
       const item = gesture.item;
       gesture = null;
-      openEditor(item, false);   // a tap opens the note
+      openNote(item, false);   // a tap opens the note
     } else {
       gesture = null;
     }
@@ -467,7 +607,7 @@ worldEl.addEventListener('keydown', (event) => {
   if (!noteEl || (event.key !== 'Enter' && event.key !== ' ')) return;
   event.preventDefault();
   const item = findItem(noteEl.dataset.id);
-  if (item) openEditor(item, false);
+  if (item) openNote(item, false);
 });
 
 
@@ -477,7 +617,7 @@ function addNote() {
   if (readOnly) return;
   const { x, y } = openSpot();
   const item = { id: makeId(), type: 'note', x, y, text: '', made: now(), changed: now() };
-  openEditor(item, true);   // it joins the board once you type something
+  openNote(item, true);   // it joins the board once you type something
 }
 
 // An open spot for a new note, as near the middle of the screen as possible,
@@ -514,18 +654,15 @@ function openSpot() {
 
 // ---------- A note on its own screen ----------
 
-function openEditor(item, isNew) {
+function openNote(item, isNew) {
   if (readOnly) return;
+  goDeeper('note');
   editing = item;
   editingIsNew = isNew;
   noteText.value = item.text;
   editorEl.hidden = false;
   noteText.focus();   // opens the phone's keyboard
   if (!isNew) noteText.setSelectionRange(noteText.value.length, noteText.value.length);
-  // Give the note screen its own step in the Back history,
-  // so the phone's Back button (<) closes the note instead of leaving the app
-  history.pushState({ ideaBoardNote: true }, '');
-  editorInHistory = true;
 }
 
 // Every letter is saved, so nothing is lost if the phone closes the page mid-sentence
@@ -539,110 +676,197 @@ noteText.addEventListener('input', () => {
   saveSoon();
 });
 
-function closeEditor(fromBackButton) {
-  if (!editing) return;
+// Runs when the history goes back from the note (by "Done," "Remove" or the Back button)
+function closeEditor() {
   const item = editing;
   editing = null;
   editorEl.hidden = true;
   noteText.blur();
+  if (!board) return;
   if (!item.text.trim()) removeItem(item, false);   // an empty note isn't kept
   render();
   if (editingIsNew && board.items.includes(item)) bringIntoView(item);   // so you see where it went
   editingIsNew = false;
   if (saveTimer) saveNow();
-  // Take away the note screen's step in the Back history, unless Back already did
-  if (!fromBackButton && editorInHistory) {
-    editorInHistory = false;
-    history.back();
+}
+
+$('done').addEventListener('click', () => goBack());
+
+$('remove-note').addEventListener('click', () => {
+  if (!editing || leaving) return;
+  const item = editing;
+  if (board.items.includes(item)) removeItem(item, item.text.trim() !== '');   // Undo only for a note with words
+  else item.text = '';   // a new note that was never kept
+  goBack();
+});
+
+
+// ---------- A board's name on its own screen: a new board, or rename or remove one ----------
+
+function openSettings(mode) {
+  goDeeper('settings');
+  settingsMode = mode;
+  settingsEl.hidden = false;
+  $('remove-board').hidden = mode === 'new';
+  $('confirm-remove').hidden = true;
+  nameInput.value = mode === 'new' ? '' : board.name;
+  $('board-count').textContent = mode === 'new' ? '' : howManyNotes(board);
+  nameInput.focus();   // opens the phone's keyboard
+}
+
+// Runs when the history goes back from the name screen
+function closeSettings() {
+  const mode = settingsMode;
+  settingsMode = null;
+  settingsEl.hidden = true;
+  $('confirm-remove').hidden = true;
+  nameInput.blur();
+  if (mode === 'rename' && board) {
+    board.name = nameOf(board);
+    $('board-name').textContent = board.name;
+    saveNow();
   }
 }
 
-document.getElementById('done').addEventListener('click', () => closeEditor(false));
-
-document.getElementById('remove-note').addEventListener('click', () => {
-  if (!editing) return;
-  const item = editing;
-  const wasOnBoard = board.items.includes(item);
-  if (wasOnBoard) removeItem(item, item.text.trim() !== '');   // Undo only for a note with words
-  item.text = wasOnBoard ? item.text : '';
-  closeEditor(false);
+$('new-board').addEventListener('click', () => openSettings('new'));
+$('edit-board').addEventListener('click', () => {
+  if (!readOnly) openSettings('rename');
 });
 
-// The phone's Back button (<) while a note is open: close the note, keep the words
-window.addEventListener('popstate', () => {
-  editorInHistory = false;
-  if (editing) closeEditor(true);
+// Renaming: every letter is saved
+nameInput.addEventListener('input', () => {
+  if (settingsMode !== 'rename' || !board) return;
+  board.name = nameInput.value;
+  $('board-name').textContent = nameOf(board);
+  saveSoon();
+});
+
+function nameDone() {
+  if (settingsMode !== 'new') {
+    goBack();
+    return;
+  }
+  // A new board: make it, and open it in place of the name screen (Back then goes to the list)
+  const record = newBoard(nameInput.value.trim() || UNTITLED);
+  boards.push(record);
+  if (db) changeBoard(record).catch(() => showStatus('Couldn’t save on this device'));
+  history.replaceState({ ideaBoard: 'board' }, '');
+  settingsMode = null;
+  settingsEl.hidden = true;
+  nameInput.blur();
+  openBoard(record);
+}
+
+$('board-done').addEventListener('click', nameDone);
+nameInput.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    nameDone();
+  }
+});
+
+// "Remove board" asks first, with the board's name and how many notes go with it
+$('remove-board').addEventListener('click', () => {
+  const count = notesOf(board).length;
+  $('confirm-words').textContent = count
+    ? `Remove “${nameOf(board)}” and its ${howManyNotes(board)}?`
+    : `Remove “${nameOf(board)}”? It has no notes.`;
+  $('confirm-remove').hidden = false;
+  $('confirm-yes').focus();
+});
+
+$('confirm-no').addEventListener('click', () => {
+  $('confirm-remove').hidden = true;
+  nameInput.focus();
+});
+
+$('confirm-yes').addEventListener('click', () => {
+  if (!board || leaving) return;
+  const record = board;
+  clearTimeout(saveTimer);   // nothing more is saved for this board
+  saveTimer = null;
+  boards = boards.filter((each) => each !== record);
+  if (db) changeBoard(record, true).catch(() => {});
+  board = null;   // the list doesn't save it again
+  offerUndo({ kind: 'board', record }, 'Board removed.');
+  goBack(2);      // past the board, to the list
 });
 
 
 // ---------- Removing, and Undo ----------
 
-function removeItem(item, offerUndo) {
+function removeItem(item, offerIt) {
   const index = board.items.indexOf(item);
   if (index === -1) return;
   board.items.splice(index, 1);
-  if (offerUndo) {
-    lastRemoved = { item, index };
-    removedEl.hidden = false;
-    clearTimeout(removedTimer);
-    removedTimer = setTimeout(() => {
-      removedEl.hidden = true;
-      lastRemoved = null;
-    }, UNDO_TIME);
-  }
+  if (offerIt) offerUndo({ kind: 'note', item, index }, 'Note removed.');
   saveSoon();
 }
 
-document.getElementById('undo').addEventListener('click', () => {
+function offerUndo(removed, words) {
+  if (lastRemoved) clearRemoved();
+  lastRemoved = removed;
+  $('removed-words').textContent = words;
+  removedEl.hidden = false;
+  removedTimer = setTimeout(clearRemoved, UNDO_TIME);
+}
+
+// The Undo time is over (or the screen changed): the removal stays
+function clearRemoved() {
+  clearTimeout(removedTimer);
+  removedEl.hidden = true;
+  if (lastRemoved && lastRemoved.kind === 'board') {
+    try {
+      localStorage.removeItem(VIEW_KEY + lastRemoved.record.id);
+    } catch (error) {
+      // Nothing to tidy
+    }
+  }
+  lastRemoved = null;
+}
+
+$('undo').addEventListener('click', () => {
   if (!lastRemoved) return;
-  const { item, index } = lastRemoved;
-  board.items.splice(Math.min(index, board.items.length), 0, item);
+  const removed = lastRemoved;
   lastRemoved = null;
   clearTimeout(removedTimer);
   removedEl.hidden = true;
-  render();
-  saveSoon();
+  if (removed.kind === 'note' && board) {
+    board.items.splice(Math.min(removed.index, board.items.length), 0, removed.item);
+    render();
+    saveSoon();
+  } else if (removed.kind === 'board') {
+    boards.push(removed.record);
+    if (db) changeBoard(removed.record).catch(() => {});
+    renderList();
+  }
 });
 
 
 // ---------- The buttons ----------
 
-document.getElementById('add-note').addEventListener('click', addNote);
-document.getElementById('show-all').addEventListener('click', showAll);
-document.getElementById('zoom-in').addEventListener('click', () => zoomFromCenter(1.25));
-document.getElementById('zoom-out').addEventListener('click', () => zoomFromCenter(1 / 1.25));
+$('add-note').addEventListener('click', addNote);
+$('show-all').addEventListener('click', () => showAll());
+$('zoom-in').addEventListener('click', () => zoomFromCenter(1.25));
+$('zoom-out').addEventListener('click', () => zoomFromCenter(1 / 1.25));
 
 
 // ---------- Starting ----------
 
 async function start() {
-  // A reload while a note was open leaves its Back step behind: tidy it away
-  if (history.state && history.state.ideaBoardNote) history.replaceState(null, '');
+  // The app always opens on the list of boards. A reload from deeper in leaves old Back steps
+  // behind, so this step is marked as the list.
+  history.replaceState({ ideaBoard: 'list' }, '');
 
   try {
     db = await openDatabase();
-    const boards = await readAllBoards();
-    // The board changed most recently (build step 3 adds a list of boards)
-    boards.sort((a, b) => String(b.changed).localeCompare(String(a.changed)));
-    board = boards.find((record) => record && Array.isArray(record.items)) || null;
+    boards = (await readAllBoards()).filter((record) => record && record.id && Array.isArray(record.items));
   } catch (error) {
     db = null;
+    boards = [];
+    $('list-note').textContent = 'This browser won’t save here, so boards go away when the page closes.';
   }
-
-  if (board && board.version > DATA_VERSION) {
-    // Saved by a newer version of the app: show it, but never write over it
-    readOnly = true;
-    showStatus('Reload the page to get the newest version');
-  } else if (!board) {
-    board = newBoard('My board');
-    if (db) saveNow();
-  }
-
-  if (!db) showStatus('This browser won’t save here');
-  else if (!readOnly) showStatus('Saved on this device');
-
-  loadView();
-  render();
+  showList();
 }
 
 start();
