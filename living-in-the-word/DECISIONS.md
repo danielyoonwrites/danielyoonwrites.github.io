@@ -319,7 +319,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - Decision: keep Sonnet 5.5 at `high` effort, and even out the sets through the guidance, starting with question 2 (next entry).
 - Why: Dan, after pasting pull request 84: "hmmm the questions are a bit inconsistent, some better than others, but it seems useable." Then he chose "A": send a weaker and a stronger set so Claude could suggest a guidance line. Its real cost on Romans 14: about 2.32 and 2.21 cents a set (Opus: 2.96).
 - Turned down: keeping it as it is ("B"); `xhigh` effort ("C": more tokens, so it costs more and is slower); going back to Opus ("D").
-- Status: replaced by November 2, 2026: Opus 5.5 writes every set (pull request NNN).
+- Status: replaced by November 2, 2026: Opus 5.5 writes every set (pull request 122).
 
 ### October 29, 2026: question 2 asks why what the passage shows about God matters there (pull request 85)
 - Decision: question 2 in `PATTERNS` (`server/worker.js`) gets one more sentence. Group study: "Guide the group a bit: not just who God is, but why that matters in this specific passage." Reading plan: "Guide the reader a bit: not just who God is, but why that matters in this specific reading."
@@ -439,7 +439,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - Why: `AUDIT.md`, item 3, found by two of the audit's reviewers. With no ESV key, every study and reading sent a request that could only fail, and the server checks the passcode before it looks at what's asked. So each open with a wrong or old passcode counted as two wrong tries, and a few group phones with an old passcode on one church Wi-Fi could reach the 10 a day and block everyone there, email sign-in too, until midnight Pacific. Section E of `tests/app-test.mjs`: with the switch on, the run asked for the text 16 times and an old passcode counted 2 wrong tries per open; with it off, none and 1.
 - Turned down: not counting wrong passcodes on text requests on the server (it would let someone guess the passcode through that route).
 
-### November 2, 2026: Opus 5.5 writes every set, at normal speed, and no fast mode (pull request NNN)
+### November 2, 2026: Opus 5.5 writes every set, at normal speed, and no fast mode (pull request 122)
 - Decision: `MODEL` in `server/worker.js` is `claude-opus-5-5` again, with `EFFORT` `medium` (Opus 5.5's own default), no `THINK_FIRST` line (it's for Sonnet) and `MAX_TOKENS` 4,000 (at most 8 cents of writing, the same cap as before). Every set uses it: the ones someone waits for and the ones written ahead. The test link (`?test`) now starts with the model's name, like "Opus 5.5.", so it shows which AI wrote a set.
 - Why: Dan, November 2, 2026, after asking whether fast mode is the regular Opus or a separate Opus he'd pay for (it's the same model on a faster setup, at twice Opus's price): "I have Max account. I'll try opus but not fast mode because that is quite expensive." Asked which sets Opus should write, he chose "A": all of them (Claude's recommendation: one style every week, and without fast mode, splitting saves little and isn't faster). On October 28, 2026 he had found Opus's questions deeper: "ok I think this is better."
 - Expected: about 3 cents a set instead of about 2.4 (Romans 14 cost 2.96 cents with Opus on October 28); probably no shorter wait (on October 28 Dan said Opus "takes a while to load," and on October 31 that Sonnet was "maybe as slow as Opus"). The `?test` line shows each set's real cost and seconds, to compare with Romans 16's 15.0.
