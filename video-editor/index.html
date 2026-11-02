@@ -20,12 +20,107 @@
 
   <!-- The app's look: dark, so the video stands out (the owner's choice, November 2, 2026; see SPEC.md).
        Raise the ?v= numbers whenever a file changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=1">
+  <link rel="stylesheet" href="style.css?v=2">
   <!-- Mediabunny, the library that reads and writes video files (see lib/README.md) -->
   <script src="lib/mediabunny.min.js?v=1.65.0" defer></script>
-  <script src="app.js?v=1" defer></script>
+  <script src="app.js?v=2" defer></script>
 </head>
 <body>
+
+  <!-- The Korean looks, as SVG color filters (the owner's choice "a", November 2, 2026; see SPEC.md,
+       "The looks"). app.js puts them on the playing video and on every frame of the new video, so what
+       you see is what you get. Each step's numbers can be changed here; values are 0 (black) to 1 (white).
+       "gamma" brightens the middle tones (an exponent under 1 means brighter); "linear" with a slope under 1
+       and an intercept above 0 softens contrast and lifts the darks (a milky look); "table" sets the
+       brightness at four points from dark to light; "saturate" under 1 mutes colors; the "matrix" rows
+       mix red, green and blue and add a tint (the last number in each row). -->
+  <svg class="looks" aria-hidden="true" focusable="false" width="0" height="0">
+    <!-- Milky (우유빛): bright and airy, soft contrast, gently muted colors, milky whites -->
+    <filter id="look-milky" color-interpolation-filters="sRGB">
+      <feComponentTransfer>
+        <feFuncR type="gamma" amplitude="1" exponent="0.85" offset="0"/>
+        <feFuncG type="gamma" amplitude="1" exponent="0.85" offset="0"/>
+        <feFuncB type="gamma" amplitude="1" exponent="0.85" offset="0"/>
+      </feComponentTransfer>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="0.86" intercept="0.14"/>
+        <feFuncG type="linear" slope="0.86" intercept="0.13"/>
+        <feFuncB type="linear" slope="0.86" intercept="0.135"/>
+      </feComponentTransfer>
+      <feColorMatrix type="saturate" values="0.85"/>
+    </filter>
+
+    <!-- Peach (복숭아): a warm peach-pink glow that flatters skin -->
+    <filter id="look-peach" color-interpolation-filters="sRGB">
+      <feComponentTransfer>
+        <feFuncR type="gamma" amplitude="1" exponent="0.9" offset="0"/>
+        <feFuncG type="gamma" amplitude="1" exponent="0.9" offset="0"/>
+        <feFuncB type="gamma" amplitude="1" exponent="0.9" offset="0"/>
+      </feComponentTransfer>
+      <feColorMatrix type="matrix" values="0.96 0.04 0    0 0.06
+                                           0.02 0.90 0.02 0 0.04
+                                           0    0.04 0.86 0 0.05
+                                           0    0    0    1 0"/>
+      <feColorMatrix type="saturate" values="0.95"/>
+    </filter>
+
+    <!-- Soft glow (뽀샤시): bright, with a soft dreamy glow. app.js sets the blur's size from the
+         picture's width (data-glow is the share of the width), so the glow looks the same on the
+         small preview and in the full-size video. -->
+    <filter id="look-glow" color-interpolation-filters="sRGB">
+      <feComponentTransfer>
+        <feFuncR type="gamma" amplitude="0.93" exponent="0.82" offset="0.06"/>
+        <feFuncG type="gamma" amplitude="0.93" exponent="0.82" offset="0.05"/>
+        <feFuncB type="gamma" amplitude="0.93" exponent="0.82" offset="0.06"/>
+      </feComponentTransfer>
+      <feColorMatrix type="saturate" values="0.88" result="base"/>
+      <feGaussianBlur in="base" stdDeviation="3" data-glow="0.012"/>
+      <feComponentTransfer result="glow">
+        <feFuncR type="linear" slope="0.45" intercept="0"/>
+        <feFuncG type="linear" slope="0.45" intercept="0"/>
+        <feFuncB type="linear" slope="0.45" intercept="0"/>
+      </feComponentTransfer>
+      <feBlend in="base" in2="glow" mode="screen"/>
+    </filter>
+
+    <!-- Café (카페): warm cream and beige, softly faded, cozy -->
+    <filter id="look-cafe" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="0.848 0.192 0.047 0 0
+                                           0.087 0.922 0.042 0 0
+                                           0.068 0.134 0.783 0 0
+                                           0     0     0     1 0"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="0.88" intercept="0.09"/>
+        <feFuncG type="linear" slope="0.88" intercept="0.07"/>
+        <feFuncB type="linear" slope="0.88" intercept="0.05"/>
+      </feComponentTransfer>
+      <feColorMatrix type="saturate" values="0.88"/>
+    </filter>
+
+    <!-- Clear (맑음): cool, clean and fresh, with a hint of mint -->
+    <filter id="look-clear" color-interpolation-filters="sRGB">
+      <feComponentTransfer>
+        <feFuncR type="gamma" amplitude="1" exponent="0.92" offset="0"/>
+        <feFuncG type="gamma" amplitude="1" exponent="0.92" offset="0"/>
+        <feFuncB type="gamma" amplitude="1" exponent="0.92" offset="0"/>
+      </feComponentTransfer>
+      <feColorMatrix type="matrix" values="0.95 0    0    0 0
+                                           0    1    0    0 0.02
+                                           0    0    1.03 0 0.03
+                                           0    0    0    1 0"/>
+      <feColorMatrix type="saturate" values="1.05"/>
+    </filter>
+
+    <!-- Film (필름): a warm film-camera feel, with faded blacks and slightly green shadows -->
+    <filter id="look-film" color-interpolation-filters="sRGB">
+      <feComponentTransfer>
+        <feFuncR type="table" tableValues="0.08 0.32 0.66 0.96"/>
+        <feFuncG type="table" tableValues="0.10 0.33 0.63 0.93"/>
+        <feFuncB type="table" tableValues="0.09 0.29 0.57 0.86"/>
+      </feComponentTransfer>
+      <feColorMatrix type="saturate" values="0.88"/>
+    </filter>
+  </svg>
 
   <!-- Screen 1: start -->
   <section class="screen" id="start-screen" aria-labelledby="start-title">

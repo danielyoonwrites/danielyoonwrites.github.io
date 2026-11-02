@@ -12,6 +12,8 @@ A simple video editor that does a few things well. In his words: "It's not tryin
 
 Everything happens on the phone: the videos are never uploaded. It's the owner's next learning app, a step harder than Idea board.
 
+Added later, in his words (November 2, 2026): "make sure the videos that are created can be used for Instagram, TikTok, and Youtube Shorts" (see "Made for Instagram, TikTok and YouTube Shorts"); "can I have the filters a bit more Korean, like fitting Korean aesthetics and lighting, and color styles?" (see "The looks"); and "can you also create a part of the app to help with audio as well? Like maybe making the audio better" (build step 5, "Better sound").
+
 ## How it works (version 1, Claude's plan; the owner can change any of it)
 
 The video plays at the top of each screen, showing the edits as it plays. One step per screen:
@@ -25,9 +27,9 @@ The video plays at the top of each screen, showing the edits as it plays. One st
 Trimming wasn't on the owner's list; Claude suggested it: cutting off a clip's start or end, like the moment of reaching for the phone. Mediabunny has it built in.
 
 Built so far (build step 3, Claude's design, shown to the owner in screenshots): Start ("Choose a video") → "The look" (the video plays at the top, without sound until you turn it on; a "Filter" tab and a "Lighting" tab under it; "Make the video" stays at the bottom) → "Making the video" (a progress bar and "Stop") → "Your video" (it plays; a line saying whether it meets Instagram's, TikTok's and YouTube Shorts' upload rules, with "What was checked" folded under it; "Save to phone," "Share" and "Start a new video"). The phone's Back button goes back one screen; Back while a video is being made stops it.
-- The filters: None, Black and white, Warm, Vivid, Soft and Old film (their CSS filters are in `FILTERS` at the top of `app.js`).
+- The looks (pull request 116, the owner's "a"): Original (원본), the six Korean looks Milky (우유빛), Peach (복숭아), Soft glow (뽀샤시), Café (카페), Clear (맑음) and Film (필름), and Black and white (흑백). Each shows its English name with the Korean word under it. See "The looks."
 - The lighting: Brightness and Contrast, from −50 to +50 in steps of 5, with "Reset the lighting."
-- The look is one CSS filter: the playing video shows it, and each frame of the new video is drawn with the same filter, so what you see is what you get.
+- The look is one CSS filter (a Korean look is `url(#look-...)`, an SVG filter in `index.html`): the playing video shows it, and each frame of the new video is drawn with the same filter, so what you see is what you get. The saved checks compare the two for Milky and Peach (within 12 of 255).
 
 ## Must-haves
 
@@ -54,6 +56,24 @@ Built so far (build step 3, Claude's design, shown to the owner in screenshots):
 ## The look
 
 Dark (the owner's choice "A", November 2, 2026): a near-black page with light words and light buttons, so the video stands out. Claude's reason, given with the options: a bright page around a video can make the video look darker than it really is, which matters when adjusting lighting. The colors are at the top of `style.css`; their contrast is checked in `tests/app-test.mjs` (words at least 4.5 to 1, button edges and the focus ring at least 3 to 1). System fonts, so nothing loads from outside.
+
+## The looks (Korean styles)
+
+The owner asked for looks that fit "Korean aesthetics and lighting, and color styles," and chose "a" (November 2, 2026): six Korean looks in place of the first filters, plus Original and Black and white.
+
+What Korean-style looks have in common, as Korean filter apps and preset sellers describe them (seen only in search results, November 2, 2026; apps.apple.com, capcut.com and gridfiti.com are blocked from Claude's session; most sources are sales pages, so this is a popular style, not a formal definition): bright and airy; soft, low contrast; gently muted pastel colors; a slightly warm or "milky" white, often with soft pink in the highlights; brightened, smooth-looking skin. Search results: https://www.capcut.com/explore/korean-filter, https://apps.apple.com/app/id6741474933 (BerryFilm), https://r1.community.samsung.com/t5/camcyclopedia/필터/ba-p/31379164 (Samsung's own camera filters such as 화사한 Sunbeam and 맑은 Crystal), https://gridfiti.com/korean-preset-lightroom/. Research notes: Dan's Notion page "Simple video editor: how hard to build (Nov 2026)."
+
+The six looks (Claude's design, tuned on a made-up test scene; the numbers are in the SVG filters near the top of `index.html`):
+- Milky (우유빛): brighter middle tones, darks lifted to about 13% (a milky softness), a touch of pink-white, colors muted to 85%.
+- Peach (복숭아): a little brighter, with red and a warm lift mixed in, so skin and whites turn peach-pink.
+- Soft glow (뽀샤시): brighter and softer, with a glow: a blurred copy laid over with "screen," at 45%. The blur is 1.2% of the picture's width, set by `setGlowFor()` in `app.js`, so the glow looks the same on the small preview and in the full-size video.
+- Café (카페): a quarter of the way to sepia, darks lifted, cream-warm whites, colors at 88%.
+- Clear (맑음): a little brighter and cooler, with a hint of mint in the shadows.
+- Film (필름): faded blacks with a green tint, warm highlights that roll off below white, colors at 88%.
+
+A separate project, Photo Filters (`photo-filters/`, planned November 2, 2026 in another session), makes looks for photos; whether the two apps share looks can be decided later.
+
+How they're made: SVG filters (feComponentTransfer, feColorMatrix, and for the glow feGaussianBlur and feBlend) work on the playing video (a CSS filter) and on a normal canvas (Claude's test, November 2, 2026), but not on an OffscreenCanvas, so each frame is drawn on a normal canvas. The playing video on "The look" is exactly the size of its picture, so a look that lifts the darks doesn't turn black bars gray. Brightness and Contrast still go on top of any look.
 
 ## Made for Instagram, TikTok and YouTube Shorts
 
@@ -84,7 +104,7 @@ Browser support below is from MDN's browser-compat-data on GitHub, read November
 - Mediabunny reads and writes the video files: free (MPL-2.0), version 1.65.0 published October 30, 2026, first published June 16, 2025 (the npm registry, https://registry.npmjs.org/mediabunny). Its whole library is one ready-made file, `mediabunny.min.mjs`, about 0.7 MB (about 187 KB compressed, measured by Claude). It's saved in `video-editor/lib/` with its license and a link to its source (https://github.com/Vanilagy/mediabunny), and loaded with a plain `<script>` tag, which gives the page a global `Mediabunny` (build step 2; modules would need an import map, which the page's safety rule blocks). Its docs say it can be included "directly with a script tag." Saved in the folder rather than loaded from a CDN: Claude's session couldn't reach jsDelivr or unpkg to test (November 2, 2026), and the page can then run only its own scripts (a Content-Security-Policy like Idea board's).
 - The browser's video tools that Mediabunny uses (WebCodecs): Chrome 94 and later, on Android too.
 - Preview while it plays: the video with CSS filters (brightness, contrast, saturate, grayscale, sepia; Chrome 53 and later) and `playbackRate` for the speed. Chrome keeps the voice's pitch at other speeds while playing (`preservesPitch`, Chrome 86 and later). Text and the crop frame are page boxes over the video.
-- Making the video, frame by frame: for each clip in order, Mediabunny's `CanvasSink` reads its frames (with the crop and fit); the app draws each one on a canvas with the filter (`ctx.filter`, Chrome 52 and later) and the text; `CanvasSource` turns the canvas into a new MP4 (H.264 video), with the times shifted for the clip's place and speed. The sound goes through `AudioBufferSink` and `AudioBufferSource` (AAC). Mediabunny's guide: https://github.com/Vanilagy/mediabunny/blob/main/docs/guide/converting-media-files.md
+- Making the video, frame by frame: for each clip in order, Mediabunny's `CanvasSink` reads its frames (with the crop and fit); the app draws each one on a normal canvas with the look (`ctx.filter`, Chrome 52 and later; a normal canvas, since an OffscreenCanvas can't use the SVG looks) and the text; `CanvasSource` turns the canvas into a new MP4 (H.264 video), with the times shifted for the clip's place and speed. The sound goes through `AudioBufferSink` and `AudioBufferSource` (AAC). Mediabunny's guide: https://github.com/Vanilagy/mediabunny/blob/main/docs/guide/converting-media-files.md
 - If Chrome on the phone can't make AAC sound, Mediabunny's free add-on `@mediabunny/aac-encoder` fills in (about 1.1 MB more, MPL-2.0, loaded only then). It contains FFmpeg's AAC encoder, unmodified (LGPL 2.1 or later; its license files are in `lib/licenses/ffmpeg/`). Its docs: "In some browsers, AAC encoding is not supported by WebCodecs." Claude's test browser needed it (November 2, 2026); the phone test shows whether the owner's phone does.
 - Saving: "Save to phone" downloads the MP4, named for the time it was made (for example `video-2026-11-02-0913.mp4`); on the owner's phone it shows up in Gallery (the phone test, November 2, 2026). "Share" opens the phone's share menu with the file (`navigator.share` with files, Chrome for Android 76 and later; Chrome for Android allows `.mp4` files, per Chromium's `ShareServiceImpl.java`, read November 2, 2026).
 - The screen stays on while the video is made (Screen Wake Lock, Chrome 84 and later).
@@ -97,17 +117,20 @@ Browser support below is from MDN's browser-compat-data on GitHub, read November
 
 1. This plan, with the folder's `CLAUDE.md`, `PROGRESS.md` and `DECISIONS.md`. Check: read "How it works" and this build plan.
 2. Done (pull request 111, checked on the owner's phone November 2, 2026): the phone test, the riskiest part first (https://danielyoonwrites.github.io/video-editor/phone-test.html): pick a video; the page says what Chrome can do (read it, make H.264 video and AAC sound), then makes a 5-second black-and-white copy, shows how long it took, and offers "Save to phone" and "Share." Check: on your phone, try a short video you filmed, play the copy, and send Claude a screenshot of what the page says.
-3. One clip with a look (pull request 112): open one video, choose a filter and the lighting while it plays, then make the video, check it against Instagram's, TikTok's and YouTube Shorts' rules, save it and share it. Check: make a video with a filter and the lighting, play it, and upload it privately to YouTube, TikTok and Instagram.
+3. Done (pull request 112): one clip with a look: open one video, choose a filter and the lighting while it plays, then make the video, check it against Instagram's, TikTok's and YouTube Shorts' rules, save it and share it. Check: make a video with a filter and the lighting, play it, and upload it privately to YouTube, TikTok and Instagram.
+   - 3b. The Korean looks (pull request 116, the owner's "a"). Check: try each look on a video of your own, make one with Soft glow, and see that it looks like the preview.
 4. Trim and speed. Check: cut the start and end off a clip, speed it up, make the video and play it.
-5. Shape and crop. Check: make a tall video from a wide clip, choosing which part shows.
-6. Text. Check: add a title for the first 3 seconds.
-7. Several clips: add more, put them in order, remove one; they join into one video. Check: join three short clips in a new order.
-8. Polish after a week of real use (like keeping an unfinished edit, if wanted), then decide whether it goes on the Projects page.
+5. Better sound (added November 2, 2026, after the owner asked; without AI): even out the volume, cut low rumble, a clearer voice, the volume up or down. Chrome's sound tools can do these faster than the video plays (OfflineAudioContext, BiquadFilterNode, DynamicsCompressorNode). They can't really remove changing background noise like voices or music. Check: make a video with "better sound" and compare.
+6. Shape and crop. Check: make a tall video from a wide clip, choosing which part shows.
+7. Text. Check: add a title for the first 3 seconds.
+8. Several clips: add more, put them in order, remove one; they join into one video. Check: join three short clips in a new order.
+9. Polish after a week of real use (like keeping an unfinished edit, if wanted), then decide whether it goes on the Projects page.
 
 ## Open questions (ask one at a time)
 
 1. The name: chosen, "Video editor" (the owner's "A", November 2, 2026).
 2. The look: chosen, dark (the owner's "A", November 2, 2026).
 3. Sound when a clip is sped up or slowed down (build step 4): the voice goes higher or lower like a tape (simplest), no sound for that clip, or the voice stays natural (the most work).
-4. Filter and lighting for the whole video (Claude's suggestion for version 1), or for each clip (build step 7, when there are several clips; with one clip it's the same).
-5. Keeping an unfinished edit after Chrome closes (build step 8).
+4. Filter and lighting for the whole video (Claude's suggestion for version 1), or for each clip (build step 8, when there are several clips; with one clip it's the same).
+5. Keeping an unfinished edit after Chrome closes (build step 9).
+6. Better sound (build step 5): which tools, and whether one "Clearer sound" switch or separate controls.
