@@ -1,6 +1,6 @@
-// Idea board: boards of typed notes (build steps 2 and 3 in SPEC.md) that line up on the board's dots.
-// For now the boards are saved only in this browser, on this device, in IndexedDB
-// (the browser's own storage, which can hold photos later). Nothing is sent anywhere.
+// Idea board: boards of typed notes and photos (build steps 2 to 4 in SPEC.md) that line up on the
+// board's dots. For now everything is saved only in this browser, on this device, in IndexedDB
+// (the browser's own storage). Nothing is sent anywhere.
 // Signing in and saving to your account come in build steps 6 and 7.
 
 
@@ -9,10 +9,18 @@
 // One record for each board, in IndexedDB (database "idea-board", store "boards"):
 //   { id, name, version: 1, made, changed, items: [ item, ... ] }
 //   item = { id, type: 'note', x, y, text, made, changed }
-// x and y are where a note's top-left corner sits on the board, in board pixels.
-// A note added or moved sits on a settling spot (a whole number of SETTLE_GAP steps, on the dots);
+//       or { id, type: 'photo', photoId, x, y, width, ratio, made, changed }
+// x and y are where an item's top-left corner sits on the board, in board pixels.
+// An item added or moved sits on a settling spot (a whole number of SETTLE_GAP steps, on the dots);
 // a note saved before notes lined up stays where it was until it's moved.
-// The last item in the list is drawn on top.
+// A photo's width is in board pixels, and ratio is its height divided by its width.
+// The last item in the list is drawn on top. An item of a type this version doesn't know
+// (from a later version) is kept and saved, just not drawn.
+//
+// The photos themselves are in a second database ("idea-board-photos", store "photos"), one record
+// for each: { id, blob, width, height, made }, where blob is the smaller JPEG copy made on this
+// device. Keeping them apart means a board's record stays small, and the boards' database didn't
+// need changing, so an older copy of the app (a phone can keep one for 10 minutes) still opens it.
 //
 // Where you were looking on each board (how far it's moved, and the zoom) is kept separately,
 // in localStorage, because it belongs to this device, not to the board.
@@ -23,7 +31,17 @@ const VIEW_KEY = 'idea-board-view:';   // followed by the board's id
 const DATA_VERSION = 1;                 // raise it if what's saved ever changes shape
 const UNTITLED = 'Untitled board';      // the name of a board saved without one
 
+const PHOTO_DB_NAME = 'idea-board-photos';
+const PHOTO_STORE = 'photos';
+const PHOTO_LONG_SIDE = 1600;           // pixels on the long side of the smaller copy that's saved
+const PHOTO_QUALITY = 0.85;             // how sharp that JPEG copy is (1 is the sharpest, and biggest)
+const TIDY_AFTER = 24 * 60 * 60 * 1000; // a photo file no board uses is tidied away after a day
+
 const NOTE_WIDTH = 220;        // board pixels, the same as .note in style.css
+const PHOTO_WIDTH = 220;       // board pixels: a new photo is as wide as a note
+const PHOTO_MIN_WIDTH = 156;   // board pixels: the smallest a photo can be (3 spots, less the gap)
+const PHOTO_MAX_WIDTH = 988;   // board pixels: the biggest, as wide as four notes side by side
+const SMALL_ON_SCREEN = 120;   // screen pixels: a photo narrower than this hides its size corner
 const DOT_GAP = 32;            // board pixels between the faint dots, at the normal zoom
 const SETTLE_GAP = 64;         // board pixels between the spots where a note's top-left corner settles:
                                // every second dot, so the spots are easy to hit with a finger
@@ -34,6 +52,8 @@ const SAVE_DELAY = 400;        // milliseconds after the last change, before sav
 const UNDO_TIME = 8000;        // milliseconds that "Note removed. Undo" stays
 
 let db = null;                 // the open database, or null if this browser won't save
+let photoDb = null;            // the photos' database, or null if this browser won't save photos
+const photoUrls = new Map();   // photoId -> a link the page can show, made from the saved JPEG
 let boards = [];               // every board on this device
 let board = null;              // the board on the screen (null on the list of boards)
 let screen = 'list';           // 'list' or 'board'
@@ -41,9 +61,11 @@ let readOnly = false;          // true if a newer version of the app saved this 
 let view = { x: 0, y: 0, zoom: 1 };   // how far the board is moved on the screen, and the zoom
 let editing = null;            // the note open on its own screen
 let editingIsNew = false;      // true while a just-added note is open
+let viewing = null;            // the photo open on its own screen
+let pendingPhoto = null;       // a photo chosen on a new note's screen, added once that screen closes
 let settingsMode = null;       // 'new' or 'rename' while a board's name is open on its own screen
 let leaving = false;           // true between tapping "Done" (or "Boards") and the screen closing
-let lastRemoved = null;        // for Undo: { kind: 'note', item, index } or { kind: 'board', record }
+let lastRemoved = null;        // for Undo: { kind: 'item', item, index } or { kind: 'board', record }
 let removedTimer = null;
 let saveTimer = null;
 let viewTimer = null;
@@ -61,6 +83,8 @@ const noteText = $('note-text');
 const settingsEl = $('board-settings');
 const nameInput = $('board-name-input');
 const removedEl = $('removed');
+const photoInput = $('photo-file');
+const photoViewEl = $('photo-view');
 
 
 // ---------- Small helpers ----------
@@ -97,11 +121,23 @@ function notesOf(record) {
   return record.items.filter((item) => item.type === 'note');
 }
 
-// "No notes yet," "1 note" or "3 notes"
-function howManyNotes(record) {
-  const count = notesOf(record).length;
-  if (count === 0) return 'No notes yet';
-  return count === 1 ? '1 note' : `${count} notes`;
+function photosOf(record) {
+  return record.items.filter((item) => item.type === 'photo');
+}
+
+// What this version draws on a board: notes and photos (anything else is kept, not drawn)
+function drawnItems(record) {
+  return record.items.filter((item) => item.type === 'note' || item.type === 'photo');
+}
+
+// "No notes yet," "1 note," "3 notes," "1 photo" or "3 notes and 1 photo"
+function whatsOnIt(record) {
+  const notes = notesOf(record).length;
+  const photos = photosOf(record).length;
+  const parts = [];
+  if (notes) parts.push(notes === 1 ? '1 note' : `${notes} notes`);
+  if (photos) parts.push(photos === 1 ? '1 photo' : `${photos} photos`);
+  return parts.length ? parts.join(' and ') : 'No notes yet';
 }
 
 function nameOf(record) {
@@ -148,6 +184,60 @@ function changeBoard(record, remove) {
     transaction.onerror = () => reject(transaction.error);
     transaction.onabort = () => reject(transaction.error);
   });
+}
+
+// The photos' own database (see "What's saved" at the top)
+function openPhotoDatabase() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(PHOTO_DB_NAME, 1);
+    request.onupgradeneeded = () => {
+      request.result.createObjectStore(PHOTO_STORE, { keyPath: 'id' });
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+    request.onblocked = () => reject(new Error('The photos are open in another tab.'));
+  });
+}
+
+// Does one thing with the photos, and waits until it's really done
+function photoTransaction(mode, work) {
+  return new Promise((resolve, reject) => {
+    const transaction = photoDb.transaction(PHOTO_STORE, mode);
+    const request = work(transaction.objectStore(PHOTO_STORE));
+    transaction.oncomplete = () => resolve(request ? request.result : undefined);
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error);
+  });
+}
+
+function savePhotoFile(record) {
+  return photoTransaction('readwrite', (store) => store.put(record));
+}
+
+function readPhotoFile(id) {
+  return photoTransaction('readonly', (store) => store.get(id));
+}
+
+// Removes photo files for good: only once removing their photo (or board) can't be undone
+function deletePhotoFiles(ids) {
+  if (!photoDb || !ids.length) return Promise.resolve();
+  return photoTransaction('readwrite', (store) => {
+    ids.forEach((id) => store.delete(id));
+  }).catch(() => {});   // if it fails, tidyPhotoFiles() takes them away later
+}
+
+// At the start: a photo file no board uses (left behind if the page closed while "Photo removed.
+// Undo" or "Board removed. Undo" was showing) is taken away once it's a day old. A newer one is
+// left alone, in case another tab is adding it right now.
+async function tidyPhotoFiles() {
+  if (!photoDb || !db) return;
+  const used = new Set();
+  for (const record of boards) {
+    for (const item of photosOf(record)) used.add(item.photoId);
+  }
+  const files = await photoTransaction('readonly', (store) => store.getAll());
+  const old = files.filter((file) => !used.has(file.id) && Date.now() - Date.parse(file.made) > TIDY_AFTER);
+  await deletePhotoFiles(old.map((file) => file.id));
 }
 
 // Saves a moment after the last change, so dragging a note doesn't save 60 times a second
@@ -237,6 +327,7 @@ window.addEventListener('popstate', (event) => followHistory(event.state && even
 function followHistory(step) {
   leaving = false;
   if (editing && step !== 'note') closeEditor();
+  if (viewing && step !== 'photo') closePhoto();
   if (settingsMode && step !== 'settings') closeSettings();
   if (screen === 'board' && (!step || step === 'list')) showList();
 }
@@ -251,7 +342,8 @@ function showList() {
   }
   board = null;
   screen = 'list';
-  if (lastRemoved && lastRemoved.kind === 'note') clearRemoved();   // that note stays removed
+  if (lastRemoved && lastRemoved.kind === 'item') clearRemoved();   // that note or photo stays removed
+  forgetPhotoUrls();
   boardScreen.hidden = true;
   listScreen.hidden = false;
   $('board-tools').hidden = true;
@@ -276,7 +368,7 @@ function boardRow(record) {
   name.textContent = nameOf(record);   // always as plain words, never as code
   const count = document.createElement('span');
   count.className = 'row-count';
-  count.textContent = howManyNotes(record);
+  count.textContent = whatsOnIt(record);
   const arrow = document.createElement('span');
   arrow.className = 'row-arrow';
   arrow.setAttribute('aria-hidden', 'true');
@@ -310,8 +402,8 @@ function openBoard(record) {
   $('board-tools').hidden = false;
   $('board-name').textContent = nameOf(board);
   render();
-  // The first time this device opens a board with notes on it, show them all
-  if (!remembered && notesOf(board).length) showAll(false);
+  // The first time this device opens a board with notes or photos on it, show them all
+  if (!remembered && drawnItems(board).length) showAll(false);
   if (readOnly) showStatus('Reload the page to get the newest version');
   else showStatus(db ? 'Saved on this device' : 'This browser won’t save here');
 }
@@ -319,33 +411,90 @@ function openBoard(record) {
 $('to-boards').addEventListener('click', () => goBack());
 
 function render() {
-  // Only notes for now. Anything else (from a later version) is kept, just not drawn.
-  const notes = notesOf(board);
-  worldEl.replaceChildren(...notes.map(noteElement));
-  emptyEl.hidden = notes.length > 0;
+  // Notes and photos. Anything else (from a later version) is kept, just not drawn.
+  const items = drawnItems(board);
+  worldEl.replaceChildren(...items.map((item) => (item.type === 'photo' ? photoElement(item) : noteElement(item))));
+  emptyEl.hidden = items.length > 0;
   applyView();
 }
 
 function noteElement(item) {
   const el = document.createElement('div');
-  el.className = 'note';
+  el.className = 'item note';
   el.dataset.id = item.id;
   el.tabIndex = 0;                     // a computer's Tab key can reach it, and Enter opens it
   el.setAttribute('role', 'button');
   el.textContent = item.text;          // always as plain words, never as code
-  placeNote(el, item);
+  placeItem(el, item);
   return el;
 }
 
-function placeNote(el, item) {
+function photoElement(item) {
+  const el = document.createElement('div');
+  el.className = 'item photo';
+  el.dataset.id = item.id;
+  el.tabIndex = 0;                     // a computer's Tab key can reach it, and Enter opens it
+  el.setAttribute('role', 'button');
+  el.setAttribute('aria-label', 'Photo');
+  const picture = document.createElement('img');
+  picture.alt = '';                    // the label above already says what it is
+  picture.draggable = false;           // dragging moves the photo, not a copy of the picture
+  const corner = document.createElement('span');
+  corner.className = 'corner';         // the size corner: drag it to make the photo bigger or smaller
+  corner.setAttribute('aria-hidden', 'true');
+  el.append(picture, corner);
+  placeItem(el, item);
+  showPhoto(picture, item.photoId);
+  return el;
+}
+
+// Where an item sits on the board, and a photo's size
+function placeItem(el, item) {
   el.style.left = item.x + 'px';
   el.style.top = item.y + 'px';
+  if (item.type === 'photo') {
+    el.style.width = item.width + 'px';
+    el.style.height = item.width * item.ratio + 'px';
+  }
+}
+
+// Puts a saved photo into an <img>, once it's read from the photos' database
+async function showPhoto(picture, photoId) {
+  let url = photoUrls.get(photoId);
+  if (!url && photoDb) {
+    try {
+      const file = await readPhotoFile(photoId);
+      if (file && file.blob) {
+        url = photoUrls.get(photoId) || URL.createObjectURL(file.blob);
+        photoUrls.set(photoId, url);
+      }
+    } catch (error) {
+      // shown as missing, below
+    }
+  }
+  if (url) picture.src = url;
+  else if (picture.parentElement) picture.parentElement.classList.add('missing');
+}
+
+// Leaving a board: the links made for its photos aren't needed any more
+function forgetPhotoUrls() {
+  for (const url of photoUrls.values()) URL.revokeObjectURL(url);
+  photoUrls.clear();
 }
 
 // The nearest spot where a note's corner can settle, one direction at a time (across, then down).
 // The spots are the same at every zoom, so any two notes can always line up exactly.
 function onSpot(value) {
   return Math.round(value / SETTLE_GAP) * SETTLE_GAP;
+}
+
+// A photo's width settles to a whole number of spots, less the 36-pixel gap between two notes
+// side by side, so a photo can be exactly as wide as one note (220), two side by side (476),
+// three (732) or four (988), with steps of 64 in between
+function settledWidth(width) {
+  const gapBetweenNotes = SETTLE_GAP * 4 - NOTE_WIDTH;   // 36
+  const spots = Math.round((width + gapBetweenNotes) / SETTLE_GAP);
+  return Math.min(PHOTO_MAX_WIDTH, Math.max(PHOTO_MIN_WIDTH, spots * SETTLE_GAP - gapBetweenNotes));
 }
 
 // Moves and zooms the world, and the dots behind it
@@ -360,6 +509,12 @@ function applyView() {
   while (gap > 64) gap /= 2;
   boardEl.style.backgroundSize = `${gap}px ${gap}px`;
   boardEl.style.backgroundPosition = `${view.x - gap / 2}px ${view.y - gap / 2}px`;
+  // A photo's size corner stays the same size on the screen at any zoom (style.css uses --zoom),
+  // and hides when the photo is small on the screen, so it never covers the picture
+  worldEl.style.setProperty('--zoom', view.zoom);
+  for (const el of worldEl.querySelectorAll('.photo')) {
+    el.classList.toggle('small', el.offsetWidth * view.zoom < SMALL_ON_SCREEN);
+  }
 }
 
 // Zooms in or out, keeping the spot under (x, y) on the screen where it is
@@ -380,9 +535,9 @@ function zoomFromCenter(factor) {
   zoomAt(view.zoom * factor, rect.width / 2, rect.height / 2);
 }
 
-// "Show all": moves and zooms so every note fits on the screen
+// "Show all": moves and zooms so every note and photo fits on the screen
 function showAll(gliding = true) {
-  if (!notesOf(board).length) {
+  if (!drawnItems(board).length) {
     view = { x: 0, y: 0, zoom: 1 };
     applyView();
     saveViewSoon();
@@ -392,7 +547,7 @@ function showAll(gliding = true) {
   let top = Infinity;
   let right = -Infinity;
   let bottom = -Infinity;
-  for (const outline of noteOutlines()) {
+  for (const outline of itemOutlines()) {
     left = Math.min(left, outline.left);
     top = Math.min(top, outline.top);
     right = Math.max(right, outline.right);
@@ -421,26 +576,33 @@ function roomForButtons() {
   return Math.max(0, boardRect.bottom - toolsRect.top) + 8;
 }
 
-// Each note's outline on the board, in board pixels (a note grows taller with more words)
-function noteOutlines() {
-  return notesOf(board).map((item) => {
-    const el = worldEl.querySelector(`[data-id="${item.id}"]`);
-    const height = el ? el.offsetHeight : NOTE_WIDTH;
-    return { left: item.x, top: item.y, right: item.x + NOTE_WIDTH, bottom: item.y + height };
+// An item's size on the board, in board pixels (a note grows taller with more words)
+function itemSize(item) {
+  if (item.type === 'photo') return { width: item.width, height: item.width * item.ratio };
+  const el = worldEl.querySelector(`[data-id="${item.id}"]`);
+  return { width: NOTE_WIDTH, height: el ? el.offsetHeight : NOTE_WIDTH };
+}
+
+// Each note's and photo's outline on the board, in board pixels
+function itemOutlines() {
+  return drawnItems(board).map((item) => {
+    const { width, height } = itemSize(item);
+    return { left: item.x, top: item.y, right: item.x + width, bottom: item.y + height };
   });
 }
 
-// Moves the board, if needed, so a note is on the screen (the zoom stays the same)
+// Moves the board, if needed, so an item is on the screen (the zoom stays the same)
 function bringIntoView(item) {
   const el = worldEl.querySelector(`[data-id="${item.id}"]`);
   if (!el) return;
   const rect = boardEl.getBoundingClientRect();
   const margin = 16;
   const buttonsRoom = roomForButtons();   // keep clear of the buttons at the bottom
+  const size = itemSize(item);
   const left = view.x + item.x * view.zoom;
   const top = view.y + item.y * view.zoom;
-  const right = left + NOTE_WIDTH * view.zoom;
-  const bottom = top + el.offsetHeight * view.zoom;
+  const right = left + size.width * view.zoom;
+  const bottom = top + size.height * view.zoom;
   let dx = 0;
   let dy = 0;
   if (left < margin) dx = margin - left;
@@ -466,39 +628,42 @@ function glide() {
 }
 
 
-// ---------- Moving the board, pinching, and dragging notes ----------
+// ---------- Moving the board, pinching, and dragging notes and photos ----------
 //
 // Pointer events cover fingers and the mouse alike.
 // One finger (or the mouse) on an empty spot moves the board.
-// One finger on a note drags the note; a tap without moving opens it.
+// One finger on a note or photo drags it; a tap without moving opens it.
+// One finger on a photo's size corner makes the photo bigger or smaller.
 // Two fingers pinch to zoom.
 
 const pointers = new Map();   // the fingers (or the mouse) on the board: id -> { x, y }
 let gesture = null;
 // gesture is one of:
 //   { kind: 'pan', lastX, lastY }
-//   { kind: 'note', item, el, startX, startY, itemX, itemY, dragging }
+//   { kind: 'item', item, el, startX, startY, itemX, itemY, dragging }
+//   { kind: 'resize', item, el, startX, startY, startWidth, dragging }
 //   { kind: 'pinch', startDistance, startZoom, boardX, boardY }
 
 boardEl.addEventListener('pointerdown', (event) => {
-  if (editing || (event.pointerType === 'mouse' && event.button !== 0)) return;
+  if (editing || viewing || (event.pointerType === 'mouse' && event.button !== 0)) return;
   const p = point(event);
   pointers.set(event.pointerId, p);
   boardEl.setPointerCapture(event.pointerId);   // keep getting this finger's moves, wherever it goes
   worldEl.classList.remove('gliding');          // a finger on the board stops any gliding at once
   boardEl.classList.remove('gliding');
   if (pointers.size === 1) {
-    const noteEl = event.target.closest('.note');
-    const item = noteEl && findItem(noteEl.dataset.id);
+    const itemEl = event.target.closest('.item');
+    const item = itemEl && findItem(itemEl.dataset.id);
     if (item) {
-      noteEl.classList.remove('settling');   // picked up again while still gliding: it follows the finger at once
-      gesture = { kind: 'note', item, el: noteEl, startX: p.x, startY: p.y, itemX: item.x, itemY: item.y, dragging: false };
+      itemEl.classList.remove('settling');   // picked up again while still gliding: it follows the finger at once
+      const kind = event.target.closest('.corner') ? 'resize' : 'item';
+      gesture = { kind, item, el: itemEl, startX: p.x, startY: p.y, itemX: item.x, itemY: item.y, startWidth: item.width, dragging: false };
     } else {
       gesture = { kind: 'pan', lastX: p.x, lastY: p.y };
       boardEl.classList.add('moving');
     }
   } else if (pointers.size === 2) {
-    finishNoteDrag();   // a second finger turns a drag into a pinch
+    finishDrag();   // a second finger turns a drag into a pinch
     startPinch();
   }
 });
@@ -515,7 +680,7 @@ boardEl.addEventListener('pointermove', (event) => {
     gesture.lastX = p.x;
     gesture.lastY = p.y;
     applyView();
-  } else if (gesture.kind === 'note') {
+  } else if (gesture.kind === 'item' || gesture.kind === 'resize') {
     const dx = p.x - gesture.startX;
     const dy = p.y - gesture.startY;
     if (!gesture.dragging) {
@@ -525,9 +690,17 @@ boardEl.addEventListener('pointermove', (event) => {
       gesture.el.classList.add('dragging');
       bringToFront(gesture.item, gesture.el);
     }
-    gesture.item.x = Math.round(gesture.itemX + dx / view.zoom);
-    gesture.item.y = Math.round(gesture.itemY + dy / view.zoom);
-    placeNote(gesture.el, gesture.item);
+    if (gesture.kind === 'item') {
+      gesture.item.x = Math.round(gesture.itemX + dx / view.zoom);
+      gesture.item.y = Math.round(gesture.itemY + dy / view.zoom);
+    } else {
+      // The size follows the finger along the photo's diagonal, so the photo keeps its shape
+      // whichever way the finger goes
+      const ratio = gesture.item.ratio;
+      const grow = (dx + dy * ratio) / view.zoom / (1 + ratio * ratio);
+      gesture.item.width = Math.min(PHOTO_MAX_WIDTH, Math.max(PHOTO_MIN_WIDTH, Math.round(gesture.startWidth + grow)));
+    }
+    placeItem(gesture.el, gesture.item);
   } else if (gesture.kind === 'pinch' && pointers.size >= 2) {
     const [a, b] = [...pointers.values()];
     const distance = Math.max(1, Math.hypot(a.x - b.x, a.y - b.y));
@@ -556,13 +729,13 @@ function pointerEnded(event) {
   pointers.delete(event.pointerId);
   if (!gesture) return;
 
-  if (gesture.kind === 'note') {
+  if (gesture.kind === 'item' || gesture.kind === 'resize') {
     if (gesture.dragging) {
-      finishNoteDrag();
+      finishDrag();
     } else if (event.type === 'pointerup') {
       const item = gesture.item;
       gesture = null;
-      openNote(item, false);   // a tap opens the note
+      openItem(item);   // a tap opens the note or photo (a tap on the size corner too)
     } else {
       gesture = null;
     }
@@ -585,24 +758,34 @@ function pointerEnded(event) {
 boardEl.addEventListener('pointerup', pointerEnded);
 boardEl.addEventListener('pointercancel', pointerEnded);
 
-function finishNoteDrag() {
-  if (!gesture || gesture.kind !== 'note') return;
+function finishDrag() {
+  if (!gesture || (gesture.kind !== 'item' && gesture.kind !== 'resize')) return;
   if (gesture.dragging) {
     const { item, el } = gesture;
     el.classList.remove('dragging');
-    // Let go: the note glides onto the nearest spot on the dots, so notes line up
-    item.x = onSpot(item.x);
-    item.y = onSpot(item.y);
+    if (gesture.kind === 'item') {
+      // Let go: the note or photo glides onto the nearest spot on the dots, so things line up
+      item.x = onSpot(item.x);
+      item.y = onSpot(item.y);
+    } else {
+      item.width = settledWidth(item.width);   // and a photo's size settles in steps that line up too
+    }
     el.classList.add('settling');
-    placeNote(el, item);
+    placeItem(el, item);
     setTimeout(() => el.classList.remove('settling'), 200);
+    applyView();   // a photo's size corner may hide or show at its new size
     item.changed = now();
     saveSoon();
   }
   gesture = null;
 }
 
-// The note you pick up goes on top of the others (last in the list is drawn on top)
+function openItem(item) {
+  if (item.type === 'photo') openPhoto(item);
+  else openNote(item, false);
+}
+
+// The note or photo you pick up goes on top of the others (last in the list is drawn on top)
 function bringToFront(item, el) {
   const index = board.items.indexOf(item);
   if (index !== -1 && index !== board.items.length - 1) {
@@ -623,13 +806,13 @@ boardEl.addEventListener('wheel', (event) => {
 // No menu on a long press: it's for dragging
 boardEl.addEventListener('contextmenu', (event) => event.preventDefault());
 
-// On a computer: Tab to a note, then Enter opens it
+// On a computer: Tab to a note or photo, then Enter opens it
 worldEl.addEventListener('keydown', (event) => {
-  const noteEl = event.target.closest('.note');
-  if (!noteEl || (event.key !== 'Enter' && event.key !== ' ')) return;
+  const itemEl = event.target.closest('.item');
+  if (!itemEl || (event.key !== 'Enter' && event.key !== ' ')) return;
   event.preventDefault();
-  const item = findItem(noteEl.dataset.id);
-  if (item) openNote(item, false);
+  const item = findItem(itemEl.dataset.id);
+  if (item) openItem(item);
 });
 
 
@@ -642,19 +825,19 @@ function addNote() {
   openNote(item, true);   // it joins the board once you type something
 }
 
-// An open spot for a new note, as near the middle of the screen as possible, so it never covers
-// another note. It goes in the same rows and columns as the note nearest the middle, so new notes
-// line up with the ones already there. On a phone held upright it tries below first,
-// on a wide screen to the right.
-function openSpot() {
+// An open spot for a new note (or photo, with its own width and height), as near the middle of the
+// screen as possible, so it never covers anything else. It goes in the same rows and columns as the
+// item nearest the middle, so new things line up with the ones already there. On a phone held
+// upright it tries below first, on a wide screen to the right.
+function openSpot(width = NOTE_WIDTH, height = NOTE_WIDTH) {
   const rect = boardEl.getBoundingClientRect();
   const step = SETTLE_GAP * 4;   // 256 board pixels: a note's width and a gap, from spot to spot
-  // Where a note in the middle of the screen would go, on the board
-  const centerX = (rect.width / 2 - view.x) / view.zoom - NOTE_WIDTH / 2;
-  const centerY = (rect.height / 2 - 40 - view.y) / view.zoom - NOTE_WIDTH / 2;
-  // The note nearest that place (if there is one) sets the rows and columns
+  // Where a new item in the middle of the screen would go, on the board
+  const centerX = (rect.width / 2 - view.x) / view.zoom - width / 2;
+  const centerY = (rect.height / 2 - 40 - view.y) / view.zoom - height / 2;
+  // The item nearest that place (if there is one) sets the rows and columns
   let nearest = null;
-  for (const item of notesOf(board)) {
+  for (const item of drawnItems(board)) {
     if (!nearest || Math.hypot(item.x - centerX, item.y - centerY) < Math.hypot(nearest.x - centerX, nearest.y - centerY)) nearest = item;
   }
   const lineX = onSpot(nearest ? nearest.x : centerX);
@@ -664,7 +847,7 @@ function openSpot() {
   const middleY = lineY + Math.round((centerY - lineY) / step) * step;
   const upright = rect.height > rect.width;
   const gap = 12;
-  const taken = noteOutlines();
+  const taken = itemOutlines();
   const spots = [];
   for (let ring = 0; ring <= 8; ring += 1) {
     for (let across = -ring; across <= ring; across += 1) {
@@ -679,8 +862,8 @@ function openSpot() {
   }
   spots.sort((a, b) => a.order - b.order);
   const free = spots.find((spot) => !taken.some((outline) =>
-    spot.x < outline.right + gap && spot.x + NOTE_WIDTH > outline.left - gap &&
-    spot.y < outline.bottom + gap && spot.y + NOTE_WIDTH > outline.top - gap));
+    spot.x < outline.right + gap && spot.x + width > outline.left - gap &&
+    spot.y < outline.bottom + gap && spot.y + height > outline.top - gap));
   const chosen = free || { x: middleX, y: middleY };
   return { x: chosen.x, y: chosen.y };   // already on the dots
 }
@@ -695,6 +878,7 @@ function openNote(item, isNew) {
   editingIsNew = isNew;
   noteText.value = item.text;
   editorEl.hidden = false;
+  updatePhotoButton();
   noteText.focus();   // opens the phone's keyboard
   if (!isNew) {
     putCursorAtEnd();
@@ -717,8 +901,14 @@ noteText.addEventListener('input', () => {
   if (!board.items.includes(editing) && editing.text.trim()) {
     board.items.push(editing);   // a new note joins the board with its first letter
   }
+  updatePhotoButton();
   saveSoon();
 });
+
+// "Photo" shows on a new note's screen until you type something: then it's a note
+function updatePhotoButton() {
+  $('add-photo').hidden = !(editing && editingIsNew && photoDb && !noteText.value.trim());
+}
 
 // Runs when the history goes back from the note (by "Done," "Remove" or the Back button)
 function closeEditor() {
@@ -732,6 +922,12 @@ function closeEditor() {
   if (editingIsNew && board.items.includes(item)) bringIntoView(item);   // so you see where it went
   editingIsNew = false;
   if (saveTimer) saveNow();
+  if (pendingPhoto) {
+    // A photo was chosen on this screen: now that the board shows, it's added
+    const { file, target } = pendingPhoto;
+    pendingPhoto = null;
+    addPhoto(file, target);
+  }
 }
 
 $('done').addEventListener('click', () => goBack());
@@ -745,6 +941,124 @@ $('remove-note').addEventListener('click', () => {
 });
 
 
+// ---------- Adding a photo ----------
+//
+// "Add," then "Photo" on the new note's screen, opens the phone's own photo picker (or the
+// computer's file window). The chosen photo is shrunk on this device and saved in the photos'
+// database; its place on the board goes in the board's record.
+
+$('add-photo').addEventListener('click', () => {
+  if (!editing || leaving) return;
+  photoInput.value = '';   // so choosing the same photo again still counts
+  photoInput.click();
+});
+
+photoInput.addEventListener('change', () => {
+  const file = photoInput.files && photoInput.files[0];
+  if (!file || !editing || leaving) return;   // (nothing chosen: the note's screen stays)
+  pendingPhoto = { file, target: board };
+  goBack();   // the note's screen closes (its empty note isn't kept); closeEditor() adds the photo
+});
+
+// Makes the smaller copy that's saved: about 1600 pixels on the long side, as a JPEG. It's a new
+// picture drawn from the chosen one, so it leaves out the hidden details a phone's photo can
+// carry, like where it was taken. It fails if this browser can't read that kind of picture.
+async function shrinkPhoto(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const picture = new Image();
+    picture.src = url;
+    await picture.decode();   // the browser turns it the right way up, as the phone shows it
+    const scale = Math.min(1, PHOTO_LONG_SIDE / Math.max(picture.naturalWidth, picture.naturalHeight));
+    const width = Math.max(1, Math.round(picture.naturalWidth * scale));
+    const height = Math.max(1, Math.round(picture.naturalHeight * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#FFFFFF';   // a see-through picture gets a white background, not black
+    context.fillRect(0, 0, width, height);
+    context.imageSmoothingQuality = 'high';
+    context.drawImage(picture, 0, 0, width, height);
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob((made) => (made ? resolve(made) : reject(new Error('No JPEG was made'))), 'image/jpeg', PHOTO_QUALITY);
+    });
+    return { blob, width, height };
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+async function addPhoto(file, target) {
+  showStatus('Adding the photo');
+  let shrunk;
+  try {
+    shrunk = await shrinkPhoto(file);
+  } catch (error) {
+    showStatus('Couldn’t open that photo');
+    return;
+  }
+  const photoId = makeId();
+  try {
+    // The photo file is saved first, so the board never names a photo that isn't there
+    await savePhotoFile({ id: photoId, blob: shrunk.blob, width: shrunk.width, height: shrunk.height, made: now() });
+  } catch (error) {
+    showStatus('Couldn’t save the photo on this device');
+    return;
+  }
+  const ratio = shrunk.height / shrunk.width;
+  const item = { id: makeId(), type: 'photo', photoId, x: 0, y: 0, width: PHOTO_WIDTH, ratio, made: now(), changed: now() };
+  if (board === target) {
+    // In an open spot near the middle of the screen, in line with the notes and photos there
+    const spot = openSpot(PHOTO_WIDTH, PHOTO_WIDTH * ratio);
+    item.x = spot.x;
+    item.y = spot.y;
+    target.items.push(item);
+    render();
+    bringIntoView(item);
+    saveSoon();
+  } else {
+    // The board was left while the photo was being made: it still joins that board, under the rest
+    const bottoms = drawnItems(target).map((each) => each.y + (each.type === 'photo' ? each.width * each.ratio : NOTE_WIDTH));
+    item.y = onSpot(Math.max(0, ...bottoms) + SETTLE_GAP);
+    target.items.push(item);
+    target.changed = now();
+    if (db) changeBoard(target).catch(() => {});
+  }
+}
+
+
+// ---------- A photo on its own screen ----------
+
+function openPhoto(item) {
+  goDeeper('photo');
+  viewing = item;
+  const big = $('photo-big');
+  big.removeAttribute('src');
+  big.parentElement.classList.remove('missing');
+  photoViewEl.hidden = false;
+  $('remove-photo').hidden = readOnly;   // (a board saved by a newer version is only shown)
+  showPhoto(big, item.photoId);
+  $('photo-done').focus();
+}
+
+// Runs when the history goes back from the photo (by "Done," "Remove" or the Back button)
+function closePhoto() {
+  viewing = null;
+  photoViewEl.hidden = true;
+  $('photo-big').removeAttribute('src');
+}
+
+$('photo-done').addEventListener('click', () => goBack());
+
+$('remove-photo').addEventListener('click', () => {
+  if (!viewing || leaving || readOnly) return;
+  removeItem(viewing, true);   // "Photo removed. Undo" for 8 seconds; the file goes after that
+  render();
+  goBack();
+});
+
+
 // ---------- A board's name on its own screen: a new board, or rename or remove one ----------
 
 function openSettings(mode) {
@@ -754,7 +1068,7 @@ function openSettings(mode) {
   $('remove-board').hidden = mode === 'new';
   $('confirm-remove').hidden = true;
   nameInput.value = mode === 'new' ? '' : board.name;
-  $('board-count').textContent = mode === 'new' ? '' : howManyNotes(board);
+  $('board-count').textContent = mode === 'new' ? '' : whatsOnIt(board);
   nameInput.focus();   // opens the phone's keyboard
 }
 
@@ -809,11 +1123,11 @@ nameInput.addEventListener('keydown', (event) => {
   }
 });
 
-// "Remove board" asks first, with the board's name and how many notes go with it
+// "Remove board" asks first, with the board's name and how many notes and photos go with it
 $('remove-board').addEventListener('click', () => {
-  const count = notesOf(board).length;
+  const count = drawnItems(board).length;
   $('confirm-words').textContent = count
-    ? `Remove “${nameOf(board)}” and its ${howManyNotes(board)}?`
+    ? `Remove “${nameOf(board)}” and its ${whatsOnIt(board)}?`
     : `Remove “${nameOf(board)}”? It has no notes.`;
   $('confirm-remove').hidden = false;
   $('confirm-yes').focus();
@@ -843,7 +1157,7 @@ function removeItem(item, offerIt) {
   const index = board.items.indexOf(item);
   if (index === -1) return;
   board.items.splice(index, 1);
-  if (offerIt) offerUndo({ kind: 'note', item, index }, 'Note removed.');
+  if (offerIt) offerUndo({ kind: 'item', item, index }, item.type === 'photo' ? 'Photo removed.' : 'Note removed.');
   saveSoon();
 }
 
@@ -855,7 +1169,7 @@ function offerUndo(removed, words) {
   removedTimer = setTimeout(clearRemoved, UNDO_TIME);
 }
 
-// The Undo time is over (or the screen changed): the removal stays
+// The Undo time is over (or the screen changed): the removal stays, and photo files go for good
 function clearRemoved() {
   clearTimeout(removedTimer);
   removedEl.hidden = true;
@@ -865,6 +1179,9 @@ function clearRemoved() {
     } catch (error) {
       // Nothing to tidy
     }
+    deletePhotoFiles(photosOf(lastRemoved.record).map((item) => item.photoId));
+  } else if (lastRemoved && lastRemoved.kind === 'item' && lastRemoved.item.type === 'photo') {
+    deletePhotoFiles([lastRemoved.item.photoId]);
   }
   lastRemoved = null;
 }
@@ -875,7 +1192,7 @@ $('undo').addEventListener('click', () => {
   lastRemoved = null;
   clearTimeout(removedTimer);
   removedEl.hidden = true;
-  if (removed.kind === 'note' && board) {
+  if (removed.kind === 'item' && board) {
     board.items.splice(Math.min(removed.index, board.items.length), 0, removed.item);
     render();
     saveSoon();
@@ -910,7 +1227,15 @@ async function start() {
     boards = [];
     $('list-note').textContent = 'This browser won’t save here, so boards go away when the page closes.';
   }
+  if (db) {
+    try {
+      photoDb = await openPhotoDatabase();
+    } catch (error) {
+      photoDb = null;   // notes still work; photos can't be added on this browser
+    }
+  }
   showList();
+  tidyPhotoFiles().catch(() => {});
 }
 
 start();

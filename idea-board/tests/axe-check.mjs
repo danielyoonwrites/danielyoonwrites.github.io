@@ -1,6 +1,7 @@
 // An accessibility check of Idea board with axe-core, Deque's open-source checker (WCAG 2.0 to 2.2,
-// levels A and AA, plus its best practices), on five screens: the list with no boards, a new board's
-// name screen, a board with a note, the "Remove board" question, and the list with a board.
+// levels A and AA, plus its best practices), on eight screens: the list with no boards, a new board's
+// name screen, a board with a note, the "Remove board" question, the list with a board, and (photos,
+// build step 4) a new note's screen with "Photo," a board with a photo, and a photo's own screen.
 // Written November 2, 2026. Run from the repository folder:
 //   node idea-board/tests/axe-check.mjs <path to axe.min.js>
 // axe-core isn't part of the website: install it with npm in a scratch folder, never in the repository
@@ -90,6 +91,33 @@ await page.click('#to-boards');
 await page.waitForSelector('#list-screen:not([hidden])');
 await page.waitForTimeout(300);
 await check('The list with a board');
+
+// Photos (build step 4)
+await page.locator('.row').first().click();
+await page.waitForSelector('#board-screen:not([hidden])');
+await page.click('#add-note');
+await page.waitForSelector('#editor:not([hidden])');
+await check('A new note\'s screen, with "Photo"');
+const picture = await page.evaluate(() => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1200;
+  canvas.height = 900;
+  const g = canvas.getContext('2d');
+  g.fillStyle = '#9CC3E0';
+  g.fillRect(0, 0, 1200, 900);
+  g.fillStyle = '#5E7F5A';
+  g.fillRect(0, 600, 1200, 300);
+  return canvas.toDataURL('image/jpeg', 0.9);
+});
+const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.click('#add-photo')]);
+await chooser.setFiles({ name: 'test-photo.jpg', mimeType: 'image/jpeg', buffer: Buffer.from(picture.split(',')[1], 'base64') });
+await page.waitForSelector('.photo');
+await page.waitForTimeout(800);
+await check('A board with a photo');
+await page.click('.photo');
+await page.waitForSelector('#photo-view:not([hidden])');
+await page.waitForTimeout(300);
+await check('A photo on its own screen');
 
 await browser.close();
 webServer.kill();
