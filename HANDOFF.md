@@ -1,6 +1,6 @@
 # Handoff: where everything stands
 
-Last updated November 2, 2026, at the end of the eleventh session (with pull request 114). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
+Last updated November 2, 2026, at the end of the eleventh session (with pull request @@PR@@). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
 
 - How to work with Dan, and the rules for every project: `CLAUDE.md`.
 - Each project: its folder's `PROGRESS.md` (where it stands, the next step), `DECISIONS.md` (choices and their reasons) and `SPEC.md`. The website's decisions are in the root `DECISIONS.md`.
@@ -19,21 +19,23 @@ This repository is public. Keep personal details out of this file.
 - **Living in the Word** (the AI helper live on Sonnet 5.5, with questions written ahead for the reading plan and the next chapter; signing in with an email code, the owner's invite page with an invite email, install help, the "check it" line; the server deploys by itself through Cloudflare; the plan for phones and app stores under way): https://danielyoonwrites.github.io/living-in-the-word, `living-in-the-word/PROGRESS.md`. The store plan is `living-in-the-word/STORE-PLAN.md`.
 - **Idea board** (live with boards of notes and photos that line up on the dots; next the server and signing in, build step 6, then saving to an account, step 7): a little app like Apple's Freeform, built to work for everyone and used just by Dan for now, https://danielyoonwrites.github.io/idea-board, `idea-board/PROGRESS.md`.
 - **Video editor** (the phone test passed on Dan's phone; build step 3, one clip with a filter and lighting, in pull request 112): a simple video editor just for Dan, on his Android phone, with the videos never leaving the phone and every video made to fit Instagram, TikTok and YouTube Shorts, https://danielyoonwrites.github.io/video-editor, `video-editor/PROGRESS.md`.
+- **Photo Filters** (planned November 2, 2026; the plan in pull request 114, build step 2 next): Dan's own looks on his photos, in the browser of his phone and MacBook, with the photos never leaving the device, https://danielyoonwrites.github.io/photo-filters (not live yet), `photo-filters/PROGRESS.md`.
 
 
 ## Where things stand (November 2, 2026)
 
-- Latest: the eleventh session (November 2, 2026), Idea board pull requests 108, 109, 113 and 114: notes that line up on the dots, photos, the dots drawn exactly, and Dan's decision that Idea board is built to work for everyone, used just by him for now. At the same time another session built the video editor (pull requests 110 to 112). Each session's summary is in `CHANGELOG.md` ("Session summaries"). Where each project stands is in its `PROGRESS.md`.
+- Latest: the eleventh session (November 2, 2026), Idea board pull requests 108, 109, 113 and @@PR@@: notes that line up on the dots, photos, the dots drawn exactly, and Dan's decision that Idea board is built to work for everyone, used just by him for now. At the same time other sessions built the video editor (pull requests 110 to 112) and planned Photo Filters (114). Each session's summary is in `CHANGELOG.md` ("Session summaries"). Where each project stands is in its `PROGRESS.md`.
 - Next: `/pickup idea board` (build step 6, the server and signing in). Living in the Word's next step is in its `PROGRESS.md` (`/pickup living in the word`).
 
 
 ## Waiting on Dan
 
-1. Idea board: merge the handoff notes, pull request 114 (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/114, Conversation tab, Merge pull request, Confirm merge), then the checks: the dots on his computer, photos on his phone. Every step is in `idea-board/PROGRESS.md`.
+1. Idea board: merge the handoff notes, pull request @@PR@@ (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/@@PR@@, Conversation tab, Merge pull request, Confirm merge), then the checks: the dots on his computer, photos on his phone. Every step is in `idea-board/PROGRESS.md`.
 2. Living in the Word: pull request 102 was merged on October 31, 2026, so its wait check (item 2 there) is next. Everything waiting, with every step, is in `living-in-the-word/PROGRESS.md` ("Waiting on Dan"): the next-chapter check, the Matthew 1 check, the invite test, and the smaller checks.
 3. The Anthropic API key expires November 24, 2026: a new key, saved in Cloudflare as `ANTHROPIC_API_KEY`. Remind him in good time, with every step (in `living-in-the-word/PROGRESS.md`).
 4. The other apps: Fewer spam calls needs the Samsung steps checked on a real Samsung phone; First step smaller waits for his daily trial. Details in each `PROGRESS.md`.
 5. Video editor: merge pull request 112, build step 3 (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/112, Conversation tab, Merge pull request, Confirm merge), then the check on his phone, with private test uploads to YouTube, TikTok and Instagram. Every step is in `video-editor/PROGRESS.md`.
+6. Photo Filters: merge pull request 114, the plan (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/114, Conversation tab, Merge pull request, Confirm merge), after reading his answers in `photo-filters/SPEC.md`. Every step is in `photo-filters/PROGRESS.md`.
 
 
 ## Parked (raise only when it becomes relevant)
@@ -73,5 +75,7 @@ Open https://claude.ai/code, start a new session with this repository, set the e
   > /pickup video editor
 
   (or, without the skill: Read HANDOFF.md, then video-editor/PROGRESS.md, DECISIONS.md and CLAUDE.md, and continue from the next step.)
+- Continue Photo Filters:
+  > /pickup photo filters
 - Something new:
   > Read HANDOFF.md first. Then help me plan [the new thing], plan only.

@@ -9,15 +9,15 @@ A little app like Apple's Freeform for typed notes, photos and links on boards, 
   - Build step 3, several boards (106): checked November 2, 2026 on Dan's phone ("it feels good and works well").
   - Notes line up on the dots (108) and build step 4, photos (109), merged November 2, 2026: tried on Dan's computer the same day. A photo wouldn't line up with two notes made before lining up existed (they sat between the spots); after he dragged each note once: "it works." Photos are not checked on his phone yet.
   - The dots drawn exactly, on a canvas (113), merged November 2, 2026: checked by the saved checks and by measuring rows of dots in a test browser (under 0.1 screen pixels from the spots, against 1 to 4 before). Not checked on Dan's computer yet.
-- In progress: nothing. These notes are in pull request 114.
+- In progress: nothing. These notes are in pull request @@PR@@.
 - What's saved: boards and photos live only in the browser of the device in use (IndexedDB); a computer starts with no boards until build step 7 saves them to an account.
 - Branch: `claude/exciting-feynman-c90w53` (the eleventh session's); everything up to pull request 113 is merged into main.
-- At the same time, another session built the video editor (`video-editor/`) in this repository: pull requests 110 to 112. Its notes are its own.
+- At the same time, other sessions worked in this repository: the video editor (`video-editor/`, pull requests 110 to 112) and Photo Filters (`photo-filters/`, 114). Their notes are their own.
 - Not checked yet: photos on Dan's phone, the dots on his computer, the KakaoTalk in-app browser, photos saved in the HEIF format.
 - Claude's rough estimate: about 5 more pull requests (build steps 6 and 7, then 5, 8 and 9).
 
 ## Waiting on Dan
-1. Merge the handoff notes, pull request 114: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/114, Conversation tab, Merge pull request, Confirm merge.
+1. Merge the handoff notes, pull request @@PR@@: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/@@PR@@, Conversation tab, Merge pull request, Confirm merge.
 2. The checks, any time (a phone or browser may keep the old copy for up to 10 minutes after a merge):
    - On his computer: open https://danielyoonwrites.github.io/idea-board and a board. A dot sits right at each note's and photo's top-left corner. Click − and + a few times: the dots stay on the corners.
    - On his phone, photos: open Chrome and go to https://danielyoonwrites.github.io/idea-board. Tap "New board," type "Test," tap "Done." Tap "Add," then "Photo," and choose a photo: it lands in line. Tap it: it opens big; check it looks sharp enough; tap "Done." Drag it and let go: it settles on the dots. Drag its small corner (bottom right) outward: it gets bigger and keeps its shape. Close Chrome and open the page again: it's still there. To remove the test board: "Edit," then "Remove board," then "Remove."
