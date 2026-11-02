@@ -25,3 +25,29 @@ Each decision with its reason, oldest first. Only add to this file; if a decisio
 - Decision: the app is called "Idea board," at https://danielyoonwrites.github.io/idea-board (folder `idea-board/`).
 - Why: the owner's choice "a" of three: "Idea board" (Claude's recommendation: plain, and says what it is), "Thinking table," or "Room to think."
 - Turned down: "Thinking table," and "Room to think," which sounds like "Quiet room" (nice or confusing).
+
+### November 2, 2026: the look, "Paper and ink" (pull request 104)
+- Decision: the same look as Living in the Word: warm paper, black ink, EB Garamond and Jost, thin lines, square corners.
+- Why: the owner's choice "B" of three: Moon jar like the website (Claude's recommendation), "Paper and ink" like Living in the Word ("clean, like Kinfolk magazine"), or a new look of its own.
+- Turned down: Moon jar, and a new look.
+
+### November 2, 2026: several boards (pull request 104)
+- Decision: several boards, with a short list on the start screen (build step 3).
+- Why: the owner's choice "a" (Claude's recommendation): one board for each thing, like a sermon series or a story, so no board gets crowded.
+- Turned down: one big board for everything (simpler, with no list).
+
+### November 2, 2026: signing in with an email code (pull request 104)
+- Decision: an email code, like Living in the Word's: the email address, a 6-digit code by email, then that device stays signed in (Living in the Word: 90 days).
+- Why: the owner's choice "a" (Claude's recommendation): nothing to remember, the way he already signs in to Living in the Word, and that code already exists to copy.
+- Turned down: a long passphrase typed once on each device (no email needed, but it has to be remembered).
+
+### November 2, 2026: how the first board works (pull request 104)
+- Decision: Claude's choices, put to the owner with pull request 104 and its screenshots:
+  - A tap opens a note on its own screen, with a big box to type in, "Done" and "Remove"; dragging moves it. The phone's Back button (<) closes an open note and keeps the words.
+  - Every letter is saved as you type. An empty note isn't kept. "Remove" shows "Note removed. Undo" for 8 seconds.
+  - A new note goes in an open spot near the middle of the screen, never covering another, and the board glides to show it. "Show all" fits every note on the screen.
+  - Faint dots on the board, so you can see it move. The − and + buttons show only on a computer (phones pinch).
+  - A note grows taller when its words need more room, instead of having a corner to resize it.
+  - The notes look like index cards, a little lighter than the paper (to confirm: open question 5 in `SPEC.md`).
+- Why: one thing per screen; on a phone, typing on a zoomed-out board would mean tiny letters. Notes added one after another first piled up and hid each other's words in the screenshots, so each now gets its own spot.
+- Turned down: typing straight onto the note on the board, and new notes stacked a little lower and to the right of the last one.

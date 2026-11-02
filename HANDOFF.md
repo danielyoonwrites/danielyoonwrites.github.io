@@ -17,19 +17,19 @@ This repository is public. Keep personal details out of this file.
 - **Fewer spam calls** (built, one check left): https://danielyoonwrites.github.io/fewer-spam-calls, `fewer-spam-calls/PROGRESS.md`.
 - **First step smaller** (built, the owner's trial next): https://danielyoonwrites.github.io/first-step-smaller, `first-step-smaller/PROGRESS.md`.
 - **Living in the Word** (the AI helper live on Sonnet 5.5, with questions written ahead for the reading plan and the next chapter; signing in with an email code, the owner's invite page with an invite email, install help, the "check it" line; the server deploys by itself through Cloudflare; the plan for phones and app stores under way): https://danielyoonwrites.github.io/living-in-the-word, `living-in-the-word/PROGRESS.md`. The store plan is `living-in-the-word/STORE-PLAN.md`.
-- **Idea board** (planned November 2, 2026, not built yet): a little app like Apple's Freeform, just for Dan, `idea-board/PROGRESS.md`.
+- **Idea board** (build step 2, one board of notes, in pull request 104): a little app like Apple's Freeform, just for Dan, https://danielyoonwrites.github.io/idea-board (once merged), `idea-board/PROGRESS.md`.
 
 
 ## Where things stand (November 2, 2026)
 
 - Latest: the eighth session (October 29 and 31, 2026), pull requests 95 to 100. Its summary, and each earlier session's, is in `CHANGELOG.md` ("Session summaries"). Where each project stands is in its `PROGRESS.md`.
 - Next: `/pickup living in the word`. The ninth session (October 31, 2026) found that the website's rules (`.claude/rules/website.md` and `moon-jar.md`) also loaded for Living in the Word's files, and fixed it in pull request 101 (root `DECISIONS.md`, "the website's rules load only for its own files"). Living in the Word's next step is in its `PROGRESS.md`.
-- The tenth session (November 1 and 2, 2026): research on sharing photos between an iPhone and a Samsung (not built: Samsung's Quick Share now works with AirDrop on many Galaxy phones) and on a whiteboard like Freeform for Android, then the plan for Idea board (pull request 103). The research is in Dan's Master Notes (Notion). To continue it: `/pickup idea board`.
+- The tenth session (November 1 and 2, 2026): research on sharing photos between an iPhone and a Samsung (not built: Samsung's Quick Share now works with AirDrop on many Galaxy phones) and on a whiteboard like Freeform for Android, then Idea board: the plan (pull request 103, merged) and build step 2 (pull request 104). The research is in Dan's Master Notes (Notion). To continue it: `/pickup idea board`.
 
 
 ## Waiting on Dan
 
-1. Idea board (new): read the plan, answer its open questions one at a time (the name is chosen; the look is next), then merge pull request 103: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/103, Conversation tab, Merge pull request, Confirm merge. Details in `idea-board/PROGRESS.md`.
+1. Idea board: pick the notes' color, merge pull request 104 (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/104, Conversation tab, Merge pull request, Confirm merge), then the check on his phone. Every step is in `idea-board/PROGRESS.md`.
 2. Living in the Word: pull request 102 was merged on October 31, 2026, so its wait check (item 2 there) is next. Everything waiting, with every step, is in `living-in-the-word/PROGRESS.md` ("Waiting on Dan"): the next-chapter check, the Matthew 1 check, the invite test, and the smaller checks.
 3. The Anthropic API key expires November 24, 2026: a new key, saved in Cloudflare as `ANTHROPIC_API_KEY`. Remind him in good time, with every step (in `living-in-the-word/PROGRESS.md`).
 4. The other apps: Fewer spam calls needs the Samsung steps checked on a real Samsung phone; First step smaller waits for his daily trial. Details in each `PROGRESS.md`.

@@ -18,7 +18,7 @@ One big board for typed notes, photos and links, like Apple's Freeform, which ru
    - Note: a square note you type into. Tap it later to change the words.
    - Photo: one from the phone's photos (or the computer's files). The app makes a smaller copy before saving it.
    - Link: a web address and an optional title, shown as a small card. Tapping it opens the page in a new tab.
-4. Drag anything to move it. Tap something to pick it, then "Remove" (with "Undo" for a few seconds). A picked note or photo has a corner to drag, to make it bigger or smaller.
+4. Drag anything to move it. Tap a note to open it on its own screen, with a big box to type in, "Done" and "Remove" ("Note removed. Undo" shows for a few seconds). The phone's Back button (<) closes an open note and keeps the words. A note grows taller when its words need more room; a photo has a corner to drag, to make it bigger or smaller (build step 4).
 5. Everything saves by itself, to your account, so the same boards open on the phone and the computer.
 6. "Download a copy" saves every board, with its photos, in one file. "Restore a copy" brings them back.
 
@@ -45,13 +45,19 @@ One big board for typed notes, photos and links, like Apple's Freeform, which ru
 
 ## The look
 
-Not chosen yet (open question 2). Claude's suggestion: the Moon jar design, like the website and the other small apps (`.claude/rules/moon-jar.md`). Its rules keep glaze for thin lines only, so the notes' color is chosen in build step 2, with screenshots.
+"Paper and ink," like Living in the Word (the owner's choice "B", November 2, 2026): warm paper, black ink, EB Garamond for reading, Jost for small labels and buttons, thin lines, square corners. The colors and fonts are the same as Living in the Word's, at the top of `style.css` (and in `living-in-the-word/SPEC.md`, "The look").
+
+- The board: faint dots on the paper, so you can see it move.
+- The notes: "index card," a little lighter than the paper (`--note`, `#FBF8F2`), with a thin line and a soft shadow. Claude's suggestion, to confirm (open question 5): the other two shown were "soft shade" (`#E9E3D8`, darker than the paper) and "pale yellow" (`#F3E6BF`).
+- A thin bar at the top: "Idea board" on the left, "Saved on this device" on the right. The buttons at the bottom: "Show all" and "Add a note" (on a computer also − and +).
 
 ## Tech notes (Claude's plan; the owner can change any of it)
 
 - Plain HTML, CSS and JavaScript in this folder, with no build tools. File links end in `?v=1`, raised whenever a file changes.
 - The board is ordinary page boxes on a large surface that moves and zooms with a CSS transform, so text stays sharp. Touch and mouse both go through Pointer Events.
-- On the device, boards are kept in the browser's IndexedDB, because `localStorage` is too small for photos.
+- On the device, boards are kept in the browser's IndexedDB (database `idea-board`, store `boards`, one record per board, data version 1), because `localStorage` is too small for photos. Each change is saved 0.4 seconds after the last one, and at once when the page goes to the background. Where you were looking (how far the board is moved, and the zoom) belongs to the device, not the board, so it's kept in `localStorage` (`idea-board-view:` and the board's id) and will never travel with the board.
+- A new note goes in an open spot near the middle of the screen (below first on a phone held upright, to the right on a wide screen), so it never covers another note, and the board glides to show it. "Show all" fits every note on the screen. An empty note isn't kept.
+- The saved checks: `node idea-board/tests/app-test.mjs` from the repository folder (Chromium at 360 and 1280 wide, with touch and a mouse; must end "0 failed").
 - Photos are shrunk on the device before saving, to about 1600 pixels on the long side, as JPEG (tested for sharpness in step 4).
 - The server (build step 6): its own small Cloudflare Worker in `idea-board/server/`, with its own D1 database, deployed by itself after each merge like Living in the Word's (Workers Builds). It's kept apart from Living in the Word's server, so a problem in one can't break the other and photos can't fill Living in the Word's database.
 - Room on Cloudflare's free plan: D1 has 500 MB per database, 5 GB per account and 2 MB per row (Cloudflare's docs, read as their source on GitHub, November 2, 2026: https://github.com/cloudflare/cloudflare-docs/blob/production/src/content/docs/d1/platform/limits.mdx). Claude's estimate, unverified: about 1,500 shrunk photos fit in 500 MB. If that's ever too small, photos can move to R2, whose free tier is 10 GB-month (the same docs, `r2/pricing.mdx`). Whether R2 needs a payment method on file wasn't on that page (unverified).
@@ -61,7 +67,7 @@ Not chosen yet (open question 2). Claude's suggestion: the Moon jar design, like
 ## Build plan (one pull request each, each with a check the owner does)
 
 1. This plan, with the folder's `CLAUDE.md`, `PROGRESS.md` and `DECISIONS.md`. Check: read "How it works" and this build plan.
-2. One board, saved on this device for now: move around, zoom, add a note, type in it, move it, remove it (with Undo). Check: on your phone, add three notes, move them, zoom out, then close Chrome and open the page again: they're still there. Then try it on your computer.
+2. One board, saved on this device for now: move around, zoom, add a note, type in it, move it, remove it (with Undo). Check: on your phone, add three notes, move them, zoom out, then close Chrome and open the page again: they're still there. Then try it on your computer. (Built November 2, 2026, pull request 104.)
 3. Several boards: the start screen, "New board," rename, remove. Check: make two boards and switch between them.
 4. Photos: add one (shrunk before saving), move it, change its size. Check: add a photo from your phone; it looks sharp enough, and it moves and resizes.
 5. Links: a web address and a title; tapping the card opens the page. Check: add a link to your Substack and tap it.
@@ -73,6 +79,7 @@ Not chosen yet (open question 2). Claude's suggestion: the Moon jar design, like
 ## Open questions (ask one at a time)
 
 1. The name: answered November 2, 2026, "Idea board" (the owner's choice).
-2. The look: Moon jar like the website (Claude's suggestion), or its own.
-3. Several boards (Claude's suggestion, build step 3), or one big board.
-4. Signing in: an email code like Living in the Word (Claude's suggestion), or a long passphrase typed once on each device.
+2. The look: answered November 2, 2026, "Paper and ink," like Living in the Word (the owner's choice "B").
+3. Several boards or one: answered November 2, 2026, several boards (the owner's choice "a").
+4. Signing in: answered November 2, 2026, an email code like Living in the Word (the owner's choice "a").
+5. The notes' color: "index card" (Claude's suggestion), "soft shade" or "pale yellow" (screenshots with pull request 104).

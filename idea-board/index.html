@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Makes the page fit phone screens. "resizes-content" makes the page shorter when the
+       keyboard opens, so the note you're typing stays above the keyboard. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <!-- A safety rule for the browser (a "Content-Security-Policy"): this page may only run its own
+       script (app.js) and use its own style.css and Google's fonts. It talks to no server yet.
+       If you add an outside service (a font, an image, a server), it has to be added here too. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; base-uri 'none'; form-action 'none'">
+  <title>Idea board</title>
+  <meta name="description" content="Typed notes, photos and links on one big board.">
+  <!-- The color of the phone's top bar, the same warm paper as the app -->
+  <meta name="theme-color" content="#F3EFE7">
+
+  <!-- Asks search engines not to list it: it's just for the owner -->
+  <meta name="robots" content="noindex">
+
+  <!-- Fonts from Google Fonts: EB Garamond (Regular and Italic) for reading,
+       Jost for small labels and buttons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital@0;1&family=Jost:wght@400;500&display=swap">
+
+  <!-- The app's own look: "Paper and ink," like Living in the Word (see SPEC.md).
+       Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
+  <link rel="stylesheet" href="style.css?v=1">
+  <script src="app.js?v=1" defer></script>
+</head>
+<body>
+
+  <!-- The thin bar at the top: the app's name, and whether your notes are saved -->
+  <header class="bar top">
+    <span class="name">Idea board</span>
+    <span class="status" id="status" role="status"></span>
+  </header>
+
+  <!-- The board. Everything on it sits on the "world," which app.js moves and zooms. -->
+  <main class="board" id="board" aria-label="Your board. Drag an empty spot to move around. Pinch to zoom.">
+    <div class="world" id="world"></div>
+    <p class="empty" id="empty" hidden>Nothing here yet. Add a note to start.</p>
+  </main>
+
+  <!-- Shows for a few seconds after "Remove" -->
+  <div class="removed" id="removed" role="status" hidden>
+    <span>Note removed.</span>
+    <button type="button" id="undo">Undo</button>
+  </div>
+
+  <!-- The buttons at the bottom. Phones pinch to zoom, so the − and + only show on a computer. -->
+  <nav class="tools" aria-label="Board tools">
+    <button type="button" class="outline" id="show-all">Show all</button>
+    <button type="button" class="outline zoom" id="zoom-out" aria-label="Zoom out">−</button>
+    <button type="button" class="outline zoom" id="zoom-in" aria-label="Zoom in">+</button>
+    <button type="button" class="primary" id="add-note">Add a note</button>
+  </nav>
+
+  <!-- The note on its own screen, with a big box to type in -->
+  <section class="editor" id="editor" aria-label="Your note" hidden>
+    <div class="bar">
+      <button type="button" class="quiet" id="remove-note">Remove</button>
+      <button type="button" class="primary" id="done">Done</button>
+    </div>
+    <textarea id="note-text" placeholder="Type your note" aria-label="Your note"></textarea>
+  </section>
+
+  <noscript><p class="empty">Idea board needs JavaScript turned on.</p></noscript>
+
+</body>
+</html>
