@@ -48,8 +48,24 @@ One big board for typed notes, photos and links, like Apple's Freeform, which ru
 "Paper and ink," like Living in the Word (the owner's choice "B", November 2, 2026): warm paper, black ink, EB Garamond for reading, Jost for small labels and buttons, thin lines, square corners. The colors and fonts are the same as Living in the Word's, at the top of `style.css` (and in `living-in-the-word/SPEC.md`, "The look").
 
 - The board: faint dots on the paper, so you can see it move.
-- The notes: "index card," a little lighter than the paper (`--note`, `#FBF8F2`), with a thin line and a soft shadow. Claude's suggestion, to confirm (open question 5): the other two shown were "soft shade" (`#E9E3D8`, darker than the paper) and "pale yellow" (`#F3E6BF`).
+- The notes: "index card," a little lighter than the paper (`--note`, `#FBF8F2`), with a soft shadow (the owner's choice, November 2, 2026: "I like the index card idea"). Their edge is a thin warm grey line (`--edge`, `#8C8478`), dark enough to see easily, and their words are 21 pixels.
 - A thin bar at the top: "Idea board" on the left, "Saved on this device" on the right. The buttons at the bottom: "Show all" and "Add a note" (on a computer also − and +).
+
+## Easy to see and read (checked November 2, 2026)
+
+The owner asked: "I would like to check accessibility information to make sure it is easy to see and read." The rules come from WCAG 2.2, read in W3C's own source files on GitHub (https://github.com/w3c/wcag, `guidelines/sc/`), November 2, 2026:
+- Words: at least 4.5 to 1 against their background (1.4.3, level AA), or 7 to 1 for level AAA (1.4.6). Large text (18 point, or 14 point bold) needs 3 to 1 (AA).
+- What you need to see to use a control: at least 3 to 1 (1.4.11, AA).
+- Text can be made 200% bigger without losing anything (1.4.4, AA); a page 320 pixels wide works without scrolling sideways, except things like maps and diagrams (1.4.10, AA).
+- Tap targets at least 24 by 24 pixels (2.5.8, AA). Android's guide asks 48 by 48 (its developer docs and Accessibility Help, through search results; not opened).
+
+Where Idea board stands (pull request 105):
+- Note words 16.2 to 1 (AAA). Buttons and the top bar 15.0 to 1. The small grey words ("Saved on this device," the hint, the typing box's hint) 6.75 to 1 (AA). Note edges 3.2 to 1 against the paper (they were 1.3), and the Undo button's line 4.7 to 1 (it was 2.2).
+- Every button is at least 48 by 48. No words are smaller than 13 pixels at the board's normal zoom (Living in the Word's readability rule). Note words are 21 pixels (they were 19), so "Show all" with three notes on a phone still shows them at about 14.
+- With a phone's zoom at 200% (a 360-pixel screen shown as 180), the buttons go onto two rows and "Undo" goes under "Note removed," all on the screen (before, the buttons ran off both edges).
+- axe-core 4.10.2 (Deque's open-source checker, run in Chromium for testing only): 0 problems on the empty board, a board with notes, an open note, and "Note removed. Undo." The one thing it couldn't measure, the hint's words over the dots, is 6.75 to 1.
+- Kept for later (about using it, not seeing it): zooming on a phone needs two fingers, with "Show all" and opening a note as the one-finger ways (WCAG 2.5.1 asks for a one-finger way); moving a note needs dragging (2.5.7 asks for another way). Far zoomed out, words get small; tapping a note always shows it at 22 pixels.
+- The saved checks keep all of this true: section C of `tests/app-test.mjs`.
 
 ## Tech notes (Claude's plan; the owner can change any of it)
 
@@ -82,4 +98,4 @@ One big board for typed notes, photos and links, like Apple's Freeform, which ru
 2. The look: answered November 2, 2026, "Paper and ink," like Living in the Word (the owner's choice "B").
 3. Several boards or one: answered November 2, 2026, several boards (the owner's choice "a").
 4. Signing in: answered November 2, 2026, an email code like Living in the Word (the owner's choice "a").
-5. The notes' color: "index card" (Claude's suggestion), "soft shade" or "pale yellow" (screenshots with pull request 104).
+5. The notes' color: answered November 2, 2026, "index card" (the owner: "I like the index card idea").

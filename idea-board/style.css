@@ -16,6 +16,8 @@
   --line: #DCD4C7;    /* thin lines, and the dots on the board */
   --soft: #E9E3D8;    /* a shaded box */
   --note: #FBF8F2;    /* the notes: like index cards, a little lighter than the paper */
+  --edge: #8C8478;    /* the notes' edges and the Undo button's line: 3.2 to 1 against the paper,
+                         4.7 to 1 against ink (accessibility check, November 2, 2026) */
 
   --serif: "EB Garamond", Georgia, serif;                /* for reading */
   --sans: "Jost", "Helvetica Neue", Arial, sans-serif;   /* for small labels and buttons */
@@ -155,10 +157,10 @@ textarea:focus-visible,
   min-height: 220px;
   padding: 18px 18px 22px;
   background: var(--note);
-  border: 1px solid var(--line);
+  border: 1px solid var(--edge);   /* easy to see where a note ends */
   box-shadow: 0 1px 2px rgba(29, 27, 24, 0.06), 0 6px 18px rgba(29, 27, 24, 0.07);
-  font-size: 19px;
-  line-height: 1.4;
+  font-size: 21px;            /* bigger than the rest, so the words stay readable when you zoom out a little */
+  line-height: 1.38;
   white-space: pre-wrap;      /* keeps your line breaks */
   overflow-wrap: anywhere;    /* a long web address wraps instead of sticking out */
   cursor: pointer;
@@ -178,7 +180,7 @@ textarea:focus-visible,
   position: absolute;
   left: 0;
   right: 0;
-  top: 38%;
+  top: 24%;   /* high enough to stay clear of the buttons, even with the phone's zoom turned up */
   margin: 0;
   padding: 0 24px;
   color: var(--muted);
@@ -188,23 +190,37 @@ textarea:focus-visible,
 }
 
 
-/* ---------- The buttons at the bottom ---------- */
+/* ---------- The bottom of the screen: "Note removed. Undo," then the buttons ---------- */
 
-.tools {
+.bottom {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 2;
-  display: flex;
-  justify-content: center;
-  gap: 8px;
   padding: 12px 16px calc(14px + env(safe-area-inset-bottom));
   pointer-events: none;   /* only the buttons catch taps; the board works between them */
 }
 
-.tools button {
+.tools {
+  display: flex;
+  flex-wrap: wrap;        /* two rows when there isn't room for one */
+  justify-content: center;
+  gap: 8px;
+}
+
+.bottom button,
+.removed {
   pointer-events: auto;
+}
+
+/* On a very narrow screen (or a phone with its zoom turned up), a little less space in the buttons */
+@media (max-width: 300px) {
+  .primary,
+  .outline {
+    padding: 0 14px;
+    letter-spacing: 0.1em;
+  }
 }
 
 /* The main button: solid ink */
@@ -250,7 +266,7 @@ textarea:focus-visible,
 
 /* "Remove": small quiet words */
 .quiet {
-  min-height: 44px;
+  min-height: 48px;   /* Android's guide: tap targets at least 48 by 48 */
   padding: 0;
   border: none;
   background: transparent;
@@ -264,16 +280,14 @@ textarea:focus-visible,
 /* ---------- "Note removed. Undo" ---------- */
 
 .removed {
-  position: fixed;
-  left: 16px;
-  right: 16px;
-  bottom: calc(78px + env(safe-area-inset-bottom));
-  z-index: 3;
+  box-sizing: border-box;
   display: flex;
+  flex-wrap: wrap;   /* on a very narrow screen, Undo goes under the words instead of off the edge */
   align-items: center;
   justify-content: space-between;
+  gap: 6px 12px;
   max-width: 24rem;
-  margin: 0 auto;
+  margin: 0 auto 10px;
   padding: 6px 6px 6px 16px;
   background: var(--ink);
   color: var(--paper);
@@ -283,9 +297,9 @@ textarea:focus-visible,
 }
 
 .removed button {
-  min-height: 40px;
+  min-height: 48px;
   padding: 0 14px;
-  border: 1px solid var(--muted);
+  border: 1px solid var(--edge);
   border-radius: 0;
   background: transparent;
   color: var(--paper);
@@ -308,8 +322,11 @@ textarea:focus-visible,
   padding-top: env(safe-area-inset-top);
 }
 
+.editor .bar {
+  min-height: 60px;   /* room for 48-pixel buttons */
+}
+
 .editor .primary {
-  min-height: 40px;
   padding: 0 18px;
 }
 

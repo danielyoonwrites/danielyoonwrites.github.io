@@ -247,9 +247,9 @@ function showAll() {
   }
   const rect = boardEl.getBoundingClientRect();
   const margin = 24;
-  const buttonsRoom = 84;   // keep clear of the buttons at the bottom
+  const buttonsRoom = roomForButtons();   // keep clear of the buttons at the bottom
   const width = Math.max(1, rect.width - margin * 2);
-  const height = Math.max(1, rect.height - margin * 2 - buttonsRoom);
+  const height = Math.max(1, rect.height - margin - buttonsRoom - margin);
   const zoom = clampZoom(Math.min(width / (right - left), height / (bottom - top), 1));
   view = {
     zoom,
@@ -259,6 +259,13 @@ function showAll() {
   glide();
   applyView();
   saveViewSoon();
+}
+
+// How much of the bottom of the board the buttons cover (two rows on a narrow screen)
+function roomForButtons() {
+  const boardRect = boardEl.getBoundingClientRect();
+  const toolsRect = document.querySelector('.tools').getBoundingClientRect();
+  return Math.max(0, boardRect.bottom - toolsRect.top) + 8;
 }
 
 // Each note's outline on the board, in board pixels (a note grows taller with more words)
@@ -276,7 +283,7 @@ function bringIntoView(item) {
   if (!el) return;
   const rect = boardEl.getBoundingClientRect();
   const margin = 16;
-  const buttonsRoom = 84;   // keep clear of the buttons at the bottom
+  const buttonsRoom = roomForButtons();   // keep clear of the buttons at the bottom
   const left = view.x + item.x * view.zoom;
   const top = view.y + item.y * view.zoom;
   const right = left + NOTE_WIDTH * view.zoom;

@@ -337,6 +337,96 @@ const browser = await chromium.launch();
   await context.close();
 }
 
+// ===== C. Easy to see and read (the accessibility check, November 2, 2026) =====
+// WCAG 2.2 (W3C): text contrast at least 4.5 to 1 (AA) and 7 to 1 (AAA, 1.4.3 and 1.4.6); the parts
+// you need to see a control at least 3 to 1 (1.4.11); targets at least 24 by 24 (2.5.8).
+// Android's guide: 48 by 48. Living in the Word's readability rule: no text under 13 pixels.
+{
+  // The WCAG contrast formula, run inside the page on the colors the browser really shows
+  const contrast = (page, script) => page.evaluate(script);
+  const formula = `
+    const lum = (rgb) => {
+      const [r, g, b] = rgb.match(/[\\d.]+/g).slice(0, 3).map(Number).map((v) => v / 255)
+        .map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+  `;
+
+  const context = await browser.newContext({ viewport: { width: 360, height: 740 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, ignoreHTTPSErrors: true });
+  const page = await context.newPage();
+  await page.goto(APP);
+  await page.waitForFunction(() => document.getElementById('status').textContent.length > 0);
+  await addNote(page, 'Easy to see and read');
+
+  const numbers = await contrast(page, `(() => { ${formula}
+    const css = (selector, property) => getComputedStyle(document.querySelector(selector))[property];
+    const paper = css('body', 'backgroundColor');
+    return {
+      words: ratio(css('.note', 'color'), css('.note', 'backgroundColor')),
+      status: ratio(css('#status', 'color'), paper),
+      edge: ratio(css('.note', 'borderTopColor'), paper),
+      button: ratio(css('#add-note', 'color'), css('#add-note', 'backgroundColor')),
+      undoLine: ratio(css('#undo', 'borderTopColor'), css('.removed', 'backgroundColor')),
+    };
+  })()`);
+  check('C1 note words at least 7 to 1 (AAA)', numbers.words >= 7, JSON.stringify(numbers));
+  check('C1 small grey words at least 4.5 to 1 (AA)', numbers.status >= 4.5, JSON.stringify(numbers));
+  check('C1 note edges at least 3 to 1', numbers.edge >= 3, JSON.stringify(numbers));
+  check('C1 button words at least 4.5 to 1', numbers.button >= 4.5, JSON.stringify(numbers));
+  check('C1 the Undo button line at least 3 to 1', numbers.undoLine >= 3, JSON.stringify(numbers));
+
+  // Buttons at least 48 by 48, on the board, on a note's screen, and with "Note removed. Undo"
+  const tooSmall = async () => page.$$eval('button', (els) => els
+    .filter((el) => el.getClientRects().length && getComputedStyle(el).display !== 'none')
+    .map((el) => ({ id: el.id, w: el.getBoundingClientRect().width, h: el.getBoundingClientRect().height }))
+    .filter((b) => b.w < 48 || b.h < 48));
+  check('C2 board buttons at least 48 by 48', (await tooSmall()).length === 0, JSON.stringify(await tooSmall()));
+  const note = await page.locator('.note').first().boundingBox();
+  await tap(page, { x: note.x + 20, y: note.y + 20 });
+  await page.waitForSelector('#editor:not([hidden])');
+  check('C2 note screen buttons at least 48 by 48', (await tooSmall()).length === 0, JSON.stringify(await tooSmall()));
+  await page.click('#remove-note');
+  check('C2 the Undo button at least 48 by 48', (await tooSmall()).length === 0, JSON.stringify(await tooSmall()));
+  await page.click('#undo');
+
+  // No words smaller than 13 pixels (at the board's normal zoom)
+  const smallest = await page.evaluate(() => Math.min(...[...document.querySelectorAll('body *')]
+    .filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && el.getClientRects().length)
+    .map((el) => parseFloat(getComputedStyle(el).fontSize))));
+  check('C3 no words under 13 pixels', smallest >= 13, String(smallest));
+  check('C3 note words are 21 pixels', (await page.locator('.note').first().evaluate((el) => getComputedStyle(el).fontSize)) === '21px');
+  await context.close();
+
+  // A phone with its zoom at 200% (360 pixels shown as 180): the buttons go onto two rows,
+  // and "Note removed. Undo" sits above them, all on the screen
+  const narrow = await browser.newContext({ viewport: { width: 180, height: 370 }, deviceScaleFactor: 4, isMobile: true, hasTouch: true, ignoreHTTPSErrors: true });
+  const small = await narrow.newPage();
+  await small.goto(APP);
+  await small.waitForFunction(() => document.getElementById('status').textContent.length > 0);
+  await addNote(small, 'Big words');
+  const offScreen = async () => small.$$eval('.bottom button, .removed', (els) => els
+    .filter((el) => el.getClientRects().length)
+    .map((el) => ({ id: el.id || el.className, r: el.getBoundingClientRect() }))
+    .filter(({ r }) => r.left < -0.5 || r.right > window.innerWidth + 0.5 || r.bottom > window.innerHeight + 0.5)
+    .map(({ id }) => id));
+  check('C4 at 200% zoom, every button is on the screen', (await offScreen()).length === 0, JSON.stringify(await offScreen()));
+  await small.screenshot({ path: SHOTS + 'c4-zoom-200.png' });
+  const bigNote = await small.locator('.note').first().boundingBox();
+  await tap(small, { x: Math.max(bigNote.x, 0) + 20, y: Math.max(bigNote.y, 60) + 20 });
+  await small.waitForSelector('#editor:not([hidden])');
+  await small.click('#remove-note');
+  check('C4 at 200% zoom, "Note removed. Undo" and the buttons are on the screen', (await offScreen()).length === 0, JSON.stringify(await offScreen()));
+  const overlapping = await small.evaluate(() => {
+    const bar = document.getElementById('removed').getBoundingClientRect();
+    return [...document.querySelectorAll('.tools button')].filter((b) => b.getClientRects().length)
+      .some((b) => { const r = b.getBoundingClientRect(); return r.top < bar.bottom && bar.top < r.bottom && r.left < bar.right && bar.left < r.right; });
+  });
+  check('C4 "Note removed. Undo" doesn\'t cover the buttons', !overlapping);
+  await small.screenshot({ path: SHOTS + 'c4-zoom-200-undo.png' });
+  await narrow.close();
+}
+
 await browser.close();
 webServer.kill();
 console.log(`Screenshots: ${SHOTS}`);
