@@ -25,15 +25,16 @@
 
   <!-- The app's own look: "Paper and ink," like Living in the Word (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=1">
-  <script src="app.js?v=1" defer></script>
+  <link rel="stylesheet" href="style.css?v=2">
+  <script src="app.js?v=2" defer></script>
 </head>
 <body>
 
   <!-- The thin bar at the top: the app's name, and whether your notes are saved -->
   <header class="bar top">
     <span class="name">Idea board</span>
-    <span class="status" id="status" role="status"></span>
+    <!-- Not read out by screen readers on every save: it changes after every letter you type -->
+    <span class="status" id="status"></span>
   </header>
 
   <!-- The board. Everything on it sits on the "world," which app.js moves and zooms. -->
@@ -42,19 +43,23 @@
     <p class="empty" id="empty" hidden>Nothing here yet. Add a note to start.</p>
   </main>
 
-  <!-- Shows for a few seconds after "Remove" -->
-  <div class="removed" id="removed" role="status" hidden>
-    <span>Note removed.</span>
-    <button type="button" id="undo">Undo</button>
-  </div>
+  <!-- At the bottom of the screen: "Note removed. Undo" (for a few seconds after "Remove"),
+       then the buttons. On a narrow screen, or with the phone's zoom turned up, the buttons
+       go onto two rows instead of running off the edges. -->
+  <div class="bottom">
+    <div class="removed" id="removed" role="status" hidden>
+      <span>Note removed.</span>
+      <button type="button" id="undo">Undo</button>
+    </div>
 
-  <!-- The buttons at the bottom. Phones pinch to zoom, so the − and + only show on a computer. -->
-  <nav class="tools" aria-label="Board tools">
-    <button type="button" class="outline" id="show-all">Show all</button>
-    <button type="button" class="outline zoom" id="zoom-out" aria-label="Zoom out">−</button>
-    <button type="button" class="outline zoom" id="zoom-in" aria-label="Zoom in">+</button>
-    <button type="button" class="primary" id="add-note">Add a note</button>
-  </nav>
+    <!-- Phones pinch to zoom, so the − and + only show on a computer -->
+    <nav class="tools" aria-label="Board tools">
+      <button type="button" class="outline" id="show-all">Show all</button>
+      <button type="button" class="outline zoom" id="zoom-out" aria-label="Zoom out">−</button>
+      <button type="button" class="outline zoom" id="zoom-in" aria-label="Zoom in">+</button>
+      <button type="button" class="primary" id="add-note">Add a note</button>
+    </nav>
+  </div>
 
   <!-- The note on its own screen, with a big box to type in -->
   <section class="editor" id="editor" aria-label="Your note" hidden>

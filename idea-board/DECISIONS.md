@@ -51,3 +51,13 @@ Each decision with its reason, oldest first. Only add to this file; if a decisio
   - The notes look like index cards, a little lighter than the paper (to confirm: open question 5 in `SPEC.md`).
 - Why: one thing per screen; on a phone, typing on a zoomed-out board would mean tiny letters. Notes added one after another first piled up and hid each other's words in the screenshots, so each now gets its own spot.
 - Turned down: typing straight onto the note on the board, and new notes stacked a little lower and to the right of the last one.
+
+### November 2, 2026: the notes' color, "index card" (pull request 105)
+- Decision: the notes stay "index card," a little lighter than the paper, with a soft shadow.
+- Why: the owner, after trying the board: "wow this is nice. I like the index card idea."
+- Turned down: "soft shade" (darker than the paper) and "pale yellow."
+
+### November 2, 2026: easier to see and read (pull request 105)
+- Decision: four changes from an accessibility check: the notes' edges are a darker warm grey (`#8C8478`, 3.2 to 1 against the paper, from 1.3); note words are 21 pixels (from 19); the bottom buttons go onto two rows, and "Undo" under "Note removed," when the screen is narrow or the phone's zoom is turned up; and every button is at least 48 by 48 (Done, Remove and Undo were 40 to 44 pixels tall). Also: the Undo button's line is easier to see (4.7 to 1, from 2.2), and screen readers no longer read out "Saving" after every letter. Claude's choices, put to the owner with pull request 105 and before-and-after screenshots.
+- Why: the owner: "I would like to check accessibility information to make sure it is easy to see and read." The check used WCAG 2.2's rules (read in W3C's source on GitHub), Android's 48-by-48 guide (through search results), and axe-core 4.10.2, which found 0 problems on four screens before and after. The words already passed (note words 16.2 to 1, small grey words 6.75 to 1). What didn't: at 200% zoom on a phone the buttons ran off both edges, and the notes' edges were faint (WCAG asks 3 to 1 for what you need to see a control).
+- Turned down for now: − and + on phones too (one-finger zoom, WCAG 2.5.1), and a way to move notes without dragging (2.5.7); both are about using it, not seeing it, and both add buttons.
