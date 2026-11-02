@@ -230,7 +230,9 @@ function contrast(a, b) {
   const facts = await text(page, '#facts');
   check('B1 the video\'s facts', facts.startsWith('0:08 long · 1080 × 1920 · H.264 picture · AAC sound'), facts);
   check('B2 Chrome can read it', (await text(page, '#check-read')).includes('Chrome can read it'));
-  check('B3 the make button shows', await page.isVisible('#make'));
+  // The page shows the button a moment after "Chrome can read it" (it looks for a saved location first),
+  // so this waits for it, up to 10 seconds
+  check('B3 the make button shows', await page.waitForSelector('#make', { state: 'visible', timeout: 10000 }).then(() => true, () => false));
   await page.locator('#info').scrollIntoViewIfNeeded();
   await page.screenshot({ path: SHOTS + '2-your-video.png' });
 

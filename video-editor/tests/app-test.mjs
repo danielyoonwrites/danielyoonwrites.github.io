@@ -16,8 +16,8 @@ import { fileURLToPath } from 'node:url';
 import os from 'node:os';
 import path from 'node:path';
 import {
-  VIDEOS, haveFfmpeg, makeTestVideos, makeChart, PATCHES, patchColor, probe, thumbnail, likeness, average,
-  colorfulness, mp4Boxes, contrast,
+  VIDEOS, haveFfmpeg, makeTestVideos, makeChart, makeClock, frameColor, soundFacts, PATCHES, patchColor, probe,
+  thumbnail, likeness, average, colorfulness, mp4Boxes, contrast,
 } from './test-videos.mjs';
 
 const require = createRequire(import.meta.url);
@@ -47,6 +47,7 @@ if (!haveFfmpeg()) {
 }
 const videos = makeTestVideos();
 const chart = makeChart();
+const clock = makeClock();
 
 // ---------- Serve the repository, like GitHub Pages does ----------
 const webServer = spawn('python3', ['-m', 'http.server', '8768', '--bind', '127.0.0.1'], { cwd: repository, stdio: 'ignore' });
@@ -99,7 +100,7 @@ async function setSlider(page, id, value) {
   await page.dispatchEvent('#' + id, 'input');
 }
 const previewFilter = (page) => page.evaluate(() => document.getElementById('preview').style.filter);
-const chosenFilter = (page) => page.evaluate(() => document.querySelector('.chip[aria-checked="true"]').dataset.filter);
+const chosenFilter = (page) => page.evaluate(() => document.querySelector('#chips .chip[aria-checked="true"]').dataset.filter);
 const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll('.screen')].filter((s) => !s.hidden).map((s) => s.id).join(','));
 
 // ---------- A. The start screen, and the dark colors ----------
@@ -136,14 +137,16 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
     const preview = document.getElementById('preview');
     return Boolean(preview.src) && preview.muted && !preview.paused;
   }));
-  check('B3 "Filter" is open, with "Original" chosen', (await page.getAttribute('#tab-filter', 'aria-selected')) === 'true' && (await chosenFilter(page)) === 'none');
-  const looks = await page.locator('.chip').evaluateAll((all) => all.map((c) => [c.querySelector('.en').textContent, c.querySelector('.ko').textContent, c.querySelector('.ko').lang]));
+  check('B3 "Trim" is open first', (await page.getAttribute('#tab-trim', 'aria-selected')) === 'true' && await visible(page, 'panel-trim'));
+  await page.click('#tab-filter');
+  check('B3b "Filter" opens, with "Original" chosen', await visible(page, 'panel-filter') && (await chosenFilter(page)) === 'none');
+  const looks = await page.locator('#chips .chip').evaluateAll((all) => all.map((c) => [c.querySelector('.en').textContent, c.querySelector('.ko').textContent, c.querySelector('.ko').lang]));
   check('B4 eight looks, each with its Korean word', JSON.stringify(looks) === JSON.stringify([
     ['Original', '원본', 'ko'], ['Milky', '우유빛', 'ko'], ['Peach', '복숭아', 'ko'], ['Soft glow', '뽀샤시', 'ko'],
     ['Café', '카페', 'ko'], ['Clear', '맑음', 'ko'], ['Film', '필름', 'ko'], ['Black and white', '흑백', 'ko']]), JSON.stringify(looks));
   check('B4b every Korean look\'s SVG filter is on the page', await page.evaluate(() =>
     FILTERS.filter((f) => f.css.startsWith('url(')).every((f) => document.querySelector(f.css.slice(4, -1)) instanceof SVGFilterElement)));
-  const chips = await page.locator('.chip').evaluateAll((all) => all.map((c) => c.getBoundingClientRect()));
+  const chips = await page.locator('#chips .chip').evaluateAll((all) => all.map((c) => c.getBoundingClientRect()));
   check('B5 every filter button is at least 48 tall', chips.every((r) => r.height >= 48));
   const make = await page.locator('#make').boundingBox();
   check('B6 "Make the video" is on the screen without scrolling', make.y + make.height <= 740 && make.height >= 48, JSON.stringify(make));
@@ -366,6 +369,7 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   const { context, page } = await openPhone();
   await page.goto(APP);
   await choose(page, chart);
+  await page.click('#tab-filter');
   const original = Object.fromEntries(Object.entries(PATCHES).map(([name, patch]) => [name, patchColor(chart, patch)]));
   const spread = (c) => Math.max(...c) - Math.min(...c); // how colorful
   const light = (c) => (c[0] + c[1] + c[2]) / 3;
@@ -426,6 +430,106 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   await context.close();
 }
 
+// ---------- I. Trim and speed ----------
+// The clock video brightens steadily, so a frame's color tells which moment it shows, and its 330 Hz
+// tone tells the sound's speed: at 2× it's 660 Hz, at 0.5× 165 Hz (like a tape, Dan's choice "b").
+{
+  const { context, page } = await openPhone();
+  await page.goto(APP);
+  await choose(page, clock);
+  const tabs = await page.locator('.tab').allInnerTexts();
+  check('I1 four tabs: Trim, Speed, Filter, Lighting', JSON.stringify(tabs) === JSON.stringify(['Trim', 'Speed', 'Filter', 'Lighting']), JSON.stringify(tabs));
+  check('I2 the whole clip at first', (await text(page, '#trim-length')) === 'Your clip: 8.0 seconds' &&
+    (await text(page, '#trim-start-value')) === '0:00.0' && (await text(page, '#trim-end-value')) === '0:08.0');
+  const startHere = await page.locator('#start-here').boundingBox();
+  check('I2b "Start here" and "End here" are at least 48 tall', startHere.height >= 48, JSON.stringify(startHere));
+
+  await page.evaluate(() => { const v = document.getElementById('preview'); v.pause(); v.currentTime = 2; });
+  await page.waitForTimeout(300);
+  await page.click('#start-here');
+  check('I3 "Start here" sets the start to where the video is', (await text(page, '#trim-start-value')) === '0:02.0');
+  await page.fill('#trim-end', '6');
+  await page.dispatchEvent('#trim-end', 'input');
+  check('I4 the End slider sets the end', (await text(page, '#trim-end-value')) === '0:06.0' && (await text(page, '#trim-length')) === 'Your clip: 4.0 seconds');
+  await page.evaluate(() => { document.getElementById('preview').currentTime = 7; });
+  await page.waitForTimeout(400);
+  check('I5 on the Trim tab the video can go past the end (to pick a new one)', await page.evaluate(() => document.getElementById('preview').currentTime) > 6.5);
+  await page.evaluate(() => { const v = document.getElementById('preview'); v.currentTime = 0.4; });
+  await page.waitForTimeout(300);
+  await page.click('#end-here');
+  check('I5b "End here" never goes before the start', (await text(page, '#trim-end-value')) === '0:02.5', await text(page, '#trim-end-value'));
+  await page.fill('#trim-end', '6');
+  await page.dispatchEvent('#trim-end', 'input');
+
+  await page.evaluate(() => { document.getElementById('preview').currentTime = 7; });
+  await page.click('#tab-speed');
+  await page.waitForTimeout(400);
+  const inside = await page.evaluate(() => document.getElementById('preview').currentTime);
+  check('I6 on the other tabs it plays only the trimmed part', inside >= 1.9 && inside <= 6, String(inside));
+  const speeds = await page.locator('#speeds .chip').evaluateAll((all) => all.map((c) => c.querySelector('.en').textContent + ' ' + c.querySelector('.sub').textContent));
+  check('I7 four speeds, 1× first chosen', JSON.stringify(speeds) === JSON.stringify(['0.5× half speed', '1× normal', '1.5× faster', '2× double speed']) &&
+    await page.evaluate(() => document.querySelector('#speeds .chip[aria-checked="true"]').dataset.speed) === '1', JSON.stringify(speeds));
+  await page.click('#speeds .chip[data-speed="2"]');
+  const rate = await page.evaluate(() => { const v = document.getElementById('preview'); return [v.playbackRate, v.preservesPitch]; });
+  check('I8 2× plays the preview at 2×, with the sound\'s pitch going up too', rate[0] === 2 && rate[1] === false, JSON.stringify(rate));
+  check('I9 the lengths say so', (await text(page, '#speed-length')) === 'The new video: 2.0 seconds long' &&
+    (await text(page, '#trim-length')) === 'Your clip: 4.0 seconds (2.0 seconds at 2×)', await text(page, '#trim-length'));
+  await page.screenshot({ path: SHOTS + '11-speed.png' });
+  await page.click('#tab-trim');
+  await page.screenshot({ path: SHOTS + '12-trim.png' });
+
+  await makeVideo(page);
+  check('I10 trim 2 to 6 at 2× is made', (await screenShown(page)) === 'done-screen', await text(page, '#look-problem').catch(() => ''));
+  const lengthLine = await page.locator('#ready-list li').evaluateAll((all) => all.map((li) => li.textContent).find((t) => t.includes('long')));
+  check('I11 the upload check sees the new length (2 seconds is too short for Instagram)', lengthLine && lengthLine.includes('0:02 long: under 3 seconds'), lengthLine);
+  let saved = (await download(page, 'trim-speed-2x.mp4')).where;
+  let info = probe(saved);
+  check('I12 2 seconds long, a steady 30 frames a second', Math.abs(parseFloat(info.video.duration) - 2) < 0.05 &&
+    info.video.r_frame_rate === '30/1' && info.video.avg_frame_rate === '30/1', JSON.stringify(info.video));
+  const near = (a, b) => Math.max(...a.map((v, i) => Math.abs(v - b[i]))) <= 8;
+  check('I13 its first frame is the moment the trim starts (2.0 s)', near(frameColor(saved, 0), frameColor(clock, 2)), `${frameColor(saved, 0)} vs ${frameColor(clock, 2)}`);
+  check('I14 one second in, it shows 4.0 s of the original (2×)', near(frameColor(saved, 1), frameColor(clock, 4)), `${frameColor(saved, 1)} vs ${frameColor(clock, 4)}`);
+  let sound = soundFacts(saved);
+  check('I15 the sound is 2 seconds, twice as high (660 Hz)', Math.abs(sound.seconds - 2) < 0.06 && Math.abs(sound.hertz - 660) < 15, JSON.stringify(sound));
+
+  await page.goBack();
+  await page.waitForSelector('#look-screen:not([hidden])');
+  check('I16 back on Edit, the trim and speed are kept', (await text(page, '#trim-start-value')) === '0:02.0' && (await text(page, '#trim-end-value')) === '0:06.0' &&
+    await page.evaluate(() => document.querySelector('#speeds .chip[aria-checked="true"]').dataset.speed) === '2');
+
+  await page.click('#reset-trim');
+  check('I17 "Reset the trim"', (await text(page, '#trim-length')) === 'Your clip: 8.0 seconds (4.0 seconds at 2×)', await text(page, '#trim-length'));
+  await page.fill('#trim-end', '2');
+  await page.dispatchEvent('#trim-end', 'input');
+  await page.click('#tab-speed');
+  await page.click('#speeds .chip[data-speed="0.5"]');
+  await makeVideo(page);
+  saved = (await download(page, 'trim-speed-half.mp4')).where;
+  info = probe(saved);
+  check('I18 0 to 2 at 0.5× is 4 seconds long', Math.abs(parseFloat(info.video.duration) - 4) < 0.05, info.video.duration);
+  check('I19 two seconds in, it shows 1.0 s of the original (0.5×)', near(frameColor(saved, 2), frameColor(clock, 1)), `${frameColor(saved, 2)} vs ${frameColor(clock, 1)}`);
+  sound = soundFacts(saved);
+  check('I20 the sound is 4 seconds, half as high (165 Hz)', Math.abs(sound.seconds - 4) < 0.06 && Math.abs(sound.hertz - 165) < 8, JSON.stringify(sound));
+
+  await page.goBack();
+  await page.waitForSelector('#look-screen:not([hidden])');
+  await page.click('#tab-trim');
+  await page.click('#reset-trim');
+  await page.click('#tab-speed');
+  await page.click('#speeds .chip[data-speed="1.5"]');
+  await makeVideo(page);
+  info = probe((await download(page, 'speed-1-5.mp4')).where);
+  check('I21 the whole 8 seconds at 1.5× is 5.3 seconds long', Math.abs(parseFloat(info.video.duration) - 8 / 1.5) < 0.06, info.video.duration);
+
+  await page.click('#new-video');
+  await page.waitForSelector('#start-screen:not([hidden])');
+  await choose(page, videos.short);
+  check('I22 a new video starts with the whole clip at 1×', (await text(page, '#trim-length')) === 'Your clip: 3.0 seconds' &&
+    await page.evaluate(() => document.querySelector('#speeds .chip[aria-checked="true"]').dataset.speed) === '1', await text(page, '#trim-length'));
+  check('I no page errors', page.problems.length === 0, page.problems.join('\n'));
+  await context.close();
+}
+
 // ---------- G. A phone with its zoom at 200% (180 wide), and a computer (1280 wide) ----------
 {
   const { context, page } = await openPhone({ viewport: { width: 180, height: 370 } });
@@ -450,7 +554,7 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   check('G4 the keyboard reaches "Choose a video"', await page.evaluate(() => document.activeElement.id === 'choose'));
   await page.setInputFiles('#pick', videos.short);
   await page.waitForSelector('#look-screen:not([hidden])');
-  const panel = await page.locator('#panel-filter').boundingBox();
+  const panel = await page.locator('#panel-trim').boundingBox();
   check('G5 on a computer the controls sit in a readable column', panel.width <= 600, JSON.stringify(panel));
   check('G6 nothing wider than the window', await page.evaluate(() => document.documentElement.scrollWidth <= 1280));
   const makeButton = await page.locator('#make').boundingBox();

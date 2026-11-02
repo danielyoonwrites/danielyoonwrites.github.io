@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 2, 2026, pull requests 110 to 112 and 116)
+## In force (November 2, 2026, pull requests 110 to 112, 116 and 125)
 
 Every decision below that still holds, one line each; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -14,13 +14,15 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 2, 2026: the riskiest part first: build step 2 is a phone test (Claude's plan).
 - November 2, 2026: the phone test is its own page, `phone-test.html`, kept for checking other phones or Chrome updates later.
 - November 2, 2026: Mediabunny loads as plain scripts (a global `Mediabunny`); its AAC add-on loads only when Chrome can't make AAC sound.
-- November 2, 2026: copies carry none of the original's tags (`tags: {}`), so hidden details like a location stay behind; the picture is turned upright in the frames; the longest side is at most 1920 pixels.
+- November 2, 2026: the new video carries none of the original's tags, so hidden details like a location stay behind (the app writes the file fresh; the phone test's copy uses `tags: {}`); the picture is turned upright; the longest side is at most 1920 pixels.
 - November 2, 2026: the phone test passed on the owner's phone: AAC sound is built in, so the app loads the add-on only on a phone or browser without it.
 - November 2, 2026: the dark look (Dan's "A").
 - November 2, 2026: every video is made to fit Instagram's, TikTok's and YouTube Shorts' upload rules (Dan's request), and "Your video" checks it against them.
-- November 2, 2026: build step 3's screens: Start, "The look" (Filter and Lighting tabs), "Making the video," "Your video"; Brightness and Contrast from −50 to +50.
+- November 2, 2026: the screens: Start, "Edit" (Trim, Speed, Filter and Lighting tabs; called "The look" until build step 4), "Making the video," "Your video"; Brightness and Contrast from −50 to +50.
 - November 2, 2026: the looks are Korean styles (Dan's "a"): Original, Milky 우유빛, Peach 복숭아, Soft glow 뽀샤시, Café 카페, Clear 맑음, Film 필름, Black and white 흑백, each with its English name and the Korean word under it. They're SVG filters, drawn on a normal canvas.
 - November 2, 2026: "Better sound," without AI, is build step 5 (Dan asked whether it's possible); its details are asked then.
+- November 2, 2026: trim and speed (build step 4): "Start here" and "End here" while it plays, or sliders in tenths of a second; speeds 0.5×, 1×, 1.5× and 2×; the sound follows the speed like a tape, so faster sounds higher (Dan's "b").
+- November 2, 2026: the app makes each new video frame by frame (Mediabunny's `CanvasSink` and `CanvasSource`, the sound through an `OfflineAudioContext`), instead of the one-step `Conversion`, which has no speed setting.
 - November 2, 2026: the filter and lighting question (whole video or each clip) waits for build step 8.
 
 ## Log (oldest first)
@@ -96,3 +98,18 @@ Every decision below that still holds, one line each; it's rewritten at each han
 ### November 2, 2026: better sound becomes build step 5 (pull request 116)
 - Decision: add "Better sound" to the build plan as step 5, after trim and speed, without AI: even out the volume, cut low rumble, a clearer voice, the volume up or down. Which of these, and how they're shown, is asked at step 5 (`SPEC.md`, open question 6). The later steps move down one (shape and crop 6, text 7, several clips 8, polish 9).
 - Why: Dan: "can you also create a part of the app to help with audio as well? Like maybe making the audio better or things like that? Let me know if it is possible." Claude's answer: possible without AI. Chrome has OfflineAudioContext (Chrome 35 and later), BiquadFilterNode and DynamicsCompressorNode (Chrome 14 and later) (MDN's browser-compat-data, November 2, 2026), and Mediabunny can hand the sound over and take it back (AudioBufferSink, AudioBufferSource). Its limit: changing background noise like other people talking or music can't really be removed without AI, and steady noise like a fan only a little. After trim and speed, because speed changes the sound too.
+
+### November 2, 2026: trim and speed (pull request 125)
+- Decision (Claude's design, for Dan to judge in the screenshots): the second screen is now "Edit," with four tabs, Trim, Speed, Filter and Lighting, and it opens on Trim. Trim: "Your clip: 4.0 seconds"; "Start here" and "End here" set the start or the end to the moment that's playing; Start and End sliders in tenths of a second; "Reset the trim"; a clip is at least half a second long, and the end never goes past the video's end. On the Trim tab the whole video plays, so new points are easy to find; the other tabs play only the trimmed part, over and over, so you see the clip as it will be. Speed: 0.5× (half speed), 1× (normal), 1.5× (faster) and 2× (double speed), as buttons in one row, with the new video's length under them.
+- Why: the plan's build step 4, with Dan's rules: one thing per screen, short pages on a phone (tabs instead of one long page), big buttons. Tapping "Start here" while it plays is easier on a phone than dragging to an exact moment; the sliders are for fine-tuning.
+
+### November 2, 2026: the sound follows the speed, like a tape (pull request 125)
+- Decision: when a clip is sped up or slowed down, its sound plays faster or slower with it, like a tape: faster sounds higher, slower sounds lower. The playing video sounds the same way (`preservesPitch` off), so what you hear is what you get.
+- Why: Dan chose "b": "b, just have it match the speed, keep it simple." Claude had offered A, B and C (`SPEC.md`, open question 3).
+- Turned down: "A) Natural voice," the voice keeping its pitch at any speed (Claude's recommendation for talking videos; the most work, a well-known sound-stretching method written by Claude, likely a little rough at 2× or 0.5×); "C) No sound" whenever the speed isn't 1×.
+
+### November 2, 2026: each new video made frame by frame (pull request 125)
+- Decision (Claude's, told to Dan when step 4 started): the app makes the new video itself, frame by frame, instead of with Mediabunny's one-step `Conversion`. Frame number k of the new video shows the moment start + (k ÷ frame rate) × speed of the original (`CanvasSink`), drawn on a normal canvas with the look and added as H.264 (`CanvasSource`). The sound is gathered (`AudioBufferSink`), played at the speed in an `OfflineAudioContext` (48 kHz stereo) and made AAC (`AudioBufferSource`).
+- Why: `Conversion` can trim but has no speed setting (its type notes, Mediabunny 1.65.0). Frame by frame handles trim and speed exactly, keeps a steady frame rate, and is the path better sound (step 5) and several clips (step 8) need. The file is written fresh, so none of the original's tags come along (`tags: {}` was a `Conversion` setting; the phone test still uses it).
+- Checked in Claude's test browser, with a made-up "clock" video (a gray that brightens each second, and a 330 Hz tone): trimmed to 2 to 6 seconds at 2×, the new video is 2.0 seconds, a steady 30 frames a second, each frame shows the right moment, and the tone is 660 Hz; 0 to 2 at 0.5× is 4 seconds at 165 Hz; the whole 8 seconds at 1.5× is 5.3 seconds. The earlier checks (looks, lighting, the upload rules, Stop, Back) pass on the new path.
+- Not checked yet: how long it takes on Dan's phone.
