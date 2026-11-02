@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 2, 2026, pull request 110)
+## In force (November 2, 2026, pull requests 110 and 111)
 
 Every decision below that still holds, one line each; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -12,6 +12,9 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 2, 2026: everything happens on the phone; the videos are never uploaded. Mediabunny makes the new video, frame by frame.
 - November 2, 2026: Mediabunny's ready-made file saved in the folder; no npm (the website's rule, kept after Dan asked whether it helps).
 - November 2, 2026: the riskiest part first: build step 2 is a phone test (Claude's plan).
+- November 2, 2026: the phone test is its own page, `phone-test.html`, kept for checking other phones or Chrome updates later.
+- November 2, 2026: Mediabunny loads as plain scripts (a global `Mediabunny`); its AAC add-on loads only when Chrome can't make AAC sound.
+- November 2, 2026: copies carry none of the original's tags (`tags: {}`), so hidden details like a location stay behind; the picture is turned upright in the frames; the longest side is at most 1920 pixels.
 
 ## Log (oldest first)
 
@@ -43,3 +46,14 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Decision: the app is called "Video editor," at https://danielyoonwrites.github.io/video-editor (folder `video-editor/`).
 - Why: the owner's answer "A" of three: "Video editor" (Claude's recommendation: plain and clear, like "Idea board," and it says what it is), "Cutting room" (warmer, and it goes with "Quiet room") or "Little edits" (says it's small and simple).
 - Turned down: "Cutting room" and "Little edits."
+
+### November 2, 2026: the phone test page, and how Mediabunny loads (pull request 111)
+- Decision: build step 2 is its own page, `video-editor/phone-test.html`, with `phone-test.js` and `phone-test.css`, kept after the app is built, for checking another phone or a Chrome update. Mediabunny loads with plain `<script>` tags: `lib/mediabunny.min.js` (its `mediabunny.min.cjs` build, renamed so the website sends it as JavaScript) sets a global `Mediabunny`. Mediabunny's AAC add-on (`lib/mediabunny-aac-encoder.min.js`) loads only when Chrome can't make AAC sound itself. The page has a safety rule (Content-Security-Policy) like Idea board's, plus `'wasm-unsafe-eval'` and `worker-src blob:` for the add-on.
+- Why (Claude's choices, November 2, 2026): the add-on's module build imports "mediabunny" by name, which needs an import map, an inline script the safety rule would block; its plain build reads the global `Mediabunny` instead (seen in both files). Claude's test browser (Chromium 153) can make H.264 video but not AAC sound, so the add-on is a real need on some browsers; Mediabunny's docs: "In some browsers, AAC encoding is not supported by WebCodecs." Both downloads matched the npm registry's integrity hashes; their SHA-256 hashes are in `lib/README.md`, and the saved checks test them.
+- Licenses: Mediabunny and the add-on are MPL-2.0 (`lib/LICENSE`, with links to their source). The add-on contains FFmpeg's AAC encoder, unmodified, under the LGPL 2.1 or later; its license files are in `lib/licenses/ffmpeg/`, with a link to FFmpeg's source and the build steps in `lib/README.md`.
+- Turned down: modules with an import map (blocked by the safety rule without extra work); loading from a CDN (not reachable from Claude's session to test); making Opus sound instead of AAC when Chrome lacks AAC (whether other apps play Opus inside MP4 wasn't checked).
+
+### November 2, 2026: what a copy keeps and doesn't (pull request 111)
+- Decision: each copy is made with `tags: {}` (none of the original's tags), with the picture turned upright in the frames (`allowTransformationMetadata: false`), and at most 1920 pixels on its longest side (Reels are 1080 by 1920). The file's name isn't shown on the page.
+- Why: Mediabunny's type notes for `Conversion` say: "If no function is set, the input's metadata tags will be copied to the output (excluding `creationTime`)." So the privacy plan in `SPEC.md` ("it shouldn't carry the original's hidden details") needed `tags: {}`. The saved checks confirm it: a test video with a location ("loci") makes a copy without one. Turning the picture upright in the frames means every player shows it the right way up; the check compares the copy's first frame with ffmpeg's upright view of the original. File names can be personal, and the owner sends screenshots.
+- Also checked: the page looks for a location in the file's "moov" box only ("©xyz", "loci" or Apple's "quicktime.location"), so picture data can't cause a false alarm. Which of these Android phones write wasn't checked; the test shows what the owner's phone does.
