@@ -19,7 +19,10 @@ A little app like Apple's Freeform, just for Dan: typed notes, photos and links 
 2. The phone check of build step 3 (the phone may keep the old copy for up to 10 minutes): on your phone, open Chrome and go to https://danielyoonwrites.github.io/idea-board. "Your boards" shows "My board" with its notes. Tap "New board," type a name, tap "Done," add a note, then tap "← Boards": both boards are in the list. Open one, tap "Edit," change its name, tap "Done." Then tap < at the bottom of the phone: it goes back one step at a time, to the list. Tell the next session anything that felt off.
 
 ## Next step
-Build plan step 4, photos: add a photo from the phone (shrunk on the phone before saving, to about 1600 pixels on the long side, as JPEG), move it, and change its size with a corner. Read `SPEC.md` ("How it works," "Tech notes," "Easy to see and read") first. Ask Dan one question at a time about anything the spec leaves open (for example how the resize corner looks), keep the accessibility checks passing (section C of the saved checks), and show screenshots before the pull request.
+First ask how the phone check of build step 3 went ("Waiting on Dan," item 2). Then build plan step 4, photos: add a photo from the phone (shrunk on the phone before saving, to about 1600 pixels on the long side, as JPEG), move it, and change its size with a corner.
+- Read `SPEC.md` first: "How it works," "Easy to see and read," and in "Tech notes" the photo plan: photos in their own IndexedDB store, which means opening the database as version 2, with `onversionchange` and a wait-and-explain on `onblocked` added first.
+- Ask Dan open questions 6 to 8 in `SPEC.md`, one at a time: how to add a photo, what tapping a photo does, and how the resize corner looks.
+- Add photo checks to section C of `tests/app-test.mjs` and to `tests/axe-check.mjs`, check that the shrunk photo carries no location data, raise the file links to `?v=4`, and show screenshots made with plain test photos before the pull request.
 
 ## Dead ends
 - Placing each new note a little lower and to the right of the last (the first try in build step 2): in the screenshots the notes piled up and hid each other's words. Each new note now gets an open spot.
