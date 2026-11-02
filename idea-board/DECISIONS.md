@@ -2,26 +2,26 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (built November 2, 2026, at the end of the tenth session; pull requests 108, 109 and 113 changed lines)
+## In force (rewritten November 2, 2026, at the end of the eleventh session)
 
 Every decision below that still holds, one line each; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
-- November 2, 2026: Dan builds his own app like Apple's Freeform (his "A": a plan first), instead of Canva Whiteboards, Excalidraw or Concepts.
-- November 2, 2026: version 1 holds typed notes, photos and links.
-- November 2, 2026: built to work for everyone, used just by Dan for now: each person's boards are their own, nothing is shared, and only Dan's address can sign in until sign-ups open; the same boards on his phone and computer (build steps 6 and 7). (Replaces "just for Dan.")
-- November 2, 2026: saving to an account (build steps 6 and 7) comes before links (build step 5), Dan's wish.
-- November 2, 2026: its own Cloudflare Worker and D1 database, apart from Living in the Word's (Claude's choice, put to Dan with pull request 103).
-- November 2, 2026: the name "Idea board," at https://danielyoonwrites.github.io/idea-board (Dan's "a").
-- November 2, 2026: the "Paper and ink" look, like Living in the Word (Dan's "B").
-- November 2, 2026: several boards, with a list on the start screen (Dan's "a").
-- November 2, 2026: signing in with an email code, like Living in the Word, from build step 6 (Dan's "a").
-- November 2, 2026: a tap opens a note on its own screen; dragging moves it; every letter is saved; an empty note isn't kept; "Remove" offers Undo for 8 seconds; a new note goes in an open spot; "Show all"; faint dots; − and + only on computers; notes grow taller instead of a resize corner.
-- November 2, 2026: "index card" notes, a little lighter than the paper (Dan: "I like the index card idea").
-- November 2, 2026: easy to see and read: note edges 3.2 to 1, note words 21 pixels, buttons at least 48 by 48, no words under 13 pixels, buttons on two rows at 200% zoom.
-- November 2, 2026: the app opens on "Your boards" (newest first); "New board" asks for a name first; on a board "← Boards" and "Edit"; "Remove board" asks first, then offers Undo; the phone's Back button goes back one step.
-- November 2, 2026: notes line up: a note you let go of glides onto the nearest spot on the dots (every 64 board pixels, the same at every zoom), a new note goes in line with the note nearest the middle, and notes saved before stay put until they're moved (Dan's "a").
-- November 2, 2026: photos (build step 4): "Add" opens a new note's screen, where "Photo" adds a photo instead (Dan's "A"); photos already on the phone only, "Take a photo" after build step 7 (Dan's "C"); a tap opens a photo on its own screen with "Done" and "Remove" (Dan's "A"); a thin ink size corner just outside the photo (Dan's "A").
-- November 2, 2026: photos are shrunk on the device (1600 pixels on the long side, a JPEG without hidden details) and kept in their own database, "idea-board-photos"; a photo's width settles in steps that line up with notes (Claude's choices, put to Dan with pull request 109).
+- November 2, 2026: our own app: Dan builds his own app like Apple's Freeform, plan first (his "A"), instead of Canva Whiteboards, Excalidraw or Concepts.
+- November 2, 2026: what goes on a board: typed notes, photos and links (version 1).
+- November 2, 2026: who it's for: built to work for everyone, used just by Dan for now. Each person's boards and photos are their own, nothing is shared between people, and only Dan's address can sign in until sign-ups open (Dan's words). The same boards on his phone and his computer.
+- November 2, 2026: what's next: saving to an account (build steps 6 and 7) comes before links (build step 5), Dan's wish.
+- November 2, 2026: the server: its own Cloudflare Worker and D1 database, apart from Living in the Word's (Claude's choice, put to Dan).
+- November 2, 2026: signing in: an email code, like Living in the Word's, from build step 6 (Dan's "a").
+- November 2, 2026: the name: "Idea board," at https://danielyoonwrites.github.io/idea-board (Dan's "a").
+- November 2, 2026: the look: "Paper and ink," like Living in the Word (Dan's "B"), with "index card" notes (Dan: "I like the index card idea").
+- November 2, 2026: easy to see and read: words at least 4.5 to 1 (note words 7 to 1), edges and control lines at least 3 to 1, buttons at least 48 by 48, no words under 13 pixels, every button on the screen at 200% zoom.
+- November 2, 2026: several boards: the app opens on "Your boards" (newest first); "New board" asks for a name first; on a board "← Boards" and "Edit"; "Remove board" asks first, then offers Undo; the phone's Back button goes back one step.
+- November 2, 2026: notes: a tap opens a note on its own screen; dragging moves it; every letter is saved; an empty note isn't kept; "Remove" offers Undo for 8 seconds; notes grow taller instead of a resize corner; "Show all"; faint dots; − and + only on computers.
+- November 2, 2026: lining up: a note or photo you let go of glides onto the nearest spot on the dots (every 64 board pixels, the same at every zoom); a new one goes in line with the item nearest the middle; notes saved before stay put until they're moved (Dan's "a").
+- November 2, 2026: the dots: drawn on a canvas, each exactly on its spot (Claude's fix, after Dan's screenshot).
+- November 2, 2026: adding a photo: "Add" opens a new note's screen, where "Photo" (until you type) opens the phone's photo picker (Dan's "A"); photos already on the phone only, "Take a photo" after build step 7 (Dan's "C").
+- November 2, 2026: a photo on the board: a tap opens it on its own screen with "Done" and "Remove" (Dan's "A"); a thin ink size corner just outside it (Dan's "A"); its width settles in steps that line up with notes (220 one note, 476 two).
+- November 2, 2026: photos underneath: shrunk on the device to 1600 pixels on the long side, a JPEG without hidden details; kept in their own database, "idea-board-photos"; a photo's file goes only once its removal can't be undone (Claude's choices, put to Dan).
 
 ## Log (oldest first)
 
@@ -38,6 +38,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Decision: only the owner uses it, with no sharing. The boards are saved to his account, so they open on his Android phone and in a computer's web browser.
 - Why: the owner said it won't be shared, and: "It would just need a way to save so it can be accessed both on Android phones and web page on computer."
 - Turned down: saving only on the phone, like First step smaller, because then the computer can't open the boards.
+- Status: partly replaced by November 2, 2026: built to work for everyone, used just by Dan for now (pull request 113). Still in force: the same boards on his phone and his computer, saved to his account, and nothing shared.
 
 ### November 2, 2026: its own small server, apart from Living in the Word's (pull request 103)
 - Decision: Claude's choice, put to the owner with pull request 103: its own Cloudflare Worker and D1 database, not added to Living in the Word's server.

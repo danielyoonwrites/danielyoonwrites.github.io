@@ -44,6 +44,8 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
 
 Only one pull request at a time from the branch: wait for a merge before starting the next one, or the new work lands in the open pull request.
 
+Two sessions can work in this repository at the same time, on different projects (November 2, 2026: Idea board and the video editor). Pull request numbers then jump, so write a number into the notes only after GitHub gives it. When shared notes clash (`HANDOFF.md`, `CHANGELOG.md`), merge main into the branch and keep both projects' lines. Never rewrite history that's already pushed.
+
 When Dan says "do the rest," Claude works through the build plan one pull request at a time, starting the next one as soon as the last merges.
 
 
@@ -73,7 +75,7 @@ When Dan says "do the rest," Claude works through the build plan one pull reques
 - `fewer-spam-calls/` is a one-page guide with its own `CLAUDE.md` and `SPEC.md`.
 - `first-step-smaller/` is a little app (planned October 2026) with its own `CLAUDE.md` and `SPEC.md`.
 - `living-in-the-word/` is a little app for Bible study questions (planned October 2026) with its own `CLAUDE.md` and `SPEC.md`.
-- `idea-board/` is a little app like Apple's Freeform, for typed notes, photos and links, just for the owner (planned November 2026), with its own `CLAUDE.md` and `SPEC.md`.
+- `idea-board/` is a little app like Apple's Freeform, for typed notes, photos and links, built to work for everyone and used just by the owner for now (planned November 2026), with its own `CLAUDE.md` and `SPEC.md`.
 - `video-editor/` is a simple video editor, just for the owner, on his Android phone (planned November 2026), with its own `CLAUDE.md` and `SPEC.md`.
 
 ## Privacy
