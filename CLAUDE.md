@@ -19,8 +19,8 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
   - Numbered steps, with the full link inside each step (never "the link above") and the exact button or tab to click.
   - Every answer stands on its own (Dan's rule, October 26, 2026, after Claude said "the steps are two messages up"): repeat every step, link, name and value in full each time, even if it was given before. Never "see above" or "as before."
   - For anything he pastes (like `server/worker.js` into Cloudflare), give the direct links to copy it: the GitHub file page (`https://github.com/danielyoonwrites/danielyoonwrites.github.io/blob/main/<path>`, with its "Copy raw file" button) and the raw page (`https://raw.githubusercontent.com/danielyoonwrites/danielyoonwrites.github.io/main/<path>`), plus exactly where to paste it.
-  - Ask one question at a time, with options and a recommendation.
-  - Accuracy matters most. Check facts against official sources before stating them, say clearly when something couldn't be checked, and never guess.
+  - Ask one question at a time, with options and a recommendation. Each lettered option is one choice: an option that joined "what goes on the board" with "use Canva" made Dan's "A" mean Canva when he meant building his own (November 2, 2026).
+  - Accuracy matters most. Check facts against official sources before stating them, say clearly when something couldn't be checked, and never guess. Cite only pages Claude actually opened, and say when a source was seen only in search results (November 2, 2026).
   - Start feedback with what works, then up to three ranked problems, each with a fix.
   - End each reply with one concrete next action.
 - He wants as little friction as possible: Claude does the follow-up work on its own (see "How the work flows"), and he doesn't want to be the messenger.
