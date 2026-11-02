@@ -470,6 +470,13 @@ if (!navigator.share) {
 // change it in the Content-Security-Policy line in index.html too, or the browser blocks it.
 const SERVER_URL = 'https://living-in-the-word.danyoonsignup.workers.dev/';
 
+// The ESV text is on hold (the owner's choice, October 26, 2026; SPEC.md, "The Bible text"),
+// so the app doesn't ask the server for it: the code stays, switched off. With it on, every
+// study and reading sent one more request, and with a wrong or old passcode each open counted
+// as two wrong tries (found in the audit, November 2, 2026: AUDIT.md, item 3). To turn the
+// text on, set ESV_TEXT to true and save the ESV_API_KEY secret in Cloudflare.
+const ESV_TEXT = false;
+
 // The passcode, or the sign-in, is saved on this phone only, under the app's own name in the
 // browser's storage. A phone that's signed in sends its session key (see "Signing in")
 // instead of the passcode; signing in replaces the passcode on that phone.
@@ -1385,7 +1392,7 @@ async function showPassageText(screenId, name) {
   if (ownBible) ownBible.hidden = false;
 
   let result = { error: 'not-connected' };
-  if (SERVER_URL && canAsk()) {
+  if (ESV_TEXT && SERVER_URL && canAsk()) {
     try {
       const response = await askServer({ passage: name, want: 'text' });
       result = await response.json();

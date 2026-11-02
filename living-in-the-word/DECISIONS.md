@@ -23,7 +23,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 29, 2026: Sonnet 5.5 at `high` effort, with "Think the problem through before you answer."; uneven sets get guidance fixes, not a model switch.
 - October 29, 2026: question 2 asks why what the passage shows about God matters there.
 - October 29, 2026: the "check it" line wherever the AI's words show; a "pastor wrote the guidelines" line may go on the start screen, never inside that warning.
-- October 26, 2026: the ESV text is on hold: only a "Read it on esv.org" button. Don't ask Dan to set up the key.
+- October 26, 2026: the ESV text is on hold: only a "Read it on esv.org" button. Don't ask Dan to set up the key. Since November 2, 2026 the app doesn't ask the server for the text either (`ESV_TEXT` off in `app.js`; the code stays).
 
 **The look and the screens**
 - October 26, 2026: the "Paper and ink" look; October 28, 2026: the magazine layout, and no text under 13 pixels except verse numbers.
@@ -431,3 +431,8 @@ The "In force" list right below is every decision that still holds, one line eac
 - Turned down: answering "sent" when an email fails (the person would wait for a code that never comes); waiting a fixed time before every answer to hide the email's speed (slower for everyone, for a small gain).
 - Accepted (low): an invited address still answers a little slower; during an outage at Resend only an invited address answers "email-failed"; anyone who knows an address can use up its 5 codes a day.
 - On the day it's deployed, a code asked for just before won't work (it was kept under the old name): ask for a new one.
+
+### November 2, 2026: the app stops asking for the Bible text while the ESV is on hold (pull request NNN)
+- Decision: an on/off switch, `ESV_TEXT = false`, near the top of the AI helper part of `app.js`. While it's off, `showPassageText` doesn't ask the server for the passage's text; the "Read ... on esv.org" row shows at once, as it did after the request failed. The code stays, as the October 26, 2026 decision (pull request 55) says; turning the text on takes the switch and the `ESV_API_KEY` secret.
+- Why: `AUDIT.md`, item 3, found by two of the audit's reviewers. With no ESV key, every study and reading sent a request that could only fail, and the server checks the passcode before it looks at what's asked. So each open with a wrong or old passcode counted as two wrong tries, and a few group phones with an old passcode on one church Wi-Fi could reach the 10 a day and block everyone there, email sign-in too, until midnight Pacific. Section E of `tests/app-test.mjs`: with the switch on, the run asked for the text 16 times and an old passcode counted 2 wrong tries per open; with it off, none and 1.
+- Turned down: not counting wrong passcodes on text requests on the server (it would let someone guess the passcode through that route).
