@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- A safety rule for the browser (a "Content-Security-Policy"): this page may only run its own
+       script (app.js), use its own style sheet (style.css), and show pictures from this site or
+       ones made on this device ("blob:"). It can't connect to any other site, so a photo can't be
+       sent anywhere. If you ever add an outside service, it has to be added here too. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' blob:; base-uri 'none'; form-action 'none'">
+  <title>Photo Filters</title>
+  <meta name="description" content="Dan's own looks for his photos, made on this device.">
+  <!-- Not listed in search engines: it's just for Dan -->
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#1c1c1c">
+  <!-- Raise the ?v= number whenever style.css or app.js changes, so phones load the new copy -->
+  <link rel="stylesheet" href="style.css?v=1">
+  <script src="app.js?v=1" defer></script>
+</head>
+<body>
+  <header class="top">
+    <h1>Photo Filters</h1>
+  </header>
+
+  <main>
+    <!-- Shown until a photo is chosen -->
+    <p id="intro" class="intro">Choose a photo to start. It stays on this device: nothing is uploaded.</p>
+
+    <!-- The chosen photo, right side up, and its size -->
+    <figure id="photo" class="photo" hidden>
+      <canvas id="preview" role="img" aria-label="Your photo"></canvas>
+      <figcaption id="size" class="size"></figcaption>
+    </figure>
+
+    <!-- "Opening the photo…" and plain-words problems -->
+    <p id="message" class="message" role="status" hidden></p>
+  </main>
+
+  <!-- At the bottom, where a thumb reaches it when holding the phone in one hand -->
+  <footer class="bottom">
+    <button type="button" id="choose" class="main-button">Choose photo</button>
+    <input type="file" id="file" accept="image/*" aria-label="Choose a photo" hidden>
+  </footer>
+</body>
+</html>
