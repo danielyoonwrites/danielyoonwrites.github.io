@@ -18,6 +18,7 @@ This repository is public. Keep personal details out of this file.
 - **First step smaller** (built, the owner's trial next): https://danielyoonwrites.github.io/first-step-smaller, `first-step-smaller/PROGRESS.md`.
 - **Living in the Word** (the AI helper live on Sonnet 5.5, with questions written ahead for the reading plan and the next chapter; signing in with an email code, the owner's invite page with an invite email, install help, the "check it" line; the server deploys by itself through Cloudflare; the plan for phones and app stores under way): https://danielyoonwrites.github.io/living-in-the-word, `living-in-the-word/PROGRESS.md`. The store plan is `living-in-the-word/STORE-PLAN.md`.
 - **Idea board** (live with several boards of notes that line up on the dots; photos in pull request 109; links next): a little app like Apple's Freeform, just for Dan, https://danielyoonwrites.github.io/idea-board, `idea-board/PROGRESS.md`.
+- **Video editor** (planned November 2, 2026, not built yet): a simple video editor just for Dan, on his Android phone, with the videos never leaving the phone, `video-editor/PROGRESS.md`.
 
 
 ## Where things stand (November 2, 2026)
@@ -32,6 +33,7 @@ This repository is public. Keep personal details out of this file.
 2. Living in the Word: pull request 102 was merged on October 31, 2026, so its wait check (item 2 there) is next. Everything waiting, with every step, is in `living-in-the-word/PROGRESS.md` ("Waiting on Dan"): the next-chapter check, the Matthew 1 check, the invite test, and the smaller checks.
 3. The Anthropic API key expires November 24, 2026: a new key, saved in Cloudflare as `ANTHROPIC_API_KEY`. Remind him in good time, with every step (in `living-in-the-word/PROGRESS.md`).
 4. The other apps: Fewer spam calls needs the Samsung steps checked on a real Samsung phone; First step smaller waits for his daily trial. Details in each `PROGRESS.md`.
+5. Video editor (new; the name is chosen): read the plan, then merge pull request 110 (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/110, Conversation tab, Merge pull request, Confirm merge). Details in `video-editor/PROGRESS.md`.
 
 
 ## Parked (raise only when it becomes relevant)
@@ -67,5 +69,9 @@ Open https://claude.ai/code, start a new session with this repository, set the e
   > /pickup idea board
 
   (or, without the skill: Read HANDOFF.md, then idea-board/PROGRESS.md, DECISIONS.md and CLAUDE.md, and continue from the next step.)
+- Continue the video editor:
+  > /pickup video editor
+
+  (or, without the skill: Read HANDOFF.md, then video-editor/PROGRESS.md, DECISIONS.md and CLAUDE.md, and continue from the next step.)
 - Something new:
   > Read HANDOFF.md first. Then help me plan [the new thing], plan only.
