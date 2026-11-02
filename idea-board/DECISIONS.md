@@ -2,6 +2,25 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
+## In force (built November 2, 2026, at the end of the tenth session)
+
+Every decision below that still holds, one line each; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
+
+- November 2, 2026: Dan builds his own app like Apple's Freeform (his "A": a plan first), instead of Canva Whiteboards, Excalidraw or Concepts.
+- November 2, 2026: version 1 holds typed notes, photos and links.
+- November 2, 2026: just for Dan, never shared; boards saved to his account, the same on his Android phone and a computer's web browser (build step 7).
+- November 2, 2026: its own Cloudflare Worker and D1 database, apart from Living in the Word's (Claude's choice, put to Dan with pull request 103).
+- November 2, 2026: the name "Idea board," at https://danielyoonwrites.github.io/idea-board (Dan's "a").
+- November 2, 2026: the "Paper and ink" look, like Living in the Word (Dan's "B").
+- November 2, 2026: several boards, with a list on the start screen (Dan's "a").
+- November 2, 2026: signing in with an email code, like Living in the Word, from build step 6 (Dan's "a").
+- November 2, 2026: a tap opens a note on its own screen; dragging moves it; every letter is saved; an empty note isn't kept; "Remove" offers Undo for 8 seconds; a new note goes in an open spot; "Show all"; faint dots; − and + only on computers; notes grow taller instead of a resize corner.
+- November 2, 2026: "index card" notes, a little lighter than the paper (Dan: "I like the index card idea").
+- November 2, 2026: easy to see and read: note edges 3.2 to 1, note words 21 pixels, buttons at least 48 by 48, no words under 13 pixels, buttons on two rows at 200% zoom.
+- November 2, 2026: the app opens on "Your boards" (newest first); "New board" asks for a name first; on a board "← Boards" and "Edit"; "Remove board" asks first, then offers Undo; the phone's Back button goes back one step.
+
+## Log (oldest first)
+
 ### November 2, 2026: build our own app like Freeform, starting with a plan (pull request 103)
 - Decision: the owner builds his own app like Apple's Freeform, starting with a plan only. His choice "A" of three: a plan first (Claude's recommendation), later (after Living in the Word's current step), or use Canva.
 - Why: Freeform runs only on Apple devices (Apple's iCloud help lists only iPhone, iPad and Mac; through search results, November 2, 2026). The owner: "Wait I didn't mean using Canva , I meant making my own app. But if that isn't worth it let me know." Claude's answer: worth it as his next learning app, not worth it just to get a whiteboard. The owner: "A, unless this will take a very long time." Claude's rough estimate: 8 small pull requests after the plan.

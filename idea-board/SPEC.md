@@ -8,7 +8,7 @@ Just the owner, on his Android phone (in Chrome) and in a computer's web browser
 
 ## What it is
 
-One big board for typed notes, photos and links, like Apple's Freeform, which runs only on iPhone, iPad and Mac (Apple's iCloud help, through search results, November 2, 2026). Free apps already do this (Canva Whiteboards has notes, photos and saving across devices, per Canva's Help Center, November 2, 2026), so this one is built as the owner's next learning app, made his way.
+Boards of typed notes, photos and links (several boards, each one big and endless), like Apple's Freeform, which runs only on iPhone, iPad and Mac (Apple's iCloud help, through search results, November 2, 2026). Free apps already do this (Canva Whiteboards has notes, photos and saving across devices, per Canva's Help Center, November 2, 2026), so this one is built as the owner's next learning app, made his way.
 
 ## How it works (version 1)
 
@@ -72,11 +72,14 @@ Where Idea board stands (pull request 105):
 
 ## Tech notes (Claude's plan; the owner can change any of it)
 
-- Plain HTML, CSS and JavaScript in this folder, with no build tools. File links end in `?v=1`, raised whenever a file changes.
+- Plain HTML, CSS and JavaScript in this folder, with no build tools. File links end in a version number (`?v=3` after build step 3), raised whenever a file changes.
 - The board is ordinary page boxes on a large surface that moves and zooms with a CSS transform, so text stays sharp. Touch and mouse both go through Pointer Events.
 - On the device, boards are kept in the browser's IndexedDB (database `idea-board`, store `boards`, one record per board, data version 1), because `localStorage` is too small for photos. Each change is saved 0.4 seconds after the last one, and at once when the page goes to the background. Where you were looking (how far the board is moved, and the zoom) belongs to the device, not the board, so it's kept in `localStorage` (`idea-board-view:` and the board's id) and will never travel with the board.
+- Items of a type this version doesn't know (photos and links, from a later version) are kept and saved, just not drawn, so an older copy of the app (a phone can keep one for up to 10 minutes) never deletes them.
 - A new note goes in an open spot near the middle of the screen (below first on a phone held upright, to the right on a wide screen), so it never covers another note, and the board glides to show it. "Show all" fits every note on the screen. An empty note isn't kept.
-- The saved checks: `node idea-board/tests/app-test.mjs` from the repository folder (Chromium at 360 and 1280 wide, with touch and a mouse; must end "0 failed").
+- The saved checks: `node idea-board/tests/app-test.mjs` from the repository folder (Chromium at 360 wide with touch, 1280 with a mouse, and 180 for a phone with its zoom at 200%; must end "0 failed"). The accessibility check: `idea-board/tests/axe-check.mjs` (how to run it is in `PROGRESS.md`).
+- Photos (build step 4), Claude's plan, found missing in a fresh read of the notes (November 2, 2026): a photo must not live inside its board's record. Each board is one record, written whole 0.4 seconds after every change, and the server's D1 allows 2 MB per row (about six shrunk photos). So each photo goes in its own store in IndexedDB (a new store, `photos`, keyed by the photo's id, holding the shrunk JPEG), and the board's item only names it (`{ type: 'photo', photoId, x, y, width }`); on the server, one row (or one R2 file) per photo.
+- A new store means opening the database as version 2. Today `app.js` opens version 1 and gives up when another tab still has the old version open (`onblocked`), so the list would look empty until that tab closes. Build step 4 must first add `db.onversionchange = () => db.close()` (so an open tab lets go), and on `onblocked` wait with a short message ("Close Idea board in your other tabs") instead of giving up. Nothing is ever lost either way: the boards stay in the database.
 - Photos are shrunk on the device before saving, to about 1600 pixels on the long side, as JPEG (tested for sharpness in step 4).
 - The server (build step 6): its own small Cloudflare Worker in `idea-board/server/`, with its own D1 database, deployed by itself after each merge like Living in the Word's (Workers Builds). It's kept apart from Living in the Word's server, so a problem in one can't break the other and photos can't fill Living in the Word's database.
 - Room on Cloudflare's free plan: D1 has 500 MB per database, 5 GB per account and 2 MB per row (Cloudflare's docs, read as their source on GitHub, November 2, 2026: https://github.com/cloudflare/cloudflare-docs/blob/production/src/content/docs/d1/platform/limits.mdx). Claude's estimate, unverified: about 1,500 shrunk photos fit in 500 MB. If that's ever too small, photos can move to R2, whose free tier is 10 GB-month (the same docs, `r2/pricing.mdx`). Whether R2 needs a payment method on file wasn't on that page (unverified).
@@ -103,3 +106,6 @@ Where Idea board stands (pull request 105):
 3. Several boards or one: answered November 2, 2026, several boards (the owner's choice "a").
 4. Signing in: answered November 2, 2026, an email code like Living in the Word (the owner's choice "a").
 5. The notes' color: answered November 2, 2026, "index card" (the owner: "I like the index card idea").
+6. How to add a photo (build step 4): one "Add" button that asks "Note, photo or link?" (as "How it works" plans; one more tap for every note), or a separate "Add a photo" next to "Add a note."
+7. What tapping a photo does (build step 4): Claude's suggestion, its own screen with the photo big, "Done" and "Remove" (with Undo for 8 seconds), like a note.
+8. The resize corner on a photo (build step 4): how it looks, and whether it shows all the time or only after tapping the photo. It must stay at least 48 by 48 at any zoom.

@@ -1,5 +1,6 @@
-// Checks for Idea board (build step 2: one board of notes, saved on this device), in Chromium:
-// a phone 360 pixels wide with touch, and a computer 1280 wide with a mouse.
+// Checks for Idea board (build steps 2 and 3: boards of notes, saved on this device), in Chromium:
+// a phone 360 pixels wide with touch, a computer 1280 wide with a mouse, and 180 wide for a phone
+// with its zoom at 200%.
 // Written November 2, 2026. Run from the repository folder: node idea-board/tests/app-test.mjs
 // It serves the repository on http://127.0.0.1:8766 (python3), so that port must be free.
 // Needs Playwright with Chromium (installed in Claude's cloud sessions). Screenshots go to a
