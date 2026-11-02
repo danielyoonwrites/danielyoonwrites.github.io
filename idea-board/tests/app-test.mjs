@@ -128,6 +128,22 @@ async function addNote(page, words) {
   await wait(350);   // the board may glide to show the new note
 }
 
+// Opens the app (on the list of boards) and waits until the list is shown
+async function openApp(page) {
+  await page.goto(APP);
+  await page.waitForSelector('#list-screen:not([hidden])');
+  await page.waitForFunction(() => !document.getElementById('no-boards').hidden || document.querySelectorAll('.row').length > 0);
+}
+
+// "New board," a name, "Done": the new board opens
+async function makeBoard(page, name) {
+  await page.click('#new-board');
+  await page.waitForSelector('#board-settings:not([hidden])');
+  await page.keyboard.type(name);
+  await page.click('#board-done');
+  await page.waitForSelector('#board-screen:not([hidden])');
+}
+
 const browser = await chromium.launch();
 
 
@@ -139,14 +155,17 @@ const browser = await chromium.launch();
   const page = await context.newPage();
   const errors = [];
   watchErrors(page, errors);
-  await page.goto(APP);
-  await page.waitForFunction(() => document.getElementById('status').textContent.length > 0);
+  await openApp(page);
+  check('A0 a new device starts with no boards', await page.isVisible('#no-boards'));
+  await page.screenshot({ path: SHOTS + 'a0-phone-no-boards.png' });
+  await makeBoard(page, 'Sermon ideas');
 
-  // A1. An empty board says how to start, and is saved as "My board"
+  // A1. An empty board says how to start, and is saved under its name
   check('A1 empty hint shows', await page.isVisible('#empty'));
   check('A1 saved status', (await page.textContent('#status')) === 'Saved on this device', await page.textContent('#status'));
+  check('A1 the name shows at the top', (await page.textContent('#board-name')) === 'Sermon ideas');
   let boards = await savedBoards(page);
-  check('A1 one board saved', boards.length === 1 && boards[0].name === 'My board' && boards[0].items.length === 0, JSON.stringify(boards));
+  check('A1 one board saved', boards.length === 1 && boards[0].name === 'Sermon ideas' && boards[0].items.length === 0, JSON.stringify(boards));
   check('A1 the − and + buttons are hidden on a phone', !(await page.isVisible('#zoom-in')) && !(await page.isVisible('#zoom-out')));
   await page.screenshot({ path: SHOTS + 'a1-phone-empty.png' });
 
@@ -250,7 +269,7 @@ const browser = await chromium.launch();
   await page.keyboard.type(' (draft)');
   await page.goBack();
   await page.waitForSelector('#editor', { state: 'hidden' });
-  check('A12 Back closes the note', page.url().startsWith(APP) && (await page.locator('.note').count()) === 4);
+  check('A12 Back closes the note', page.url().startsWith(APP) && (await page.locator('.note').count()) === 4 && (await page.isVisible('#board-screen')));
   check('A12 the words typed before Back are kept', (await page.locator('.note').nth(2).textContent()).endsWith('(draft)'));
   // ...and Done doesn't take the page back a step too far
   await tap(page, { x: third.x + 20, y: third.y + 20 });
@@ -263,6 +282,11 @@ const browser = await chromium.launch();
   await wait(600);
   const zoomBeforeReload = await zoomNow(page);
   await page.reload();
+  await page.waitForSelector('.row');
+  check('A13 the app opens on the list, with the board and its notes counted',
+    (await page.textContent('.row .row-name')) === 'Sermon ideas' && (await page.textContent('.row .row-count')) === '4 notes');
+  await page.screenshot({ path: SHOTS + 'a13-phone-list.png' });
+  await page.locator('.row').first().tap();
   await page.waitForFunction(() => document.querySelectorAll('.note').length > 0);
   check('A13 the notes are still there', (await page.locator('.note').count()) === 4);
   check('A13 the zoom is kept', Math.abs((await zoomNow(page)) - zoomBeforeReload) < 0.001);
@@ -279,8 +303,8 @@ const browser = await chromium.launch();
   const page = await context.newPage();
   const errors = [];
   watchErrors(page, errors);
-  await page.goto(APP);
-  await page.waitForFunction(() => document.getElementById('status').textContent.length > 0);
+  await openApp(page);
+  await makeBoard(page, 'Christmas planning');
 
   check('B1 the − and + buttons show on a computer', (await page.isVisible('#zoom-in')) && (await page.isVisible('#zoom-out')));
   await addNote(page, 'Books to read this winter');
@@ -355,8 +379,8 @@ const browser = await chromium.launch();
 
   const context = await browser.newContext({ viewport: { width: 360, height: 740 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, ignoreHTTPSErrors: true });
   const page = await context.newPage();
-  await page.goto(APP);
-  await page.waitForFunction(() => document.getElementById('status').textContent.length > 0);
+  await openApp(page);
+  await makeBoard(page, 'Easy to see');
   await addNote(page, 'Easy to see and read');
 
   const numbers = await contrast(page, `(() => { ${formula}
@@ -382,6 +406,28 @@ const browser = await chromium.launch();
     .map((el) => ({ id: el.id, w: el.getBoundingClientRect().width, h: el.getBoundingClientRect().height }))
     .filter((b) => b.w < 48 || b.h < 48));
   check('C2 board buttons at least 48 by 48', (await tooSmall()).length === 0, JSON.stringify(await tooSmall()));
+  await page.click('#edit-board');
+  await page.waitForSelector('#board-settings:not([hidden])');
+  await page.click('#remove-board');
+  check('C2 name screen and "Remove board" buttons at least 48 by 48', (await tooSmall()).length === 0, JSON.stringify(await tooSmall()));
+  const smallestOnNameScreen = await page.evaluate(() => Math.min(...[...document.querySelectorAll('#board-settings *')]
+    .filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && el.getClientRects().length)
+    .map((el) => parseFloat(getComputedStyle(el).fontSize))));
+  check('C3 no words under 13 pixels on the name screen', smallestOnNameScreen >= 13, String(smallestOnNameScreen));
+  await page.click('#confirm-no');
+  await page.goBack();
+  await page.waitForSelector('#board-settings', { state: 'hidden' });
+  await page.click('#to-boards');
+  await page.waitForSelector('#list-screen:not([hidden])');
+  check('C2 list buttons at least 48 by 48', (await tooSmall()).length === 0, JSON.stringify(await tooSmall()));
+  const listNumbers = await contrast(page, `(() => { ${formula}
+    const css = (selector, property) => getComputedStyle(document.querySelector(selector))[property];
+    const paper = css('body', 'backgroundColor');
+    return { name: ratio(css('.row-name', 'color'), paper), count: ratio(css('.row-count', 'color'), paper), small: ratio(css('#list-note', 'color'), paper) };
+  })()`);
+  check('C1 list words at least 4.5 to 1', listNumbers.name >= 7 && listNumbers.count >= 4.5 && listNumbers.small >= 4.5, JSON.stringify(listNumbers));
+  await page.locator('.row').first().tap();
+  await page.waitForSelector('#board-screen:not([hidden])');
   const note = await page.locator('.note').first().boundingBox();
   await tap(page, { x: note.x + 20, y: note.y + 20 });
   await page.waitForSelector('#editor:not([hidden])');
@@ -402,15 +448,17 @@ const browser = await chromium.launch();
   // and "Note removed. Undo" sits above them, all on the screen
   const narrow = await browser.newContext({ viewport: { width: 180, height: 370 }, deviceScaleFactor: 4, isMobile: true, hasTouch: true, ignoreHTTPSErrors: true });
   const small = await narrow.newPage();
-  await small.goto(APP);
-  await small.waitForFunction(() => document.getElementById('status').textContent.length > 0);
-  await addNote(small, 'Big words');
-  const offScreen = async () => small.$$eval('.bottom button, .removed', (els) => els
+  await openApp(small);
+  const offScreen = async () => small.$$eval('.bottom button, .removed, .top button, .row', (els) => els
     .filter((el) => el.getClientRects().length)
     .map((el) => ({ id: el.id || el.className, r: el.getBoundingClientRect() }))
     .filter(({ r }) => r.left < -0.5 || r.right > window.innerWidth + 0.5 || r.bottom > window.innerHeight + 0.5)
     .map(({ id }) => id));
+  check('C4 at 200% zoom, "New board" is on the screen', (await offScreen()).length === 0, JSON.stringify(await offScreen()));
+  await makeBoard(small, 'A long board name for a small screen');
+  await addNote(small, 'Big words');
   check('C4 at 200% zoom, every button is on the screen', (await offScreen()).length === 0, JSON.stringify(await offScreen()));
+  await small.screenshot({ path: SHOTS + 'c4-zoom-200-board.png' });
   await small.screenshot({ path: SHOTS + 'c4-zoom-200.png' });
   const bigNote = await small.locator('.note').first().boundingBox();
   await tap(small, { x: Math.max(bigNote.x, 0) + 20, y: Math.max(bigNote.y, 60) + 20 });
@@ -425,6 +473,121 @@ const browser = await chromium.launch();
   check('C4 "Note removed. Undo" doesn\'t cover the buttons', !overlapping);
   await small.screenshot({ path: SHOTS + 'c4-zoom-200-undo.png' });
   await narrow.close();
+}
+
+// ===== D. Several boards (build step 3) =====
+{
+  const context = await browser.newContext({ viewport: { width: 360, height: 740 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, ignoreHTTPSErrors: true });
+  const page = await context.newPage();
+  const errors = [];
+  watchErrors(page, errors);
+  await openApp(page);
+  const rowNames = () => page.$$eval('.row-name', (els) => els.map((el) => el.textContent));
+
+  // D1. Two boards; the one changed last is at the top
+  await makeBoard(page, 'Sermon series');
+  await page.click('#to-boards');
+  await page.waitForSelector('#list-screen:not([hidden])');
+  await makeBoard(page, 'Chapter two');
+  await addNote(page, 'The opening line');
+  await page.click('#to-boards');
+  await page.waitForSelector('#list-screen:not([hidden])');
+  check('D1 newest first', JSON.stringify(await rowNames()) === JSON.stringify(['Chapter two', 'Sermon series']), JSON.stringify(await rowNames()));
+  check('D1 notes counted', JSON.stringify(await page.$$eval('.row-count', (els) => els.map((el) => el.textContent))) === JSON.stringify(['1 note', 'No notes yet']));
+  await page.screenshot({ path: SHOTS + 'd1-phone-two-boards.png' });
+
+  // D2. Each board keeps its own notes
+  await page.locator('.row').nth(1).tap();
+  await page.waitForSelector('#board-screen:not([hidden])');
+  check('D2 the other board has no notes', (await page.locator('.note').count()) === 0 && (await page.textContent('#board-name')) === 'Sermon series');
+
+  // D3. Rename: "Edit," a new name, "Done"
+  await page.click('#edit-board');
+  await page.waitForSelector('#board-settings:not([hidden])');
+  check('D3 the name screen shows the name and no "Remove" question yet', (await page.inputValue('#board-name-input')) === 'Sermon series' && !(await page.isVisible('#confirm-remove')));
+  await page.fill('#board-name-input', 'Psalms of ascent');
+  await page.screenshot({ path: SHOTS + 'd3-phone-rename.png' });
+  await page.click('#board-done');
+  await page.waitForSelector('#board-settings', { state: 'hidden' });
+  check('D3 the new name shows at the top', (await page.textContent('#board-name')) === 'Psalms of ascent');
+  await wait(600);
+  check('D3 the new name is saved', (await savedBoards(page)).some((b) => b.name === 'Psalms of ascent'));
+
+  // D4. The phone's Back button: from a name screen to the board, from a board to the list
+  await page.click('#edit-board');
+  await page.waitForSelector('#board-settings:not([hidden])');
+  await page.goBack();
+  await page.waitForSelector('#board-settings', { state: 'hidden' });
+  check('D4 Back from the name screen goes to the board', await page.isVisible('#board-screen'));
+  await page.goBack();
+  await page.waitForSelector('#list-screen:not([hidden])');
+  check('D4 Back from a board goes to the list', page.url().startsWith(APP));
+  await page.click('#new-board');
+  await page.waitForSelector('#board-settings:not([hidden])');
+  await page.keyboard.type('Never made');
+  await page.goBack();
+  await page.waitForSelector('#board-settings', { state: 'hidden' });
+  check('D4 Back from "New board" makes no board', (await page.locator('.row').count()) === 2 && (await page.isVisible('#list-screen')));
+
+  // D5. An empty name becomes "Untitled board"; names show as words, never as code
+  await makeBoard(page, '');
+  check('D5 an empty name becomes "Untitled board"', (await page.textContent('#board-name')) === 'Untitled board');
+  await page.click('#edit-board');
+  await page.waitForSelector('#board-settings:not([hidden])');
+  await page.fill('#board-name-input', '<i>not italic</i>');
+  await page.click('#board-done');
+  await page.waitForSelector('#board-settings', { state: 'hidden' });
+  check('D5 a typed name stays words at the top', (await page.textContent('#board-name')) === '<i>not italic</i>' && !(await page.innerHTML('#board-name')).includes('<i>'));
+  await page.click('#to-boards');
+  await page.waitForSelector('#list-screen:not([hidden])');
+  check('D5 and in the list', (await rowNames()).includes('<i>not italic</i>'));
+
+  // D6. Remove a board: it asks first, then "Board removed. Undo"
+  await page.locator('.row', { hasText: 'Chapter two' }).tap();
+  await page.waitForSelector('#board-screen:not([hidden])');
+  await page.click('#edit-board');
+  await page.waitForSelector('#board-settings:not([hidden])');
+  await page.click('#remove-board');
+  check('D6 it asks first, with the name and the notes', (await page.textContent('#confirm-words')) === 'Remove “Chapter two” and its 1 note?', await page.textContent('#confirm-words'));
+  await page.screenshot({ path: SHOTS + 'd6-phone-remove.png' });
+  await page.click('#confirm-no');
+  check('D6 "Keep it" keeps it', !(await page.isVisible('#confirm-remove')) && (await page.isVisible('#board-settings')));
+  await page.click('#remove-board');
+  await page.click('#confirm-yes');
+  await page.waitForSelector('#list-screen:not([hidden])');
+  await wait(300);
+  check('D6 the board is gone from the list', !(await rowNames()).includes('Chapter two'), JSON.stringify(await rowNames()));
+  check('D6 "Board removed. Undo" shows', (await page.isVisible('#removed')) && (await page.textContent('#removed-words')) === 'Board removed.');
+  check('D6 it is gone from this device', !(await savedBoards(page)).some((b) => b.name === 'Chapter two'));
+  await page.screenshot({ path: SHOTS + 'd6-phone-removed.png' });
+  await page.click('#undo');
+  await wait(300);
+  check('D6 Undo brings it back, with its note', (await rowNames()).includes('Chapter two') && (await savedBoards(page)).some((b) => b.name === 'Chapter two' && b.items.length === 1));
+  check('D6 the app is still open after removing', page.url().startsWith(APP) && (await page.isVisible('#list-screen')));
+
+  // D7. A board saved by build step 2 (one board, "My board") shows in the list and opens
+  await page.evaluate(() => new Promise((resolve, reject) => {
+    const request = indexedDB.open('idea-board', 1);
+    request.onsuccess = () => {
+      const transaction = request.result.transaction('boards', 'readwrite');
+      transaction.objectStore('boards').put({ id: 'from-step-2', name: 'My board', version: 1, made: '2026-11-02T03:00:00.000Z', changed: '2026-11-02T03:00:00.000Z',
+        items: [{ id: 'n1', type: 'note', x: 40, y: 40, text: 'Saved before the list of boards', made: '2026-11-02T03:00:00.000Z', changed: '2026-11-02T03:00:00.000Z' }] });
+      transaction.oncomplete = () => { request.result.close(); resolve(); };
+      transaction.onerror = () => reject(transaction.error);
+    };
+    request.onerror = () => reject(request.error);
+  }));
+  await openApp(page);
+  check('D7 the older board shows in the list', (await rowNames()).includes('My board'));
+  await page.locator('.row', { hasText: 'My board' }).tap();
+  await page.waitForSelector('#board-screen:not([hidden])');
+  check('D7 and opens with its note', (await page.locator('.note').count()) === 1 && (await page.textContent('.note')) === 'Saved before the list of boards');
+  const noteBox = await page.locator('.note').boundingBox();
+  const boardBox = await page.locator('#board').boundingBox();
+  check('D7 the first time, the board shows its notes', noteBox.y >= boardBox.y && noteBox.y + noteBox.height <= boardBox.y + boardBox.height, JSON.stringify({ noteBox, boardBox }));
+
+  check('D no page errors', errors.length === 0, errors.join('\n'));
+  await context.close();
 }
 
 await browser.close();

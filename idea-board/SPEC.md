@@ -12,8 +12,8 @@ One big board for typed notes, photos and links, like Apple's Freeform, which ru
 
 ## How it works (version 1)
 
-1. The start screen lists your boards, newest first, with "New board."
-2. A board fills the screen. Drag an empty spot to move around (one finger on the phone, the mouse on a computer). Pinch with two fingers to zoom (on a computer, the mouse wheel or the + and − buttons).
+1. The app opens on "Your boards": your boards, the one changed last at the top, each with how many notes it has, and "New board" at the bottom. "New board" asks for a name first (an empty name becomes "Untitled board"), then opens the new board.
+2. A board fills the screen, under a thin bar: "← Boards" (back to the list), the board's name, and "Edit" (rename it, or "Remove board," which asks first: "Remove “Sermon series” and its 3 notes?"; then "Board removed. Undo" shows for 8 seconds). The phone's Back button (<) goes back one step: from a note to its board, from a board to the list. Drag an empty spot to move around (one finger on the phone, the mouse on a computer). Pinch with two fingers to zoom (on a computer, the mouse wheel or the + and − buttons).
 3. One "Add" button offers Note, Photo or Link, placed in the middle of the screen.
    - Note: a square note you type into. Tap it later to change the words.
    - Photo: one from the phone's photos (or the computer's files). The app makes a smaller copy before saving it.
@@ -49,7 +49,9 @@ One big board for typed notes, photos and links, like Apple's Freeform, which ru
 
 - The board: faint dots on the paper, so you can see it move.
 - The notes: "index card," a little lighter than the paper (`--note`, `#FBF8F2`), with a soft shadow (the owner's choice, November 2, 2026: "I like the index card idea"). Their edge is a thin warm grey line (`--edge`, `#8C8478`), dark enough to see easily, and their words are 21 pixels.
-- A thin bar at the top: "Idea board" on the left, "Saved on this device" on the right. The buttons at the bottom: "Show all" and "Add a note" (on a computer also − and +).
+- "Your boards": a thin bar with "Idea board," the title "Your boards" in the middle, then one row for each board (its name, how many notes, and an arrow) with thin lines between, like Living in the Word's start screen. "New board" at the bottom.
+- On a board: a thin bar with "← Boards," the board's name and "Edit." "Saved on this device" sits in the board's top right corner and fades 3 seconds after each save, so it doesn't sit over a note. The buttons at the bottom: "Show all" and "Add a note" (on a computer also − and +).
+- A board's name screen: "Board name" over a single line to write on, how many notes, and "Remove board" and "Done" at the top.
 
 ## Easy to see and read (checked November 2, 2026)
 
@@ -65,6 +67,7 @@ Where Idea board stands (pull request 105):
 - With a phone's zoom at 200% (a 360-pixel screen shown as 180), the buttons go onto two rows and "Undo" goes under "Note removed," all on the screen (before, the buttons ran off both edges).
 - axe-core 4.10.2 (Deque's open-source checker, run in Chromium for testing only): 0 problems on the empty board, a board with notes, an open note, and "Note removed. Undo." The one thing it couldn't measure, the hint's words over the dots, is 6.75 to 1.
 - Kept for later (about using it, not seeing it): zooming on a phone needs two fingers, with "Show all" and opening a note as the one-finger ways (WCAG 2.5.1 asks for a one-finger way); moving a note needs dragging (2.5.7 asks for another way). Far zoomed out, words get small; tapping a note always shows it at 22 pixels.
+- Build step 3's screens (the list, a board's name screen, "Remove board") were checked the same way: axe-core 0 problems on five screens, buttons at least 48 by 48, and every button on the screen at 200% zoom (pull request 106).
 - The saved checks keep all of this true: section C of `tests/app-test.mjs`.
 
 ## Tech notes (Claude's plan; the owner can change any of it)
@@ -78,13 +81,14 @@ Where Idea board stands (pull request 105):
 - The server (build step 6): its own small Cloudflare Worker in `idea-board/server/`, with its own D1 database, deployed by itself after each merge like Living in the Word's (Workers Builds). It's kept apart from Living in the Word's server, so a problem in one can't break the other and photos can't fill Living in the Word's database.
 - Room on Cloudflare's free plan: D1 has 500 MB per database, 5 GB per account and 2 MB per row (Cloudflare's docs, read as their source on GitHub, November 2, 2026: https://github.com/cloudflare/cloudflare-docs/blob/production/src/content/docs/d1/platform/limits.mdx). Claude's estimate, unverified: about 1,500 shrunk photos fit in 500 MB. If that's ever too small, photos can move to R2, whose free tier is 10 GB-month (the same docs, `r2/pricing.mdx`). Whether R2 needs a payment method on file wasn't on that page (unverified).
 - Signing in (build step 6): an email code sent only to `OWNER_EMAIL`, like Living in the Word's, through Resend. Codes and session keys are kept only scrambled. If both apps use the same Resend account, they share its daily limit (Resend's free plan: 100 emails a day and 3,000 a month, per Living in the Word's `DECISIONS.md`, October 2026).
+- Going from screen to screen (build step 3): each step deeper (a board, a note, a board's name) adds a step to the browser's Back history, and "Done," "← Boards" and the phone's Back button all go back through it. Whenever the history moves, `followHistory()` in `app.js` shows what that step should show. The app always opens on the list.
 - Saving between devices (build step 7): each board has a version number. The server refuses a save made from an older copy, and the app loads the newest one instead, so nothing is overwritten.
 
 ## Build plan (one pull request each, each with a check the owner does)
 
 1. This plan, with the folder's `CLAUDE.md`, `PROGRESS.md` and `DECISIONS.md`. Check: read "How it works" and this build plan.
 2. One board, saved on this device for now: move around, zoom, add a note, type in it, move it, remove it (with Undo). Check: on your phone, add three notes, move them, zoom out, then close Chrome and open the page again: they're still there. Then try it on your computer. (Built November 2, 2026, pull request 104.)
-3. Several boards: the start screen, "New board," rename, remove. Check: make two boards and switch between them.
+3. Several boards: the start screen, "New board," rename, remove. Check: make two boards and switch between them. (Built November 2, 2026, pull request 106.)
 4. Photos: add one (shrunk before saving), move it, change its size. Check: add a photo from your phone; it looks sharp enough, and it moves and resizes.
 5. Links: a web address and a title; tapping the card opens the page. Check: add a link to your Substack and tap it.
 6. The server and signing in: a one-time setup in Cloudflare (with every step), then signing in with an email code. Check: sign in on your phone and on your computer.

@@ -61,3 +61,15 @@ Each decision with its reason, oldest first. Only add to this file; if a decisio
 - Decision: four changes from an accessibility check: the notes' edges are a darker warm grey (`#8C8478`, 3.2 to 1 against the paper, from 1.3); note words are 21 pixels (from 19); the bottom buttons go onto two rows, and "Undo" under "Note removed," when the screen is narrow or the phone's zoom is turned up; and every button is at least 48 by 48 (Done, Remove and Undo were 40 to 44 pixels tall). Also: the Undo button's line is easier to see (4.7 to 1, from 2.2), and screen readers no longer read out "Saving" after every letter. Claude's choices, put to the owner with pull request 105 and before-and-after screenshots.
 - Why: the owner: "I would like to check accessibility information to make sure it is easy to see and read." The check used WCAG 2.2's rules (read in W3C's source on GitHub), Android's 48-by-48 guide (through search results), and axe-core 4.10.2, which found 0 problems on four screens before and after. The words already passed (note words 16.2 to 1, small grey words 6.75 to 1). What didn't: at 200% zoom on a phone the buttons ran off both edges, and the notes' edges were faint (WCAG asks 3 to 1 for what you need to see a control).
 - Turned down for now: − and + on phones too (one-finger zoom, WCAG 2.5.1), and a way to move notes without dragging (2.5.7); both are about using it, not seeing it, and both add buttons.
+
+### November 2, 2026: several boards, how they work (pull request 106)
+- Decision: Claude's choices for build step 3, put to the owner with pull request 106 and its screenshots:
+  - The app always opens on "Your boards," the one changed last at the top, each with how many notes it has ("No notes yet," "1 note," "3 notes").
+  - "New board" asks for the name first, on its own screen, then opens the board. An empty name becomes "Untitled board." The phone's Back button on that screen makes no board.
+  - On a board: "← Boards," the board's name, and "Edit," which opens the name screen to rename it or "Remove board."
+  - "Remove board" asks first, on the same screen ("Remove “Sermon series” and its 3 notes?" with "Remove" and "Keep it"), then "Board removed. Undo" shows for 8 seconds.
+  - The phone's Back button goes back one step: note to board, board to list.
+  - "Saved on this device" moved from the top bar into the board's top right corner (the bar now holds the board's name) and fades 3 seconds after each save.
+  - The board saved by build step 2 ("My board") shows in the list as it is; nothing had to change in what's saved.
+- Why: one thing per screen; a board is easier to find with a name; removing a whole board loses more than one note, so it asks first and still offers Undo. The owner, after trying build step 2 and the accessibility fixes on his phone: "I tried it on the phone it works pretty well." Then he chose "A" (start build step 3).
+- Turned down: opening straight on the last board (the plan says the app opens on the list), new boards called "Untitled" until renamed (they would pile up in the list), and a phone pop-up to confirm removing (the question stays on the app's own screen).
