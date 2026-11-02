@@ -1,6 +1,6 @@
 # Handoff: where everything stands
 
-Last updated October 31, 2026, at the end of the eighth session (with pull request 100). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
+Last updated November 2, 2026, in the tenth session (with pull request 103). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
 
 - How to work with Dan, and the rules for every project: `CLAUDE.md`.
 - Each project: its folder's `PROGRESS.md` (where it stands, the next step), `DECISIONS.md` (choices and their reasons) and `SPEC.md`. The website's decisions are in the root `DECISIONS.md`.
@@ -17,18 +17,20 @@ This repository is public. Keep personal details out of this file.
 - **Fewer spam calls** (built, one check left): https://danielyoonwrites.github.io/fewer-spam-calls, `fewer-spam-calls/PROGRESS.md`.
 - **First step smaller** (built, the owner's trial next): https://danielyoonwrites.github.io/first-step-smaller, `first-step-smaller/PROGRESS.md`.
 - **Living in the Word** (the AI helper live on Sonnet 5.5, with questions written ahead for the reading plan and the next chapter; signing in with an email code, the owner's invite page with an invite email, install help, the "check it" line; the server deploys by itself through Cloudflare; the plan for phones and app stores under way): https://danielyoonwrites.github.io/living-in-the-word, `living-in-the-word/PROGRESS.md`. The store plan is `living-in-the-word/STORE-PLAN.md`.
+- **Idea board** (planned November 2, 2026, not built yet): a little app like Apple's Freeform, just for Dan, `idea-board/PROGRESS.md`.
 
 
-## Where things stand (October 31, 2026)
+## Where things stand (November 2, 2026)
 
 - Latest: the eighth session (October 29 and 31, 2026), pull requests 95 to 100. Its summary, and each earlier session's, is in `CHANGELOG.md` ("Session summaries"). Where each project stands is in its `PROGRESS.md`.
 - Next: `/pickup living in the word`. The ninth session (October 31, 2026) found that the website's rules (`.claude/rules/website.md` and `moon-jar.md`) also loaded for Living in the Word's files, and fixed it in pull request 101 (root `DECISIONS.md`, "the website's rules load only for its own files"). Living in the Word's next step is in its `PROGRESS.md`.
+- The tenth session (November 1 and 2, 2026): research on sharing photos between an iPhone and a Samsung (not built: Samsung's Quick Share now works with AirDrop on many Galaxy phones) and on a whiteboard like Freeform for Android, then the plan for Idea board (pull request 103). The research is in Dan's Master Notes (Notion). To continue it: `/pickup idea board`.
 
 
 ## Waiting on Dan
 
-1. Merge pull request 102 (Living in the Word: the test link says how long the wait was): https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/102, Conversation tab, Merge pull request, Confirm merge. Then the wait check, item 2 in `living-in-the-word/PROGRESS.md`.
-2. Living in the Word: everything waiting, with every step, is in `living-in-the-word/PROGRESS.md` ("Waiting on Dan"): the next-chapter check, the Matthew 1 check, the invite test, and the smaller checks.
+1. Idea board (new): read the plan, answer its open questions one at a time (the name is chosen; the look is next), then merge pull request 103: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/103, Conversation tab, Merge pull request, Confirm merge. Details in `idea-board/PROGRESS.md`.
+2. Living in the Word: pull request 102 was merged on October 31, 2026, so its wait check (item 2 there) is next. Everything waiting, with every step, is in `living-in-the-word/PROGRESS.md` ("Waiting on Dan"): the next-chapter check, the Matthew 1 check, the invite test, and the smaller checks.
 3. The Anthropic API key expires November 24, 2026: a new key, saved in Cloudflare as `ANTHROPIC_API_KEY`. Remind him in good time, with every step (in `living-in-the-word/PROGRESS.md`).
 4. The other apps: Fewer spam calls needs the Samsung steps checked on a real Samsung phone; First step smaller waits for his daily trial. Details in each `PROGRESS.md`.
 
@@ -62,5 +64,9 @@ Open https://claude.ai/code, start a new session with this repository, set the e
   > /pickup fewer spam calls
 
   (or: Read HANDOFF.md, then fewer-spam-calls/PROGRESS.md, DECISIONS.md and CLAUDE.md, and continue.)
+- Continue Idea board:
+  > /pickup idea board
+
+  (or, without the skill: Read HANDOFF.md, then idea-board/PROGRESS.md, DECISIONS.md and CLAUDE.md, and continue from the next step.)
 - Something new:
   > Read HANDOFF.md first. Then help me plan [the new thing], plan only.
