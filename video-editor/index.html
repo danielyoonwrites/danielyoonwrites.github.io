@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Makes the page fit phone screens -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- A safety rule for the browser (a "Content-Security-Policy"): this page may only run its own
+       scripts (app.js and the video library in lib/) and its own style sheet. It talks to no server.
+       "blob:" lets it play your video and the new one, and lets the sound add-on start its helper.
+       'wasm-unsafe-eval' lets that add-on run its sound encoder, which is compiled code (WebAssembly).
+       If you add anything from outside (a font, an image, a server), it has to be added here too. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src blob:; style-src 'self'; media-src blob:; img-src 'self' data: blob:; base-uri 'none'; form-action 'none'">
+  <title>Video editor</title>
+  <meta name="description" content="Make a short video look its best: a filter and lighting, saved on this phone.">
+  <!-- The color of the phone's top bar: the same near-black as the app -->
+  <meta name="theme-color" content="#121212">
+
+  <!-- Asks search engines not to list it: it's just for the owner -->
+  <meta name="robots" content="noindex">
+
+  <!-- The app's look: dark, so the video stands out (the owner's choice, November 2, 2026; see SPEC.md).
+       Raise the ?v= numbers whenever a file changes, so phones load the new copy. -->
+  <link rel="stylesheet" href="style.css?v=1">
+  <!-- Mediabunny, the library that reads and writes video files (see lib/README.md) -->
+  <script src="lib/mediabunny.min.js?v=1.65.0" defer></script>
+  <script src="app.js?v=1" defer></script>
+</head>
+<body>
+
+  <!-- Screen 1: start -->
+  <section class="screen" id="start-screen" aria-labelledby="start-title">
+    <header class="bar">
+      <span class="name">Video editor</span>
+    </header>
+    <div class="content">
+      <h1 id="start-title" tabindex="-1">Make a short video look its best</h1>
+      <p>Choose a video from your phone, pick a filter and the lighting, and save the new video. Nothing is uploaded: everything stays on this phone.</p>
+      <button type="button" class="button" id="choose">Choose a video</button>
+      <!-- The phone's own picker opens from the button above; this box itself stays hidden -->
+      <input type="file" id="pick" accept="video/*" hidden>
+      <p class="working-note" id="reading" hidden>Reading your video…</p>
+      <p class="problem" id="start-problem" role="alert" hidden></p>
+    </div>
+  </section>
+
+  <!-- Screen 2: the look (a filter and the lighting), shown on the video as it plays -->
+  <section class="screen" id="look-screen" aria-labelledby="look-title" hidden>
+    <header class="bar">
+      <button type="button" class="back" id="look-back">← Back</button>
+      <h1 class="name" id="look-title" tabindex="-1">The look</h1>
+    </header>
+    <div class="stage">
+      <video id="preview" playsinline muted loop controls></video>
+    </div>
+    <div class="tabs" role="tablist" aria-label="The look">
+      <button type="button" role="tab" class="tab" id="tab-filter" aria-selected="true" aria-controls="panel-filter">Filter</button>
+      <button type="button" role="tab" class="tab" id="tab-light" aria-selected="false" aria-controls="panel-light" tabindex="-1">Lighting</button>
+    </div>
+    <div class="panel" role="tabpanel" id="panel-filter" aria-labelledby="tab-filter">
+      <!-- app.js adds one button for each filter in FILTERS -->
+      <div class="chips" id="chips" role="radiogroup" aria-label="Filter"></div>
+    </div>
+    <div class="panel" role="tabpanel" id="panel-light" aria-labelledby="tab-light" hidden>
+      <div class="slider">
+        <label for="brightness">Brightness</label>
+        <output id="brightness-value" for="brightness">0</output>
+        <input type="range" id="brightness" min="-50" max="50" step="5" value="0">
+      </div>
+      <div class="slider">
+        <label for="contrast">Contrast</label>
+        <output id="contrast-value" for="contrast">0</output>
+        <input type="range" id="contrast" min="-50" max="50" step="5" value="0">
+      </div>
+      <button type="button" class="button quiet" id="reset-light">Reset the lighting</button>
+    </div>
+    <div class="action">
+      <p class="problem" id="look-problem" role="alert" hidden></p>
+      <button type="button" class="button" id="make">Make the video</button>
+    </div>
+  </section>
+
+  <!-- Screen 3: making the new video -->
+  <section class="screen" id="making-screen" aria-labelledby="making-title" hidden>
+    <header class="bar">
+      <h1 class="name" id="making-title" tabindex="-1">Making the video</h1>
+    </header>
+    <div class="content">
+      <progress id="bar" max="100" value="0" aria-labelledby="making-words"></progress>
+      <p id="making-words">0%</p>
+      <p class="small">Keep this screen open until it's done. The screen stays on by itself.</p>
+      <button type="button" class="button quiet" id="stop">Stop</button>
+    </div>
+  </section>
+
+  <!-- Screen 4: the new video, ready to save or share -->
+  <section class="screen" id="done-screen" aria-labelledby="done-title" hidden>
+    <header class="bar">
+      <button type="button" class="back" id="done-back">← The look</button>
+      <h1 class="name" id="done-title" tabindex="-1">Your video</h1>
+    </header>
+    <div class="stage">
+      <video id="result" playsinline controls></video>
+    </div>
+    <div class="content">
+      <p class="ready" id="ready-line"></p>
+      <details id="ready-details">
+        <summary>What was checked</summary>
+        <ul class="checks" id="ready-list"></ul>
+        <p class="small" id="tech-line"></p>
+      </details>
+      <div class="buttons">
+        <a class="button" id="save" download="video.mp4">Save to phone</a>
+        <button type="button" class="button" id="share" hidden>Share</button>
+      </div>
+      <p class="problem" id="done-problem" role="alert" hidden></p>
+      <button type="button" class="button quiet" id="new-video">Start a new video</button>
+    </div>
+  </section>
+
+</body>
+</html>

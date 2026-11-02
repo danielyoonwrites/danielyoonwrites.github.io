@@ -17,5 +17,8 @@ A simple video editor for the owner's own videos, on his Android phone in Chrome
 - Make every copy with `tags: {}` (or only tags chosen on purpose): Mediabunny copies the original's tags unless told not to, and they can include where a video was filmed.
 - The AAC add-on (`lib/mediabunny-aac-encoder.min.js`) contains FFmpeg under the LGPL: keep `lib/licenses/ffmpeg/` and the links in `lib/README.md` with it.
 - Each page has a safety rule (a Content-Security-Policy, near the top): its own scripts and styles only, plus `'wasm-unsafe-eval'` and `worker-src blob:` for the AAC add-on. Put words into the page with `textContent`, never as HTML, and no inline scripts or `style="..."` attributes.
-- Run the saved checks after any change, and add checks for new work: `node video-editor/tests/phone-test.mjs` from the repository folder (it must end "0 failed").
+- Every video must fit Instagram's, TikTok's and YouTube Shorts' upload rules (the owner's request, November 2, 2026). The `OUTPUT` settings at the top of `app.js` and `checkReady()` keep it so; before changing them, read `SPEC.md`, "Made for Instagram, TikTok and YouTube Shorts," and check the rules again.
+- The look is dark (the owner's choice): its colors are at the top of `style.css`, and the checks test their contrast. The filters are CSS filters (`FILTERS` in `app.js`): the same words go on the playing video and on each frame of the new file, so they always match.
+- Screens change only through `goDeeper()`, `show()` and `followHistory()` in `app.js`, so the phone's Back button (<) goes back one screen at a time; Back while a video is being made stops it.
+- Run the saved checks after any change, and add checks for new work, from the repository folder: `node video-editor/tests/app-test.mjs` (the app) and `node video-editor/tests/phone-test.mjs` (the phone test). Both must end "0 failed".
 - Raise the `?v=` number on file links whenever a file changes.

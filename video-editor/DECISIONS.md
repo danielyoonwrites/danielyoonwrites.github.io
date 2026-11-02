@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 2, 2026, pull requests 110 and 111)
+## In force (November 2, 2026, pull requests 110 to 112)
 
 Every decision below that still holds, one line each; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -15,6 +15,11 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 2, 2026: the phone test is its own page, `phone-test.html`, kept for checking other phones or Chrome updates later.
 - November 2, 2026: Mediabunny loads as plain scripts (a global `Mediabunny`); its AAC add-on loads only when Chrome can't make AAC sound.
 - November 2, 2026: copies carry none of the original's tags (`tags: {}`), so hidden details like a location stay behind; the picture is turned upright in the frames; the longest side is at most 1920 pixels.
+- November 2, 2026: the phone test passed on the owner's phone: AAC sound is built in, so the app loads the add-on only on a phone or browser without it.
+- November 2, 2026: the dark look (Dan's "A").
+- November 2, 2026: every video is made to fit Instagram's, TikTok's and YouTube Shorts' upload rules (Dan's request), and "Your video" checks it against them.
+- November 2, 2026: build step 3's screens: Start, "The look" (Filter and Lighting tabs), "Making the video," "Your video"; six filters; Brightness and Contrast from −50 to +50.
+- November 2, 2026: the filter and lighting question (whole video or each clip) waits for build step 7.
 
 ## Log (oldest first)
 
@@ -57,3 +62,24 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Decision: each copy is made with `tags: {}` (none of the original's tags), with the picture turned upright in the frames (`allowTransformationMetadata: false`), and at most 1920 pixels on its longest side (Reels are 1080 by 1920). The file's name isn't shown on the page.
 - Why: Mediabunny's type notes for `Conversion` say: "If no function is set, the input's metadata tags will be copied to the output (excluding `creationTime`)." So the privacy plan in `SPEC.md` ("it shouldn't carry the original's hidden details") needed `tags: {}`. The saved checks confirm it: a test video with a location ("loci") makes a copy without one. Turning the picture upright in the frames means every player shows it the right way up; the check compares the copy's first frame with ffmpeg's upright view of the original. File names can be personal, and the owner sends screenshots.
 - Also checked: the page looks for a location in the file's "moov" box only ("©xyz", "loci" or Apple's "quicktime.location"), so picture data can't cause a false alarm. Which of these Android phones write wasn't checked; the test shows what the owner's phone does.
+
+### November 2, 2026: the phone test passed on the owner's phone (pull request 111)
+- Result: on Dan's phone (Chrome 156 on Android 17, phone model SM-S948U1, from the page's "This phone" line), every line under "What Chrome can do" was ✓: the video tools, H.264 video, AAC sound "yes, built in," drawing filters, sharing to other apps, and keeping the screen on (his screenshot). The copy worked; Dan: "yes it works, the copy is in my gallery, black and white and with sound."
+- So: the app loads the AAC add-on only when Chrome can't make AAC itself (never on Dan's phone; always in Claude's test browser).
+- Not reported: how long the 5-second copy took.
+
+### November 2, 2026: the dark look (pull request 112)
+- Decision: a dark look: a near-black page (`#121212`), light words, light buttons, system fonts.
+- Why: Dan's answer "A" of three. Claude recommended it: "a bright page around a video can make the video look darker than it really is, which matters when you're adjusting lighting."
+- Turned down: "Paper and ink" (like Idea board and Living in the Word) and "Moon jar" (like the website).
+
+### November 2, 2026: made for Instagram, TikTok and YouTube Shorts (pull request 112)
+- Decision: every new video is made to fit the three platforms' upload rules: MP4 with its details at the front; H.264; at most 1920 pixels on the longest side; a steady 24 to 60 frames a second (the original's, rounded); 8 Mbps for 1080 by 1920 at 30 frames a second (10 at 60, less for smaller videos); AAC sound at 48 kHz, stereo, 128 kbps; no tags. "Your video" reads the new file back and checks it against the rules, with one line for each, and a line for Claude with the codec, color tags and edit lists.
+- Why: Dan: "Also make sure the videos that are created can be used for Instagram, TikTok, and Youtube Shorts." The rules and their sources are in `SPEC.md` ("Made for Instagram, TikTok and YouTube Shorts"); every official page was seen only in search results, since developers.facebook.com, developers.tiktok.com, help.instagram.com and support.google.com are blocked from Claude's session. The strictest numbers come from Meta's rules for videos posted through its tools (300 MB, 25 Mbps, AAC at 48 kHz, 128 kbps): meeting those meets the looser ones. The data rates keep a 3-minute video under 300 MB (Claude's arithmetic: 8.1 Mbps for 180 seconds is about 183 MB).
+- Known differences, left on purpose until real uploads say otherwise: one edit list on the sound track (it skips the AAC encoder's first 1,024 samples; Mediabunny has no setting to leave it out, and ffmpeg's MP4 files have the same kind by default), and full-range color tags in Claude's test browser (the phone's own may differ; the line for Claude shows them). Meta's and YouTube's strictest settings ask for no edit lists.
+- Turned down: hacking the edit list out of the finished file (renaming its box), since it shifts the sound by 21 thousandths of a second and real uploads may show it's not needed; converting every frame to limited-range color by hand, which would slow every video down, before knowing what the phone makes.
+
+### November 2, 2026: build step 3's screens (pull request 112)
+- Decision (Claude's design, for Dan to judge in the screenshots): Start → "The look" → "Making the video" → "Your video." On "The look," the video plays at the top without sound (it can be turned on), with a "Filter" tab (None, Black and white, Warm, Vivid, Soft, Old film) and a "Lighting" tab (Brightness and Contrast, −50 to +50 in steps of 5, "Reset the lighting"); "Make the video" stays at the bottom. The phone's Back button goes back one screen, and stops a video being made. A saved video is named for its time, like `video-2026-11-02-0913.mp4`.
+- Why: Dan's rules: one thing per screen and short pages on a phone (tabs instead of one long page). The filters are CSS filters, so the playing video and the new file use the same words and look the same.
+- The filter and lighting question (`SPEC.md`, open question 4) waits for build step 7: with one clip, the whole video and each clip are the same.
