@@ -24,7 +24,7 @@ Fast mode (Opus 5.5 in fast mode for sets someone waits for) was built and teste
 
 ## For Dan (no code)
 
-- A passcode of four or more random words, and a spend limit in the Claude Console (both already in `PROGRESS.md`, item 7). The passcode's 10-wrong-tries lockout counts each internet address separately, so a computer with many addresses (IPv6) or many tries sent at the same moment gets past it; only a long passcode really protects it, until step S6 removes it.
+- A passcode of four or more random words, and a spend limit in the Claude Console (both already in `PROGRESS.md`, "Waiting on Dan," item 10). The passcode's 10-wrong-tries lockout counts each internet address separately, so a computer with many addresses (IPv6) or many tries sent at the same moment gets past it; only a long passcode really protects it, until step S6 removes it.
 - If his phone is ever lost: in Cloudflare, the database `living-in-the-word-limits`, run `DELETE FROM sessions WHERE email = '<his address>';` to sign out every phone signed in as him (the menu names in Cloudflare weren't checked).
 - Cloudflare's logs are on (`server/wrangler.jsonc`) and may keep each visitor's internet address for up to 7 days (unverified): look at one log entry before writing the privacy page (`STORE-PLAN.md`, step 6).
 - Before the group signs in together (step S6): the 10 wrong tries a day are counted per internet connection, for passcodes and codes together, so one person's mistakes on a church Wi-Fi can block everyone there. Sign in on mobile data, or count wrong codes separately then.

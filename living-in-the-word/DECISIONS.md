@@ -2,7 +2,7 @@
 
 The "In force" list right below is every decision that still holds, one line each; it's rewritten at each handoff. The log under it has each decision with its reason, oldest first, and is only added to: if a decision changes, add a new entry that says which one it replaces, and one "Status" line on the old entry. The decisions from before October 27, 2026 were copied in on October 28, 2026 from the root `HANDOFF.md` ("Project 5"), `SPEC.md`, `AI-PLAN.md` and `SIGNUP-PLAN.md`; those files keep their own text too. When the notes give no reason, an entry says "not recorded."
 
-## In force (rewritten October 31, 2026, at the end of the eighth session)
+## In force (rewritten November 2, 2026, at the end of the ninth session)
 
 **Who it's for, and how the work goes**
 - October 25, 2026: stages: Dan's small group first, then anyone online later (stage 3). Dan reviews every question, and nothing is shared on its own.
@@ -32,7 +32,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 26, 2026: saved studies stay on the phone; the Save button says what it saves; "Remove" sits under the Save bar.
 - October 31, 2026: the reading plan writes the next reading's questions ahead, quietly, one reading ahead only.
 - October 31, 2026: "Prepare for a Bible study" writes the next chapter's questions ahead after a whole chapter (one set kept on the phone, used once).
-- October 31, 2026: the test link (`?test`) shows how long the wait was and the AI's part of it; the wait is measured before changing anything about speed.
+- October 31, 2026: the test link (`?test`) shows how long the wait was and the AI's part of it, and since November 2 which AI wrote the set; the wait is measured before changing anything about speed.
 - October 26, 2026: the home screen icon is the full name in EB Garamond, and the name under it is "In the Word."
 - October 26, 2026: verse numbers follow the NASB, ESV and NIV; "Choose from the Bible" sits above the typing box.
 - October 28, 2026: typed short names are written out in full ("Phil 2" becomes "Philippians 2").
@@ -446,3 +446,4 @@ The "In force" list right below is every decision that still holds, one line eac
 - Turned down: Opus 5.5 in fast mode for the sets someone waits for ("quite expensive": about 6 cents a set, twice Opus's price; it was built and tested, then removed unused); Opus for the waited sets only ("(b)": different styles from week to week, and no faster without fast mode).
 - Also: Dan has a Max plan, which includes $100 a month of credit for Anthropic's API (https://platform.claude.com/docs/en/about-claude/api-credits-for-subscribers, read November 2, 2026), claimed by linking the Console organization that holds the app's key, on claude.ai under Settings, Billing. Not linked yet as far as Claude knows; optional.
 - Revisit if: Opus's sets aren't clearly better than Sonnet's, the wait bothers Dan more, or the cost line is clearly over about 3 cents. Going back to Sonnet is the four lines named in `server/worker.js`.
+- Correction (November 2, 2026, at the handoff): the Max plan's credit was already linked on October 26, 2026 (`AI-PLAN.md`, step B: "The Claude Console org gets $100 a month of API credits from the owner's Max plan"), so the app's AI is paid from it. The "Not linked yet as far as Claude knows" above was wrong.
