@@ -14,7 +14,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 2, 2026: the Milestone 1 plan, four pull requests: the plan; choose a photo; Warm natural next to the original; Export (Dan's "ok").
 - November 2, 2026: plain HTML, CSS and JavaScript with no build tools; `PROGRESS.md` and `DECISIONS.md` instead of NOTES.md; each step pushed to Claude's work branch as a pull request; hosting on GitHub Pages (Dan's "ok" on the plan).
 - November 2, 2026: a neutral dark gray look with the device's own fonts; the looks worked out in plain JavaScript in a Web Worker (WebGL2 only if that's too slow); a Content-Security-Policy and `noindex`, like Idea board (Claude's choices in the plan, OK'd with it).
-- November 2, 2026: build step 2's screen: "Choose photo" in a bar at the bottom; the photo right side up, about 1,080 pixels wide, with its size in pixels and megapixels; a plain message for a file the browser can't open; a page with a made-up tall test photo for the MacBook (Claude's choices, shown to Dan in screenshots with pull request 115).
+- November 2, 2026: build step 2's screen: "Choose photo" in a bar at the bottom; the photo right side up, about 1,080 pixels wide, with its size in pixels and megapixels; a plain message for a file the browser can't open; a page with a made-up tall test photo for the MacBook (Claude's choices, shown to Dan in screenshots with pull request 117).
 
 ## Log (oldest first)
 
@@ -54,8 +54,8 @@ Every decision below that still holds, one line each; it's rewritten at each han
   - Like Idea board: a Content-Security-Policy, so the page uses only its own files, and `noindex`.
 - Turned down: Vite and TypeScript, with React only if it helps (the spec's "Technical notes").
 
-### November 2, 2026: build step 2, choosing a photo (pull request 115)
-- Decision (Claude's choices, shown to Dan in screenshots with pull request 115; he can change any of them):
+### November 2, 2026: build step 2, choosing a photo (pull request 117)
+- Decision (Claude's choices, shown to Dan in screenshots with pull request 117; he can change any of them):
   - One screen: "Photo Filters" at the top, the photo in the middle, and "Choose photo" in a bar at the bottom, where a thumb reaches when holding the phone in one hand (the spec: "big tap targets and one-handed use").
   - Before a photo: "Choose a photo to start. It stays on this device: nothing is uploaded."
   - The photo shows right side up, as a copy about 1,080 pixels wide (the spec's preview size), with its size under it, for example "4,000 × 3,000 pixels (12.0 MP)," so it can be matched to the spec's "12 MP."
