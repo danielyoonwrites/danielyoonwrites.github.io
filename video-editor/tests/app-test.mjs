@@ -16,7 +16,8 @@ import { fileURLToPath } from 'node:url';
 import os from 'node:os';
 import path from 'node:path';
 import {
-  VIDEOS, haveFfmpeg, makeTestVideos, probe, thumbnail, likeness, average, colorfulness, mp4Boxes, contrast,
+  VIDEOS, haveFfmpeg, makeTestVideos, makeChart, PATCHES, patchColor, probe, thumbnail, likeness, average,
+  colorfulness, mp4Boxes, contrast,
 } from './test-videos.mjs';
 
 const require = createRequire(import.meta.url);
@@ -45,6 +46,7 @@ if (!haveFfmpeg()) {
   process.exit(1);
 }
 const videos = makeTestVideos();
+const chart = makeChart();
 
 // ---------- Serve the repository, like GitHub Pages does ----------
 const webServer = spawn('python3', ['-m', 'http.server', '8768', '--bind', '127.0.0.1'], { cwd: repository, stdio: 'ignore' });
@@ -113,7 +115,8 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   for (const [what, a, b, least] of [
     ['words', '#f2f2f2', '#121212', 4.5], ['small words', '#b8b8b8', '#121212', 4.5],
     ['words on the filter buttons', '#f2f2f2', '#1f1f1f', 4.5], ['small words on the filter buttons', '#b8b8b8', '#1f1f1f', 4.5],
-    ['words on light buttons', '#121212', '#f2f2f2', 4.5], ['✓', '#7bd88f', '#121212', 4.5], ['✗', '#ff9e8f', '#121212', 4.5],
+    ['words on light buttons', '#121212', '#f2f2f2', 4.5], ['the Korean word on the chosen look', '#3d3d3d', '#f2f2f2', 4.5],
+    ['✓', '#7bd88f', '#121212', 4.5], ['✗', '#ff9e8f', '#121212', 4.5],
     ['problem words', '#ffe1dc', '#3a1a17', 4.5], ['button edges', '#8a8a8a', '#121212', 3], ['the focus ring', '#ffd166', '#121212', 3],
   ]) {
     check(`A6 ${what}: contrast at least ${least} to 1`, contrast(a, b) >= least, contrast(a, b).toFixed(2));
@@ -133,8 +136,13 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
     const preview = document.getElementById('preview');
     return Boolean(preview.src) && preview.muted && !preview.paused;
   }));
-  check('B3 "Filter" is open, with "None" chosen', (await page.getAttribute('#tab-filter', 'aria-selected')) === 'true' && (await chosenFilter(page)) === 'none');
-  check('B4 six filters', (await page.locator('.chip').count()) === 6);
+  check('B3 "Filter" is open, with "Original" chosen', (await page.getAttribute('#tab-filter', 'aria-selected')) === 'true' && (await chosenFilter(page)) === 'none');
+  const looks = await page.locator('.chip').evaluateAll((all) => all.map((c) => [c.querySelector('.en').textContent, c.querySelector('.ko').textContent, c.querySelector('.ko').lang]));
+  check('B4 eight looks, each with its Korean word', JSON.stringify(looks) === JSON.stringify([
+    ['Original', '원본', 'ko'], ['Milky', '우유빛', 'ko'], ['Peach', '복숭아', 'ko'], ['Soft glow', '뽀샤시', 'ko'],
+    ['Café', '카페', 'ko'], ['Clear', '맑음', 'ko'], ['Film', '필름', 'ko'], ['Black and white', '흑백', 'ko']]), JSON.stringify(looks));
+  check('B4b every Korean look\'s SVG filter is on the page', await page.evaluate(() =>
+    FILTERS.filter((f) => f.css.startsWith('url(')).every((f) => document.querySelector(f.css.slice(4, -1)) instanceof SVGFilterElement)));
   const chips = await page.locator('.chip').evaluateAll((all) => all.map((c) => c.getBoundingClientRect()));
   check('B5 every filter button is at least 48 tall', chips.every((r) => r.height >= 48));
   const make = await page.locator('#make').boundingBox();
@@ -143,9 +151,9 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   await page.click('.chip[data-filter="bw"]');
   check('B7 "Black and white" shows on the playing video', (await previewFilter(page)) === 'grayscale(1)' && (await chosenFilter(page)) === 'bw');
   await page.focus('.chip[data-filter="bw"]');
-  await page.keyboard.press('ArrowRight');
-  check('B8 the arrow key moves to the next filter', (await chosenFilter(page)) === 'warm' && (await previewFilter(page)) === 'sepia(0.3) saturate(1.2)');
   await page.keyboard.press('ArrowLeft');
+  check('B8 the arrow key moves to the look before', (await chosenFilter(page)) === 'film' && (await previewFilter(page)) === 'url("#look-film")');
+  await page.keyboard.press('ArrowRight');
   check('B9 and back', (await chosenFilter(page)) === 'bw');
   await page.screenshot({ path: SHOTS + '2-look-filter.png' });
 
@@ -347,6 +355,74 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   await page.locator('#save').scrollIntoViewIfNeeded();
   await page.screenshot({ path: SHOTS + '8-save-and-share.png' });
   check('F no page errors', page.problems.length === 0, page.problems.join('\n'));
+  await context.close();
+}
+
+// ---------- H. The Korean looks, in the saved file ----------
+// Each look is made from the color chart; its patches must move the way the look says (lifted darks,
+// warmer or cooler whites, and so on). For two looks, the playing video (the preview) is compared with
+// the saved file too: what you see is what you get.
+{
+  const { context, page } = await openPhone();
+  await page.goto(APP);
+  await choose(page, chart);
+  const original = Object.fromEntries(Object.entries(PATCHES).map(([name, patch]) => [name, patchColor(chart, patch)]));
+  const spread = (c) => Math.max(...c) - Math.min(...c); // how colorful
+  const light = (c) => (c[0] + c[1] + c[2]) / 3;
+  const sizes = await page.evaluate(() => {
+    const preview = document.getElementById('preview');
+    return { box: preview.clientWidth / preview.clientHeight, picture: preview.videoWidth / preview.videoHeight };
+  });
+  check('H1 the playing video has no black bars inside it', Math.abs(sizes.box - sizes.picture) < 0.02, JSON.stringify(sizes));
+
+  const expectations = {
+    milky: (c) => c.black[0] - original.black[0] >= 25 && light(c.white) >= 228 && spread(c.skin) < spread(original.skin) - 8 && light(c.gray) > light(original.gray) + 10,
+    peach: (c) => (c.skin[0] - c.skin[2]) > (original.skin[0] - original.skin[2]) + 4 && c.white[0] >= c.white[2] + 8,
+    glow: (c) => light(c.gray) > light(original.gray) + 15 && c.black[0] - original.black[0] >= 10,
+    cafe: (c) => c.white[0] - c.white[2] >= 15 && c.black[0] - original.black[0] >= 10 && spread(c.sky) < spread(original.sky),
+    clear: (c) => c.white[2] - c.white[0] >= 8 && c.black[1] >= c.black[0] && c.black[2] >= c.black[0],
+    film: (c) => c.black[0] - original.black[0] >= 10 && c.black[1] >= c.black[0] && light(c.white) < 245 && c.white[0] >= c.white[2] + 15,
+  };
+  for (const id of ['milky', 'peach', 'glow', 'cafe', 'clear', 'film']) {
+    await page.click(`.chip[data-filter="${id}"]`);
+    check(`H2 ${id}: the playing video shows it`, (await previewFilter(page)) === `url("#look-${id}")`);
+    let previewColors = null;
+    if (id === 'milky' || id === 'peach') {
+      await page.waitForTimeout(300);
+      const shot = VIDEOS + `preview-${id}.png`;
+      await page.locator('#preview').screenshot({ path: shot });
+      const box = await page.locator('#preview').evaluate((v) => v.clientWidth);
+      previewColors = Object.fromEntries(['black', 'gray', 'white', 'skin', 'sky'].map((name) => [name, patchColor(shot, PATCHES[name], 0, box * 2)]));
+    }
+    if (id === 'glow') {
+      const glow = await page.evaluate(() => ({ blur: Number(document.querySelector('[data-glow]').getAttribute('stdDeviation')), width: document.getElementById('preview').getBoundingClientRect().width }));
+      check('H3 the glow is sized for the preview', Math.abs(glow.blur - 0.012 * glow.width) < 0.05, JSON.stringify(glow));
+      await page.click('#make');
+      await page.waitForSelector('#making-screen:not([hidden])');
+      const during = await page.waitForFunction(() => Number(document.querySelector('[data-glow]').getAttribute('stdDeviation')) > 5, null, { timeout: 10000 })
+        .then(() => page.evaluate(() => Number(document.querySelector('[data-glow]').getAttribute('stdDeviation')))).catch(() => -1);
+      check('H4 the glow is sized for the full picture while the video is made', Math.abs(during - 0.012 * 540) < 0.05, String(during));
+      await page.evaluate(() => window.dispatchEvent(new Event('resize')));
+      const afterResize = await page.evaluate(() => Number(document.querySelector('[data-glow]').getAttribute('stdDeviation')));
+      check('H4b a screen resize while making doesn\'t change the glow', Math.abs(afterResize - 0.012 * 540) < 0.05, String(afterResize));
+      await page.waitForSelector('#done-screen:not([hidden]), #look-problem:not([hidden])', { timeout: 240000 });
+    } else {
+      await makeVideo(page);
+    }
+    check(`H5 ${id}: the video is made`, (await screenShown(page)) === 'done-screen', await text(page, '#look-problem').catch(() => ''));
+    const { where } = await download(page, `look-${id}.mp4`);
+    const made = Object.fromEntries(Object.entries(PATCHES).map(([name, patch]) => [name, patchColor(where, patch)]));
+    check(`H6 ${id}: the saved file has the look`, expectations[id](made), JSON.stringify({ black: made.black, gray: made.gray, white: made.white, skin: made.skin, sky: made.sky }));
+    if (previewColors) {
+      const worst = Math.max(...Object.keys(previewColors).flatMap((name) => previewColors[name].map((v, i) => Math.abs(v - made[name][i]))));
+      check(`H7 ${id}: the saved file looks like the preview (within 12 of 255)`, worst <= 12, `${worst} ` + JSON.stringify({ preview: previewColors, made }));
+    }
+    await page.goBack();
+    await page.waitForSelector('#look-screen:not([hidden])');
+  }
+  const after = await page.evaluate(() => ({ blur: Number(document.querySelector('[data-glow]').getAttribute('stdDeviation')), width: document.getElementById('preview').getBoundingClientRect().width }));
+  check('H8 back on "The look," the glow is sized for the preview again', Math.abs(after.blur - 0.012 * after.width) < 0.05, JSON.stringify(after));
+  check('H no page errors', page.problems.length === 0, page.problems.join('\n'));
   await context.close();
 }
 
