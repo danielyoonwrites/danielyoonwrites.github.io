@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (built November 2, 2026, at the end of the tenth session; pull request 108 added one line)
+## In force (built November 2, 2026, at the end of the tenth session; pull requests 108 and 109 added lines)
 
 Every decision below that still holds, one line each; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -19,6 +19,8 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 2, 2026: easy to see and read: note edges 3.2 to 1, note words 21 pixels, buttons at least 48 by 48, no words under 13 pixels, buttons on two rows at 200% zoom.
 - November 2, 2026: the app opens on "Your boards" (newest first); "New board" asks for a name first; on a board "← Boards" and "Edit"; "Remove board" asks first, then offers Undo; the phone's Back button goes back one step.
 - November 2, 2026: notes line up: a note you let go of glides onto the nearest spot on the dots (every 64 board pixels, the same at every zoom), a new note goes in line with the note nearest the middle, and notes saved before stay put until they're moved (Dan's "a").
+- November 2, 2026: photos (build step 4): "Add" opens a new note's screen, where "Photo" adds a photo instead (Dan's "A"); photos already on the phone only, "Take a photo" after build step 7 (Dan's "C"); a tap opens a photo on its own screen with "Done" and "Remove" (Dan's "A"); a thin ink size corner just outside the photo (Dan's "A").
+- November 2, 2026: photos are shrunk on the device (1600 pixels on the long side, a JPEG without hidden details) and kept in their own database, "idea-board-photos"; a photo's width settles in steps that line up with notes (Claude's choices, put to Dan with pull request 109).
 
 ## Log (oldest first)
 
@@ -104,3 +106,23 @@ Every decision below that still holds, one line each; it's rewritten at each han
   - Notes saved before stay where they are until they're moved; nothing moves by itself. Notes still grow taller when their words need room, so their tops line up, not always their bottoms.
 - Also fixed, found by the saved checks: a tap on a note near the top of the screen put the cursor where the finger was (the tap's own click lands on the typing box a moment later), so typing went into the middle of the words. The cursor now goes back to the end.
 - Turned down: guide lines while dragging (more work, and the pull can feel jumpy under a finger); not now; settling onto whichever dots show at the zoom you're at (the first try: zoomed out, fewer dots show, so a note placed close in could never line up exactly with one placed zoomed out); every dot as a spot (zoomed out the way a phone shows several notes, a finger would have only about 6 to 8 screen pixels of leeway).
+
+### November 2, 2026: how to add a photo, and from where (pull request 109)
+- Decision: "Add a note" became "Add." It opens a new note's screen as before, with a "Photo" button at the top until you type something. "Photo" opens the phone's own photo picker (on a computer, the file window). Photos already on the phone only for now; "Take a photo" comes after build step 7.
+- Why: Dan's "A" of three for where to tap (Claude's recommendation): notes stay one tap, photos take two, and the bottom buttons stay on one row. Claude measured that a third button doesn't fit there on a phone: 328 pixels of room on a 360-pixel screen, and "Show all" and "Add a note" already take 288. For the camera, Dan's "C" of three (Claude's recommendation): in Chromium's source (`SelectFileDialog.java`, main branch, read November 2, 2026), a picture taken through the camera from a web page goes to a temporary file that's cleared after an hour, not to the phone's photos, so until boards are saved to his account the board's smaller copy would be the only one.
+- Turned down: a separate "Add a photo" button (two rows of buttons on a phone); one "Add" button that asks "Note or photo?" (the plan's first idea: an extra tap and screen for every note); "Take a photo" now.
+
+### November 2, 2026: a photo on the board (pull request 109)
+- Decision: a tap opens a photo on its own screen, big, with "Done" and "Remove" ("Photo removed. Undo" for 8 seconds); the phone's Back button closes it. Dragging moves a photo, and it settles on the dots like a note. Its size corner is a thin ink corner, like a picture frame's, just outside the photo's bottom-right corner, on the paper.
+- Why: Dan's "A" for both (Claude's recommendations): it works like a note, one thing per screen; the ink corner matches the thin lines of "Paper and ink," and on the paper it shows on dark and light photos alike.
+- Turned down: a first tap that selects and a second that opens; nothing on a tap, with an × to remove; a round handle; a square tab with an arrow.
+
+### November 2, 2026: how photos work underneath (pull request 109)
+- Decision: Claude's choices, put to Dan with pull request 109 and its screenshots:
+  - A photo is shrunk on the device to 1600 pixels on the long side, as a JPEG (quality 0.85), turned the right way up. It's a new picture, so it leaves out the hidden details a phone's photo carries, like where it was taken; the saved checks prove it with a made-up location.
+  - Photos are kept in their own database, "idea-board-photos" (`{ id, blob, width, height, made }`); the board's item is `{ id, type: 'photo', photoId, x, y, width, ratio, made, changed }`. This replaces the plan of a new store in the boards' database (`SPEC.md`, "Tech notes," written at the end of the tenth session): that needed the boards' database opened as version 2, and a phone still running the old copy of the app (up to 10 minutes after a merge) would then fail to open the boards, or hold up the change while its tab stayed open.
+  - A new photo is as wide as a note (220). Its width settles to a whole number of spots less the gap between notes, from 156 to 988, so it can be exactly as wide as one, two, three or four notes side by side, and it keeps its shape. The corner's grab area is 48 by 48 on the screen at any zoom, and the corner hides when the photo is under 120 pixels wide on the screen.
+  - A photo's file goes for good only once removing it (or its board) can't be undone; a file no board uses is tidied away at the start, once it's a day old.
+  - The list counts photos ("1 note and 1 photo"), and "Remove board" names them too.
+- Why: never lose work; and the server (build steps 6 and 7) can keep one photo per row (D1 allows 2 MB per row, per `SPEC.md`, "Tech notes").
+- Turned down: a new store in the boards' database (above); photos inside the board's own record (a board would hit 2 MB after about six photos).

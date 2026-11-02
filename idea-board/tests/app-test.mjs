@@ -173,6 +173,109 @@ async function makeBoard(page, name) {
   await page.waitForSelector('#board-screen:not([hidden])');
 }
 
+// ----- For the photo checks -----
+
+// A made-up test photo, drawn in the page: a sky, a sun, a hill and the word TOP. With an
+// orientation, it also gets the hidden details a phone's camera adds (see withPhoneDetails).
+async function testPhoto(page, width, height, orientation = 0) {
+  const dataUrl = await page.evaluate(([w, h]) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const g = canvas.getContext('2d');
+    const sky = g.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0, '#9CC3E0');
+    sky.addColorStop(1, '#F3E7C9');
+    g.fillStyle = sky;
+    g.fillRect(0, 0, w, h);
+    g.fillStyle = '#E8B04B';
+    g.beginPath();
+    g.arc(w * 0.75, h * 0.3, Math.min(w, h) * 0.12, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = '#5E7F5A';
+    g.beginPath();
+    g.moveTo(0, h);
+    g.lineTo(0, h * 0.7);
+    g.quadraticCurveTo(w * 0.35, h * 0.45, w * 0.7, h * 0.72);
+    g.quadraticCurveTo(w * 0.85, h * 0.8, w, h * 0.68);
+    g.lineTo(w, h);
+    g.fill();
+    g.fillStyle = '#1D1B18';
+    g.font = `${Math.round(h * 0.08)}px sans-serif`;
+    g.fillText('TOP', w * 0.05, h * 0.12);
+    return canvas.toDataURL('image/jpeg', 0.92);
+  }, [width, height]);
+  const jpeg = Buffer.from(dataUrl.split(',')[1], 'base64');
+  return orientation ? withPhoneDetails(jpeg, orientation) : jpeg;
+}
+
+// Adds the hidden details a phone's camera puts in a JPEG (its "Exif" part): which way to turn
+// the picture (orientation 6: a quarter turn to the right), and where it was taken (GPS, made up
+// here: 12 degrees 34 minutes 56 seconds north). The saved copy must leave all of it out.
+function withPhoneDetails(jpeg, orientation) {
+  const tiff = Buffer.alloc(92);
+  tiff.write('II', 0, 'latin1');   // numbers stored smallest byte first
+  tiff.writeUInt16LE(42, 2);
+  tiff.writeUInt32LE(8, 4);         // the first list starts at 8
+  tiff.writeUInt16LE(2, 8);         // first list: 2 details
+  tiff.writeUInt16LE(0x0112, 10); tiff.writeUInt16LE(3, 12); tiff.writeUInt32LE(1, 14); tiff.writeUInt16LE(orientation, 18);
+  tiff.writeUInt16LE(0x8825, 22); tiff.writeUInt16LE(4, 24); tiff.writeUInt32LE(1, 26); tiff.writeUInt32LE(38, 30);
+  tiff.writeUInt32LE(0, 34);        // no more lists
+  tiff.writeUInt16LE(2, 38);        // the location list: 2 details
+  tiff.writeUInt16LE(0x0001, 40); tiff.writeUInt16LE(2, 42); tiff.writeUInt32LE(2, 44); tiff.write('N\0', 48, 'latin1');
+  tiff.writeUInt16LE(0x0002, 52); tiff.writeUInt16LE(5, 54); tiff.writeUInt32LE(3, 56); tiff.writeUInt32LE(68, 60);
+  tiff.writeUInt32LE(0, 64);
+  [12, 1, 34, 1, 56, 1].forEach((number, i) => tiff.writeUInt32LE(number, 68 + i * 4));
+  const name = Buffer.from('Exif\0\0', 'latin1');
+  const marker = Buffer.alloc(4);
+  marker.writeUInt16BE(0xFFE1, 0);
+  marker.writeUInt16BE(2 + name.length + tiff.length, 2);
+  const after = jpeg.readUInt16BE(2) === 0xFFE0 ? 4 + jpeg.readUInt16BE(4) : 2;   // after the JFIF part, if any
+  return Buffer.concat([jpeg.subarray(0, after), marker, name, tiff, jpeg.subarray(after)]);
+}
+
+// The photo files saved on this device, read straight from the browser
+async function savedPhotoFiles(page) {
+  return page.evaluate(() => new Promise((resolve, reject) => {
+    const request = indexedDB.open('idea-board-photos', 1);
+    request.onsuccess = () => {
+      const get = request.result.transaction('photos', 'readonly').objectStore('photos').getAll();
+      get.onsuccess = async () => {
+        const files = [];
+        for (const file of get.result) {
+          const bytes = new Uint8Array(await file.blob.arrayBuffer());
+          const text = Array.from(bytes, (b) => String.fromCharCode(b)).join('');
+          files.push({ id: file.id, width: file.width, height: file.height, made: file.made, type: file.blob.type,
+            size: file.blob.size, jpeg: bytes[0] === 0xFF && bytes[1] === 0xD8, details: text.includes('Exif') });
+        }
+        request.result.close();
+        resolve(files);
+      };
+      get.onerror = () => reject(get.error);
+    };
+    request.onerror = () => reject(request.error);
+  }));
+}
+
+// "Add," then "Photo," then a photo from the file chooser; waits until it's on the board
+async function addPhoto(page, file) {
+  const before = await page.locator('.photo').count();
+  await page.click('#add-note');
+  await page.waitForSelector('#editor:not([hidden])');
+  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.click('#add-photo')]);
+  await chooser.setFiles({ name: 'test-photo.jpg', mimeType: 'image/jpeg', buffer: file });
+  await page.waitForFunction((count) => document.querySelectorAll('.photo').length > count, before);
+  await wait(700);   // saved, and the board glides to show it
+}
+
+// Waits until the board's first photo shows its picture
+async function photoShows(page) {
+  await page.waitForFunction(() => {
+    const picture = document.querySelector('.photo img');
+    return picture && picture.complete && picture.naturalWidth > 0;
+  });
+}
+
 const browser = await chromium.launch();
 
 
@@ -477,6 +580,28 @@ const browser = await chromium.launch();
     .map((el) => parseFloat(getComputedStyle(el).fontSize))));
   check('C3 no words under 13 pixels', smallest >= 13, String(smallest));
   check('C3 note words are 21 pixels', (await page.locator('.note').first().evaluate((el) => getComputedStyle(el).fontSize)) === '21px');
+
+  // Photos (build step 4): a new note's screen with "Photo," the size corner, and a photo's own screen
+  await page.click('#add-note');
+  await page.waitForSelector('#editor:not([hidden])');
+  check('C2 a new note\'s screen buttons ("Photo" too) at least 48 by 48', (await page.isVisible('#add-photo')) && (await tooSmall()).length === 0, JSON.stringify(await tooSmall()));
+  await page.click('#done');
+  await page.waitForSelector('#editor', { state: 'hidden' });
+  await addPhoto(page, await testPhoto(page, 1200, 900));
+  const cornerInk = await contrast(page, `(() => { ${formula}
+    return ratio(getComputedStyle(document.querySelector('.photo .corner'), '::after').borderRightColor, getComputedStyle(document.body).backgroundColor);
+  })()`);
+  check('C1 the size corner at least 3 to 1 against the paper', cornerInk >= 3, String(cornerInk));
+  const photoEdge = await contrast(page, `(() => { ${formula}
+    return ratio(getComputedStyle(document.querySelector('.photo')).borderTopColor, getComputedStyle(document.body).backgroundColor);
+  })()`);
+  check('C1 a photo\'s edge at least 3 to 1 against the paper', photoEdge >= 3, String(photoEdge));
+  const photoBox = await page.locator('.photo').boundingBox();
+  await tap(page, { x: photoBox.x + photoBox.width / 2, y: photoBox.y + photoBox.height / 2 });
+  await page.waitForSelector('#photo-view:not([hidden])');
+  check('C2 a photo\'s own screen buttons at least 48 by 48', (await tooSmall()).length === 0, JSON.stringify(await tooSmall()));
+  await page.goBack();
+  await page.waitForSelector('#photo-view', { state: 'hidden' });
   await context.close();
 
   // A phone with its zoom at 200% (360 pixels shown as 180): the buttons go onto two rows,
@@ -507,6 +632,26 @@ const browser = await chromium.launch();
   });
   check('C4 "Note removed. Undo" doesn\'t cover the buttons', !overlapping);
   await small.screenshot({ path: SHOTS + 'c4-zoom-200-undo.png' });
+
+  // At 200% zoom, a new note's screen ("Remove," "Photo," "Done") and a photo's own screen fit too
+  const offBar = async () => small.$$eval('.editor:not([hidden]) .bar button', (els) => els
+    .filter((el) => el.getClientRects().length)
+    .map((el) => ({ id: el.id, r: el.getBoundingClientRect() }))
+    .filter(({ r }) => r.left < -0.5 || r.top < -0.5 || r.right > window.innerWidth + 0.5 || r.bottom > window.innerHeight + 0.5)
+    .map(({ id }) => id));
+  await small.click('#add-note');
+  await small.waitForSelector('#editor:not([hidden])');
+  check('C4 at 200% zoom, a new note\'s screen buttons are on the screen', (await small.isVisible('#add-photo')) && (await offBar()).length === 0, JSON.stringify(await offBar()));
+  await small.screenshot({ path: SHOTS + 'c4-zoom-200-new-note.png' });
+  const [chooser] = await Promise.all([small.waitForEvent('filechooser'), small.click('#add-photo')]);
+  await chooser.setFiles({ name: 'test-photo.jpg', mimeType: 'image/jpeg', buffer: await testPhoto(small, 1200, 900) });
+  await small.waitForSelector('.photo');
+  await wait(700);
+  const smallPhoto = await small.locator('.photo').boundingBox();
+  await tap(small, { x: Math.max(smallPhoto.x, 0) + 20, y: Math.max(smallPhoto.y, 60) + 20 });
+  await small.waitForSelector('#photo-view:not([hidden])');
+  check('C4 at 200% zoom, a photo\'s own screen buttons are on the screen', (await offBar()).length === 0, JSON.stringify(await offBar()));
+  await small.screenshot({ path: SHOTS + 'c4-zoom-200-photo.png' });
   await narrow.close();
 }
 
@@ -708,7 +853,7 @@ const browser = await chromium.launch();
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const glideReduced = await glideOf();
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  check('E5 it glides for 0.15 seconds', glideNormally === '0.15s, 0.15s', glideNormally);
+  check('E5 it glides for 0.15 seconds', glideNormally.split(', ').every((part) => part === '0.15s'), glideNormally);
   check('E5 with reduced motion it doesn\'t glide', glideReduced === '0s', glideReduced);
 
   // E6. A note saved before the dots lined things up stays where it was until it's moved
@@ -791,6 +936,236 @@ const browser = await chromium.launch();
   check('E9 its corner sits on a dot on the screen', cornerFar.across < 0.6 && cornerFar.down < 0.6 && Math.abs(cornerFar.gap - dotsE9) < 0.01, JSON.stringify(cornerFar));
 
   check('E no page errors (computer)', errors.length === 0, errors.join('\n'));
+  await context.close();
+}
+
+// ===== F. Photos (build step 4, November 2, 2026) =====
+// Dan's choices: "Add," then "Photo" on the new note's screen ("A"); photos already on the phone,
+// with "Take a photo" after build step 7 ("C"); a tap opens a photo on its own screen ("A"); a thin
+// ink size corner, like a picture frame's ("A"). Shrunk to about 1600 pixels on the long side, as a
+// JPEG without the hidden details. Saved in their own database, "idea-board-photos".
+{
+  const context = await browser.newContext({
+    viewport: { width: 360, height: 740 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, ignoreHTTPSErrors: true,
+  });
+  const page = await context.newPage();
+  const errors = [];
+  watchErrors(page, errors);
+  await openApp(page);
+  await makeBoard(page, 'Photos');
+  const photosBoard = async () => (await savedBoards(page)).find((record) => record.name === 'Photos');
+
+  // F1. "Add" opens a new note's screen with "Photo"; typing makes it a note, and "Photo" goes
+  check('F1 the button says "Add"', (await page.textContent('#add-note')).trim() === 'Add');
+  await page.click('#add-note');
+  await page.waitForSelector('#editor:not([hidden])');
+  check('F1 a new note\'s screen shows "Photo"', await page.isVisible('#add-photo'));
+  await page.keyboard.type('A note first');
+  check('F1 typing hides "Photo"', !(await page.isVisible('#add-photo')));
+  await page.click('#done');
+  await page.waitForSelector('#editor', { state: 'hidden' });
+  await wait(350);
+  const firstNote = await page.locator('.note').boundingBox();
+  await tap(page, { x: firstNote.x + 30, y: firstNote.y + 30 });
+  await page.waitForSelector('#editor:not([hidden])');
+  check('F1 an existing note\'s screen has no "Photo"', !(await page.isVisible('#add-photo')));
+  await page.click('#done');
+  await page.waitForSelector('#editor', { state: 'hidden' });
+
+  // F2. A photo from the phone: turned the right way up, shrunk to 1600 pixels on the long side,
+  // saved as a JPEG without the hidden details (like where it was taken), in line with the note
+  const chosen = await testPhoto(page, 2000, 1000, 6);   // a quarter turn: it shows 1000 wide, 2000 tall
+  check('F2 the chosen test photo carries the hidden details', chosen.includes(Buffer.from('Exif')));
+  await addPhoto(page, chosen);
+  check('F2 the note\'s screen closed', !(await page.isVisible('#editor')));
+  let items = (await photosBoard()).items;
+  const note = items.find((item) => item.type === 'note');
+  let photo = items.find((item) => item.type === 'photo');
+  check('F2 the photo is saved on the board, as wide as a note', photo && photo.photoId && photo.width === 220 && photo.ratio === 2, JSON.stringify(items));
+  check('F2 it lands on a spot, in line with the note', photo && onSpot(photo.x) && onSpot(photo.y)
+    && (photo.x - note.x) % 256 === 0 && (photo.y - note.y) % 256 === 0, JSON.stringify(items));
+  const files = await savedPhotoFiles(page);
+  const file = files.find((each) => each.id === photo.photoId);
+  check('F2 the photo file is a JPEG', file && file.jpeg && file.type === 'image/jpeg', JSON.stringify(files));
+  check('F2 turned the right way up, and 1600 on the long side', file && file.width === 800 && file.height === 1600, JSON.stringify(file));
+  check('F2 without the hidden details (no location)', file && !file.details, JSON.stringify(file));
+
+  // F3. The picture shows on the board, at its own shape
+  await photoShows(page);
+  check('F3 the picture shows on the board', (await page.locator('.photo img').evaluate((img) => img.naturalWidth)) === 800);
+  const onBoard = await page.locator('.photo').boundingBox();
+  check('F3 it keeps its shape', Math.abs(onBoard.height / onBoard.width - 2) < 0.02, JSON.stringify(onBoard));
+  check('F3 the empty-board words say what to add', (await page.textContent('#empty')).includes('a note or a photo'));
+
+  // F4. The size corner: a finger-sized 48 by 48 on the screen, centered on the photo's corner
+  await page.click('#show-all');
+  await wait(400);
+  const shown = await page.locator('.photo').boundingBox();
+  const corner = await page.locator('.photo .corner').boundingBox();
+  check('F4 the size corner is 48 by 48 on the screen', Math.abs(corner.width - 48) < 0.6 && Math.abs(corner.height - 48) < 0.6, JSON.stringify(corner));
+  check('F4 it is centered on the photo\'s corner', Math.abs(corner.x + 24 - (shown.x + shown.width)) < 1
+    && Math.abs(corner.y + 24 - (shown.y + shown.height)) < 1, JSON.stringify({ corner, shown }));
+
+  // F5. Dragging the corner makes the photo bigger or smaller, keeping its shape; when the finger
+  // lifts, the width settles in steps that line up with notes (64 at a time, less the gap)
+  const zoomF5 = await zoomNow(page);
+  await fingerDrag(page, { x: corner.x + 24, y: corner.y + 24 }, { x: corner.x + 24 + 70 * zoomF5, y: corner.y + 24 + 130 * zoomF5 });
+  await wait(600);
+  photo = (await photosBoard()).items.find((item) => item.type === 'photo');
+  check('F5 dragged out, the photo grows one step, to 284', photo.width === 284, JSON.stringify(photo));
+  const grown = await page.locator('.photo').evaluate((el) => [el.offsetWidth, el.offsetHeight]);
+  check('F5 it keeps its shape', grown[0] === 284 && grown[1] === 568, JSON.stringify(grown));
+  await page.click('#show-all');   // (the bigger photo's corner was under the bottom buttons)
+  await wait(400);
+  const zoomF5b = await zoomNow(page);
+  const corner2 = await page.locator('.photo .corner').boundingBox();
+  await fingerDrag(page, { x: corner2.x + 24, y: corner2.y + 24 }, { x: corner2.x + 24 - 60 * zoomF5b, y: corner2.y + 24 - 120 * zoomF5b });
+  await wait(600);
+  photo = (await photosBoard()).items.find((item) => item.type === 'photo');
+  check('F5 dragged back in, it settles to a note\'s width, 220', photo.width === 220, JSON.stringify(photo));
+  const widths = await page.evaluate(() => [100, 260, 476, 2000].map(settledWidth));
+  check('F5 the sizes: never under 156, never over 988 (four notes), and 476 is two notes', JSON.stringify(widths) === '[156,284,476,988]', JSON.stringify(widths));
+
+  // F6. A dragged photo settles onto a spot, like a note
+  const box6 = await page.locator('.photo').boundingBox();
+  await fingerDrag(page, { x: box6.x + box6.width / 2, y: box6.y + 30 }, { x: box6.x + box6.width / 2 + 25, y: box6.y + 40 });
+  await wait(600);
+  photo = (await photosBoard()).items.find((item) => item.type === 'photo');
+  check('F6 a dragged photo settles onto a spot', onSpot(photo.x) && onSpot(photo.y), JSON.stringify(photo));
+
+  // F7. Zoomed far out, the photo is small on the screen, and its size corner hides
+  await pinch(page, 260, 60);
+  await wait(300);
+  const tiny = await page.locator('.photo').boundingBox();
+  check('F7 zoomed far out, the size corner hides', tiny.width < 120 && !(await page.isVisible('.photo .corner')), String(tiny.width));
+  await page.click('#show-all');
+  await wait(400);
+  check('F7 and it shows again close in', await page.isVisible('.photo .corner'));
+
+  // F8. Close the page and open it again: the photo is still there, with its picture
+  await wait(600);
+  await page.reload();
+  await page.waitForSelector('.row');
+  check('F8 the list counts notes and photos', (await page.textContent('.row .row-count')) === '1 note and 1 photo', await page.textContent('.row .row-count'));
+  await page.locator('.row').first().tap();
+  await page.waitForSelector('#board-screen:not([hidden])');
+  await photoShows(page);
+  check('F8 the photo is still there, with its picture', (await page.locator('.photo').count()) === 1);
+
+  // F9. A tap opens the photo on its own screen, big; "Done" and the phone's Back button close it
+  const openIt = async () => {
+    const box = await page.locator('.photo').boundingBox();
+    await tap(page, { x: box.x + box.width / 2, y: box.y + box.height / 2 });
+    await page.waitForSelector('#photo-view:not([hidden])');
+    await page.waitForFunction(() => document.getElementById('photo-big').naturalWidth > 0);
+  };
+  await openIt();
+  const big = await page.locator('#photo-big').boundingBox();
+  check('F9 the photo shows big on its own screen', big.height > 500, JSON.stringify(big));
+  await page.screenshot({ path: SHOTS + 'f9-photo-on-its-own-screen.png' });
+  await page.click('#photo-done');
+  await page.waitForSelector('#photo-view', { state: 'hidden' });
+  check('F9 "Done" goes back to the board', page.url().startsWith(APP) && (await page.isVisible('#board-screen')));
+  await openIt();
+  await page.goBack();
+  await page.waitForSelector('#photo-view', { state: 'hidden' });
+  check('F9 the phone\'s Back button goes back to the board', page.url().startsWith(APP) && (await page.isVisible('#board-screen')));
+
+  // F10. "Remove," then "Photo removed. Undo" for 8 seconds; Undo brings it back
+  await openIt();
+  await page.click('#remove-photo');
+  await page.waitForSelector('#photo-view', { state: 'hidden' });
+  check('F10 "Remove" takes the photo off the board', (await page.locator('.photo').count()) === 0);
+  check('F10 "Photo removed. Undo" shows', (await page.isVisible('#removed')) && (await page.textContent('#removed-words')) === 'Photo removed.');
+  await page.click('#undo');
+  await wait(600);
+  photo = (await photosBoard()).items.find((item) => item.type === 'photo');
+  check('F10 Undo brings it back, with its picture', (await page.locator('.photo').count()) === 1 && photo
+    && (await savedPhotoFiles(page)).some((each) => each.id === photo.photoId));
+
+  // F11. Removed for good once the Undo time is over: then its file goes too
+  const removedId = photo.photoId;
+  await openIt();
+  await page.click('#remove-photo');
+  await page.waitForSelector('#photo-view', { state: 'hidden' });
+  await wait(8600);
+  check('F11 after the Undo time, the photo file is gone', !(await savedPhotoFiles(page)).some((each) => each.id === removedId));
+  check('F11 and the board no longer has the photo', !(await photosBoard()).items.some((item) => item.type === 'photo'));
+
+  // F12. "Remove board" counts the photos; once its Undo time is over, its photo files go too
+  await page.click('#to-boards');
+  await page.waitForSelector('#list-screen:not([hidden])');
+  await makeBoard(page, 'Trip');
+  await addPhoto(page, await testPhoto(page, 1200, 900));
+  const tripPhoto = (await savedBoards(page)).find((record) => record.name === 'Trip').items.find((item) => item.type === 'photo');
+  check('F12 a wide photo keeps its shape too', tripPhoto && tripPhoto.ratio === 0.75 && tripPhoto.width === 220, JSON.stringify(tripPhoto));
+  await page.click('#edit-board');
+  await page.waitForSelector('#board-settings:not([hidden])');
+  await page.click('#remove-board');
+  check('F12 "Remove board" counts the photo', (await page.textContent('#confirm-words')) === 'Remove “Trip” and its 1 photo?', await page.textContent('#confirm-words'));
+  await page.click('#confirm-yes');
+  await page.waitForSelector('#list-screen:not([hidden])');
+  await wait(8600);
+  check('F12 after the Undo time, the board\'s photo files are gone', !(await savedPhotoFiles(page)).some((each) => each.id === tripPhoto.photoId));
+
+  // F13. At the start, a photo file no board uses is tidied away once it's a day old; a newer one stays
+  await page.evaluate(() => new Promise((resolve, reject) => {
+    const request = indexedDB.open('idea-board-photos', 1);
+    request.onsuccess = () => {
+      const transaction = request.result.transaction('photos', 'readwrite');
+      const store = transaction.objectStore('photos');
+      const blob = new Blob(['not a real photo'], { type: 'image/jpeg' });
+      store.put({ id: 'old-leftover', blob, width: 1, height: 1, made: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString() });
+      store.put({ id: 'new-leftover', blob, width: 1, height: 1, made: new Date().toISOString() });
+      transaction.oncomplete = () => { request.result.close(); resolve(); };
+      transaction.onerror = () => reject(transaction.error);
+    };
+    request.onerror = () => reject(request.error);
+  }));
+  await page.reload();
+  await page.waitForSelector('#list-screen:not([hidden])');
+  await wait(800);
+  const leftovers = (await savedPhotoFiles(page)).map((each) => each.id);
+  check('F13 a day-old leftover photo file is tidied away', !leftovers.includes('old-leftover'), JSON.stringify(leftovers));
+  check('F13 a new one stays (another tab may be adding it)', leftovers.includes('new-leftover'), JSON.stringify(leftovers));
+
+  check('F no page errors (phone)', errors.length === 0, errors.join('\n'));
+  await context.close();
+}
+{
+  // F14 to F16 on a computer, with a mouse
+  const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, ignoreHTTPSErrors: true });
+  const page = await context.newPage();
+  const errors = [];
+  watchErrors(page, errors);
+  await openApp(page);
+  await makeBoard(page, 'Photos on a computer');
+
+  // F14. The same "Add," then "Photo," opens the computer's file window
+  await addPhoto(page, await testPhoto(page, 1600, 1200));
+  await photoShows(page);
+  check('F14 a photo added on a computer shows', (await page.locator('.photo').count()) === 1);
+
+  // F15. The mouse drags the size corner
+  const corner = await page.locator('.photo .corner').boundingBox();
+  await page.mouse.move(corner.x + 24, corner.y + 24);
+  await page.mouse.down();
+  await page.mouse.move(corner.x + 24 + 100, corner.y + 24 + 75, { steps: 10 });
+  await page.mouse.up();
+  await wait(600);
+  const photo = (await savedBoards(page))[0].items.find((item) => item.type === 'photo');
+  check('F15 the mouse makes the photo bigger, in a step that lines up (348)', photo.width === 348, JSON.stringify(photo));
+  await page.screenshot({ path: SHOTS + 'f15-computer-photo.png' });
+
+  // F16. Tab to the photo, Enter opens it
+  await page.focus('.photo');
+  await page.keyboard.press('Enter');
+  await page.waitForSelector('#photo-view:not([hidden])');
+  check('F16 Enter opens a photo', await page.isVisible('#photo-big'));
+  await page.goBack();
+  await page.waitForSelector('#photo-view', { state: 'hidden' });
+
+  check('F no page errors (computer)', errors.length === 0, errors.join('\n'));
   await context.close();
 }
 

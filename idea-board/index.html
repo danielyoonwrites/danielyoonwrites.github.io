@@ -6,7 +6,8 @@
        keyboard opens, so what you're typing stays above the keyboard. -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <!-- A safety rule for the browser (a "Content-Security-Policy"): this page may only run its own
-       script (app.js) and use its own style.css and Google's fonts. It talks to no server yet.
+       script (app.js) and use its own style.css and Google's fonts, and show pictures it makes itself
+       ("blob:" links, for the photos saved on this device). It talks to no server yet.
        If you add an outside service (a font, an image, a server), it has to be added here too. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; base-uri 'none'; form-action 'none'">
   <title>Idea board</title>
@@ -25,8 +26,8 @@
 
   <!-- The app's own look: "Paper and ink," like Living in the Word (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=4">
-  <script src="app.js?v=4" defer></script>
+  <link rel="stylesheet" href="style.css?v=5">
+  <script src="app.js?v=5" defer></script>
 </head>
 <body>
 
@@ -52,7 +53,7 @@
     </header>
     <main class="board" id="board" aria-label="Your board. Drag an empty spot to move around. Pinch to zoom.">
       <div class="world" id="world"></div>
-      <p class="empty" id="empty" hidden>Nothing here yet. Add a note to start.</p>
+      <p class="empty" id="empty" hidden>Nothing here yet. Add a note or a photo to start.</p>
       <!-- Not read out by screen readers on every save: it changes after every letter you type -->
       <span class="status" id="status"></span>
     </main>
@@ -77,17 +78,33 @@
       <button type="button" class="outline" id="show-all">Show all</button>
       <button type="button" class="outline zoom" id="zoom-out" aria-label="Zoom out">−</button>
       <button type="button" class="outline zoom" id="zoom-in" aria-label="Zoom in">+</button>
-      <button type="button" class="primary" id="add-note">Add a note</button>
+      <button type="button" class="primary" id="add-note" aria-label="Add a note or a photo">Add</button>
     </nav>
   </div>
 
-  <!-- A note on its own screen, with a big box to type in -->
+  <!-- A note on its own screen, with a big box to type in. On a new note, until you type,
+       "Photo" adds a photo instead: it opens the phone's photo picker (the hidden file chooser). -->
   <section class="editor" id="editor" aria-label="Your note" hidden>
     <div class="bar">
       <button type="button" class="quiet" id="remove-note">Remove</button>
-      <button type="button" class="primary" id="done">Done</button>
+      <span class="bar-end">
+        <button type="button" class="outline" id="add-photo" hidden>Photo</button>
+        <button type="button" class="primary" id="done">Done</button>
+      </span>
     </div>
     <textarea id="note-text" placeholder="Type your note" aria-label="Your note"></textarea>
+    <input type="file" id="photo-file" accept="image/*" aria-label="Choose a photo" hidden>
+  </section>
+
+  <!-- A photo on its own screen, big -->
+  <section class="editor photo-view" id="photo-view" aria-label="Your photo" hidden>
+    <div class="bar">
+      <button type="button" class="quiet" id="remove-photo">Remove</button>
+      <span class="bar-end">
+        <button type="button" class="primary" id="photo-done">Done</button>
+      </span>
+    </div>
+    <div class="photo-big"><img id="photo-big" alt="Your photo"></div>
   </section>
 
   <!-- A board's name on its own screen: for a new board, or to rename or remove one -->
