@@ -208,10 +208,10 @@ Filters were removed from Video mode in One UI 8.5 and the One UI 9 beta. To use
 
 Dan's "ok," November 2, 2026. Each later milestone gets its own short plan first (`CLAUDE.md`, "Plan first").
 
-1. This plan: this spec, `CLAUDE.md`, `PROGRESS.md` and `DECISIONS.md`, with Dan's answers below. Check: read "Questions to ask Dan first." (Pull request 114.)
-2. Choose a photo and see it right side up, with its size in pixels; a plain message if a photo can't be opened. Check, on the phone (Chrome) and the MacBook (Safari): choose a tall photo; it shows right side up, with its size.
+1. This plan: this spec, `CLAUDE.md`, `PROGRESS.md` and `DECISIONS.md`, with Dan's answers below. Check: read "Questions to ask Dan first." (Pull request 114, merged November 2, 2026.)
+2. Choose a photo and see it right side up, with its size in pixels; a plain message if a photo can't be opened. Check, on the phone (Chrome) and the MacBook (Safari): choose a tall photo; it shows right side up, with its size. (Built November 2, 2026, pull request 117, with the first saved checks and a made-up tall test photo for the MacBook, `tests/test-photos.html`, which also carries a made-up location for step 4.)
 3. Warm natural next to the original, labeled "Original" and "Warm natural." Check: both appear within a few seconds, and Warm natural looks right to Dan. The saved checks test the math against "The looks."
-4. Export: a full-size JPEG of the Warm natural version, with a line showing its size and how long it took, and the HDR note ("Technical notes"). Check on the MacBook: the export opens in Preview right side up and the same size as the original, and Tools > Show Location Info is dimmed (it works on the original; a made-up test picture with a location comes with this step). Check on the phone: under about 10 seconds for a 12 MP photo, right side up in Gallery, and swiping up shows a location on the original but not on the export.
+4. Export: a full-size JPEG of the Warm natural version, with a line showing its size and how long it took, and the HDR note ("Technical notes"). Check on the MacBook: the export opens in Preview right side up and the same size as the original, and Tools > Show Location Info is dimmed (it works on the original; the made-up test photo from step 2 has a location). Check on the phone: under about 10 seconds for a 12 MP photo, right side up in Gallery, and swiping up shows a location on the original but not on the export.
 
 Then Milestone 1 is done, and Claude says so.
 

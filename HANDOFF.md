@@ -19,7 +19,7 @@ This repository is public. Keep personal details out of this file.
 - **Living in the Word** (the AI helper live on Sonnet 5.5, with questions written ahead for the reading plan and the next chapter; signing in with an email code, the owner's invite page with an invite email, install help, the "check it" line; the server deploys by itself through Cloudflare; the plan for phones and app stores under way): https://danielyoonwrites.github.io/living-in-the-word, `living-in-the-word/PROGRESS.md`. The store plan is `living-in-the-word/STORE-PLAN.md`.
 - **Idea board** (live with boards of notes and photos that line up on the dots; the dots drawn exactly in pull request 113; saving to an account next): a little app like Apple's Freeform, built to work for everyone and used just by Dan for now, https://danielyoonwrites.github.io/idea-board, `idea-board/PROGRESS.md`.
 - **Video editor** (the phone test passed on Dan's phone; build step 3, one clip with a filter and lighting, in pull request 112): a simple video editor just for Dan, on his Android phone, with the videos never leaving the phone and every video made to fit Instagram, TikTok and YouTube Shorts, https://danielyoonwrites.github.io/video-editor, `video-editor/PROGRESS.md`.
-- **Photo Filters** (planned November 2, 2026; the plan in pull request 114, build step 2 next): Dan's own looks on his photos, in the browser of his phone and MacBook, with the photos never leaving the device, https://danielyoonwrites.github.io/photo-filters (not live yet), `photo-filters/PROGRESS.md`.
+- **Photo Filters** (the plan merged in pull request 114; build step 2, choosing a photo, in pull request 117): Dan's own looks on his photos, in the browser of his phone and MacBook, with the photos never leaving the device, https://danielyoonwrites.github.io/photo-filters (not live yet), `photo-filters/PROGRESS.md`.
 
 
 ## Where things stand (November 2, 2026)
@@ -35,7 +35,7 @@ This repository is public. Keep personal details out of this file.
 3. The Anthropic API key expires November 24, 2026: a new key, saved in Cloudflare as `ANTHROPIC_API_KEY`. Remind him in good time, with every step (in `living-in-the-word/PROGRESS.md`).
 4. The other apps: Fewer spam calls needs the Samsung steps checked on a real Samsung phone; First step smaller waits for his daily trial. Details in each `PROGRESS.md`.
 5. Video editor: merge pull request 112, build step 3 (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/112, Conversation tab, Merge pull request, Confirm merge), then the check on his phone, with private test uploads to YouTube, TikTok and Instagram. Every step is in `video-editor/PROGRESS.md`.
-6. Photo Filters: merge pull request 114, the plan (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/114, Conversation tab, Merge pull request, Confirm merge), after reading his answers in `photo-filters/SPEC.md`. Every step is in `photo-filters/PROGRESS.md`.
+6. Photo Filters: merge pull request 117, build step 2 (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/117, Conversation tab, Merge pull request, Confirm merge), then the checks on his phone and MacBook. Every step is in `photo-filters/PROGRESS.md`.
 
 
 ## Parked (raise only when it becomes relevant)

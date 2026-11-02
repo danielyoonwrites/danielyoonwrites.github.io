@@ -1,0 +1,144 @@
+/* Photo Filters: the look (SPEC.md, "The look of the app").
+   A plain, neutral dark gray around the photos (no warm or cool tint), so the background doesn't
+   change how their colors look. The device's own fonts, so nothing loads from other sites.
+   Contrast (checked in tests/app-test.mjs): words at least 4.5 to 1 against the page. */
+
+:root {
+  --page: #1c1c1c;        /* the page: dark neutral gray */
+  --ink: #ececec;         /* words */
+  --soft: #a8a8a8;        /* smaller words, like the photo's size */
+  --button: #ececec;      /* the main button */
+  --button-ink: #1c1c1c;  /* words on the main button */
+  --line: #7a7a7a;        /* thin lines */
+  --focus: #ffffff;       /* the ring around whatever the keyboard is on */
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+  /* The page fills the screen, with the button bar at the bottom */
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* The name at the top */
+.top {
+  padding: 12px 16px;
+  padding-top: max(12px, env(safe-area-inset-top));
+}
+
+.top h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* The middle: the photo, or the words before it */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 8px 16px 16px;
+}
+
+.intro {
+  margin: 24px 0 0;
+  max-width: 32em;
+}
+
+.photo {
+  margin: 0;
+}
+
+/* The photo keeps its shape, as big as fits above the button bar */
+.photo canvas {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 210px);
+  max-height: calc(100dvh - 210px);
+  width: auto;
+  height: auto;
+  margin: 0 auto;
+}
+
+.size {
+  margin-top: 8px;
+  color: var(--soft);
+  font-size: 15px;
+  text-align: center;
+}
+
+.message {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  max-width: 32em;
+}
+
+/* The button bar, at the bottom of the screen */
+.bottom {
+  position: sticky;
+  bottom: 0;
+  padding: 12px 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  background: var(--page);
+  display: flex;
+  justify-content: center;
+}
+
+.main-button {
+  width: 100%;
+  max-width: 480px;
+  min-height: 56px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--button);
+  color: var(--button-ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.main-button:active {
+  opacity: 0.85;
+}
+
+/* A link that looks like the main button (on the test photo page) */
+a.main-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+a {
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
