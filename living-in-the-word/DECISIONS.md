@@ -44,6 +44,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 28, 2026: daily limits: 20 sets a day for each signed-in person (or each connection using the passcode), 60 for everyone, and 10 wrong passcodes or codes a day for each connection. The counts start over at midnight Pacific time.
 - October 26, 2026: invite only; sign in with an email code (built) or Google (step S5, later); Apple only if wanted. The passcode goes away at step S6.
 - October 28, 2026: sign-in codes have 6 digits and last 10 minutes or 5 tries; a phone stays signed in 90 days; the app never says whether an address is invited.
+- November 2, 2026: every address asking for a code is counted and gets a scrambled code the same way (kept under the address scrambled); only invited ones are emailed; the day's emails count only emails that go.
 - October 26, 2026: emails go through Resend, from `sign-in@mail.danielyoonwrites.com`. Dan's web address `danielyoonwrites.com` has auto-renew off and expires October 26, 2027: remind him once, in September 2027 (sign-in and invite emails depend on it).
 - October 29, 2026: the owner's page ("Invite people"), only for Dan: two screens; "Turn off" signs someone out everywhere; rows stay in place.
 - October 29, 2026: "Daily AI limits" explained on the owner's page; no "testing only" note (only Dan sees it).
@@ -423,3 +424,10 @@ The "In force" list right below is every decision that still holds, one line eac
 - Turned down: only lowering the 4-second wait to 2 (the speed review's smallest change): shorter waits, but the old page could still get the new script.
 - Cost of the change: a file changed without a new `?v=` number would now never reach installed phones (before, within about 10 minutes). The VERSIONS check catches it in Claude's sessions; the rule is in `CLAUDE.md`.
 - Revisit if: the app ever needs to change a file without a new number.
+
+### November 2, 2026: sign-in answers the same for every address (pull request 120)
+- Decision: in `sendCode` (`server/worker.js`), every address is counted and gets a code the same way, invited or not, and only an invited address is emailed. The code is kept under the address scrambled (`codeKey`), so the database never keeps an address someone only typed; the day's email budget (90) is checked the same way for any address but counted only when an email goes; and the answer no longer carries Resend's reason (the owner still sees it when an invite email fails).
+- Why: `AUDIT.md`, item 2, proved by running. Someone who knew an address could tell whether it was invited: "check a code" answered "wrong code, 4 tries left" for an invited address and "code expired" for any other, and the 6th code of a day was refused only for an invited one. That broke the October 28, 2026 rule that the app never says who's invited. And because the day's 90 emails were counted before the 5-a-day limit for one address refused, 100 requests for one invited address (the owner's is the reply-to on every invite) used up the day's sign-in emails for everyone. The new checks (`tests/server-test.mjs`, section 22) fail 7 times on the old code.
+- Turned down: answering "sent" when an email fails (the person would wait for a code that never comes); waiting a fixed time before every answer to hide the email's speed (slower for everyone, for a small gain).
+- Accepted (low): an invited address still answers a little slower; during an outage at Resend only an invited address answers "email-failed"; anyone who knows an address can use up its 5 codes a day.
+- On the day it's deployed, a code asked for just before won't work (it was kept under the old name): ask for a new one.

@@ -302,7 +302,7 @@ const WRONG_LIMIT = 10;            // wrong passcodes or sign-in codes from each
 // The counts are kept in a small Cloudflare database (D1), connected to this Worker under
 // the name DB (see AI-PLAN.md). One row a day for everyone, and for each person or connection:
 //   day "2026-10-26", who "everyone", "person:dan@example.com", "questions:9f2c...",
-//   "wrong:9f2c...", "codes:dan@example.com", "invites:dan@example.com", "code-asks:9f2c..."
+//   "wrong:9f2c...", "codes:4b1e..." (an address, scrambled), "invites:dan@example.com", "code-asks:9f2c..."
 //   or "emails", count 7
 // Each connection gets a scrambled code instead of its internet address, so the address
 // itself is never kept. Days before yesterday are deleted.
@@ -310,7 +310,8 @@ const WRONG_LIMIT = 10;            // wrong passcodes or sign-in codes from each
 // The database's tables. The server makes any that are missing (see makeTables).
 //   usage: the daily counts above
 //   people: who may sign in besides the owner (the owner's page adds them, sign-up step S4)
-//   codes: sign-in codes, kept only scrambled, one at a time for each email address
+//   codes: sign-in codes, kept only scrambled, one at a time for each email address; since
+//     November 2, 2026 the "email" column holds the address scrambled too (see codeKey)
 //   sessions: one row for each signed-in phone, its key kept only scrambled
 const TABLES = [
   'CREATE TABLE IF NOT EXISTS usage (day TEXT NOT NULL, who TEXT NOT NULL, count INTEGER NOT NULL, PRIMARY KEY (day, who))',
@@ -455,8 +456,12 @@ async function signedInPerson(request, env) {
   return (await mayUseApp(env, session.email)) ? session.email : SIGNED_OUT;
 }
 
-// "Email me a code": sends a new code to an address that may sign in. The answer is the
-// same for any address, so nobody can use it to find out who's invited.
+// "Email me a code": sends a new code to an address that may sign in. The answers are the
+// same for any address, so nobody can use them to find out who's invited (the owner's rule,
+// October 28, 2026): every address is counted and gets a scrambled code the same way, and
+// only an invited address is emailed. Until November 2, 2026, an address that wasn't invited
+// got no code, so "check a code" answered differently for it (found in the audit: AUDIT.md,
+// item 2).
 async function sendCode(input, request, env, cors) {
   const email = cleanEmail(input.email);
   if (!email) return reply({ error: 'bad-email' }, 400, cors);
@@ -465,24 +470,35 @@ async function sendCode(input, request, env, cors) {
   const day = dayInPacific();
   const asks = 'code-asks:' + await connectionCode(request, env, day);
   if ((await addOne(env, day, [asks]))[asks] > CODE_ASKS_EACH) return reply({ error: 'too-many-codes' }, 429, cors);
-  if (!(await mayUseApp(env, email))) return reply({ sent: true }, 200, cors);
-
-  const mine = 'codes:' + email;
-  const counts = await addOne(env, day, [mine, 'emails']);
-  if (counts[mine] > CODES_EACH || counts.emails > EMAILS_ALL) return reply({ error: 'too-many-codes' }, 429, cors);
+  // The day's emails for everyone: checked the same way for any address, but counted only
+  // when an email goes (below), so asking again and again for one address can't use them up
+  if ((await readCounts(env, day, ['emails'])).emails >= EMAILS_ALL) return reply({ error: 'too-many-codes' }, 429, cors);
+  const key = await codeKey(email);
+  const mine = 'codes:' + key.slice(0, 24);
+  if ((await addOne(env, day, [mine]))[mine] > CODES_EACH) return reply({ error: 'too-many-codes' }, 429, cors);
 
   // A new code replaces any earlier one for this address. Only a scrambled copy is kept.
   const code = newCode();
   await env.DB.batch([
     env.DB.prepare('DELETE FROM codes WHERE expires < ?').bind(Date.now()),
     env.DB.prepare('INSERT OR REPLACE INTO codes (email, code, expires, tries) VALUES (?, ?, ?, 0)')
-      .bind(email, await scramble(email + '|' + code), Date.now() + CODE_MINUTES * 60000),
+      .bind(key, await scramble(email + '|' + code), Date.now() + CODE_MINUTES * 60000),
   ]);
+  if (!(await mayUseApp(env, email))) return reply({ sent: true }, 200, cors);   // not invited: no email
+
+  await addOne(env, day, ['emails']);
   const problem = await emailCode(env.RESEND_API_KEY, email, code);
-  // Resend's reason goes back too, so the test link can show it (like a web address
-  // that isn't verified yet). It never holds a key.
-  if (problem) return reply({ error: 'email-failed', detail: problem }, 502, cors);
+  // No reason from Resend in this answer: it goes to anyone who types an address. (The owner
+  // still sees Resend's reason when an invite email fails.)
+  if (problem) return reply({ error: 'email-failed' }, 502, cors);
   return reply({ sent: true }, 200, cors);
+}
+
+// The name a sign-in code is kept under (in the codes table's "email" column) and counted
+// under: the address scrambled, so the database never keeps an address that someone only
+// typed (since November 2, 2026, when every address started getting a code the same way)
+async function codeKey(email) {
+  return scramble('code|' + email);
 }
 
 // The email with the code. Returns '' when it's sent, or else Resend's reason.
@@ -531,9 +547,10 @@ async function checkCode(input, request, env, cors) {
   const wrong = 'wrong:' + await connectionCode(request, env, day);
   if ((await readCounts(env, day, [wrong]))[wrong] >= WRONG_LIMIT) return reply({ error: 'too-many-tries' }, 429, cors);
 
+  const codeName = await codeKey(email);
   const [, found] = await env.DB.batch([
-    env.DB.prepare('UPDATE codes SET tries = tries + 1 WHERE email = ?').bind(email),
-    env.DB.prepare('SELECT code, expires, tries FROM codes WHERE email = ?').bind(email),
+    env.DB.prepare('UPDATE codes SET tries = tries + 1 WHERE email = ?').bind(codeName),
+    env.DB.prepare('SELECT code, expires, tries FROM codes WHERE email = ?').bind(codeName),
   ]);
   const saved = found.results[0];
   if (!saved || saved.expires < Date.now() || saved.tries > CODE_TRIES) return reply({ error: 'code-expired' }, 401, cors);
@@ -548,7 +565,7 @@ async function checkCode(input, request, env, cors) {
   // Only a scrambled copy of the key is kept, so the database alone can't sign anyone in.
   const key = newKey();
   await env.DB.batch([
-    env.DB.prepare('DELETE FROM codes WHERE email = ?').bind(email),
+    env.DB.prepare('DELETE FROM codes WHERE email = ?').bind(codeName),
     env.DB.prepare('DELETE FROM sessions WHERE expires < ?').bind(Date.now()),
     env.DB.prepare('INSERT INTO sessions (key, email, expires) VALUES (?, ?, ?)')
       .bind(await scramble(key), email, Date.now() + SESSION_DAYS * 86400000),
@@ -619,7 +636,7 @@ async function ownerPage(input, request, env, cors) {
     await env.DB.batch([
       env.DB.prepare('UPDATE people SET active = 0 WHERE email = ?').bind(email),
       env.DB.prepare('DELETE FROM sessions WHERE email = ?').bind(email),
-      env.DB.prepare('DELETE FROM codes WHERE email = ?').bind(email),
+      env.DB.prepare('DELETE FROM codes WHERE email = ?').bind(await codeKey(email)),
     ]);
   }
 

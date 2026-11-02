@@ -12,7 +12,7 @@ A little app like Apple's Freeform for typed notes, photos and links on boards, 
 - In progress: nothing. These notes are in pull request 115.
 - What's saved: boards and photos live only in the browser of the device in use (IndexedDB); a computer starts with no boards until build step 7 saves them to an account.
 - Branch: `claude/exciting-feynman-c90w53` (the eleventh session's); everything up to pull request 113 is merged into main.
-- At the same time, other sessions worked in this repository: the video editor (`video-editor/`, pull requests 110 to 112 and 116), Photo Filters (`photo-filters/`, 114 and 117) and Living in the Word's audit (`living-in-the-word/AUDIT.md`, 119). Their notes are their own.
+- At the same time, other sessions worked in this repository: the video editor (`video-editor/`, pull requests 110 to 112 and 116), Photo Filters (`photo-filters/`, 114 and 117) and Living in the Word's audit and its first fixes (`living-in-the-word/AUDIT.md`, 119 and 120). Their notes are their own.
 - Not checked yet: photos on Dan's phone, the dots on his computer, the KakaoTalk in-app browser, photos saved in the HEIF format.
 - Claude's rough estimate: about 5 more pull requests (build steps 6 and 7, then 5, 8 and 9).
 
