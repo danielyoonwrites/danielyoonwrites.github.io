@@ -432,7 +432,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - Accepted (low): an invited address still answers a little slower; during an outage at Resend only an invited address answers "email-failed"; anyone who knows an address can use up its 5 codes a day.
 - On the day it's deployed, a code asked for just before won't work (it was kept under the old name): ask for a new one.
 
-### November 2, 2026: the app stops asking for the Bible text while the ESV is on hold (pull request NNN)
+### November 2, 2026: the app stops asking for the Bible text while the ESV is on hold (pull request 121)
 - Decision: an on/off switch, `ESV_TEXT = false`, near the top of the AI helper part of `app.js`. While it's off, `showPassageText` doesn't ask the server for the passage's text; the "Read ... on esv.org" row shows at once, as it did after the request failed. The code stays, as the October 26, 2026 decision (pull request 55) says; turning the text on takes the switch and the `ESV_API_KEY` secret.
 - Why: `AUDIT.md`, item 3, found by two of the audit's reviewers. With no ESV key, every study and reading sent a request that could only fail, and the server checks the passcode before it looks at what's asked. So each open with a wrong or old passcode counted as two wrong tries, and a few group phones with an old passcode on one church Wi-Fi could reach the 10 a day and block everyone there, email sign-in too, until midnight Pacific. Section E of `tests/app-test.mjs`: with the switch on, the run asked for the text 16 times and an old passcode counted 2 wrong tries per open; with it off, none and 1.
 - Turned down: not counting wrong passcodes on text requests on the server (it would let someone guess the passcode through that route).
