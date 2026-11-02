@@ -73,6 +73,7 @@ When Dan says "do the rest," Claude works through the build plan one pull reques
 - `fewer-spam-calls/` is a one-page guide with its own `CLAUDE.md` and `SPEC.md`.
 - `first-step-smaller/` is a little app (planned October 2026) with its own `CLAUDE.md` and `SPEC.md`.
 - `living-in-the-word/` is a little app for Bible study questions (planned October 2026) with its own `CLAUDE.md` and `SPEC.md`.
+- `idea-board/` is a little app like Apple's Freeform, for typed notes, photos and links, just for the owner (planned November 2026; a working name), with its own `CLAUDE.md` and `SPEC.md`.
 
 ## Privacy
 
