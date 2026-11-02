@@ -7,7 +7,7 @@ A little app for typed notes, photos and links on boards, like Apple's Freeform,
 ## Rules for working here
 
 - Same rules as the website's `CLAUDE.md`: plain words for a beginner, one small change per pull request with a check the owner does, no build tools, phone first.
-- It's just for the owner: no sharing, no live collaboration, no other accounts. Once the server exists (build step 6), only a device signed in with his own address (`OWNER_EMAIL`) can open the boards.
+- Built to work for everyone, used just by the owner for now (his choice, November 2, 2026): each person who signs in has only their own boards and photos; no sharing between people, no live collaboration. Until sign-ups open, the server (build step 6) lets only the addresses on its list sign in (`ALLOWED_EMAILS`: just the owner's).
 - Never send the boards anywhere except this app's own server. No AI, analytics or tracking.
 - Never lose work: every change saves by itself, a save made from an older copy never overwrites a newer one, and the backup file stays the same versioned JSON, so old backups keep working.
 - Never put a key or any secret in this folder: the repository and the website are public. Secrets live only in Cloudflare.

@@ -43,6 +43,7 @@ const PHOTO_MIN_WIDTH = 156;   // board pixels: the smallest a photo can be (3 s
 const PHOTO_MAX_WIDTH = 988;   // board pixels: the biggest, as wide as four notes side by side
 const SMALL_ON_SCREEN = 120;   // screen pixels: a photo narrower than this hides its size corner
 const DOT_GAP = 32;            // board pixels between the faint dots, at the normal zoom
+const DOT_RADIUS = 1.45;       // page pixels: how big a dot is, at any zoom
 const SETTLE_GAP = 64;         // board pixels between the spots where a note's top-left corner settles:
                                // every second dot, so the spots are easy to hit with a finger
 const MIN_ZOOM = 0.2;
@@ -83,6 +84,9 @@ const noteText = $('note-text');
 const settingsEl = $('board-settings');
 const nameInput = $('board-name-input');
 const removedEl = $('removed');
+const dotsEl = $('dots');
+// The dots' color, from the top of style.css
+const dotColor = getComputedStyle(document.documentElement).getPropertyValue('--line').trim() || '#DCD4C7';
 const photoInput = $('photo-file');
 const photoViewEl = $('photo-view');
 
@@ -500,15 +504,7 @@ function settledWidth(width) {
 // Moves and zooms the world, and the dots behind it
 function applyView() {
   worldEl.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`;
-  // The dots stay between 16 and 64 pixels apart, so they never get crowded. A dot is drawn in
-  // the middle of its little square, so the squares start half a square up and to the left:
-  // that puts a dot on every spot where a note's corner settles (only when zoomed out the
-  // farthest, below a quarter of the size, are there spots between the dots).
-  let gap = DOT_GAP * view.zoom;
-  while (gap < 16) gap *= 2;
-  while (gap > 64) gap /= 2;
-  boardEl.style.backgroundSize = `${gap}px ${gap}px`;
-  boardEl.style.backgroundPosition = `${view.x - gap / 2}px ${view.y - gap / 2}px`;
+  drawDots();
   // A photo's size corner stays the same size on the screen at any zoom (style.css uses --zoom),
   // and hides when the photo is small on the screen, so it never covers the picture
   worldEl.style.setProperty('--zoom', view.zoom);
@@ -617,15 +613,71 @@ function bringIntoView(item) {
   saveViewSoon();
 }
 
-// The board glides, instead of jumping, when a button moves it
+// The faint dots, drawn on a canvas behind the world: each one exactly where a spot is, on any
+// screen. (Drawn as a repeating background instead, browsers round the little squares, and the
+// dots drifted a few pixels away from the spots: found November 2, 2026, on Dan's computer.)
+// They stay between 16 and 64 pixels apart on the screen, so they never get crowded: a dot on
+// every 32 board pixels, or every 64 or 128 when zoomed far out, or 16 when zoomed far in. So
+// every spot where a corner settles has a dot, except below a quarter of the size.
+function drawDots(look = view) {
+  const width = boardEl.clientWidth;
+  const height = boardEl.clientHeight;
+  const sharpness = window.devicePixelRatio || 1;   // screen pixels to each page pixel
+  if (dotsEl.width !== Math.round(width * sharpness) || dotsEl.height !== Math.round(height * sharpness)) {
+    dotsEl.width = Math.round(width * sharpness);
+    dotsEl.height = Math.round(height * sharpness);
+  }
+  const pen = dotsEl.getContext('2d');
+  pen.setTransform(sharpness, 0, 0, sharpness, 0, 0);
+  pen.clearRect(0, 0, width, height);
+  let gap = DOT_GAP * look.zoom;
+  while (gap < 16) gap *= 2;
+  while (gap > 64) gap /= 2;
+  // The first dot at or left of the board's edge, then every gap: dot k is at look.x + k * gap
+  const firstX = look.x - Math.ceil(look.x / gap) * gap;
+  const firstY = look.y - Math.ceil(look.y / gap) * gap;
+  pen.fillStyle = dotColor;
+  pen.beginPath();
+  for (let i = 0; firstX + i * gap < width + DOT_RADIUS; i += 1) {
+    for (let j = 0; firstY + j * gap < height + DOT_RADIUS; j += 1) {
+      const x = firstX + i * gap;
+      const y = firstY + j * gap;
+      pen.moveTo(x + DOT_RADIUS, y);
+      pen.arc(x, y, DOT_RADIUS, 0, Math.PI * 2);
+    }
+  }
+  pen.fill();
+}
+
+// The board glides, instead of jumping, when a button moves it. The world glides by itself
+// (style.css); the dots follow it, one drawing for each frame of the glide.
+let glideFrame = 0;
+let glideTimer = 0;
 function glide() {
   worldEl.classList.add('gliding');
-  boardEl.classList.add('gliding');
-  setTimeout(() => {
-    worldEl.classList.remove('gliding');
-    boardEl.classList.remove('gliding');
-  }, 300);
+  cancelAnimationFrame(glideFrame);
+  clearTimeout(glideTimer);
+  const ends = performance.now() + 300;
+  const follow = () => {
+    const now = new DOMMatrixReadOnly(getComputedStyle(worldEl).transform);
+    drawDots({ x: now.e, y: now.f, zoom: now.a });
+    if (performance.now() < ends) glideFrame = requestAnimationFrame(follow);
+    else drawDots();
+  };
+  glideFrame = requestAnimationFrame(follow);
+  glideTimer = setTimeout(() => worldEl.classList.remove('gliding'), 300);
 }
+
+// A finger on the board stops any gliding at once
+function stopGliding() {
+  worldEl.classList.remove('gliding');
+  cancelAnimationFrame(glideFrame);
+  drawDots();
+}
+
+// When the board's size changes (a phone turned sideways, the keyboard, a window made bigger),
+// the dots are drawn again to fit
+new ResizeObserver(() => drawDots()).observe(boardEl);
 
 
 // ---------- Moving the board, pinching, and dragging notes and photos ----------
@@ -649,8 +701,7 @@ boardEl.addEventListener('pointerdown', (event) => {
   const p = point(event);
   pointers.set(event.pointerId, p);
   boardEl.setPointerCapture(event.pointerId);   // keep getting this finger's moves, wherever it goes
-  worldEl.classList.remove('gliding');          // a finger on the board stops any gliding at once
-  boardEl.classList.remove('gliding');
+  stopGliding();                                // a finger on the board stops any gliding at once
   if (pointers.size === 1) {
     const itemEl = event.target.closest('.item');
     const item = itemEl && findItem(itemEl.dataset.id);

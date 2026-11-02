@@ -2,13 +2,14 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (built November 2, 2026, at the end of the tenth session; pull requests 108 and 109 added lines)
+## In force (built November 2, 2026, at the end of the tenth session; pull requests 108 to 110 changed lines)
 
 Every decision below that still holds, one line each; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
 - November 2, 2026: Dan builds his own app like Apple's Freeform (his "A": a plan first), instead of Canva Whiteboards, Excalidraw or Concepts.
 - November 2, 2026: version 1 holds typed notes, photos and links.
-- November 2, 2026: just for Dan, never shared; boards saved to his account, the same on his Android phone and a computer's web browser (build step 7).
+- November 2, 2026: built to work for everyone, used just by Dan for now: each person's boards are their own, nothing is shared, and only Dan's address can sign in until sign-ups open; the same boards on his phone and computer (build steps 6 and 7). (Replaces "just for Dan.")
+- November 2, 2026: saving to an account (build steps 6 and 7) comes before links (build step 5), Dan's wish.
 - November 2, 2026: its own Cloudflare Worker and D1 database, apart from Living in the Word's (Claude's choice, put to Dan with pull request 103).
 - November 2, 2026: the name "Idea board," at https://danielyoonwrites.github.io/idea-board (Dan's "a").
 - November 2, 2026: the "Paper and ink" look, like Living in the Word (Dan's "B").
@@ -126,3 +127,17 @@ Every decision below that still holds, one line each; it's rewritten at each han
   - The list counts photos ("1 note and 1 photo"), and "Remove board" names them too.
 - Why: never lose work; and the server (build steps 6 and 7) can keep one photo per row (D1 allows 2 MB per row, per `SPEC.md`, "Tech notes").
 - Turned down: a new store in the boards' database (above); photos inside the board's own record (a board would hit 2 MB after about six photos).
+
+### November 2, 2026: built to work for everyone, used just by Dan for now (pull request 110)
+- Decision: the server and the saving (build steps 6 and 7) are built so each person who signs in has their own boards and photos, kept apart from everyone else's. For now only Dan's address can sign in (the server keeps a list of allowed addresses). Opening sign-ups to everyone comes later, with its own questions first (limits, costs, privacy). Nothing is shared between people, and there's no working on a board together live.
+- Why: Claude asked whose boards it should save ("a) Just yours" or "b) Anyone's"), because Dan wrote "someone's board." Dan: "I have cloud flare, I am using it for another project in Claude code already. Let's mainly use it for me for now, but we should build it to work for everyone."
+- Replaces: "just for the owner" (pull request 103) and, in `CLAUDE.md`, "no other accounts" and signing in only with `OWNER_EMAIL`.
+
+### November 2, 2026: saving before links (pull request 110)
+- Decision: build steps 6 and 7 (the server, signing in, saving to the account) come next, before step 5 (links).
+- Why: Dan, after trying photos on his computer: "maybe we should add a way to save so that someone's board can be accessed on phone or computer."
+
+### November 2, 2026: the dots drawn exactly (pull request 110)
+- Decision: Claude's fix: the dots are drawn on a canvas behind the board, each exactly on its spot, instead of as a repeating background.
+- Why: on his computer, Dan couldn't line a photo up with the note "act 1." The main cause: "act 1" and "act 2" were made before lining up and sat between spots; Dan dragged each once, and then it lined up ("it works"). But his screenshot also showed the dots a few pixels away from the spots: browsers round the little squares of a repeating background. In a test browser the dots were 1 to 4 screen pixels off before the fix, and under 0.1 after.
+- Turned down: keeping the repeating background (the dots could mislead the eye).
