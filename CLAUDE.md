@@ -75,6 +75,7 @@ When Dan says "do the rest," Claude works through the build plan one pull reques
 - `living-in-the-word/` is a little app for Bible study questions (planned October 2026) with its own `CLAUDE.md` and `SPEC.md`.
 - `idea-board/` is a little app like Apple's Freeform, for typed notes, photos and links, just for the owner (planned November 2026), with its own `CLAUDE.md` and `SPEC.md`.
 - `video-editor/` is a simple video editor, just for the owner, on his Android phone (planned November 2026), with its own `CLAUDE.md` and `SPEC.md`.
+- `photo-filters/` is a little app that puts the owner's own looks on his photos, in the browser of his phone and MacBook (planned November 2026), with its own `CLAUDE.md` and `SPEC.md`.
 
 ## Privacy
 
