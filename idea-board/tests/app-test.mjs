@@ -124,7 +124,7 @@ async function zoomNow(page) {
 // A note's corner settles on a spot every 64 board pixels (every second dot), at every zoom
 // (SETTLE_GAP in app.js)
 const onSpot = (value) => value % 64 === 0;   // (-0 counts as 0)
-// How far apart the dots are on the screen at a zoom (the same rule as applyView() in app.js)
+// How far apart the dots are on the screen at a zoom (the same rule as drawDots() in app.js)
 function dotGapOnScreen(zoom) {
   let gap = 32 * zoom;
   while (gap < 16) gap *= 2;
@@ -132,20 +132,25 @@ function dotGapOnScreen(zoom) {
   return gap;
 }
 
-// How far a note's top-left corner is from the nearest dot drawn on the screen, in screen pixels
-async function cornerToDot(page, note) {
+// How solid the dots' canvas is at a place on the board (page pixels from the board's top-left
+// corner): 0 where no dot is drawn. Read straight from the canvas, even under a note.
+async function dotAt(page, x, y) {
+  return page.evaluate(([atX, atY]) => {
+    const canvas = document.getElementById('dots');
+    const sharp = canvas.width / canvas.clientWidth;
+    return canvas.getContext('2d').getImageData(Math.floor(atX * sharp), Math.floor(atY * sharp), 1, 1).data[3];
+  }, [x, y]);
+}
+
+// Whether the dots sit exactly on the spots, measured at a note's top-left corner: a dot right there,
+// none half a gap away, and the next dot a whole gap away
+async function cornerToDot(page, note, zoom) {
   const noteBox = await note.boundingBox();
   const boardBox = await page.locator('#board').boundingBox();
-  const dots = await page.evaluate(() => {
-    const style = getComputedStyle(document.getElementById('board'));
-    return { gap: parseFloat(style.backgroundSize), x: parseFloat(style.backgroundPositionX), y: parseFloat(style.backgroundPositionY) };
-  });
-  // A dot is drawn in the middle of each little square of the background
-  const away = (corner, start) => {
-    const d = corner - (start + dots.gap / 2);
-    return Math.abs(d - Math.round(d / dots.gap) * dots.gap);
-  };
-  return { across: away(noteBox.x - boardBox.x, dots.x), down: away(noteBox.y - boardBox.y, dots.y), gap: dots.gap };
+  const x = noteBox.x - boardBox.x;
+  const y = noteBox.y - boardBox.y;
+  const gap = dotGapOnScreen(zoom);
+  return { at: await dotAt(page, x, y), halfway: await dotAt(page, x + gap / 2, y), next: await dotAt(page, x + gap, y), gap };
 }
 
 async function addNote(page, words) {
@@ -813,9 +818,9 @@ const browser = await chromium.launch();
   items = (await savedBoards(page))[0].items;
   const settled = items.find((item) => item.text === 'Second idea');
   check('E3 moved 40 across and 20 down, it settles one spot across, at the same height', settled.x === start.x + 64 && settled.y === start.y, JSON.stringify({ start, settled }));
-  const corner = await cornerToDot(page, second);
-  check('E3 its corner sits on a dot', corner.across < 0.6 && corner.down < 0.6, JSON.stringify(corner));
-  check('E3 the dots look as before (32 pixels apart at the normal zoom)', corner.gap === 32, JSON.stringify(corner));
+  const corner = await cornerToDot(page, second, await zoomNow(page));
+  check('E3 its corner sits on a dot', corner.at > 150 && corner.halfway === 0, JSON.stringify(corner));
+  check('E3 the dots look as before (32 pixels apart at the normal zoom)', corner.gap === 32 && corner.next > 150, JSON.stringify(corner));
   await page.screenshot({ path: SHOTS + 'e3-phone-lined-up.png' });
 
   // E4. A tap on a note near the top of the screen opens it with the cursor at the end of its words.
@@ -932,10 +937,40 @@ const browser = await chromium.launch();
   const far = items.find((item) => item.text === 'On the right');
   check('E9 it settles onto a spot', onSpot(far.x) && onSpot(far.y), JSON.stringify(far));
   check('E9 let go a little low, it stays level with the note placed close in', far.y === level, JSON.stringify({ far, level }));
-  const cornerFar = await cornerToDot(page, right);
-  check('E9 its corner sits on a dot on the screen', cornerFar.across < 0.6 && cornerFar.down < 0.6 && Math.abs(cornerFar.gap - dotsE9) < 0.01, JSON.stringify(cornerFar));
+  const cornerFar = await cornerToDot(page, right, zoomE9);
+  check('E9 its corner sits on a dot on the screen', cornerFar.at > 150 && cornerFar.halfway === 0 && cornerFar.next > 150, JSON.stringify(cornerFar));
 
   check('E no page errors (computer)', errors.length === 0, errors.join('\n'));
+  await context.close();
+}
+{
+  // E10. On a sharp computer screen (2 screen pixels to each page pixel), at a zoom like Dan's (0.58),
+  // far from where the board starts, the dots are still drawn exactly on the spots. (Drawn as a
+  // repeating background, they drifted a few pixels there: found on Dan's computer.)
+  const context = await browser.newContext({ viewport: { width: 1000, height: 700 }, deviceScaleFactor: 2, ignoreHTTPSErrors: true });
+  const page = await context.newPage();
+  const errors = [];
+  watchErrors(page, errors);
+  await openApp(page);
+  await makeBoard(page, 'Far out');
+  await addNote(page, 'Far from the start');
+  await page.evaluate(() => {
+    const item = board.items[0];
+    item.x = 64 * 40;
+    item.y = 64 * 30;
+    render();
+    view.zoom = 0.58;
+    view.x = boardEl.clientWidth / 2 - item.x * view.zoom + 0.37;
+    view.y = boardEl.clientHeight / 2 - item.y * view.zoom - 0.29;
+    applyView();
+  });
+  const far = await cornerToDot(page, page.locator('.note'), 0.58);
+  check('E10 far out on a sharp screen, a dot sits exactly at the corner', far.at > 150 && far.halfway === 0 && far.next > 150, JSON.stringify(far));
+  await page.click('#show-all');
+  await wait(400);
+  const shown = await cornerToDot(page, page.locator('.note'), await zoomNow(page));
+  check('E10 after "Show all" glides, the dots are on the spots again', shown.at > 150 && shown.halfway === 0, JSON.stringify(shown));
+  check('E10 no page errors', errors.length === 0, errors.join('\n'));
   await context.close();
 }
 

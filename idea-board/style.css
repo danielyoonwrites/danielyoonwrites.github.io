@@ -259,11 +259,17 @@ textarea:focus-visible,
   overflow: hidden;
   touch-action: none;   /* the app moves and zooms the board itself */
   cursor: grab;
-  /* Faint dots, so you can see the board move. Notes' corners settle onto them (on every second
-     dot when you're zoomed in close), so notes line up. app.js changes their size and place. */
   background-color: var(--paper);
-  background-image: radial-gradient(circle, var(--line) 1.3px, transparent 1.6px);
-  background-size: 32px 32px;
+}
+
+/* Faint dots, so you can see the board move. Notes' and photos' corners settle onto them (on every
+   second dot when you're zoomed in close), so things line up. app.js draws them, in --line. */
+.dots {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .board.moving {
@@ -271,16 +277,11 @@ textarea:focus-visible,
 }
 
 /* When a button moves the board ("Show all", − and +), it glides instead of jumping */
-.board.gliding {
-  transition: background-position 0.25s ease, background-size 0.25s ease;
-}
-
 .world.gliding {
   transition: transform 0.25s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .board.gliding,
   .world.gliding {
     transition: none;
   }

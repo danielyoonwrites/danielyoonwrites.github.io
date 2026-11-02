@@ -4,7 +4,7 @@ A little app at https://danielyoonwrites.github.io/idea-board (folder `idea-boar
 
 ## Who it's for
 
-Just the owner, on his Android phone (in Chrome) and in a computer's web browser. It isn't shared with anyone, and there's no working on it together live. In his words: "It would just need a way to save so it can be accessed both on Android phones and web page on computer."
+Built to work for everyone, used just by the owner for now (his words, November 2, 2026: "Let's mainly use it for me for now, but we should build it to work for everyone"). Each person who signs in has their own boards and photos, kept apart from everyone else's; nothing is shared between people, and there's no working on a board together live. For now only the owner's address can sign in. He uses it on his Android phone (in Chrome) and in a computer's web browser. In his words: "It would just need a way to save so it can be accessed both on Android phones and web page on computer."
 
 ## What it is
 
@@ -27,7 +27,7 @@ Boards of typed notes, photos and links (several boards, each one big and endles
 - Phone first: big buttons, and moving the board never gets mixed up with moving a note.
 - Never lose work: each change is saved within a couple of seconds, and there's a backup file.
 - Nothing is overwritten between the phone and the computer. If a board changed on the other device, the app says so and loads the newest one first.
-- Only the owner can open his boards.
+- Only you can open your boards: each person only their own.
 
 ## Not in version 1 (ideas for later)
 
@@ -39,7 +39,7 @@ Boards of typed notes, photos and links (several boards, each one big and endles
 
 ## Privacy and safety
 
-- Only a device signed in with the owner's own address can open the boards.
+- A person's boards open only on a device signed in with that person's own address. For now, only the owner's address can sign in.
 - The boards go only to this app's own server, on the owner's Cloudflare account: never to an AI, analytics or anyone else. The app's code is public; the boards aren't.
 - The smaller copy of a photo is a new picture, so it leaves out the original's hidden details, like where it was taken (checked by section F of the saved checks, pull request 109, with a made-up location).
 
@@ -81,6 +81,7 @@ Where Idea board stands (pull request 105):
 - Items of a type this version doesn't know (photos and links, from a later version) are kept and saved, just not drawn, so an older copy of the app (a phone can keep one for up to 10 minutes) never deletes them.
 - A new note goes in an open spot near the middle of the screen (below first on a phone held upright, to the right on a wide screen), so it never covers another note, and the board glides to show it. The spot is in the same rows and columns as the note nearest the middle (256 board pixels apart: a note's width and a gap), so new notes line up with the old ones. "Show all" fits every note on the screen. An empty note isn't kept.
 - Lining up (pull request 108): when you let go of a note, its top-left corner glides (0.15 seconds; no glide with reduced motion) onto the nearest spot, every 64 board pixels (`SETTLE_GAP` and `onSpot()` in `app.js`). The spots are the same at every zoom, so any two notes can line up exactly; settling onto whichever dots show was tried first and dropped, because a note placed close in could then never line up with one placed zoomed out. The dots stay 32 board pixels apart at the normal zoom (`DOT_GAP`) and are drawn so a dot sits on every spot (below a quarter of the size, there are spots between the dots). Notes saved before stay put until they're moved. Photos settle the same way (pull request 109: `itemSize()`, `itemOutlines()` and `openSpot(width, height)` handle any size); links (build step 5) should too.
+- The dots (pull request 113) are drawn on a canvas behind the world (`drawDots()` in `app.js`), each exactly on its spot, and redrawn whenever the board moves (each frame of a glide too). A repeating background was used before: browsers round its little squares, so the dots sat 1 to 4 screen pixels away from the spots in a test browser, and several on Dan's computer.
 - A tap that opens a screen also sends a click a moment later, to whatever is under the finger on the new screen. On a note's screen that's the typing box, so `openNote()` puts the cursor back at the end of the words (`putCursorAtEnd()`; found in pull request 108).
 - The saved checks: `node idea-board/tests/app-test.mjs` from the repository folder (Chromium at 360 wide with touch, 1280 with a mouse, and 180 for a phone with its zoom at 200%; must end "0 failed"). The accessibility check: `idea-board/tests/axe-check.mjs` (how to run it is in `PROGRESS.md`).
 - Photos (pull request 109): a photo doesn't live inside its board's record. Each board is one record, written whole 0.4 seconds after every change, and the server's D1 allows 2 MB per row (about six shrunk photos). So the photos are in their own database on the device, "idea-board-photos" (store `photos`: `{ id, blob, width, height, made }`, the blob being the shrunk JPEG), and the board's item only names it: `{ id, type: 'photo', photoId, x, y, width, ratio, made, changed }` (ratio is height divided by width). On the server, one row (or one R2 file) per photo. A separate database, rather than a new store in the boards' database, means the boards' database didn't change version, so a phone still running the old copy of the app (up to 10 minutes after a merge) still opens it, and keeps the photo items it doesn't draw.
@@ -88,11 +89,13 @@ Where Idea board stands (pull request 105):
 - A photo's width (board pixels) settles to a whole number of spots less the 36-pixel gap between notes (`settledWidth()`): 156 to 988, so 220 is one note wide, 476 two, 732 three and 988 four. While the corner is dragged, the size follows the finger along the photo's diagonal. The corner's size is set in screen pixels through `--zoom`, which `applyView()` sets on the board.
 - The server (build step 6): its own small Cloudflare Worker in `idea-board/server/`, with its own D1 database, deployed by itself after each merge like Living in the Word's (Workers Builds). It's kept apart from Living in the Word's server, so a problem in one can't break the other and photos can't fill Living in the Word's database.
 - Room on Cloudflare's free plan: D1 has 500 MB per database, 5 GB per account and 2 MB per row (Cloudflare's docs, read as their source on GitHub, November 2, 2026: https://github.com/cloudflare/cloudflare-docs/blob/production/src/content/docs/d1/platform/limits.mdx). Claude's estimate, unverified: about 1,500 shrunk photos fit in 500 MB. If that's ever too small, photos can move to R2, whose free tier is 10 GB-month (the same docs, `r2/pricing.mdx`). Whether R2 needs a payment method on file wasn't on that page (unverified).
-- Signing in (build step 6): an email code sent only to `OWNER_EMAIL`, like Living in the Word's, through Resend. Codes and session keys are kept only scrambled. If both apps use the same Resend account, they share its daily limit (Resend's free plan: 100 emails a day and 3,000 a month, per Living in the Word's `DECISIONS.md`, October 2026).
+- Signing in (build step 6): an email code, like Living in the Word's, through Resend, sent only to an address on the server's list of allowed addresses (`ALLOWED_EMAILS`: just the owner's for now). The server keeps each person's boards and photos under their own account and answers only that person, so opening sign-ups later is mostly taking the list away (with its own questions first: limits, costs, privacy). Codes and session keys are kept only scrambled. If both apps use the same Resend account, they share its daily limit (Resend's free plan: 100 emails a day and 3,000 a month, per Living in the Word's `DECISIONS.md`, October 2026).
 - Going from screen to screen (build step 3): each step deeper (a board, a note, a board's name) adds a step to the browser's Back history, and "Done," "← Boards" and the phone's Back button all go back through it. Whenever the history moves, `followHistory()` in `app.js` shows what that step should show. The app always opens on the list.
 - Saving between devices (build step 7): each board has a version number. The server refuses a save made from an older copy, and the app loads the newest one instead, so nothing is overwritten.
 
 ## Build plan (one pull request each, each with a check the owner does)
+
+Order: saving to your account (steps 6 and 7) comes before links (step 5), the owner's wish (November 2, 2026).
 
 1. This plan, with the folder's `CLAUDE.md`, `PROGRESS.md` and `DECISIONS.md`. Check: read "How it works" and this build plan.
 2. One board, saved on this device for now: move around, zoom, add a note, type in it, move it, remove it (with Undo). Check: on your phone, add three notes, move them, zoom out, then close Chrome and open the page again: they're still there. Then try it on your computer. (Built November 2, 2026, pull request 104.)
@@ -115,3 +118,4 @@ Where Idea board stands (pull request 105):
 7. What tapping a photo does: answered November 2, 2026, its own screen with the photo big, "Done" and "Remove" (Dan's "A").
 8. The size corner: answered November 2, 2026, a thin ink corner like a picture frame's, just outside the photo (Dan's "A"). Always there, 48 by 48 to grab, hidden when the photo is small on the screen; the size settles in steps that line up with notes (Claude's choices).
 9. How to add a link (build step 5): for example a "Link" button next to "Photo" on a new note's screen, or a note whose words are only a web address turning into a link card by itself.
+10. Where photos are kept on the server (build step 7): in the app's D1 database (free; 500 MB, plenty for the owner alone) or in R2, Cloudflare's file storage (free up to 10 GB-month; whether it needs a payment method on file is unverified). For everyone, later, R2 would fit better.
