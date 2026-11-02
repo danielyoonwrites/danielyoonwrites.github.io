@@ -14,11 +14,11 @@ Boards of typed notes, photos and links (several boards, each one big and endles
 
 1. The app opens on "Your boards": your boards, the one changed last at the top, each with how many notes it has, and "New board" at the bottom. "New board" asks for a name first (an empty name becomes "Untitled board"), then opens the new board.
 2. A board fills the screen, under a thin bar: "← Boards" (back to the list), the board's name, and "Edit" (rename it, or "Remove board," which asks first: "Remove “Sermon series” and its 3 notes?"; then "Board removed. Undo" shows for 8 seconds). The phone's Back button (<) goes back one step: from a note to its board, from a board to the list. Drag an empty spot to move around (one finger on the phone, the mouse on a computer). Pinch with two fingers to zoom (on a computer, the mouse wheel or the + and − buttons).
-3. One "Add" button offers Note, Photo or Link, placed in the middle of the screen.
+3. One "Add" button offers Note, Photo or Link, placed near the middle of the screen, in line with the notes already there.
    - Note: a square note you type into. Tap it later to change the words.
    - Photo: one from the phone's photos (or the computer's files). The app makes a smaller copy before saving it.
    - Link: a web address and an optional title, shown as a small card. Tapping it opens the page in a new tab.
-4. Drag anything to move it. Tap a note to open it on its own screen, with a big box to type in, "Done" and "Remove" ("Note removed. Undo" shows for a few seconds). The phone's Back button (<) closes an open note and keeps the words. A note grows taller when its words need more room; a photo has a corner to drag, to make it bigger or smaller (build step 4).
+4. Drag anything to move it. When you let go, it glides onto the nearest spot on the dots, so things line up in rows and columns (Dan's idea, pull request 108). Tap a note to open it on its own screen, with a big box to type in, "Done" and "Remove" ("Note removed. Undo" shows for a few seconds). The phone's Back button (<) closes an open note and keeps the words. A note grows taller when its words need more room; a photo has a corner to drag, to make it bigger or smaller (build step 4).
 5. Everything saves by itself, to your account, so the same boards open on the phone and the computer.
 6. "Download a copy" saves every board, with its photos, in one file. "Restore a copy" brings them back.
 
@@ -47,7 +47,7 @@ Boards of typed notes, photos and links (several boards, each one big and endles
 
 "Paper and ink," like Living in the Word (the owner's choice "B", November 2, 2026): warm paper, black ink, EB Garamond for reading, Jost for small labels and buttons, thin lines, square corners. The colors and fonts are the same as Living in the Word's, at the top of `style.css` (and in `living-in-the-word/SPEC.md`, "The look").
 
-- The board: faint dots on the paper, so you can see it move.
+- The board: faint dots on the paper, so you can see it move. Notes settle onto them (on every second dot at the normal zoom, on every dot when zoomed out).
 - The notes: "index card," a little lighter than the paper (`--note`, `#FBF8F2`), with a soft shadow (the owner's choice, November 2, 2026: "I like the index card idea"). Their edge is a thin warm grey line (`--edge`, `#8C8478`), dark enough to see easily, and their words are 21 pixels.
 - "Your boards": a thin bar with "Idea board," the title "Your boards" in the middle, then one row for each board (its name, how many notes, and an arrow) with thin lines between, like Living in the Word's start screen. "New board" at the bottom.
 - On a board: a thin bar with "← Boards," the board's name and "Edit." "Saved on this device" sits in the board's top right corner and fades 3 seconds after each save, so it doesn't sit over a note. The buttons at the bottom: "Show all" and "Add a note" (on a computer also − and +).
@@ -72,11 +72,13 @@ Where Idea board stands (pull request 105):
 
 ## Tech notes (Claude's plan; the owner can change any of it)
 
-- Plain HTML, CSS and JavaScript in this folder, with no build tools. File links end in a version number (`?v=3` after build step 3), raised whenever a file changes.
+- Plain HTML, CSS and JavaScript in this folder, with no build tools. File links end in a version number (`?v=4` after pull request 108), raised whenever a file changes.
 - The board is ordinary page boxes on a large surface that moves and zooms with a CSS transform, so text stays sharp. Touch and mouse both go through Pointer Events.
 - On the device, boards are kept in the browser's IndexedDB (database `idea-board`, store `boards`, one record per board, data version 1), because `localStorage` is too small for photos. Each change is saved 0.4 seconds after the last one, and at once when the page goes to the background. Where you were looking (how far the board is moved, and the zoom) belongs to the device, not the board, so it's kept in `localStorage` (`idea-board-view:` and the board's id) and will never travel with the board.
 - Items of a type this version doesn't know (photos and links, from a later version) are kept and saved, just not drawn, so an older copy of the app (a phone can keep one for up to 10 minutes) never deletes them.
-- A new note goes in an open spot near the middle of the screen (below first on a phone held upright, to the right on a wide screen), so it never covers another note, and the board glides to show it. "Show all" fits every note on the screen. An empty note isn't kept.
+- A new note goes in an open spot near the middle of the screen (below first on a phone held upright, to the right on a wide screen), so it never covers another note, and the board glides to show it. The spot is in the same rows and columns as the note nearest the middle (256 board pixels apart: a note's width and a gap), so new notes line up with the old ones. "Show all" fits every note on the screen. An empty note isn't kept.
+- Lining up (pull request 108): when you let go of a note, its top-left corner glides (0.15 seconds; no glide with reduced motion) onto the nearest spot, every 64 board pixels (`SETTLE_GAP` and `onSpot()` in `app.js`). The spots are the same at every zoom, so any two notes can line up exactly; settling onto whichever dots show was tried first and dropped, because a note placed close in could then never line up with one placed zoomed out. The dots stay 32 board pixels apart at the normal zoom (`DOT_GAP`) and are drawn so a dot sits on every spot (below a quarter of the size, there are spots between the dots). Notes saved before stay put until they're moved. Photos and links (build steps 4 and 5) should settle the same way; `openSpot()` and `noteOutlines()` assume a note's width (220), so photos need their own width there.
+- A tap that opens a screen also sends a click a moment later, to whatever is under the finger on the new screen. On a note's screen that's the typing box, so `openNote()` puts the cursor back at the end of the words (`putCursorAtEnd()`; found in pull request 108).
 - The saved checks: `node idea-board/tests/app-test.mjs` from the repository folder (Chromium at 360 wide with touch, 1280 with a mouse, and 180 for a phone with its zoom at 200%; must end "0 failed"). The accessibility check: `idea-board/tests/axe-check.mjs` (how to run it is in `PROGRESS.md`).
 - Photos (build step 4), Claude's plan, found missing in a fresh read of the notes (November 2, 2026): a photo must not live inside its board's record. Each board is one record, written whole 0.4 seconds after every change, and the server's D1 allows 2 MB per row (about six shrunk photos). So each photo goes in its own store in IndexedDB (a new store, `photos`, keyed by the photo's id, holding the shrunk JPEG), and the board's item only names it (`{ type: 'photo', photoId, x, y, width }`); on the server, one row (or one R2 file) per photo.
 - A new store means opening the database as version 2. Today `app.js` opens version 1 and gives up when another tab still has the old version open (`onblocked`), so the list would look empty until that tab closes. Build step 4 must first add `db.onversionchange = () => db.close()` (so an open tab lets go), and on `onblocked` wait with a short message ("Close Idea board in your other tabs") instead of giving up. Nothing is ever lost either way: the boards stay in the database.
@@ -91,7 +93,7 @@ Where Idea board stands (pull request 105):
 
 1. This plan, with the folder's `CLAUDE.md`, `PROGRESS.md` and `DECISIONS.md`. Check: read "How it works" and this build plan.
 2. One board, saved on this device for now: move around, zoom, add a note, type in it, move it, remove it (with Undo). Check: on your phone, add three notes, move them, zoom out, then close Chrome and open the page again: they're still there. Then try it on your computer. (Built November 2, 2026, pull request 104.)
-3. Several boards: the start screen, "New board," rename, remove. Check: make two boards and switch between them. (Built November 2, 2026, pull request 106.)
+3. Several boards: the start screen, "New board," rename, remove. Check: make two boards and switch between them. (Built November 2, 2026, pull request 106.) Then Dan's idea after trying it: notes line up on the dots (pull request 108).
 4. Photos: add one (shrunk before saving), move it, change its size. Check: add a photo from your phone; it looks sharp enough, and it moves and resizes.
 5. Links: a web address and a title; tapping the card opens the page. Check: add a link to your Substack and tap it.
 6. The server and signing in: a one-time setup in Cloudflare (with every step), then signing in with an email code. Check: sign in on your phone and on your computer.
@@ -108,4 +110,4 @@ Where Idea board stands (pull request 105):
 5. The notes' color: answered November 2, 2026, "index card" (the owner: "I like the index card idea").
 6. How to add a photo (build step 4): one "Add" button that asks "Note, photo or link?" (as "How it works" plans; one more tap for every note), or a separate "Add a photo" next to "Add a note."
 7. What tapping a photo does (build step 4): Claude's suggestion, its own screen with the photo big, "Done" and "Remove" (with Undo for 8 seconds), like a note.
-8. The resize corner on a photo (build step 4): how it looks, and whether it shows all the time or only after tapping the photo. It must stay at least 48 by 48 at any zoom.
+8. The resize corner on a photo (build step 4): how it looks, whether it shows all the time or only after tapping the photo, and whether a photo's size also settles to the spots, so photos line up with notes. It must stay at least 48 by 48 at any zoom.

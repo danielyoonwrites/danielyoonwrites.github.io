@@ -1,4 +1,4 @@
-// Idea board: boards of typed notes (build steps 2 and 3 in SPEC.md).
+// Idea board: boards of typed notes (build steps 2 and 3 in SPEC.md) that line up on the board's dots.
 // For now the boards are saved only in this browser, on this device, in IndexedDB
 // (the browser's own storage, which can hold photos later). Nothing is sent anywhere.
 // Signing in and saving to your account come in build steps 6 and 7.
@@ -10,6 +10,8 @@
 //   { id, name, version: 1, made, changed, items: [ item, ... ] }
 //   item = { id, type: 'note', x, y, text, made, changed }
 // x and y are where a note's top-left corner sits on the board, in board pixels.
+// A note added or moved sits on a settling spot (a whole number of SETTLE_GAP steps, on the dots);
+// a note saved before notes lined up stays where it was until it's moved.
 // The last item in the list is drawn on top.
 //
 // Where you were looking on each board (how far it's moved, and the zoom) is kept separately,
@@ -22,6 +24,9 @@ const DATA_VERSION = 1;                 // raise it if what's saved ever changes
 const UNTITLED = 'Untitled board';      // the name of a board saved without one
 
 const NOTE_WIDTH = 220;        // board pixels, the same as .note in style.css
+const DOT_GAP = 32;            // board pixels between the faint dots, at the normal zoom
+const SETTLE_GAP = 64;         // board pixels between the spots where a note's top-left corner settles:
+                               // every second dot, so the spots are easy to hit with a finger
 const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 3;
 const MOVE_BEFORE_DRAG = 8;    // screen pixels a finger moves before a tap becomes a drag
@@ -337,15 +342,24 @@ function placeNote(el, item) {
   el.style.top = item.y + 'px';
 }
 
+// The nearest spot where a note's corner can settle, one direction at a time (across, then down).
+// The spots are the same at every zoom, so any two notes can always line up exactly.
+function onSpot(value) {
+  return Math.round(value / SETTLE_GAP) * SETTLE_GAP;
+}
+
 // Moves and zooms the world, and the dots behind it
 function applyView() {
   worldEl.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`;
-  // The dots stay between 16 and 64 pixels apart, so they never get crowded
-  let gap = 32 * view.zoom;
+  // The dots stay between 16 and 64 pixels apart, so they never get crowded. A dot is drawn in
+  // the middle of its little square, so the squares start half a square up and to the left:
+  // that puts a dot on every spot where a note's corner settles (only when zoomed out the
+  // farthest, below a quarter of the size, are there spots between the dots).
+  let gap = DOT_GAP * view.zoom;
   while (gap < 16) gap *= 2;
   while (gap > 64) gap /= 2;
   boardEl.style.backgroundSize = `${gap}px ${gap}px`;
-  boardEl.style.backgroundPosition = `${view.x}px ${view.y}px`;
+  boardEl.style.backgroundPosition = `${view.x - gap / 2}px ${view.y - gap / 2}px`;
 }
 
 // Zooms in or out, keeping the spot under (x, y) on the screen where it is
@@ -477,6 +491,7 @@ boardEl.addEventListener('pointerdown', (event) => {
     const noteEl = event.target.closest('.note');
     const item = noteEl && findItem(noteEl.dataset.id);
     if (item) {
+      noteEl.classList.remove('settling');   // picked up again while still gliding: it follows the finger at once
       gesture = { kind: 'note', item, el: noteEl, startX: p.x, startY: p.y, itemX: item.x, itemY: item.y, dragging: false };
     } else {
       gesture = { kind: 'pan', lastX: p.x, lastY: p.y };
@@ -573,8 +588,15 @@ boardEl.addEventListener('pointercancel', pointerEnded);
 function finishNoteDrag() {
   if (!gesture || gesture.kind !== 'note') return;
   if (gesture.dragging) {
-    gesture.el.classList.remove('dragging');
-    gesture.item.changed = now();
+    const { item, el } = gesture;
+    el.classList.remove('dragging');
+    // Let go: the note glides onto the nearest spot on the dots, so notes line up
+    item.x = onSpot(item.x);
+    item.y = onSpot(item.y);
+    el.classList.add('settling');
+    placeNote(el, item);
+    setTimeout(() => el.classList.remove('settling'), 200);
+    item.changed = now();
     saveSoon();
   }
   gesture = null;
@@ -620,15 +642,27 @@ function addNote() {
   openNote(item, true);   // it joins the board once you type something
 }
 
-// An open spot for a new note, as near the middle of the screen as possible,
-// so it never covers another note. On a phone held upright it tries below first,
+// An open spot for a new note, as near the middle of the screen as possible, so it never covers
+// another note. It goes in the same rows and columns as the note nearest the middle, so new notes
+// line up with the ones already there. On a phone held upright it tries below first,
 // on a wide screen to the right.
 function openSpot() {
   const rect = boardEl.getBoundingClientRect();
-  const middleX = (rect.width / 2 - view.x) / view.zoom - NOTE_WIDTH / 2;
-  const middleY = (rect.height / 2 - 40 - view.y) / view.zoom - NOTE_WIDTH / 2;
+  const step = SETTLE_GAP * 4;   // 256 board pixels: a note's width and a gap, from spot to spot
+  // Where a note in the middle of the screen would go, on the board
+  const centerX = (rect.width / 2 - view.x) / view.zoom - NOTE_WIDTH / 2;
+  const centerY = (rect.height / 2 - 40 - view.y) / view.zoom - NOTE_WIDTH / 2;
+  // The note nearest that place (if there is one) sets the rows and columns
+  let nearest = null;
+  for (const item of notesOf(board)) {
+    if (!nearest || Math.hypot(item.x - centerX, item.y - centerY) < Math.hypot(nearest.x - centerX, nearest.y - centerY)) nearest = item;
+  }
+  const lineX = onSpot(nearest ? nearest.x : centerX);
+  const lineY = onSpot(nearest ? nearest.y : centerY);
+  // The place in those rows and columns closest to the middle of the screen
+  const middleX = lineX + Math.round((centerX - lineX) / step) * step;
+  const middleY = lineY + Math.round((centerY - lineY) / step) * step;
   const upright = rect.height > rect.width;
-  const step = NOTE_WIDTH + 24;
   const gap = 12;
   const taken = noteOutlines();
   const spots = [];
@@ -648,7 +682,7 @@ function openSpot() {
     spot.x < outline.right + gap && spot.x + NOTE_WIDTH > outline.left - gap &&
     spot.y < outline.bottom + gap && spot.y + NOTE_WIDTH > outline.top - gap));
   const chosen = free || { x: middleX, y: middleY };
-  return { x: Math.round(chosen.x), y: Math.round(chosen.y) };
+  return { x: chosen.x, y: chosen.y };   // already on the dots
 }
 
 
@@ -662,7 +696,17 @@ function openNote(item, isNew) {
   noteText.value = item.text;
   editorEl.hidden = false;
   noteText.focus();   // opens the phone's keyboard
-  if (!isNew) noteText.setSelectionRange(noteText.value.length, noteText.value.length);
+  if (!isNew) {
+    putCursorAtEnd();
+    // On a phone, the tap that opened the note also sends a click a moment later. It lands on this
+    // typing box and would put the cursor where the finger was; put it back at the end of the words.
+    noteText.addEventListener('click', putCursorAtEnd, { once: true });
+    setTimeout(() => noteText.removeEventListener('click', putCursorAtEnd), 500);
+  }
+}
+
+function putCursorAtEnd() {
+  noteText.setSelectionRange(noteText.value.length, noteText.value.length);
 }
 
 // Every letter is saved, so nothing is lost if the phone closes the page mid-sentence

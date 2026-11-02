@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (built November 2, 2026, at the end of the tenth session)
+## In force (built November 2, 2026, at the end of the tenth session; pull request 108 added one line)
 
 Every decision below that still holds, one line each; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -18,6 +18,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 2, 2026: "index card" notes, a little lighter than the paper (Dan: "I like the index card idea").
 - November 2, 2026: easy to see and read: note edges 3.2 to 1, note words 21 pixels, buttons at least 48 by 48, no words under 13 pixels, buttons on two rows at 200% zoom.
 - November 2, 2026: the app opens on "Your boards" (newest first); "New board" asks for a name first; on a board "← Boards" and "Edit"; "Remove board" asks first, then offers Undo; the phone's Back button goes back one step.
+- November 2, 2026: notes line up: a note you let go of glides onto the nearest spot on the dots (every 64 board pixels, the same at every zoom), a new note goes in line with the note nearest the middle, and notes saved before stay put until they're moved (Dan's "a").
 
 ## Log (oldest first)
 
@@ -92,3 +93,14 @@ Every decision below that still holds, one line each; it's rewritten at each han
   - The board saved by build step 2 ("My board") shows in the list as it is; nothing had to change in what's saved.
 - Why: one thing per screen; a board is easier to find with a name; removing a whole board loses more than one note, so it asks first and still offers Undo. The owner, after trying build step 2 and the accessibility fixes on his phone: "I tried it on the phone it works pretty well." Then he chose "A" (start build step 3).
 - Turned down: opening straight on the last board (the plan says the app opens on the list), new boards called "Untitled" until renamed (they would pile up in the list), and a phone pop-up to confirm removing (the question stays on the app's own screen).
+
+### November 2, 2026: notes line up on the dots (pull request 108)
+- Decision: a note you let go of glides onto the nearest spot on the board's dots, so notes line up in rows and columns. Dan's choice "a" of three: notes settle onto the dots (Claude's recommendation), guide lines while dragging, or not now.
+- Why: Dan, after trying build step 3 on his phone ("it feels good and works well"): "Could there be a way to have maybe some sort of grid line or system that might help the different post it notes be aligned, like at the same height or something to help it look more organized? If that is hard and not worth the effort let me know." Claude: not hard, and worth it; the dots already on the board can be the grid, settling acts the same way every time under a finger, and photos (build step 4) can line up the same way.
+- How it works (Claude's choices, put to Dan with pull request 108 and its screenshots):
+  - The spots are every 64 board pixels: every second dot at the normal zoom, every dot when zoomed out. They're the same at every zoom, so any two notes can line up exactly. The dots look as before (32 board pixels apart at the normal zoom), drawn so a dot sits on every spot.
+  - The note glides there in 0.15 seconds (no glide with reduced motion turned on).
+  - A new note goes in the same rows and columns as the note nearest the middle of the screen (256 board pixels apart: a note's width and a gap).
+  - Notes saved before stay where they are until they're moved; nothing moves by itself. Notes still grow taller when their words need room, so their tops line up, not always their bottoms.
+- Also fixed, found by the saved checks: a tap on a note near the top of the screen put the cursor where the finger was (the tap's own click lands on the typing box a moment later), so typing went into the middle of the words. The cursor now goes back to the end.
+- Turned down: guide lines while dragging (more work, and the pull can feel jumpy under a finger); not now; settling onto whichever dots show at the zoom you're at (the first try: zoomed out, fewer dots show, so a note placed close in could never line up exactly with one placed zoomed out); every dot as a spot (zoomed out the way a phone shows several notes, a finger would have only about 6 to 8 screen pixels of leeway).

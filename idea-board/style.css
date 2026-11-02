@@ -258,7 +258,8 @@ textarea:focus-visible,
   overflow: hidden;
   touch-action: none;   /* the app moves and zooms the board itself */
   cursor: grab;
-  /* Faint dots, so you can see the board move. app.js changes their size and place. */
+  /* Faint dots, so you can see the board move. Notes' corners settle onto them (on every second
+     dot when you're zoomed in close), so notes line up. app.js changes their size and place. */
   background-color: var(--paper);
   background-image: radial-gradient(circle, var(--line) 1.3px, transparent 1.6px);
   background-size: 32px 32px;
@@ -316,6 +317,18 @@ textarea:focus-visible,
 .note.dragging {
   cursor: grabbing;
   box-shadow: 0 2px 4px rgba(29, 27, 24, 0.08), 0 14px 32px rgba(29, 27, 24, 0.14);
+}
+
+/* When you let go of a note, it glides the last few pixels onto the nearest spot on the dots */
+.note.settling {
+  transition: left 0.15s ease, top 0.15s ease;
+}
+
+/* (This comes after .note.settling on purpose: the later rule wins.) */
+@media (prefers-reduced-motion: reduce) {
+  .note.settling {
+    transition: none;
+  }
 }
 
 /* "Nothing here yet" in the middle of an empty board */
