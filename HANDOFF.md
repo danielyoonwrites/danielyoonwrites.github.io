@@ -1,6 +1,6 @@
 # Handoff: where everything stands
 
-Last updated November 2, 2026, at the end of the eleventh session (with pull request 115). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
+Last updated November 2, 2026, at the end of the eleventh session (with pull request 115), and Living in the Word's lines at the end of the ninth session. This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
 
 - How to work with Dan, and the rules for every project: `CLAUDE.md`.
 - Each project: its folder's `PROGRESS.md` (where it stands, the next step), `DECISIONS.md` (choices and their reasons) and `SPEC.md`. The website's decisions are in the root `DECISIONS.md`.
