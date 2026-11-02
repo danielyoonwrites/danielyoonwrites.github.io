@@ -2,11 +2,12 @@
 // sign-in screens, in Chromium at 320, 360 and 1280 wide, with the real server/worker.js
 // answering (stand-ins for D1, Resend and the AI; see server-test.mjs). Written October 29,
 // 2026. Run from the repository folder: node living-in-the-word/tests/app-test.mjs
-// It serves the repository itself on http://127.0.0.1:8765 (python3), so that port must be
-// free. Needs Playwright with Chromium (installed in Claude's cloud sessions). Screenshots go
+// It serves the repository itself on http://127.0.0.1:8765 (python3), and a stand-in site for
+// the offline helper's checks on 8766 (section SW), so both ports must be free. Needs Playwright with Chromium (installed in Claude's cloud sessions). Screenshots go
 // to a temporary folder, printed at the end. Success ends with "... passed, 0 failed".
 import { createRequire } from 'node:module';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
@@ -621,6 +622,136 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
   ai.delay = 0;
   check('Z: no errors', errors.length === 0, errors.join(' | '));
   await context.close();
+}
+
+// ---- SW. The offline helper (sw.js), which the checks above turn off. A small stand-in website
+// on port 8766 serves two made-up versions of the app, ignores the ?v= part of an address the way
+// GitHub Pages does, and can be slowed down or cut off. The new script doesn't fit the old page
+// (it looks for something only the new page has), like the real updates in pull requests 73,
+// 87 and 89. Found in the audit, November 2, 2026 (AUDIT.md, item 1).
+{
+  const SW_APP = 'http://127.0.0.1:8766/living-in-the-word/';
+  const appFolder = fileURLToPath(new URL('../', import.meta.url));
+  const page = (v, id) => '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Test</title>' +
+    '<link rel="stylesheet" href="style.css?v=' + v + '"><script src="app.js?v=' + v + '" defer></script></head>' +
+    '<body><p id="' + id + '">' + id + ' page</p></body></html>';
+  const script = (id) => "document.getElementById('" + id + "').textContent = '" + id + " page, " + id + " script';\n" +
+    "navigator.serviceWorker.register('sw.js');\n";
+  const versions = {
+    old: { '': page(1, 'old'), 'app.js': script('old'), 'style.css': 'p { color: #1D1B18; }' },
+    new: { '': page(2, 'new'), 'app.js': script('new'), 'style.css': 'p { color: #1D1B18; }' },
+  };
+  const REAL = ['sw.js', 'manifest.webmanifest', 'icons/apple-touch-icon.png', 'icons/icon-192.png'];
+  const TYPES = { js: 'text/javascript', css: 'text/css', png: 'image/png', webmanifest: 'application/manifest+json' };
+  const site = { version: 'old', down: false, slow: {} };   // slow: { 'app.js': { ms, fail } }; '' is the page
+  const sockets = new Set();
+  const server = http.createServer(async (request, response) => {
+    if (site.down) { request.socket.destroy(); return; }
+    const name = new URL(request.url, SW_APP).pathname.replace('/living-in-the-word/', '');   // ?v= ignored
+    const slow = site.slow[name];
+    if (slow) {
+      await new Promise((r) => setTimeout(r, slow.ms));
+      if (slow.fail) { request.socket.destroy(); return; }
+    }
+    const body = REAL.includes(name) ? readFileSync(path.join(appFolder, name)) : versions[site.version][name];
+    if (body === undefined) { response.writeHead(404); response.end(); return; }
+    response.writeHead(200, { 'content-type': TYPES[name.split('.').pop()] || 'text/html', 'cache-control': 'no-cache' });
+    response.end(body);
+  });
+  server.on('connection', (socket) => { sockets.add(socket); socket.on('close', () => sockets.delete(socket)); });
+  await new Promise((resolve) => server.listen(8766, '127.0.0.1', resolve));
+
+  const swPhone = async () => {
+    const context = await browser.newContext({ viewport: { width: 360, height: 740 } });   // the helper allowed
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    return { context, page, errors };
+  };
+  const helped = (page) => page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+    if (!navigator.serviceWorker.controller) await new Promise((r) => navigator.serviceWorker.addEventListener('controllerchange', r, { once: true }));
+  });
+  const scriptRan = (page, timeout = 10000) => page.waitForFunction(() => /script$/.test((document.querySelector('p') || {}).textContent || ''), null, { timeout }).catch(() => {});
+  const shown = (page) => page.evaluate(() => (document.querySelector('p') || {}).textContent || '(nothing)').catch(() => '(no page)');
+  const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // SW1. Without reception, the copy opens, and its script runs
+  {
+    Object.assign(site, { version: 'old', down: false, slow: {} });
+    const { context, page, errors } = await swPhone();
+    await page.goto(SW_APP);
+    await helped(page);
+    await page.reload();   // a visit with the helper on: the exact versions are kept
+    await pause(300);
+    site.down = true;
+    for (const socket of sockets) socket.destroy();
+    await page.reload().catch(() => {});
+    await scriptRan(page);
+    check('SW1: without reception, the copy opens and its script runs', (await shown(page)) === 'old page, old script', await shown(page));
+    check('SW1: no errors', errors.length === 0, errors.join(' | '));
+    site.down = false;
+    await context.close();
+  }
+
+  // SW2. Right after an update, with a slow page (over the 4 seconds): the old page shows from
+  // the copy, with its own old script, not the new one (no button would work). Then the next
+  // open shows the new version.
+  {
+    Object.assign(site, { version: 'old', down: false, slow: {} });
+    const { context, page, errors } = await swPhone();
+    await page.goto(SW_APP);
+    await helped(page);
+    await page.reload();
+    await pause(300);
+    site.version = 'new';
+    site.slow[''] = { ms: 6000 };
+    await page.reload({ timeout: 20000 });
+    await scriptRan(page);
+    check('SW2: slow page after an update: the old page with its own old script', (await shown(page)) === 'old page, old script', await shown(page));
+    check('SW2: no errors (the new script never runs in the old page)', errors.length === 0, errors.join(' | '));
+    await pause(6500);   // the new page arrives in the background
+    site.slow = {};
+    await page.reload();
+    await scriptRan(page);
+    check('SW2: the next open shows the new version', (await shown(page)) === 'new page, new script', await shown(page));
+    await context.close();
+  }
+
+  // SW3. The second open after a first visit, on a connection that hangs and then drops: the
+  // copy (of any version) is used, instead of a page whose script never comes
+  {
+    Object.assign(site, { version: 'new', down: false, slow: {} });
+    const { context, page } = await swPhone();
+    await page.goto(SW_APP);
+    await helped(page);
+    for (const name of ['', 'app.js', 'style.css']) site.slow[name] = { ms: 6000, fail: true };
+    await page.reload({ timeout: 30000 }).catch(() => {});
+    await scriptRan(page, 15000);
+    check('SW3: a connection that hangs, then drops: the copy\'s script still runs', (await shown(page)) === 'new page, new script', await shown(page));
+    site.slow = {};
+    await context.close();
+  }
+  server.close();
+  for (const socket of sockets) socket.destroy();
+}
+
+// ---- VERSIONS. The offline helper uses the phone's copy of app.js?v=36 or style.css?v=25 without
+// asking the internet (since November 2, 2026), so a changed file needs a new ?v= number in
+// index.html, or installed phones would never get it. When app.js or style.css changes: raise its
+// ?v= number in index.html, then put the new number and the fingerprint this check prints in KNOWN.
+{
+  const KNOWN = {
+    'app.js?v=36': '0aa6592b8116a93a',
+    'style.css?v=25': 'a79e0238a9c905fd',
+  };
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  for (const file of ['app.js', 'style.css']) {
+    const link = (html.match(new RegExp(file.replace('.', '\\.') + '\\?v=\\d+')) || [''])[0];
+    const print = createHash('sha256').update(readFileSync(new URL('../' + file, import.meta.url))).digest('hex').slice(0, 16);
+    check('VERSIONS: ' + file + ' has a new ?v= number for each change', KNOWN[link] === print,
+      link + ' is now ' + print + (KNOWN[link] ? ', not ' + KNOWN[link] + ': the file changed, so raise its ?v= in index.html' : ': a new number, so put it and this fingerprint in KNOWN'));
+  }
 }
 
 await browser.close();

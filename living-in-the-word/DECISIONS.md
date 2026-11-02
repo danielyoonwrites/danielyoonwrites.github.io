@@ -9,6 +9,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 25, 2026: the name "Living in the Word"; a trademark search before any public launch or store listing.
 - October 25, 2026: Claude's effort: High for most steps; Extra high was for building the AI helper.
 - October 29, 2026: the checks live in `living-in-the-word/tests/`; run them after any change to `app.js` or `server/worker.js`.
+- November 2, 2026: perfect what's built: the audit's fixes come first, one pull request each, in `AUDIT.md`'s order.
 
 **The questions and the AI**
 - October 25, 2026: the AI gets only the passage name and whether it's for a group study or the reading plan: no Bible text, nothing personal.
@@ -52,6 +53,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 27 and 28, 2026: no app store for now; the free steps of `STORE-PLAN.md` first, in its order.
 - October 28, 2026: Android's back gesture goes back one screen, like Back.
 - October 29, 2026: install help: "Install the app" in Chrome, or the steps for iPhone and Android; no KakaoTalk step.
+- November 2, 2026: the offline helper takes the phone's exact copy of a versioned file (`app.js?v=…`) at once; every change to app.js or style.css gets a new `?v=` (the VERSIONS check).
 - October 29, 2026: Cloudflare deploys the server on every merge (Workers Builds, settings in `server/wrangler.jsonc`, build watch paths `*`): the one exception to "no npm." Preview builds stay off.
 
 ## Log (oldest first)
@@ -408,3 +410,16 @@ The "In force" list right below is every decision that still holds, one line eac
 - Checked for the options (Anthropic's reference in Claude Code's claude-api skill, last updated October 6, 2026): fast mode on Opus 5.5 is $8 / $40 per million tokens (twice Opus 5.5's $4 / $20), "up to 2.5x higher output tokens per second", a research preview, on Claude's own API only; Sonnet 5.5 is $2 / $10. Not re-checked: that fast mode needs the Start tier or higher (the morning's research, in pull request 96's entry). For the timing, Cloudflare's docs (`cloudflare/cloudflare-docs` on GitHub, `workers/runtime-apis/performance.mdx`, read October 31, 2026): a Worker's timers "only advance or increment after I/O occurs," and wrapping a subrequest in them measures it, so the server's clock times just the AI's request.
 - Turned down for now: "(a)" fast mode for the set someone waits for (about 6 cents a set instead of about 2.3, by Claude's estimate from the Romans 14 costs; Dan found Opus's questions deeper on October 28, but the first chapter's set could read differently from the ones written ahead on Sonnet); "(c)" leaving it.
 - Revisit when: Dan has the seconds for a first chapter or two. Then "(a)" or "(c)".
+- Correction (November 2, 2026): Anthropic's live fast mode page (https://platform.claude.com/docs/en/build-with-claude/fast-mode, read November 2, 2026) lists fast mode on Opus 5.5 as "Available," not a research preview (that's Opus 5 and Opus 4.8 only), with no beta header for Opus 5.5. The Start tier requirement is confirmed there: "Organizations in the Evaluation tier can use fast mode with Claude Opus 5.5 once they move to the Start, Build, or Scale tier." The skill's reference cached October 6 was out of date.
+
+### November 2, 2026: perfect what's built: an audit, then its fixes in order
+- Decision: an audit of Living in the Word by three separate reviewers (security and privacy, reliability and bugs, speed and cost), every finding checked by Claude against the code. The list, with each item's status, is `AUDIT.md`. The fixes go one small pull request each, in its order: 1 (the offline helper), 2 (sign-in privacy and the email budget), 3 (the Bible-text request), then fast mode if Dan wants it, then 4 to 10.
+- Why: Dan, November 2, 2026, after the Romans 16 wait: "Can we audit our code to check for reliability, bugs, security issues, and speed? Can we work on perfecting it not just building it". No high-severity problems were found; the three medium ones were proved by running them. The order is Claude's (Claude had said anything serious from the audit goes first), told to Dan with "unless you say otherwise."
+- Revisit if: a new finding is more serious than the one in progress, or Dan wants fast mode sooner.
+
+### November 2, 2026: the offline helper uses the phone's exact copy of a versioned file at once (pull request 103)
+- Decision: in `sw.js`, a file with a version number in its address (`app.js?v=36`, `style.css?v=25`) is taken from the phone at once when the phone has that exact version, without the internet. If the internet hangs and then fails after the 4-second wait, any version of the file is used, as without reception. The page and the fonts still try the internet first. A saved check ("VERSIONS" in `tests/app-test.mjs`) fails when app.js or style.css changes without a new `?v=` number, and the saved checks now test the offline helper (section SW), which they used to turn off.
+- Why: `AUDIT.md`, item 1, proved by running: right after an update, if the page took more than 4 seconds, the helper showed the copy of the old page, which asked for its old script; GitHub Pages ignores `?v=`, so the new app.js came back, didn't fit the old page, and no button worked for that open. Of the 19 updates since the offline helper (pull request 59), 3 would have done it (pull requests 73, 87 and 89). And on the second open after a first visit, a connection that hung and then dropped left the page without its script. The new checks SW2 and SW3 fail on the old `sw.js` with exactly these problems.
+- Turned down: only lowering the 4-second wait to 2 (the speed review's smallest change): shorter waits, but the old page could still get the new script.
+- Cost of the change: a file changed without a new `?v=` number would now never reach installed phones (before, within about 10 minutes). The VERSIONS check catches it in Claude's sessions; the rule is in `CLAUDE.md`.
+- Revisit if: the app ever needs to change a file without a new number.

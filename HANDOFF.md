@@ -16,7 +16,7 @@ This repository is public. Keep personal details out of this file.
 - **Quiet room** (paused after step 1): https://danielyoonwrites.github.io/quiet-room, `quiet-room/PROGRESS.md`.
 - **Fewer spam calls** (built, one check left): https://danielyoonwrites.github.io/fewer-spam-calls, `fewer-spam-calls/PROGRESS.md`.
 - **First step smaller** (built, the owner's trial next): https://danielyoonwrites.github.io/first-step-smaller, `first-step-smaller/PROGRESS.md`.
-- **Living in the Word** (the AI helper live on Sonnet 5.5, with questions written ahead for the reading plan and the next chapter; signing in with an email code, the owner's invite page with an invite email, install help, the "check it" line; the server deploys by itself through Cloudflare; the plan for phones and app stores under way): https://danielyoonwrites.github.io/living-in-the-word, `living-in-the-word/PROGRESS.md`. The store plan is `living-in-the-word/STORE-PLAN.md`.
+- **Living in the Word** (the AI helper live on Sonnet 5.5, with questions written ahead for the reading plan and the next chapter; signing in with an email code, the owner's invite page with an invite email, install help, the "check it" line; the server deploys by itself through Cloudflare; the plan for phones and app stores paused for the audit's fixes, `living-in-the-word/AUDIT.md`, November 2, 2026): https://danielyoonwrites.github.io/living-in-the-word, `living-in-the-word/PROGRESS.md`. The store plan is `living-in-the-word/STORE-PLAN.md`.
 
 
 ## Where things stand (October 31, 2026)
@@ -27,7 +27,7 @@ This repository is public. Keep personal details out of this file.
 
 ## Waiting on Dan
 
-1. Merge pull request 102 (Living in the Word: the test link says how long the wait was): https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/102, Conversation tab, Merge pull request, Confirm merge. Then the wait check, item 2 in `living-in-the-word/PROGRESS.md`.
+1. Merge pull request 103 (Living in the Word: the audit, and its first fix, the offline helper): https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/103, Conversation tab, Merge pull request, Confirm merge. Then its check, item 2 in `living-in-the-word/PROGRESS.md`. Also his answer on fast mode (item 2b there).
 2. Living in the Word: everything waiting, with every step, is in `living-in-the-word/PROGRESS.md` ("Waiting on Dan"): the next-chapter check, the Matthew 1 check, the invite test, and the smaller checks.
 3. The Anthropic API key expires November 24, 2026: a new key, saved in Cloudflare as `ANTHROPIC_API_KEY`. Remind him in good time, with every step (in `living-in-the-word/PROGRESS.md`).
 4. The other apps: Fewer spam calls needs the Samsung steps checked on a real Samsung phone; First step smaller waits for his daily trial. Details in each `PROGRESS.md`.
