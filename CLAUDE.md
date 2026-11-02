@@ -19,8 +19,8 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
   - Numbered steps, with the full link inside each step (never "the link above") and the exact button or tab to click.
   - Every answer stands on its own (Dan's rule, October 26, 2026, after Claude said "the steps are two messages up"): repeat every step, link, name and value in full each time, even if it was given before. Never "see above" or "as before."
   - For anything he pastes (like `server/worker.js` into Cloudflare), give the direct links to copy it: the GitHub file page (`https://github.com/danielyoonwrites/danielyoonwrites.github.io/blob/main/<path>`, with its "Copy raw file" button) and the raw page (`https://raw.githubusercontent.com/danielyoonwrites/danielyoonwrites.github.io/main/<path>`), plus exactly where to paste it.
-  - Ask one question at a time, with options and a recommendation.
-  - Accuracy matters most. Check facts against official sources before stating them, say clearly when something couldn't be checked, and never guess.
+  - Ask one question at a time, with options and a recommendation. Each lettered option is one choice: an option that joined "what goes on the board" with "use Canva" made Dan's "A" mean Canva when he meant building his own (November 2, 2026).
+  - Accuracy matters most. Check facts against official sources before stating them, say clearly when something couldn't be checked, and never guess. Cite only pages Claude actually opened, and say when a source was seen only in search results (November 2, 2026).
   - Start feedback with what works, then up to three ranked problems, each with a fix.
   - End each reply with one concrete next action.
 - He wants as little friction as possible: Claude does the follow-up work on its own (see "How the work flows"), and he doesn't want to be the messenger.
@@ -73,6 +73,9 @@ When Dan says "do the rest," Claude works through the build plan one pull reques
 - `fewer-spam-calls/` is a one-page guide with its own `CLAUDE.md` and `SPEC.md`.
 - `first-step-smaller/` is a little app (planned October 2026) with its own `CLAUDE.md` and `SPEC.md`.
 - `living-in-the-word/` is a little app for Bible study questions (planned October 2026) with its own `CLAUDE.md` and `SPEC.md`.
+- `idea-board/` is a little app like Apple's Freeform, for typed notes, photos and links, just for the owner (planned November 2026), with its own `CLAUDE.md` and `SPEC.md`.
+- `video-editor/` is a simple video editor, just for the owner, on his Android phone (planned November 2026), with its own `CLAUDE.md` and `SPEC.md`.
+- `photo-filters/` is a little app that puts the owner's own looks on his photos, in the browser of his phone and MacBook (planned November 2026), with its own `CLAUDE.md` and `SPEC.md`.
 
 ## Privacy
 

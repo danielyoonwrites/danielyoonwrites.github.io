@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- The same safety rule as the app: only this site's own files -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>Photo Filters: a test photo</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="../style.css?v=1">
+</head>
+<body>
+  <!-- A page for Dan's checks on his MacBook: one made-up test photo to download.
+       The photo (tall-test-photo.jpg) is made by Claude, not taken by anyone: a drawn sky, sun and
+       hill with the word TOP. It's 3,000 wide and 4,000 tall as you see it, saved turned on its
+       side with rotation tag 6 (the way a phone's camera saves a tall photo), and it carries a
+       made-up location: 30 degrees north, 140 degrees west, open ocean in the North Pacific. -->
+  <header class="top">
+    <h1>Photo Filters: a test photo</h1>
+  </header>
+  <main>
+    <p class="intro">A made-up photo for checking Photo Filters on a computer. It's tall, and it's saved turned on its side with a note saying which way is up, the way a phone's camera saves a tall photo. It also carries a made-up location in the Pacific Ocean, for checking that exports leave the location out.</p>
+    <p class="intro"><a id="download" class="main-button" href="tall-test-photo.jpg" download="tall-test-photo.jpg">Download the test photo</a></p>
+    <p class="intro">Then open <a href="../">Photo Filters</a>, click "Choose photo," and pick tall-test-photo.jpg from your Downloads folder.</p>
+  </main>
+</body>
+</html>

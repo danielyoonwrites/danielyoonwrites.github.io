@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Makes the page fit phone screens -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- A safety rule for the browser (a "Content-Security-Policy"): this page may only run its own
+       scripts (phone-test.js and the video library in lib/) and its own style sheet. It talks to no server.
+       "blob:" lets it play and save the video it makes, and lets the sound add-on start its helper.
+       'wasm-unsafe-eval' lets that add-on run its sound encoder, which is compiled code (WebAssembly).
+       If you add anything from outside (a font, an image, a server), it has to be added here too. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src blob:; style-src 'self'; media-src blob:; img-src 'self' data: blob:; base-uri 'none'; form-action 'none'">
+  <title>Phone test · Video editor</title>
+  <meta name="description" content="Checks whether this phone can make a new video, before the video editor is built.">
+
+  <!-- Asks search engines not to list it: it's just for the owner -->
+  <meta name="robots" content="noindex">
+
+  <!-- Raise the ?v= numbers whenever a file changes, so phones load the new copy -->
+  <link rel="stylesheet" href="phone-test.css?v=1">
+  <!-- Mediabunny, the library that reads and writes video files (see lib/README.md) -->
+  <script src="lib/mediabunny.min.js?v=1.65.0" defer></script>
+  <script src="phone-test.js?v=1" defer></script>
+</head>
+<body>
+  <main>
+    <p class="kicker">Video editor</p>
+    <h1>Phone test</h1>
+    <p class="lead">This checks whether your phone can make a new video, before the real app is built. Nothing is uploaded: everything stays on this phone.</p>
+
+    <!-- Part 1: what Chrome on this phone can do. phone-test.js fills in each line. -->
+    <section aria-labelledby="can-title">
+      <h2 id="can-title">What Chrome can do</h2>
+      <ul class="checks">
+        <li id="check-tools"><span class="mark" aria-hidden="true">…</span> <span>Video tools (WebCodecs): <b class="note">checking</b></span></li>
+        <li id="check-video"><span class="mark" aria-hidden="true">…</span> <span>Make MP4 video (H.264): <b class="note">checking</b></span></li>
+        <li id="check-sound"><span class="mark" aria-hidden="true">…</span> <span>Make MP4 sound (AAC): <b class="note">checking</b></span></li>
+        <li id="check-filter"><span class="mark" aria-hidden="true">…</span> <span>Draw filters: <b class="note">checking</b></span></li>
+        <li id="check-share"><span class="mark" aria-hidden="true">…</span> <span>Share to other apps: <b class="note">checking</b></span></li>
+        <li id="check-awake"><span class="mark" aria-hidden="true">…</span> <span>Keep the screen on: <b class="note">checking</b></span></li>
+      </ul>
+      <p class="small" id="browser"></p>
+    </section>
+
+    <!-- Part 2: choose a video and make the copy -->
+    <section aria-labelledby="try-title">
+      <h2 id="try-title">Try a video</h2>
+      <p>Pick a short video from your phone. The test makes a black-and-white copy of its first 5 seconds.</p>
+      <button type="button" class="button" id="choose">Choose a video</button>
+      <!-- The phone's own picker opens from the button above; this box itself stays hidden -->
+      <input type="file" id="pick" accept="video/*" hidden>
+
+      <div id="info" hidden>
+        <p class="facts" id="facts"></p>
+        <ul class="checks">
+          <li id="check-read"><span class="mark" aria-hidden="true">…</span> <span id="read-words"></span></li>
+        </ul>
+        <button type="button" class="button" id="make" hidden>Make a 5-second black-and-white copy</button>
+      </div>
+
+      <div id="working" hidden>
+        <progress id="bar" max="100" value="0" aria-labelledby="working-words"></progress>
+        <p id="working-words">Making the copy… 0%</p>
+        <button type="button" class="button quiet" id="stop">Stop</button>
+      </div>
+
+      <p class="problem" id="problem" role="alert" hidden></p>
+    </section>
+
+    <!-- Part 3: the copy, with Save and Share -->
+    <section id="result" aria-labelledby="result-title" hidden>
+      <h2 id="result-title" tabindex="-1">The copy</h2>
+      <ul class="checks">
+        <li id="check-time"><span class="mark" aria-hidden="true">…</span> <span id="time-words"></span></li>
+        <li id="check-plays"><span class="mark" aria-hidden="true">…</span> <span id="plays-words">Checking that it plays</span></li>
+        <li id="check-hidden"><span class="mark" aria-hidden="true">…</span> <span id="hidden-words">Checking for hidden details</span></li>
+      </ul>
+      <p class="small" id="guess"></p>
+      <video id="copy" controls playsinline preload="metadata"></video>
+      <div class="buttons">
+        <a class="button" id="save" download="video-editor-test.mp4">Save to phone</a>
+        <button type="button" class="button" id="share" hidden>Share</button>
+      </div>
+      <p class="small">Send Claude a screenshot of this page.</p>
+    </section>
+  </main>
+</body>
+</html>
