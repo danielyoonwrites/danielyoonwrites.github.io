@@ -1,17 +1,16 @@
 # Video editor: progress (updated November 2, 2026)
 
-The plan for a simple video editor, just for the owner, on his Android phone in Chrome: a filter, lighting, text, clip order, crop and speed, with the videos never leaving the phone. "Video editor" is a working name. Read `SPEC.md` (what it does, the tech notes and the build plan), `DECISIONS.md` (choices and their reasons) and `CLAUDE.md`.
+The plan for a simple video editor, just for the owner, on his Android phone in Chrome: a filter, lighting, text, clip order, crop and speed, with the videos never leaving the phone. Read `SPEC.md` (what it does, the tech notes and the build plan), `DECISIONS.md` (choices and their reasons) and `CLAUDE.md`.
 
 ## Where it stands
 - Planned November 2, 2026, in pull request 110 (build plan step 1). Nothing is built yet.
 - The research behind it is in Dan's Notion (Master Notes, "Simple video editor: how hard to build (Nov 2026)"): doable in Chrome on the phone; the hard part is saving the finished video; Mediabunny does the file work.
 - Claude's rough estimate: 8 to 10 small pull requests in all, about as many as Idea board's plan (9 build steps), with harder steps.
-- Open questions, asked one at a time, the name first (`SPEC.md`, "Open questions").
+- The name is chosen: "Video editor" (Dan's "A"), so the folder and web address stay `video-editor/`. The other open questions come with their build steps, one at a time; the look is next, with build step 3 (`SPEC.md`, "Open questions").
 
 ## Waiting on Dan
 1. Read the plan: on https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/110, tap the "Files changed" tab, then `video-editor/SPEC.md` ("How it works" and "Build plan").
-2. Answer the open questions, one at a time, starting with the name.
-3. Merge pull request 110: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/110, Conversation tab, Merge pull request, Confirm merge.
+2. Merge pull request 110: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/110, Conversation tab, Merge pull request, Confirm merge.
 
 ## Open pull requests
 - Pull request 110, this plan (only new notes; nothing on the website changes).

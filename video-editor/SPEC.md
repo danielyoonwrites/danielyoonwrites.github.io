@@ -1,6 +1,6 @@
 # SPEC: Video editor
 
-A little app at https://danielyoonwrites.github.io/video-editor (folder `video-editor/` in the website repository; "Video editor" is a working name). Planned with the owner, November 2, 2026, after Claude's research on how hard it would be (his Notion page "Simple video editor: how hard to build (Nov 2026)").
+A little app at https://danielyoonwrites.github.io/video-editor (folder `video-editor/` in the website repository; the name is the owner's choice). Planned with the owner, November 2, 2026, after Claude's research on how hard it would be (his Notion page "Simple video editor: how hard to build (Nov 2026)").
 
 ## Who it's for
 
@@ -80,7 +80,7 @@ Browser support below is from MDN's browser-compat-data on GitHub, read November
 
 ## Open questions (ask one at a time)
 
-1. The name (before build step 2, since it sets the web address): "Video editor" is a working name.
+1. The name: chosen, "Video editor" (the owner's "A", November 2, 2026).
 2. The look (build step 3): "Paper and ink" like Idea board and Living in the Word, "Moon jar" like the website, or its own.
 3. Sound when a clip is sped up or slowed down (build step 4): the voice goes higher or lower like a tape (simplest), no sound for that clip, or the voice stays natural (the most work).
 4. Filter and lighting for the whole video (Claude's suggestion for version 1), or for each clip (build step 3).

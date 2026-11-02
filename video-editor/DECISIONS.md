@@ -8,6 +8,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 
 - November 2, 2026: a simple video editor that does a few things well (a filter, lighting, text, clip order, crop, speed); no music button, nothing copyrighted, no AI (the owner's words).
 - November 2, 2026: just for Dan, on his Android phone in Chrome (his "A").
+- November 2, 2026: the name "Video editor," at https://danielyoonwrites.github.io/video-editor (his "A").
 - November 2, 2026: everything happens on the phone; the videos are never uploaded. Mediabunny makes the new video, frame by frame.
 - November 2, 2026: Mediabunny's ready-made file saved in the folder; no npm (the website's rule, kept after Dan asked whether it helps).
 - November 2, 2026: the riskiest part first: build step 2 is a phone test (Claude's plan).
@@ -37,3 +38,8 @@ Every decision below that still holds, one line each; it's rewritten at each han
 ### November 2, 2026: the riskiest part first (pull request 110)
 - Decision: build step 2 is a phone test: make a 5-second black-and-white copy of a video, save it and share it, showing what Chrome can do and how long it took.
 - Why: Claude's plan, from the research. Saving the finished video is the hard part, and two answers can only come from the owner's phone: how fast it is, and whether Chrome there can make AAC sound (Mediabunny's docs: "In some browsers, AAC encoding is not supported by WebCodecs").
+
+### November 2, 2026: the name, "Video editor" (pull request 110)
+- Decision: the app is called "Video editor," at https://danielyoonwrites.github.io/video-editor (folder `video-editor/`).
+- Why: the owner's answer "A" of three: "Video editor" (Claude's recommendation: plain and clear, like "Idea board," and it says what it is), "Cutting room" (warmer, and it goes with "Quiet room") or "Little edits" (says it's small and simple).
+- Turned down: "Cutting room" and "Little edits."
