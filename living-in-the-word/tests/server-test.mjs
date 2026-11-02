@@ -69,7 +69,7 @@ globalThis.fetch = async (url, init) => {
     if (ai.delay) await new Promise((resolve) => setTimeout(resolve, ai.delay));
     const answer = { known_passage: true, leader_note: 'A short note.', questions: ['What stands out?', 'What does it show about God?', 'How will you respond?'] };
     return new Response(JSON.stringify({
-      model: 'claude-sonnet-5-5', stop_reason: 'end_turn',
+      model: ai.last.model, stop_reason: 'end_turn',   // answers as the model it was asked for
       content: [{ type: 'text', text: JSON.stringify(answer) }],
       usage: { input_tokens: 100, output_tokens: 50 },
     }), { status: 200 });
@@ -376,6 +376,13 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   check('a code is kept under the scrambled address', keptCodes.includes(codeName('stranger@example.com')));
   await call(worker5, env5, { action: 'turn-off', email: 'member@example.com' }, { key: owner5 });
   check('turning someone off deletes their code', !db5.prepare('SELECT email FROM codes').all().some((row) => row.email === codeName('member@example.com')));
+
+  // 23. Opus 5.5 writes every set, at normal speed (the owner's choice, November 2, 2026)
+  const opus = await call(worker3, env3, { passage: 'John 8', method: 'study', passcode: env3.PASSCODE });
+  const sent = ai.last;
+  check('Opus 5.5 at medium effort, 4,000 tokens, normal speed', sent.model === 'claude-opus-5-5' && sent.output_config.effort === 'medium' && sent.max_tokens === 4000 && !('speed' in sent), JSON.stringify([sent.model, sent.output_config.effort, sent.max_tokens, sent.speed]));
+  check('no Sonnet-only "think" line at the end of the guidance', !sent.system.includes('Think the problem through before you answer.'));
+  check('the answer says Opus 5.5, priced at $4 / $20 per million', opus.body.model === 'claude-opus-5-5' && Math.abs(opus.body.cost - (100 * 4 + 50 * 20) / 1e6) < 1e-12, JSON.stringify(opus.body));
 
   console.log(passed + ' passed, ' + failed + ' failed');
   process.exit(failed ? 1 : 0);

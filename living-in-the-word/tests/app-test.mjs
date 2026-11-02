@@ -596,7 +596,7 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
   // Z1. Mark 1: the cost, then "You waited ... seconds; the AI took ... of them."
   await typePassage(page, 'Mark 1');
   await questionsShow(page);
-  const z1 = (await line(page)).match(/^100 tokens in, 50 out\. About 0\.07 cents\. You waited (\d+\.\d) seconds; the AI took (\d+\.\d) of them\.$/);
+  const z1 = (await line(page)).match(/^Opus 5\.5\. 100 tokens in, 50 out\. About 0\.14 cents\. You waited (\d+\.\d) seconds; the AI took (\d+\.\d) of them\.$/);
   check('Z1: the test line shows the wait and the AI\'s part', Boolean(z1) && (await visible(page, '.test-cost')), await line(page));
   check('Z1: the AI took about 1.2 seconds, and the wait was at least that', Boolean(z1) && Number(z1[2]) >= 1.1 && Number(z1[2]) < 2.5 && Number(z1[1]) >= Number(z1[2]), z1 && z1.join(' '));
   await page.screenshot({ path: SHOTS + 'z1-test-line.png' });
@@ -615,7 +615,7 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
   release();
   hold = null;
   await questionsShow(page);
-  check('Z3: already being written ahead', /^100 tokens in, 50 out\. About 0\.07 cents\. You waited \d+\.\d seconds; it was already being written ahead \(the AI took \d+\.\d in all\)\.$/.test(await line(page)), await line(page));
+  check('Z3: already being written ahead', /^Opus 5\.5\. 100 tokens in, 50 out\. About 0\.14 cents\. You waited \d+\.\d seconds; it was already being written ahead \(the AI took \d+\.\d in all\)\.$/.test(await line(page)), await line(page));
 
   // Z4. A small phone (320 wide): no sideways scroll with the longest line
   await page.setViewportSize({ width: 320, height: 640 });
@@ -771,7 +771,7 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
 // ?v= number in index.html, then put the new number and the fingerprint this check prints in KNOWN.
 {
   const KNOWN = {
-    'app.js?v=37': 'b3185883fdc4875e',
+    'app.js?v=38': '2cf8d2a4711b0454',
     'style.css?v=25': 'a79e0238a9c905fd',
   };
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
