@@ -1,4 +1,5 @@
-// Checks for Idea board (build steps 2 and 3: boards of notes, saved on this device), in Chromium:
+// Checks for Idea board (build steps 2 and 3: boards of notes, saved on this device, that settle
+// onto the board's dots), in Chromium:
 // a phone 360 pixels wide with touch, a computer 1280 wide with a mouse, and 180 wide for a phone
 // with its zoom at 200%.
 // Written November 2, 2026. Run from the repository folder: node idea-board/tests/app-test.mjs
@@ -120,6 +121,33 @@ async function zoomNow(page) {
   });
 }
 
+// A note's corner settles on a spot every 64 board pixels (every second dot), at every zoom
+// (SETTLE_GAP in app.js)
+const onSpot = (value) => value % 64 === 0;   // (-0 counts as 0)
+// How far apart the dots are on the screen at a zoom (the same rule as applyView() in app.js)
+function dotGapOnScreen(zoom) {
+  let gap = 32 * zoom;
+  while (gap < 16) gap *= 2;
+  while (gap > 64) gap /= 2;
+  return gap;
+}
+
+// How far a note's top-left corner is from the nearest dot drawn on the screen, in screen pixels
+async function cornerToDot(page, note) {
+  const noteBox = await note.boundingBox();
+  const boardBox = await page.locator('#board').boundingBox();
+  const dots = await page.evaluate(() => {
+    const style = getComputedStyle(document.getElementById('board'));
+    return { gap: parseFloat(style.backgroundSize), x: parseFloat(style.backgroundPositionX), y: parseFloat(style.backgroundPositionY) };
+  });
+  // A dot is drawn in the middle of each little square of the background
+  const away = (corner, start) => {
+    const d = corner - (start + dots.gap / 2);
+    return Math.abs(d - Math.round(d / dots.gap) * dots.gap);
+  };
+  return { across: away(noteBox.x - boardBox.x, dots.x), down: away(noteBox.y - boardBox.y, dots.y), gap: dots.gap };
+}
+
 async function addNote(page, words) {
   await page.click('#add-note');
   await page.waitForSelector('#editor:not([hidden])');
@@ -205,17 +233,20 @@ const browser = await chromium.launch();
   const shown = await page.locator('.note').last().evaluate((el) => ({ text: el.textContent, html: el.innerHTML }));
   check('A5 typed code shows as plain words', shown.text === '<b>not bold</b>' && !shown.html.includes('<b>'), JSON.stringify(shown));
 
-  // A6. Dragging a note with a finger moves it, and the move is saved
+  // A6. Dragging a note with a finger moves it; when the finger lifts, it settles onto the nearest
+  // spot (no more than half the space between spots from where the finger left it), and that's saved
   const lastNote = page.locator('.note').last();
   const before = await lastNote.boundingBox();
   await fingerDrag(page, { x: before.x + 60, y: before.y + 60 }, { x: before.x + 60 - 100, y: before.y + 60 + 150 });
   await wait(600);
   const after = await lastNote.boundingBox();
-  check('A6 the note moved with the finger', Math.abs(after.x - (before.x - 100)) < 3 && Math.abs(after.y - (before.y + 150)) < 3, JSON.stringify({ before, after }));
+  const zoomA6 = await zoomNow(page);
+  const halfA6 = 32 * zoomA6 + 1;
+  check('A6 the note moved with the finger', Math.abs(after.x - (before.x - 100)) <= halfA6 && Math.abs(after.y - (before.y + 150)) <= halfA6, JSON.stringify({ before, after, zoomA6 }));
   check('A6 dragging did not open the note', !(await page.isVisible('#editor')));
   boards = await savedBoards(page);
   const movedItem = boards[0].items.find((item) => item.text === '<b>not bold</b>');
-  check('A6 the new place is saved', movedItem && movedItem.y > 0, JSON.stringify(movedItem));
+  check('A6 the new place is saved, on a spot', movedItem && movedItem.y > 0 && onSpot(movedItem.x) && onSpot(movedItem.y), JSON.stringify(movedItem));
 
   // A7. A finger on an empty spot moves the board, not a note
   const worldBefore = await page.evaluate(() => document.getElementById('world').style.transform);
@@ -320,8 +351,11 @@ const browser = await chromium.launch();
   await page.mouse.down();
   await page.mouse.move(box.x + 140, box.y + 90, { steps: 8 });
   await page.mouse.up();
+  await wait(250);   // it glides onto the nearest spot
   const moved = await note.boundingBox();
-  check('B2 the mouse drags a note', Math.abs(moved.x - (box.x + 100)) < 3 && Math.abs(moved.y - (box.y + 50)) < 3, JSON.stringify({ box, moved }));
+  const zoomB2 = await zoomNow(page);
+  const halfB2 = 32 * zoomB2 + 1;
+  check('B2 the mouse drags a note', Math.abs(moved.x - (box.x + 100)) <= halfB2 && Math.abs(moved.y - (box.y + 50)) <= halfB2, JSON.stringify({ box, moved, zoomB2 }));
   check('B2 dragging did not open it', !(await page.isVisible('#editor')));
   await note.click();
   check('B2 a click opens it', await page.isVisible('#editor'));
@@ -588,6 +622,175 @@ const browser = await chromium.launch();
   check('D7 the first time, the board shows its notes', noteBox.y >= boardBox.y && noteBox.y + noteBox.height <= boardBox.y + boardBox.height, JSON.stringify({ noteBox, boardBox }));
 
   check('D no page errors', errors.length === 0, errors.join('\n'));
+  await context.close();
+}
+
+// ===== E. Lining up: a note settles onto the dots (Dan's idea, November 2, 2026) =====
+// A note's top-left corner settles on a spot every 64 board pixels: every second dot at the normal
+// zoom, every dot when zoomed out. The spots are the same at every zoom, so any two notes can line
+// up exactly. New notes land on the spots too, and a note saved before stays put until it's moved.
+{
+  const context = await browser.newContext({
+    viewport: { width: 360, height: 740 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, ignoreHTTPSErrors: true,
+  });
+  const page = await context.newPage();
+  const errors = [];
+  watchErrors(page, errors);
+  await openApp(page);
+  await makeBoard(page, 'Lining up');
+
+  // E1. New notes land on the dots; on a phone held upright the second goes straight below the first
+  await addNote(page, 'First idea');
+  await addNote(page, 'Second idea');
+  await wait(600);
+  let items = (await savedBoards(page))[0].items;
+  check('E1 new notes land on the spots', items.length === 2 && items.every((item) => onSpot(item.x) && onSpot(item.y)), JSON.stringify(items));
+  check('E1 the second is straight below the first', items[1].x === items[0].x && items[1].y === items[0].y + 256, JSON.stringify(items));
+
+  // E2. Move the board a little (not a whole note's width), then add a note: it still goes in the
+  // same rows and columns as the others (a whole number of 256-pixel steps from the first)
+  await fingerDrag(page, { x: 330, y: 140 }, { x: 260, y: 200 });
+  await wait(300);
+  await addNote(page, 'Third idea');
+  await wait(600);
+  items = (await savedBoards(page))[0].items;
+  const first = items.find((item) => item.text === 'First idea');
+  const third = items.find((item) => item.text === 'Third idea');
+  check('E2 a new note lines up with the notes already there', third && (third.x - first.x) % 256 === 0 && (third.y - first.y) % 256 === 0, JSON.stringify(items));
+
+  // E3. Let go of a note: it glides onto the nearest spot, and its corner sits on a dot on the
+  // screen. At the normal zoom the dots are 32 pixels apart, as before.
+  const second = page.locator('.note', { hasText: 'Second idea' });
+  const start = items.find((item) => item.text === 'Second idea');
+  const box = await second.boundingBox();
+  await fingerDrag(page, { x: box.x + 50, y: box.y + 50 }, { x: box.x + 50 + 40, y: box.y + 50 + 20 });
+  await wait(600);
+  items = (await savedBoards(page))[0].items;
+  const settled = items.find((item) => item.text === 'Second idea');
+  check('E3 moved 40 across and 20 down, it settles one spot across, at the same height', settled.x === start.x + 64 && settled.y === start.y, JSON.stringify({ start, settled }));
+  const corner = await cornerToDot(page, second);
+  check('E3 its corner sits on a dot', corner.across < 0.6 && corner.down < 0.6, JSON.stringify(corner));
+  check('E3 the dots look as before (32 pixels apart at the normal zoom)', corner.gap === 32, JSON.stringify(corner));
+  await page.screenshot({ path: SHOTS + 'e3-phone-lined-up.png' });
+
+  // E4. A tap on a note near the top of the screen opens it with the cursor at the end of its words.
+  // (The tap's own click arrives a moment later and lands on the typing box, where the words are.)
+  await page.goBack();
+  await page.waitForSelector('#list-screen:not([hidden])');
+  await makeBoard(page, 'Near the top');
+  await addNote(page, 'Near the top of the screen');
+  const nearTop = page.locator('.note');
+  const topBox = await nearTop.boundingBox();
+  await fingerDrag(page, { x: 330, y: 600 }, { x: 330, y: 600 - (topBox.y - 70) });   // move the board up
+  await wait(300);
+  // After a fast move, Chrome takes the next tap as "stop sliding" and sends no click with it,
+  // so tap an empty spot first, the way a finger would
+  await tap(page, { x: 330, y: 600 });
+  await wait(300);
+  const movedUp = await nearTop.boundingBox();
+  await tap(page, { x: movedUp.x + 20, y: movedUp.y + 20 });
+  await page.waitForSelector('#editor:not([hidden])');
+  await wait(100);
+  await page.keyboard.type('!');
+  await page.goBack();
+  await page.waitForSelector('#editor', { state: 'hidden' });
+  check('E4 the note was near the top of the screen', movedUp.y < 100, JSON.stringify(movedUp));
+  check('E4 the typing goes at the end of the words', (await nearTop.textContent()) === 'Near the top of the screen!', await nearTop.textContent());
+
+  // E5. With reduced motion turned on (a phone setting), it goes straight to its dot, without gliding
+  const glideOf = () => page.locator('.note').first().evaluate((el) => {
+    el.classList.add('settling');
+    const duration = getComputedStyle(el).transitionDuration;
+    el.classList.remove('settling');
+    return duration;
+  });
+  const glideNormally = await glideOf();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const glideReduced = await glideOf();
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  check('E5 it glides for 0.15 seconds', glideNormally === '0.15s, 0.15s', glideNormally);
+  check('E5 with reduced motion it doesn\'t glide', glideReduced === '0s', glideReduced);
+
+  // E6. A note saved before the dots lined things up stays where it was until it's moved
+  await page.evaluate(() => new Promise((resolve, reject) => {
+    const request = indexedDB.open('idea-board', 1);
+    request.onsuccess = () => {
+      const transaction = request.result.transaction('boards', 'readwrite');
+      transaction.objectStore('boards').put({ id: 'off-the-dots', name: 'Saved before', version: 1, made: '2026-11-02T03:00:00.000Z', changed: '2026-11-02T03:00:00.000Z',
+        items: [{ id: 'n1', type: 'note', x: 40, y: 50, text: 'Placed before the dots lined things up', made: '2026-11-02T03:00:00.000Z', changed: '2026-11-02T03:00:00.000Z' }] });
+      transaction.oncomplete = () => { request.result.close(); resolve(); };
+      transaction.onerror = () => reject(transaction.error);
+    };
+    request.onerror = () => reject(request.error);
+  }));
+  await openApp(page);
+  await page.locator('.row', { hasText: 'Saved before' }).tap();
+  await page.waitForSelector('#board-screen:not([hidden])');
+  await wait(600);
+  let older = (await savedBoards(page)).find((record) => record.id === 'off-the-dots');
+  check('E6 opening the board moves nothing', older.items[0].x === 40 && older.items[0].y === 50 && older.changed === '2026-11-02T03:00:00.000Z', JSON.stringify(older));
+  const olderBox = await page.locator('.note').boundingBox();
+  await fingerDrag(page, { x: olderBox.x + 40, y: olderBox.y + 40 }, { x: olderBox.x + 40 + 30, y: olderBox.y + 40 + 30 });
+  await wait(600);
+  older = (await savedBoards(page)).find((record) => record.id === 'off-the-dots');
+  const zoomE6 = await zoomNow(page);
+  check('E6 once moved, it settles onto a spot', onSpot(older.items[0].x) && onSpot(older.items[0].y), JSON.stringify({ item: older.items[0], zoomE6 }));
+
+  check('E no page errors (phone)', errors.length === 0, errors.join('\n'));
+  await context.close();
+}
+{
+  const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, ignoreHTTPSErrors: true });
+  const page = await context.newPage();
+  const errors = [];
+  watchErrors(page, errors);
+  await openApp(page);
+  await makeBoard(page, 'Lining up on a computer');
+  await addNote(page, 'On the left');
+  await addNote(page, 'On the right');
+  await wait(600);
+  let items = (await savedBoards(page))[0].items;
+
+  // E7. On a wide screen the second new note goes to the right, level with the first
+  check('E7 side by side and level', items.length === 2 && items[1].y === items[0].y && items[1].x === items[0].x + 256, JSON.stringify(items));
+
+  // E8. Let go a little lower than its neighbor, and a note ends up level with it
+  const right = page.locator('.note', { hasText: 'On the right' });
+  async function mouseDrag(note, dx, dy) {
+    const b = await note.boundingBox();
+    await page.mouse.move(b.x + 40, b.y + 40);
+    await page.mouse.down();
+    await page.mouse.move(b.x + 40 + dx, b.y + 40 + dy, { steps: 8 });
+    await page.mouse.up();
+    await wait(600);
+  }
+  const level = items[0].y;
+  await mouseDrag(right, 0, 120);
+  items = (await savedBoards(page))[0].items;
+  check('E8 dragged 120 pixels down, it settles two spots lower', items.find((item) => item.text === 'On the right').y === level + 128, JSON.stringify(items));
+  await mouseDrag(right, 0, -118);
+  items = (await savedBoards(page))[0].items;
+  check('E8 let go 10 pixels lower than its neighbor, it ends up level with it', items.find((item) => item.text === 'On the right').y === level, JSON.stringify(items));
+  await page.screenshot({ path: SHOTS + 'e8-computer-level.png' });
+
+  // E9. Zoomed out (as on a phone showing several notes), the spots are exactly the dots that show,
+  // 64 board pixels apart; a note settles onto one and still lines up with a note placed close in
+  for (let i = 0; i < 4; i += 1) {
+    await page.click('#zoom-out');
+    await wait(300);
+  }
+  const zoomE9 = await zoomNow(page);
+  const dotsE9 = dotGapOnScreen(zoomE9);
+  check('E9 zoomed out, the dots that show are 64 board pixels apart', Math.abs(dotsE9 - 64 * zoomE9) < 0.01, JSON.stringify({ zoomE9, dotsE9 }));
+  await mouseDrag(right, 23, 9);
+  items = (await savedBoards(page))[0].items;
+  const far = items.find((item) => item.text === 'On the right');
+  check('E9 it settles onto a spot', onSpot(far.x) && onSpot(far.y), JSON.stringify(far));
+  check('E9 let go a little low, it stays level with the note placed close in', far.y === level, JSON.stringify({ far, level }));
+  const cornerFar = await cornerToDot(page, right);
+  check('E9 its corner sits on a dot on the screen', cornerFar.across < 0.6 && cornerFar.down < 0.6 && Math.abs(cornerFar.gap - dotsE9) < 0.01, JSON.stringify(cornerFar));
+
+  check('E no page errors (computer)', errors.length === 0, errors.join('\n'));
   await context.close();
 }
 
