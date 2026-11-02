@@ -8,15 +8,15 @@ A little app like Apple's Freeform for typed notes, photos and links on boards, 
   - Build step 2, one board of notes saved on the device (pull request 104), and the accessibility fixes (pull request 105): checked on Dan's phone ("I tried it on the phone it works pretty well").
   - Build step 3, several boards (pull request 106): checked on Dan's phone ("it feels good and works well").
   - Notes line up on the dots (pull request 108, Dan's idea) and build step 4, photos (pull request 109), both merged November 2, 2026. Dan tried photos on his computer: a photo wouldn't line up with two notes made before lining up existed; after he dragged each note once: "it works."
-- In progress: pull request 110: the dots drawn exactly, on a canvas (a repeating background had drifted a few pixels from the spots, on Dan's computer too), and Dan's two decisions: saving to an account comes next, and it's built to work for everyone, used just by him for now. 161 saved checks pass, and axe-core finds 0 problems on eight screens.
+- In progress: pull request 113: the dots drawn exactly, on a canvas (a repeating background had drifted a few pixels from the spots, on Dan's computer too), and Dan's two decisions: saving to an account comes next, and it's built to work for everyone, used just by him for now. 161 saved checks pass, and axe-core finds 0 problems on eight screens.
 - What's saved: boards and photos live only in the browser of the device in use (IndexedDB); a computer starts with no boards until saving to an account (build step 7).
 - Branch: `claude/exciting-feynman-c90w53` (the eleventh session's), restarted from main after each merge.
-- Open pull requests: pull request 110.
+- Open pull requests: pull request 113.
 - Not checked yet: photos on Dan's phone (he tried his computer), the KakaoTalk in-app browser, and photos saved in the HEIF format.
 - Claude's rough estimate: about 5 more pull requests (build steps 6 and 7, then 5, 8 and 9).
 
 ## Waiting on Dan
-1. Merge pull request 110: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/110, Conversation tab, Merge pull request, Confirm merge.
+1. Merge pull request 113: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/113, Conversation tab, Merge pull request, Confirm merge.
 2. The quick check, after the merge (publishing takes a minute or two; the browser may keep the old copy for up to 10 minutes): on your computer, open https://danielyoonwrites.github.io/idea-board and open a board. A dot sits right at each note's and photo's top-left corner. Click − and + a few times: the dots stay on the corners.
 
 ## Next step

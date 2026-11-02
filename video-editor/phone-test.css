@@ -1,0 +1,137 @@
+/* The phone test's look: plain and easy to read on a phone.
+   The video editor's own look comes later (build step 3, open question 2 in SPEC.md). */
+
+:root {
+  --ink: #1c1c1c;        /* words */
+  --soft: #4a4a4a;       /* small words */
+  --paper: #ffffff;      /* background */
+  --line: #c9c9c9;       /* thin lines */
+  --button: #1f3a5f;     /* button color (dark blue) */
+  --yes: #1b6e20;        /* ✓ green */
+  --no: #b3261e;         /* ✗ red */
+  --focus: #b35c00;      /* the ring around whatever the keyboard is on (4.7 to 1 against white) */
+}
+
+/* Anything marked "hidden" stays hidden, even if a style below says otherwise */
+[hidden] { display: none !important; }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+main {
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 16px 16px 48px;
+}
+
+.kicker {
+  margin: 8px 0 0;
+  color: var(--soft);
+  font-size: 15px;
+}
+
+h1 { margin: 0 0 8px; font-size: 28px; line-height: 1.2; }
+h2 { margin: 28px 0 8px; font-size: 20px; line-height: 1.3; }
+p { margin: 8px 0; }
+.lead { margin-bottom: 4px; }
+.small { color: var(--soft); font-size: 15px; }
+.facts { font-weight: 600; }
+
+/* The lists of checks: a mark (✓, ✗ or …), then the words */
+.checks {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+}
+.checks li {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+.checks li:last-child { border-bottom: none; }
+.mark {
+  flex: 0 0 1.2em;
+  font-weight: 700;
+  text-align: center;
+  color: var(--soft);
+}
+.yes .mark { color: var(--yes); }
+.no .mark { color: var(--no); }
+.note { font-weight: 600; }
+
+/* Big, easy buttons: at least 48 by 48 pixels, the full width on a phone */
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  margin: 12px 0 0;
+  padding: 10px 16px;
+  border: 2px solid var(--button);
+  border-radius: 8px;
+  background: var(--button);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+.button.quiet {
+  background: var(--paper);
+  color: var(--button);
+}
+.button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.buttons {
+  display: flex;
+  gap: 12px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+progress {
+  width: 100%;
+  height: 16px;
+  margin-top: 16px;
+  accent-color: var(--button);
+}
+
+/* When something goes wrong: what happened, in plain words, then the details for Claude */
+.problem {
+  margin: 16px 0;
+  padding: 12px;
+  border-left: 4px solid var(--no);
+  background: #fdecea;
+  color: #5f1510;
+}
+.problem .details {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+video {
+  display: block;
+  width: 100%;
+  max-height: 45vh;   /* a tall video stays short enough to see the buttons under it */
+  margin-top: 12px;
+  border-radius: 8px;
+  background: #000000;
+}
