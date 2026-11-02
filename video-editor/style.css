@@ -1,0 +1,299 @@
+/* ============================================================
+   Video editor: styles
+   Design: dark, so the video stands out and its brightness is easy
+   to judge (the owner's choice "A", November 2, 2026; see SPEC.md,
+   "The look"). Phone first: big buttons, one step per screen.
+   ============================================================ */
+
+/* ---------- Colors ----------
+   Change one here and it changes everywhere. The contrast of each pair is checked in tests/app-test.mjs. */
+:root {
+  --bg: #121212;        /* the page: near-black */
+  --surface: #1f1f1f;   /* the filter buttons */
+  --text: #f2f2f2;      /* words */
+  --soft: #b8b8b8;      /* small words */
+  --line: #3d3d3d;      /* thin lines that only divide things */
+  --edge: #8a8a8a;      /* the edges of buttons you can tap */
+  --light: #f2f2f2;     /* main buttons and the chosen filter: light on dark */
+  --dark-text: #121212; /* words on light buttons */
+  --yes: #7bd88f;       /* ✓ */
+  --no: #ff9e8f;        /* ✗, and notes about something to fix */
+  --focus: #ffd166;     /* the ring around whatever the keyboard is on */
+}
+
+/* Anything marked "hidden" stays hidden, even if a style below says otherwise */
+[hidden] { display: none !important; }
+
+* { box-sizing: border-box; }
+
+html { background: var(--bg); }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+/* ---------- Screens: one at a time, each filling the phone's screen ---------- */
+.screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 56px;
+  padding: 0 8px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.name {
+  margin: 0;
+  padding: 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+}
+.back {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0 8px;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.content {
+  width: 100%;
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+h1 { margin: 8px 0; font-size: 26px; line-height: 1.25; }
+p { margin: 8px 0; }
+.small { color: var(--soft); font-size: 15px; }
+.working-note { color: var(--soft); }
+
+/* ---------- The video ---------- */
+.stage {
+  display: flex;
+  justify-content: center;
+  background: #000000;
+}
+video {
+  display: block;
+  width: 100%;
+  max-width: 36rem;
+  max-height: 45vh;
+  background: #000000;
+}
+
+/* ---------- Tabs: Filter and Lighting ---------- */
+.tabs {
+  display: flex;
+  width: 100%;
+  max-width: 36rem;
+  margin: 0 auto;
+  border-bottom: 1px solid var(--line);
+}
+.tab {
+  flex: 1;
+  min-height: 48px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--soft);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tab[aria-selected="true"] {
+  color: var(--text);
+  border-bottom-color: var(--light);
+}
+
+.panel {
+  flex: 1;
+  width: 100%;
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* The filters: buttons in rows; the chosen one is light */
+.chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+}
+.chip {
+  min-height: 48px;
+  padding: 6px 8px;
+  border: 2px solid var(--edge);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.25;
+  cursor: pointer;
+}
+.chip[aria-checked="true"] {
+  border-color: var(--light);
+  background: var(--light);
+  color: var(--dark-text);
+  font-weight: 700;
+}
+
+/* The lighting sliders: the name and the number on one line, the slider under them */
+.slider {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.slider output { font-weight: 600; }
+.slider input {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 48px;
+  margin: 0;
+  accent-color: var(--light);
+}
+
+/* The main action stays at the bottom of the screen */
+.action {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  width: 100%;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+}
+.action > * {
+  max-width: calc(36rem - 32px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ---------- Buttons: at least 48 by 48 pixels, the full width on a phone ---------- */
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  margin: 12px 0 0;
+  padding: 10px 16px;
+  border: 2px solid var(--light);
+  border-radius: 8px;
+  background: var(--light);
+  color: var(--dark-text);
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+.action .button { margin: 0 auto; }
+.action .problem { margin: 0 auto 12px; }
+.button.quiet {
+  border-color: var(--edge);
+  background: transparent;
+  color: var(--text);
+  font-weight: 600;
+}
+.button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.buttons {
+  display: flex;
+  gap: 12px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+/* Each screen's title gets the focus when the screen opens, so screen readers say where you are;
+   it can't be tapped or tabbed to, so it needs no ring */
+h1[tabindex="-1"]:focus { outline: none; }
+
+progress {
+  width: 100%;
+  height: 16px;
+  margin-top: 24px;
+  accent-color: var(--light);
+}
+
+/* ---------- Messages ---------- */
+.problem {
+  margin: 16px 0 0;
+  padding: 12px;
+  border-left: 4px solid var(--no);
+  background: #3a1a17;
+  color: #ffe1dc;
+}
+.problem .details {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+/* "Meets the upload rules for Instagram, TikTok and YouTube Shorts" */
+.ready {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 700;
+}
+.ready.yes { color: var(--yes); }
+.ready.no { color: var(--no); }
+
+details {
+  margin: 4px 0 8px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+summary {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* The lists of checks: a mark (✓ or ✗), then the words */
+.checks {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+}
+.checks li {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+.checks li:last-child { border-bottom: none; }
+.mark {
+  flex: 0 0 1.2em;
+  font-weight: 700;
+  text-align: center;
+}
+.yes .mark { color: var(--yes); }
+.no .mark { color: var(--no); }
