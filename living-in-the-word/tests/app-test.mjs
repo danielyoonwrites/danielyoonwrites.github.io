@@ -61,6 +61,8 @@ let offline = false;
 let requests = 0;
 const asked = [];   // each set of questions asked for, like "Philippians 2|personal"
 let hold = null;    // { passage, waiting }: that passage's answer waits until released (section W)
+let textAsks = 0;   // requests for the Bible text (none while the ESV is on hold; section E)
+let phoneIp = '203.0.113.9';   // the internet address the stand-in server sees for every phone
 
 const browser = await chromium.launch({
   proxy: process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY, bypass: '127.0.0.1,localhost' } : undefined,
@@ -79,11 +81,12 @@ async function newPhone(width = 360, height = 740) {
     requests += 1;
     const request = route.request();
     const headers = Object.fromEntries(Object.entries(await request.allHeaders()).filter(([name]) => !name.startsWith(':')));
-    headers['cf-connecting-ip'] = '203.0.113.9';
+    headers['cf-connecting-ip'] = phoneIp;
     const init = { method: request.method(), headers };
     if (request.method() === 'POST') {
       init.body = request.postData();
       const sent = JSON.parse(init.body || '{}');
+      if (sent.want === 'text') textAsks += 1;
       if (sent.passage && !sent.want) {
         asked.push(sent.passage + '|' + sent.method);
         if (hold && hold.passage === sent.passage) await hold.waiting;
@@ -624,6 +627,32 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
   await context.close();
 }
 
+// ---- E. While the ESV is on hold (ESV_TEXT off in app.js), nothing asks the server for the Bible
+// text, so a wrong or old passcode counts once per open, not twice (AUDIT.md, item 3; November 2, 2026)
+{
+  check('E: no study or reading asked for the Bible text', textAsks === 0, String(textAsks));
+  const wrongTries = () => env.DB.raw.prepare("SELECT COALESCE(SUM(count), 0) AS n FROM usage WHERE who LIKE 'wrong:%'").get().n;
+  phoneIp = '203.0.113.60';   // a connection of its own, so earlier sections' tries don't count
+  const before = wrongTries();
+  const { context, page, errors } = await newPhone();
+  await page.goto(APP);
+  await page.evaluate(() => localStorage.setItem('living-in-the-word', JSON.stringify({ version: 1, passcode: 'an old passcode' })));
+  await page.goto(APP);
+  await page.waitForLoadState('networkidle');
+  await page.click('[data-action="study"]');
+  await page.fill('#passage-text', 'John 3');
+  await page.click('#passage button[type="submit"]');
+  await page.waitForFunction(() => document.getElementById('passcode').classList.contains('active'));
+  await new Promise((r) => setTimeout(r, 500));   // time for a second request, if there were one
+  check('E: an old passcode counts as one wrong try per open', wrongTries() === before + 1, before + ' then ' + wrongTries());
+  check('E: and asks for the passcode', await visible(page, '#passcode .wrong-passcode'));
+  await page.click('#passcode .back');
+  check('E: the esv.org link still shows on the passage', await visible(page, '#questions .esv-only'), await active(page));
+  check('E: no errors', errors.length === 0, errors.join(' | '));
+  phoneIp = '203.0.113.9';
+  await context.close();
+}
+
 // ---- SW. The offline helper (sw.js), which the checks above turn off. A small stand-in website
 // on port 8766 serves two made-up versions of the app, ignores the ?v= part of an address the way
 // GitHub Pages does, and can be slowed down or cut off. The new script doesn't fit the old page
@@ -742,7 +771,7 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
 // ?v= number in index.html, then put the new number and the fingerprint this check prints in KNOWN.
 {
   const KNOWN = {
-    'app.js?v=36': '0aa6592b8116a93a',
+    'app.js?v=37': 'b3185883fdc4875e',
     'style.css?v=25': 'a79e0238a9c905fd',
   };
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
