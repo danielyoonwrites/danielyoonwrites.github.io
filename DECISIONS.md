@@ -16,6 +16,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - October 24, 2026: a celadon Subscribe button, not Substack's form; four hand-picked posts under "Start here."
 - October 24, 2026: Latest posts filled in on GitHub through Jina Reader, before each publish.
 - October 24, 2026: the menu is Writing, Projects, About (no Home link); Projects lists every project first, then "How I built it" as fold-outs.
+- November 2, 2026: Idea board is on the Projects page as a web app in progress, with a link, before its polish step (Dan's wish); its line says only what it does today.
 - October 24, 2026: version numbers on the stylesheet and script links, raised on every change.
 
 **The notes and handoffs**
@@ -147,3 +148,10 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Why: Dan, while planning the video editor: "why is there a no npm rule? Does that help in any way? If not then use npm." Claude's answer: it helps in three ways. (1) The files on GitHub are exactly what runs on the phone, so Dan can open any of them, read it and change it by hand, and the change is live after the publish run. (2) There's no build step, so a merge can't be held up by a build that fails. (3) There are no package updates and warnings to keep up with: a saved library changes only when an update is chosen on purpose. And npm wouldn't help the video editor much: Mediabunny comes as one ready-made file (its docs: it can be included "directly with a script tag"), and npm's one gain there, a smaller download by keeping only the parts the app uses, is small (the whole file is about 187 KB compressed, less than a phone photo).
 - Turned down: npm with a build step on GitHub's computers (nothing would run on Dan's computer, but the files he reads would no longer be the files that run).
 - Revisit if: an app needs a library that only works through npm, or Dan wants to learn npm and build tools as their own step.
+
+### November 2, 2026: Idea board on the Projects page (pull request 124)
+- Decision: Idea board is listed on the Projects page, between "This website" and "Quiet room": the label "Web app · In progress," its name linked to the app, the line "Boards for spreading out ideas: typed notes and photos that line up neatly in rows.", "Open Idea board," and a "How I built it" note with the four parts (what I wanted, the problem, what I decided, the trade-off).
+- Why: Dan: "let's add this idea board to my personal web page in the projects section with a brief description of what it is and what it can do." Idea board's build plan had left this for its last step (step 9, after a week of real use); Dan chose now.
+- How the words were chosen (Claude's choices, put to Dan with the pull request and its screenshots): the line says only what works today. It makes no promise about phones in general (the app was checked on Dan's Android phone in Chrome and on his computer, never on an iPhone) or about the same boards on every device (that's build step 7). At 83 characters it shows whole even on a phone 320 pixels wide, where project lines stop after 3 lines (Quiet room's is cut there). The note's trade-off says the boards stay in the browser they were made in, for now. The name check is in `idea-board/DECISIONS.md`.
+- Turned down: waiting for build step 9; "on a phone or a computer" in the line (an iPhone was never tested); a longer line (it would be cut on small phones).
+- Revisit if: what the app can do changes (saving to an account, links): update its line and its note in the same pull request (`idea-board/CLAUDE.md`).

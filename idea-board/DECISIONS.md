@@ -12,7 +12,8 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 2, 2026: what's next: saving to an account (build steps 6 and 7) comes before links (build step 5), Dan's wish.
 - November 2, 2026: the server: its own Cloudflare Worker and D1 database, apart from Living in the Word's (Claude's choice, put to Dan).
 - November 2, 2026: signing in: an email code, like Living in the Word's, from build step 6 (Dan's "a").
-- November 2, 2026: the name: "Idea board," at https://danielyoonwrites.github.io/idea-board (Dan's "a").
+- November 2, 2026: the name: "Idea board," at https://danielyoonwrites.github.io/idea-board (Dan's "a"); kept for the Projects page after a name check through search results (no live US trademark found; the trademark office's own search not checked).
+- November 2, 2026: on the website's Projects page now, before polish (Dan's wish; the words and why are in the root `DECISIONS.md`).
 - November 2, 2026: the look: "Paper and ink," like Living in the Word (Dan's "B"), with "index card" notes (Dan: "I like the index card idea").
 - November 2, 2026: easy to see and read: words at least 4.5 to 1 (note words 7 to 1), edges and control lines at least 3 to 1, buttons at least 48 by 48, no words under 13 pixels, every button on the screen at 200% zoom.
 - November 2, 2026: several boards: the app opens on "Your boards" (newest first); "New board" asks for a name first; on a board "← Boards" and "Edit"; "Remove board" asks first, then offers Undo; the phone's Back button goes back one step.
@@ -142,3 +143,15 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Decision: Claude's fix: the dots are drawn on a canvas behind the board, each exactly on its spot, instead of as a repeating background.
 - Why: on his computer, Dan couldn't line a photo up with the note "act 1." The main cause: "act 1" and "act 2" were made before lining up and sat between spots; Dan dragged each once, and then it lined up ("it works"). But his screenshot also showed the dots a few pixels away from the spots: browsers round the little squares of a repeating background. In a test browser the dots were 1 to 4 screen pixels off before the fix, and under 0.1 after.
 - Turned down: keeping the repeating background (the dots could mislead the eye).
+
+### November 2, 2026: on the Projects page now, and the name check (pull request 124)
+- Decision: Idea board goes on the website's Projects page now, before build step 9 (polish), which had planned to decide it then, "with a check of the name first." The name stays "Idea board." The listing's words and their reasons are in the root `DECISIONS.md` ("Idea board on the Projects page").
+- Why: Dan: "let's add this idea board to my personal web page in the projects section with a brief description of what it is and what it can do."
+- The name check, November 2, 2026, through search results only (Justia's trademark pages, the trademark office's status site, tsdr.uspto.gov, and MockFlow's site were blocked from Claude's session, so no page below was opened):
+  - No live US trademark for "Idea board" turned up.
+  - An application for "IDEABOARD" (software for a virtual whiteboard, filed in 2012 by Ideaboard, Inc., serial number 85803546) shows as abandoned in 2013 in search results from Justia and GleanMark.
+  - MockFlow offers a team whiteboard called "IdeaBoard" (one word), seen in search results (its site and the Google Workspace Marketplace).
+  - "Idea board" is a common plain name for a feature in other tools (for example Brightidea, QuestionPro, StoriesOnBoard and Quoll Writer), seen in search results.
+  - Not checked: the US trademark office's own search (Trademark Search, https://tmsearch.uspto.gov, which replaced TESS in 2023, per uspto.gov pages seen in search results), and other countries.
+  - Claude's view, not legal advice: fine for a free app on a personal website. Before any app store listing or charging, do a proper trademark search, like Living in the Word's plan.
+- Turned down: waiting for build step 9; renaming it (nothing found that calls for it).
