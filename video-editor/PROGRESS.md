@@ -7,7 +7,7 @@ A simple video editor, just for the owner, on his Android phone in Chrome: a loo
   - The plan and the name (pull request 110).
   - Build step 2, the phone test (pull request 111): every line ✓ on Dan's phone, AAC sound built in, and the copy "is in my gallery, black and white and with sound."
   - Build step 3, one clip with a look (pull request 112), at https://danielyoonwrites.github.io/video-editor. Dan, November 2, 2026: "it looks good."
-- In progress: pull request 115, the Korean looks (Dan's "a"): Original, Milky 우유빛, Peach 복숭아, Soft glow 뽀샤시, Café 카페, Clear 맑음, Film 필름, Black and white 흑백. Also "Better sound" added to the build plan as step 5, after Dan asked whether it's possible.
+- In progress: pull request 116, the Korean looks (Dan's "a"): Original, Milky 우유빛, Peach 복숭아, Soft glow 뽀샤시, Café 카페, Clear 맑음, Film 필름, Black and white 흑백. Also "Better sound" added to the build plan as step 5, after Dan asked whether it's possible.
 - Checked in Claude's test browser: 128 saved checks pass (`tests/app-test.mjs`), including each look's effect on a color chart, the preview matching the saved file (Milky and Peach), and the glow's size; the phone test's 71 still pass.
 - Not checked yet:
   - Real uploads to the three platforms (asked with pull request 112; not reported yet).
@@ -17,7 +17,7 @@ A simple video editor, just for the owner, on his Android phone in Chrome: a loo
 - Claude's rough estimate: 6 more small pull requests (build steps 4 to 9).
 
 ## Waiting on Dan
-1. Merge pull request 115: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/115, Conversation tab, Merge pull request, Confirm merge.
+1. Merge pull request 116: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/116, Conversation tab, Merge pull request, Confirm merge.
 2. The check on his phone, after the merge (publishing takes a minute or two; the phone may keep the old copy for up to 10 minutes):
    1. On your phone, open Chrome and go to https://danielyoonwrites.github.io/video-editor
    2. Tap "Choose a video" and pick a short video of your own, with a face in it if you like (it stays on your phone).
@@ -27,7 +27,7 @@ A simple video editor, just for the owner, on his Android phone in Chrome: a loo
    6. Tell Claude which looks you like, how long Soft glow took, and how the uploads went. A screenshot of "What was checked" helps (it has the "For Claude" line).
 
 ## Open pull requests
-- Pull request 115, the Korean looks.
+- Pull request 116, the Korean looks.
 
 ## Next step
 Adjust any look Dan wants changed (the numbers are in the SVG filters in `index.html`; `node video-editor/tests/looks-sheet.mjs` shows them side by side). Then build step 4, trim and speed; ask open question 3 (the sound when a clip is sped up or slowed down) first.
