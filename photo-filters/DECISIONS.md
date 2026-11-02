@@ -14,6 +14,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 2, 2026: the Milestone 1 plan, four pull requests: the plan; choose a photo; Warm natural next to the original; Export (Dan's "ok").
 - November 2, 2026: plain HTML, CSS and JavaScript with no build tools; `PROGRESS.md` and `DECISIONS.md` instead of NOTES.md; each step pushed to Claude's work branch as a pull request; hosting on GitHub Pages (Dan's "ok" on the plan).
 - November 2, 2026: a neutral dark gray look with the device's own fonts; the looks worked out in plain JavaScript in a Web Worker (WebGL2 only if that's too slow); a Content-Security-Policy and `noindex`, like Idea board (Claude's choices in the plan, OK'd with it).
+- November 2, 2026: build step 2's screen: "Choose photo" in a bar at the bottom; the photo right side up, about 1,080 pixels wide, with its size in pixels and megapixels; a plain message for a file the browser can't open; a page with a made-up tall test photo for the MacBook (Claude's choices, shown to Dan in screenshots with pull request 117).
 
 ## Log (oldest first)
 
@@ -52,3 +53,14 @@ Every decision below that still holds, one line each; it's rewritten at each han
   - The looks worked out in plain JavaScript in a background helper (a Web Worker), so the screen doesn't freeze, timed against the spec's goals. WebGL2 only if that's too slow.
   - Like Idea board: a Content-Security-Policy, so the page uses only its own files, and `noindex`.
 - Turned down: Vite and TypeScript, with React only if it helps (the spec's "Technical notes").
+
+### November 2, 2026: build step 2, choosing a photo (pull request 117)
+- Decision (Claude's choices, shown to Dan in screenshots with pull request 117; he can change any of them):
+  - One screen: "Photo Filters" at the top, the photo in the middle, and "Choose photo" in a bar at the bottom, where a thumb reaches when holding the phone in one hand (the spec: "big tap targets and one-handed use").
+  - Before a photo: "Choose a photo to start. It stays on this device: nothing is uploaded."
+  - The photo shows right side up, as a copy about 1,080 pixels wide (the spec's preview size), with its size under it, for example "4,000 × 3,000 pixels (12.0 MP)," so it can be matched to the spec's "12 MP."
+  - A file the browser can't open: "This browser couldn't open that file. Please choose a JPEG photo." (the spec: "If the browser can't open a file, say so in plain words").
+  - The colors: the page #1c1c1c; words #ececec (14.43 to 1); smaller words #a8a8a8 (7.17 to 1); the button #ececec with #1c1c1c words; the message's edge #7a7a7a (3.97 to 1). The main button is 56 pixels high.
+  - A made-up tall test photo (`tests/tall-test-photo.jpg`: 3,000 by 4,000 as you see it, saved turned with rotation tag 6, and a made-up location, 30 degrees north and 140 degrees west, open ocean) on its own page, `tests/test-photos.html`, so the Safari check doesn't depend on having a phone photo on the MacBook. It came earlier than planned: the plan had a test picture arriving with Export (step 4), which will use it too.
+  - The saved checks start with this step instead of step 3.
+- Why: the plan's step 2, and Dan's rules: "Phone first," "Show me side-by-side previews," and "Check, don't guess."
