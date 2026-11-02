@@ -152,7 +152,10 @@ Here the commentary for the leader is a short note for the reader instead: speak
 // with their depth). Then Sonnet 5.5 again the same day, to save cost and time (the owner's
 // choice), with the two changes Anthropic suggests for JSON answers: EFFORT 'high' and
 // THINK_FIRST below. Sonnet costs about half as much per answer as Opus (prices below).
-// To go back to Opus: MODEL 'claude-opus-5-5', EFFORT 'medium', THINK_FIRST '' and MAX_TOKENS 4000.
+// Then Opus 5.5 again on November 2, 2026, for every set, at normal speed (the owner's choice:
+// "I'll try opus but not fast mode because that is quite expensive"; his "A" for all sets).
+// To go back to Sonnet: MODEL 'claude-sonnet-5-5', EFFORT 'high', THINK_FIRST
+// 'Think the problem through before you answer.' and MAX_TOKENS 8000.
 // The others stay in the list only to price an answer if the model is ever changed.
 // Prices in US dollars per million tokens, from https://platform.claude.com/docs/en/about-claude/pricing
 // (checked again October 28, 2026). Used only to show what each answer cost.
@@ -161,24 +164,25 @@ const MODELS = {
   'claude-sonnet-5-5': { input: 2,    output: 10 },
   'claude-haiku-5-5':  { input: 0.10, output: 0.50 },
 };
-const MODEL = 'claude-sonnet-5-5';
+const MODEL = 'claude-opus-5-5';
 
 // How much the AI thinks before it writes: 'low', 'medium', 'high', 'xhigh' or 'max'.
 // 'high' is Sonnet 5.5's default, 'medium' is Opus 5.5's. From October 26 to 28, 2026, Sonnet
-// ran at 'medium', where it often skips thinking when the answer must be JSON.
+// ran at 'medium', where it often skips thinking when the answer must be JSON. Opus 5.5 runs
+// at its own default, 'medium', as on October 28, 2026, when the owner found its questions deeper.
 // https://platform.claude.com/docs/en/build-with-claude/effort
-const EFFORT = 'high';
+const EFFORT = 'medium';
 
 // One line at the very end of the guidance, from Anthropic's Sonnet 5.5 guide ("Reasoning
 // tasks with JSON output"): it helps the AI think before it writes a JSON answer.
 // https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-sonnet-5-5
-// For Opus 5.5, leave it empty (''): it decides by itself how much to think.
-const THINK_FIRST = 'Think the problem through before you answer.';
+// For Opus 5.5, leave it empty (''): it decides by itself how much to think. For Sonnet 5.5:
+// 'Think the problem through before you answer.'
+const THINK_FIRST = '';
 
 // The longest an answer can be, thinking included (a hard limit that also caps the cost:
-// with Sonnet 5.5, 8,000 tokens is at most 8 cents of writing, the same as 4,000 with Opus).
-// The room is for the longer thinking at 'high' effort.
-const MAX_TOKENS = 8000;
+// with Opus 5.5, 4,000 tokens is at most 8 cents of writing, the same as 8,000 with Sonnet).
+const MAX_TOKENS = 4000;
 
 // Only the website (and a local copy while building) may use this server
 const ALLOWED_ORIGINS = ['https://danielyoonwrites.github.io', 'http://127.0.0.1:8765'];
