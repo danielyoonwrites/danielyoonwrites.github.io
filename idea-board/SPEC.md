@@ -105,7 +105,7 @@ Order: saving to your account (steps 6 and 7) comes before links (step 5), the o
 6. The server and signing in: a one-time setup in Cloudflare (with every step), then signing in with an email code. Check: sign in on your phone and on your computer.
 7. Saving to your account: the boards already on the phone move to it, and the same boards open on the phone and the computer, without overwriting. Check: add a note on your phone and see it on your computer, then the other way around.
 8. "Download a copy" and "Restore a copy." Check: download a copy, remove a board, restore the copy: the board comes back.
-9. Polish after a week of real use, then decide whether it goes on the Projects page (with a check of the name first).
+9. Polish after a week of real use. (It went on the website's Projects page early, at Dan's wish, in pull request 124, after a name check: `DECISIONS.md`.)
 
 ## Open questions (ask one at a time)
 
