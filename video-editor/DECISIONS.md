@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 2, 2026, pull requests 110 to 112)
+## In force (November 2, 2026, pull requests 110 to 112 and 116)
 
 Every decision below that still holds, one line each; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -18,8 +18,10 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 2, 2026: the phone test passed on the owner's phone: AAC sound is built in, so the app loads the add-on only on a phone or browser without it.
 - November 2, 2026: the dark look (Dan's "A").
 - November 2, 2026: every video is made to fit Instagram's, TikTok's and YouTube Shorts' upload rules (Dan's request), and "Your video" checks it against them.
-- November 2, 2026: build step 3's screens: Start, "The look" (Filter and Lighting tabs), "Making the video," "Your video"; six filters; Brightness and Contrast from −50 to +50.
-- November 2, 2026: the filter and lighting question (whole video or each clip) waits for build step 7.
+- November 2, 2026: build step 3's screens: Start, "The look" (Filter and Lighting tabs), "Making the video," "Your video"; Brightness and Contrast from −50 to +50.
+- November 2, 2026: the looks are Korean styles (Dan's "a"): Original, Milky 우유빛, Peach 복숭아, Soft glow 뽀샤시, Café 카페, Clear 맑음, Film 필름, Black and white 흑백, each with its English name and the Korean word under it. They're SVG filters, drawn on a normal canvas.
+- November 2, 2026: "Better sound," without AI, is build step 5 (Dan asked whether it's possible); its details are asked then.
+- November 2, 2026: the filter and lighting question (whole video or each clip) waits for build step 8.
 
 ## Log (oldest first)
 
@@ -83,3 +85,14 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Decision (Claude's design, for Dan to judge in the screenshots): Start → "The look" → "Making the video" → "Your video." On "The look," the video plays at the top without sound (it can be turned on), with a "Filter" tab (None, Black and white, Warm, Vivid, Soft, Old film) and a "Lighting" tab (Brightness and Contrast, −50 to +50 in steps of 5, "Reset the lighting"); "Make the video" stays at the bottom. The phone's Back button goes back one screen, and stops a video being made. A saved video is named for its time, like `video-2026-11-02-0913.mp4`.
 - Why: Dan's rules: one thing per screen and short pages on a phone (tabs instead of one long page). The filters are CSS filters, so the playing video and the new file use the same words and look the same.
 - The filter and lighting question (`SPEC.md`, open question 4) waits for build step 7: with one clip, the whole video and each clip are the same.
+
+### November 2, 2026: Korean looks (pull request 116)
+- Decision: the looks are Original (원본), six Korean looks, Milky (우유빛), Peach (복숭아), Soft glow (뽀샤시), Café (카페), Clear (맑음) and Film (필름), and Black and white (흑백), in that order. Each button shows the English name with the Korean word under it. They replace None, Warm, Vivid, Soft and Old film.
+- Why: Dan, after trying build step 3: "it looks good, but can I have the filters a bit more Korean, like fitting Korean aesthetics and lighting, and color styles?" Claude researched it (search results only; the pages were blocked) and offered three ways; Dan chose "a": "Replace the current filters with the six Korean looks, keeping Original and Black and white, for 8 in all" (Claude's recommendation). What the looks share (bright and airy, soft contrast, muted pastels, a milky or warm white with soft pink, brightened skin) and the sources are in `SPEC.md`, "The looks."
+- How (Claude's choices): the Korean looks are SVG filters near the top of `index.html`, since the simple CSS steps can't do pink highlights, a milky lift or a glow. Claude's test in the test browser: SVG filters work on a normal canvas, with exactly the expected colors, but not on an OffscreenCanvas, so each frame is now drawn on a normal canvas. The glow's blur is 1.2% of the picture's width (`setGlowFor()`), so the small preview and the full-size video match, and it doesn't change while a video is being made (an address bar sliding away resizes the page). The playing video is sized to its picture, so lifted darks don't turn black bars gray. The saved checks compare the preview with the saved file for Milky and Peach (within 12 of 255) and check each look's direction on a color chart.
+- Turned down: "b", the six Korean looks plus Original only (no Black and white); "c", adding them to the old six (12 in all, a long list). Also a preview drawn on a canvas (it would lose the video's own controls).
+- Not checked yet: how fast Soft glow is on Dan's phone; the looks on real faces (the test scene is made up).
+
+### November 2, 2026: better sound becomes build step 5 (pull request 116)
+- Decision: add "Better sound" to the build plan as step 5, after trim and speed, without AI: even out the volume, cut low rumble, a clearer voice, the volume up or down. Which of these, and how they're shown, is asked at step 5 (`SPEC.md`, open question 6). The later steps move down one (shape and crop 6, text 7, several clips 8, polish 9).
+- Why: Dan: "can you also create a part of the app to help with audio as well? Like maybe making the audio better or things like that? Let me know if it is possible." Claude's answer: possible without AI. Chrome has OfflineAudioContext (Chrome 35 and later), BiquadFilterNode and DynamicsCompressorNode (Chrome 14 and later) (MDN's browser-compat-data, November 2, 2026), and Mediabunny can hand the sound over and take it back (AudioBufferSink, AudioBufferSource). Its limit: changing background noise like other people talking or music can't really be removed without AI, and steady noise like a fan only a little. After trim and speed, because speed changes the sound too.
