@@ -1,6 +1,6 @@
 # SPEC: Idea board
 
-A little app at https://danielyoonwrites.github.io/idea-board (folder `idea-board/` in the website repository; "Idea board" is a working name). Planned with the owner, November 2, 2026.
+A little app at https://danielyoonwrites.github.io/idea-board (folder `idea-board/` in the website repository). Planned with the owner, November 2, 2026.
 
 ## Who it's for
 
@@ -68,11 +68,11 @@ Not chosen yet (open question 2). Claude's suggestion: the Moon jar design, like
 6. The server and signing in: a one-time setup in Cloudflare (with every step), then signing in with an email code. Check: sign in on your phone and on your computer.
 7. Saving to your account: the boards already on the phone move to it, and the same boards open on the phone and the computer, without overwriting. Check: add a note on your phone and see it on your computer, then the other way around.
 8. "Download a copy" and "Restore a copy." Check: download a copy, remove a board, restore the copy: the board comes back.
-9. Polish after a week of real use, then decide whether it goes on the Projects page.
+9. Polish after a week of real use, then decide whether it goes on the Projects page (with a check of the name first).
 
 ## Open questions (ask one at a time)
 
-1. The name: "Idea board" is a working name.
+1. The name: answered November 2, 2026, "Idea board" (the owner's choice).
 2. The look: Moon jar like the website (Claude's suggestion), or its own.
 3. Several boards (Claude's suggestion, build step 3), or one big board.
 4. Signing in: an email code like Living in the Word (Claude's suggestion), or a long passphrase typed once on each device.

@@ -2,7 +2,7 @@
 
 Read `PROGRESS.md` first (where it stands and the next step), then `DECISIONS.md` (choices and their reasons) and `SPEC.md`.
 
-A little app for typed notes, photos and links on one big board, like Apple's Freeform, for the owner's Android phone and a computer's web browser. "Idea board" is a working name (planned November 2, 2026). It lives in this folder and will be published at https://danielyoonwrites.github.io/idea-board. Keep the "Build plan" in `SPEC.md` up to date.
+A little app for typed notes, photos and links on one big board, like Apple's Freeform, for the owner's Android phone and a computer's web browser, planned November 2, 2026. It lives in this folder and will be published at https://danielyoonwrites.github.io/idea-board. Keep the "Build plan" in `SPEC.md` up to date.
 
 ## Rules for working here
 

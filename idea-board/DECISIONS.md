@@ -20,3 +20,8 @@ Each decision with its reason, oldest first. Only add to this file; if a decisio
 - Decision: Claude's choice, put to the owner with pull request 103: its own Cloudflare Worker and D1 database, not added to Living in the Word's server.
 - Why: a problem in one app's server can't break the other, and photos can't fill Living in the Word's database (D1's free plan has 500 MB per database: Cloudflare's docs, read as their source on GitHub, November 2, 2026).
 - Turned down: adding the boards to Living in the Word's server. It would need no new setup in Cloudflare, but it ties the two apps together.
+
+### November 2, 2026: the name, "Idea board" (pull request 103)
+- Decision: the app is called "Idea board," at https://danielyoonwrites.github.io/idea-board (folder `idea-board/`).
+- Why: the owner's choice "a" of three: "Idea board" (Claude's recommendation: plain, and says what it is), "Thinking table," or "Room to think."
+- Turned down: "Thinking table," and "Room to think," which sounds like "Quiet room" (nice or confusing).
