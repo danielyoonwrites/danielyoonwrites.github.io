@@ -85,6 +85,67 @@ export function makeClock() {
   return file;
 }
 
+// Test sounds for "Better sound" (build step 5), each with a plain gray picture, 6 seconds:
+// "tones": 50, 300, 1,000 and 3,500 Hz together, each at -20 dB (a rumble, the boomy middle, the middle,
+// and the part of a voice that carries the words); "quiet-loud": silence for 1 second, then a 440 Hz
+// tone at -36 dB until 3.5 seconds, then at -6 dB (a 30 dB gap between quiet and loud); "noise": silence
+// for 1 second, then a hiss, which lines up with a copy of itself at only one point (to check timing).
+function makeSoundVideo(name, expression) {
+  const file = VIDEOS + name;
+  if (existsSync(file)) return file;
+  ffmpeg(['-f', 'lavfi', '-i', 'color=c=gray:s=360x640:r=30:d=6', '-f', 'lavfi', '-i', `aevalsrc=${expression}:s=48000:d=6`,
+    '-vf', 'format=yuv420p', '-ac', '2', '-c:v', 'libx264', '-preset', 'veryfast', '-c:a', 'aac', '-b:a', '256k', '-shortest', file]);
+  return file;
+}
+export function makeSoundTests() {
+  return {
+    tones: makeSoundVideo('tones.mp4', "'0.1*(sin(2*PI*50*t)+sin(2*PI*300*t)+sin(2*PI*1000*t)+sin(2*PI*3500*t))'"),
+    quietLoud: makeSoundVideo('quiet-loud.mp4', "'if(lt(t,1),0,if(lt(t,3.5),0.01585,0.5))*sin(2*PI*440*t)'"),
+    noise: makeSoundVideo('noise.mp4', "'if(gte(t,1),0.3*(2*random(0)-1),0)'"),
+  };
+}
+
+// A file's sound as numbers (one channel, 48,000 a second), as ffmpeg plays it
+export function soundSamples(file) {
+  const run = spawnSync('ffmpeg', ['-v', 'error', '-i', file, '-ac', '1', '-ar', '48000', '-f', 'f32le', '-'], { maxBuffer: 1 << 28 });
+  return new Float32Array(run.stdout.buffer.slice(run.stdout.byteOffset, run.stdout.byteOffset + Math.floor(run.stdout.length / 4) * 4));
+}
+const toDb = (x) => 20 * Math.log10(Math.max(x, 1e-9));
+// How loud one tone is in a stretch of the sound (from and to in seconds), in dB (0 = the loudest possible)
+export function toneLevel(samples, hertz, from, to) {
+  const a = Math.round(from * 48000);
+  const b = Math.round(to * 48000);
+  const k = 2 * Math.cos((2 * Math.PI * hertz) / 48000);
+  let s1 = 0;
+  let s2 = 0;
+  for (let i = a; i < b; i++) { const s0 = samples[i] + k * s1 - s2; s2 = s1; s1 = s0; }
+  return toDb((2 * Math.sqrt(Math.max(s1 * s1 + s2 * s2 - k * s1 * s2, 0))) / (b - a));
+}
+// How loud a stretch is on average (RMS), and its loudest moment, in dB
+export function soundLevel(samples, from, to) {
+  let sum = 0;
+  for (let i = Math.round(from * 48000); i < Math.round(to * 48000); i++) sum += samples[i] * samples[i];
+  return toDb(Math.sqrt(sum / (Math.round(to * 48000) - Math.round(from * 48000))));
+}
+export function soundPeak(samples) {
+  let most = 0;
+  for (const v of samples) most = Math.max(most, Math.abs(v));
+  return toDb(most);
+}
+// How many samples later sound "b" is than sound "a" (from -most to +most), found where the two line up
+// best between "from" and "to" seconds. With a hiss it lines up at only one point. (A tone that starts
+// suddenly can't be timed by its start: AAC smears a sudden start over a few thousandths of a second.)
+export function soundLag(a, b, from, to, most = 2400) {
+  let best = 0;
+  let bestScore = -Infinity;
+  for (let lag = -most; lag <= most; lag++) {
+    let score = 0;
+    for (let i = Math.round(from * 48000); i < Math.round(to * 48000); i++) score += a[i] * b[i + lag];
+    if (score > bestScore) { bestScore = score; best = lag; }
+  }
+  return best;
+}
+
 // The average color of a whole frame at a moment (as ffmpeg shows it)
 export function frameColor(file, at) {
   const run = spawnSync('ffmpeg', ['-v', 'error', '-ss', String(at), '-i', file, '-vf', 'scale=1:1:flags=area,format=rgb24',
