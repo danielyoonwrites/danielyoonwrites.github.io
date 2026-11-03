@@ -34,5 +34,6 @@ Fast mode (Opus 5.5 in fast mode for sets someone waits for) was built and teste
 - Every page of danielyoonwrites.github.io shares the app's saved sign-in (browsers keep one storage per website). Keep outside scripts, embeds and HTML insertion off every page of the site.
 - `readSaved` treats any `version` other than 1 as empty, and the next save replaces everything. If the version is ever raised, an older app.js still on a phone would wipe saved studies.
 - `connectionCode` uses the passcode as its secret; step S6 already plans a separate secret.
+- Found at the November 3, 2026 handoff, low: `emailInvite` (`server/worker.js`) adds to an address's invite count and the day's shared email count together, then checks, so taps of "Invite" past the 3 a day for one address still use up the day's 90 emails. Only the owner can invite, so only he could cause it. The same pattern as item 8.
 - Prompt caching was checked again: still not worth it. In steady use each request written ahead goes alone, so the cache write costs more than it saves (`PROGRESS.md`, "Dead ends").
 - Gaps in the saved checks: AI errors all the way to the screen (a refusal, and a study whose request hangs; 429 and 529 are checked since pull request 126, a reading whose request hangs since pull request 127; plan restarts are checked since pull request 128). Each fix above adds its own checks.
