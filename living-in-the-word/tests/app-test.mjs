@@ -62,6 +62,7 @@ let requests = 0;
 const asked = [];   // each set of questions asked for, like "Philippians 2|personal"
 let hold = null;    // { passage, waiting }: that passage's answer waits until released (section W)
 let hang = null;    // a passage whose answer never comes, like a connection that hangs (section HANG)
+const held = new Map();   // passage → a promise: more than one answer held back at once (section W9)
 let textAsks = 0;   // requests for the Bible text (none while the ESV is on hold; section E)
 let phoneIp = '203.0.113.9';   // the internet address the stand-in server sees for every phone
 
@@ -92,6 +93,7 @@ async function newPhone(width = 360, height = 740) {
         asked.push(sent.passage + '|' + sent.method);
         if (hang && hang === sent.passage) return;   // never answered: only the app's own timer ends it
         if (hold && hold.passage === sent.passage) await hold.waiting;
+        if (held.has(sent.passage)) await held.get(sent.passage);
       }
     }
     const response = await worker.fetch(new Request(WORKER, init), env);
@@ -482,6 +484,61 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
     check('W8: no errors', errors.length === 0, errors.join(' | '));
     await context.close();
   }
+
+  // W9, W10. Ending a plan while its first reading is written, then starting another
+  // (AUDIT.md, item 6; November 3, 2026). Someone new, so the owner's daily limit doesn't
+  // get in the way.
+  {
+    await call(worker, env, { action: 'invite', email: 'plans@example.com', name: 'Plans' }, { key: ownerKey3 });
+    const plansKey = (await signIn(worker, env, 'plans@example.com', '198.51.100.64')).body.session;
+    const { context, page, errors } = await newPhone();
+    await signedInAs(page, plansKey, 'plans@example.com', false);
+    page.on('dialog', (dialog) => dialog.accept());
+    const begin = async (book) => {
+      await page.click('[data-action="reading"]');
+      await page.selectOption('#plan-book', book);
+      await page.click('#plan-setup button[type="submit"]');
+      await page.waitForFunction((name) => document.querySelector('.reading-name').textContent === name, book + ' 1');
+    };
+    let releaseOld;
+    let releaseNew;
+    held.set('Jonah 1', new Promise((resolve) => { releaseOld = resolve; }));
+    held.set('Ruth 1', new Promise((resolve) => { releaseNew = resolve; }));
+
+    // W9. Jonah 1 is being written when that plan ends; then a plan for Ruth starts
+    await begin('Jonah');
+    await waitUntil(() => times('Jonah 1') > 0);
+    await page.click('[data-action="end-plan"]');
+    await begin('Ruth');
+    await waitUntil(() => times('Ruth 1') > 0);
+    check('W9: Ruth 1 says it is being written', (await writing(page)) && (await text(page, '.reading-status')).startsWith('Writing questions for Ruth 1.'), await text(page, '.reading-status'));
+    releaseOld();   // Jonah's answer arrives while Ruth's is still being written
+    await new Promise((r) => setTimeout(r, 600));
+    check('W9: the old plan\'s answer leaves Ruth 1\'s writing lines alone', (await writing(page)) && (await text(page, '.reading-status')).startsWith('Writing questions for Ruth 1.'), await text(page, '.reading-status'));
+    await page.click('#today .back');
+    await page.click('[data-action="reading"]');
+    await new Promise((r) => setTimeout(r, 300));
+    check('W9: opened again, Ruth 1 is not asked for twice', times('Ruth 1') === 1 && (await writing(page)), JSON.stringify(asked.filter((item) => item.startsWith('Ruth'))));
+    releaseNew();
+    await page.waitForFunction(() => !document.querySelector('.reading-check').hidden);
+    check('W9: then Ruth 1\'s questions show', (await text(page, '.reading-name')) === 'Ruth 1' && (await page.locator('.reflect-list li').count()) === 3 && times('Ruth 1') === 1);
+    held.clear();
+
+    // W10. A reading that failed in one plan is asked for by itself in the next plan
+    await page.click('[data-action="end-plan"]');
+    ai.fail = { status: 500, body: { type: 'error', error: { type: 'api_error', message: 'Internal server error' } } };
+    await begin('Esther');
+    await page.waitForFunction(() => !document.getElementById('today').classList.contains('writing'));
+    check('W10: Esther 1 failed, so "Questions for this reading" shows', await visible(page, '[data-action="reading-ai"]'));
+    ai.fail = null;
+    await page.click('[data-action="end-plan"]');
+    const before = times('Esther 1');
+    await begin('Esther');
+    const cameBack = await page.waitForFunction(() => !document.querySelector('.reading-check').hidden, null, { timeout: 8000 }).then(() => true, () => false);
+    check('W10: a new plan asks for its first reading by itself', cameBack && times('Esther 1') === before + 1, JSON.stringify(asked.filter((item) => item.startsWith('Esther'))));
+    check('W9, W10: no errors', errors.length === 0, errors.join(' | '));
+    await context.close();
+  }
 }
 
 // ---- Y. Prepare for a Bible study: the next chapter's questions are written ahead, quietly
@@ -714,7 +771,8 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
     window.setTimeout = (fn, ms, ...rest) => realSetTimeout(fn, ms === 120000 ? 1500 : ms, ...rest);
   });
   await signedInAs(page, hangKey, 'hang@example.com', false);
-  const times = () => asked.filter((item) => item === 'Ruth 1|personal').length;
+  const earlier = asked.filter((item) => item === 'Ruth 1|personal').length;   // Ruth 1 asked for in other sections
+  const times = () => asked.filter((item) => item === 'Ruth 1|personal').length - earlier;
   const writing = () => page.evaluate(() => document.getElementById('today').classList.contains('writing'));
   const OFFLINE = 'Couldn’t reach the AI helper, so these are general questions. Check your connection and try again.';
 
@@ -858,7 +916,7 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
 // ?v= number in index.html, then put the new number and the fingerprint this check prints in KNOWN.
 {
   const KNOWN = {
-    'app.js?v=40': '7f30abddddd3a5af',
+    'app.js?v=41': '9f5b9c471e542816',
     'style.css?v=25': 'a79e0238a9c905fd',
   };
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
