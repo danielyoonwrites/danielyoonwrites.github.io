@@ -277,8 +277,11 @@ function startStudy(text) {
   }
 
   // A new passage starts fresh, with its questions at once if they were written ahead
-  // (see "Next chapter ahead"; not while the AI is still writing another passage's)
-  const ready = asking ? null : takeReadyAhead(text);
+  // (see "Next chapter ahead"). If the AI is still writing another passage's questions, that
+  // answer is ignored, as when a saved study opens, so the ready set is used, not paid for
+  // again (AUDIT.md, item 7)
+  const ready = takeReadyAhead(text);
+  if (ready && asking) stopAsking();
   showNotFound(false);
   passage = text;
   fill('.passage-name', passage);
@@ -1305,16 +1308,21 @@ function updateSaveButton() {
   document.querySelector('[data-action="unsave"]').hidden = !study;
 }
 
-// Opens a saved study's questions, ready to use, change or share
-function openStudy(study) {
-  showNotFound(false);
-  // If the AI is still writing for another passage, its answer is ignored
+// Stops waiting for the AI's answer for another passage: when it comes, it's ignored
+// (requestSuggestions checks latestRequest), and the button and the screen are ready again
+function stopAsking() {
   latestRequest++;
   asking = false;
   const button = document.querySelector('[data-action="suggest"]');
   button.disabled = false;
   button.textContent = 'Write new questions';
   showWriting('questions', false);
+}
+
+// Opens a saved study's questions, ready to use, change or share
+function openStudy(study) {
+  showNotFound(false);
+  stopAsking();   // if the AI is still writing for another passage, its answer is ignored
 
   passage = study.passage;
   questions = study.questions.slice();
