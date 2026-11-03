@@ -2,7 +2,7 @@
 
 The "In force" list right below is every decision that still holds, one line each; it's rewritten at each handoff. The log under it has each decision with its reason, oldest first, and is only added to: if a decision changes, add a new entry that says which one it replaces, and one "Status" line on the old entry. The decisions from before October 27, 2026 were copied in on October 28, 2026 from the root `HANDOFF.md` ("Project 5"), `SPEC.md`, `AI-PLAN.md` and `SIGNUP-PLAN.md`; those files keep their own text too. When the notes give no reason, an entry says "not recorded."
 
-## In force (rewritten November 2, 2026, at the end of the ninth session)
+## In force (rewritten November 3, 2026, at the end of the twelfth session)
 
 **Who it's for, and how the work goes**
 - October 25, 2026: stages: Dan's small group first, then anyone online later (stage 3). Dan reviews every question, and nothing is shared on its own.
@@ -32,7 +32,8 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 26, 2026: "Go deeper with AI," a loading screen with placeholder lines, and a clean screen when a passage isn't recognized.
 - October 26, 2026: saved studies stay on the phone; the Save button says what it saves; "Remove" sits under the Save bar.
 - October 31, 2026: the reading plan writes the next reading's questions ahead, quietly, one reading ahead only.
-- October 31, 2026: "Prepare for a Bible study" writes the next chapter's questions ahead after a whole chapter (one set kept on the phone, used once).
+- November 3, 2026: a reading's questions give up after 2 minutes, like a study's; an answer for an ended plan changes nothing in the next one.
+- October 31, 2026: "Prepare for a Bible study" writes the next chapter's questions ahead after a whole chapter (one set kept on the phone, used once); since November 3, 2026 the set opens at once even while the AI writes another passage, whose answer is then ignored.
 - October 31, 2026: the test link (`?test`) shows how long the wait was and the AI's part of it, and since November 2 which AI wrote the set; the wait is measured before changing anything about speed.
 - October 26, 2026: the home screen icon is the full name in EB Garamond, and the name under it is "In the Word."
 - October 26, 2026: verse numbers follow the NASB, ESV and NIV; "Choose from the Bible" sits above the typing box.
@@ -464,3 +465,21 @@ The "In force" list right below is every decision that still holds, one line eac
 - Checks: section 24 of `tests/server-test.mjs` (nine problems; the 4 "busy" checks fail on the old code) and section BUSY of `tests/app-test.mjs` (the words on the screen, and a phone screenshot).
 - Turned down: recognizing the spend cap by its missing `retry-after` header (Anthropic: "Not every 429 carries it"); trying again by itself after a busy answer (a longer wait; "Write new questions" is one tap).
 - Not changed: "Today's AI limit is reached," which the app's own daily counts give.
+
+### November 3, 2026: a reading's questions give up after 2 minutes, like a study's (pull request 127)
+- Decision: `fetchReadingQuestions` in `app.js` gives up after 2 minutes, with the same timer as a study (`requestSuggestions`) and the next chapter written ahead (`prepareStudyAhead`). Then the reading shows the general questions with "Couldn’t reach the AI helper, so these are general questions. Check your connection and try again.", as without reception, and opening the reading again asks again.
+- Why: `AUDIT.md`, item 5. With no timer, a connection that hung (no answer and no error) left "Writing questions for …" on the reading for as long as the app stayed open, and blocked every later reading's questions too, including the one written ahead, because only one reading is asked for at a time (`readingRequest`).
+- Checks: section HANG of `tests/app-test.mjs`: the phone's 2-minute timer shortened to 1.5 seconds for that check only, and a stand-in server that never answers. On the old code, 2 of its checks fail.
+- Not changed: what a reading does without reception (no "Questions for this reading" button; the next visit asks again by itself).
+
+### November 3, 2026: an answer for an ended plan changes nothing in the next one (pull request 128)
+- Decision: `app.js` keeps a plan counter, `planCount`. It goes up each time a plan ends or starts (`leavePlan`, called by "End this plan," "Start a new plan" and the plan setup), and `leavePlan` also clears the reading the AI is writing (`readingRequest`) and the readings that failed (`readingFailed`). `fetchReadingQuestions` remembers the counter when it asks; if it changed by the time the answer comes, the answer changes nothing.
+- Why: `AUDIT.md`, item 6. Ending a plan while its first reading was being written, then starting another, let the old plan's late answer clear the new plan's place in line and hide its "Writing questions" lines, because both plans' first readings are number 0. Opening the new reading again then asked the AI a second time, so it was paid for twice. And a reading that failed in the old plan wasn't asked for by itself in the new one.
+- Checks: sections W9 and W10 of `tests/app-test.mjs`, with two answers held back at once (`held`). On the old code, 4 of their checks fail.
+- Kept: the check of the saved plan when an answer comes, for a plan changed some other way (like in another tab).
+
+### November 3, 2026: a chapter written ahead opens at once, even while the AI writes another passage (pull request 130)
+- Decision: `startStudy` in `app.js` takes the chapter written ahead whenever it's there. If the AI is still writing another passage's questions, `stopAsking` makes that answer be ignored, as opening a saved study already did (`openStudy` now uses `stopAsking` too).
+- Why: `AUDIT.md`, item 7. The ready set was skipped while the AI was writing anything else, so the chapter was asked for again (paid twice) and the ready set was later replaced unused. The ready set couldn't simply be shown before, because the other answer would then have cleared its "check it" line when it came; `stopAsking` makes that answer change nothing.
+- Checks: section Y9 of `tests/app-test.mjs` (Titus 1, then Hosea 1 held back, then Titus 2). On the old code, 2 of its checks fail.
+- Not changed: the other passage's request isn't stopped, only ignored, the same as when a saved study opens (whether stopping it on the phone would save its cost wasn't checked).

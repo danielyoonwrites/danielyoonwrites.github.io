@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 2, 2026, pull requests 110 to 112, 116 and 125)
+## In force (November 3, 2026, pull requests 110 to 112, 116, 125 and 129)
 
 Every decision below that still holds, one line each; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -18,9 +18,9 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 2, 2026: the phone test passed on the owner's phone: AAC sound is built in, so the app loads the add-on only on a phone or browser without it.
 - November 2, 2026: the dark look (Dan's "A").
 - November 2, 2026: every video is made to fit Instagram's, TikTok's and YouTube Shorts' upload rules (Dan's request), and "Your video" checks it against them.
-- November 2, 2026: the screens: Start, "Edit" (Trim, Speed, Filter and Lighting tabs; called "The look" until build step 4), "Making the video," "Your video"; Brightness and Contrast from −50 to +50.
+- November 2, 2026: the screens: Start, "Edit" (Trim, Speed, Filter, Lighting and Sound tabs; called "The look" until build step 4), "Making the video," "Your video"; Brightness and Contrast from −50 to +50.
 - November 2, 2026: the looks are Korean styles (Dan's "a"): Original, Milky 우유빛, Peach 복숭아, Soft glow 뽀샤시, Café 카페, Clear 맑음, Film 필름, Black and white 흑백, each with its English name and the Korean word under it. They're SVG filters, drawn on a normal canvas.
-- November 2, 2026: "Better sound," without AI, is build step 5 (Dan asked whether it's possible); its details are asked then.
+- November 3, 2026: better sound, without AI (build step 5): three switches, Cut rumble, Clearer voice and Even out the volume, and a Volume slider from Off to 200% (Dan's "B"); the same steps on the playing video and in the new video, with a safety limit so nothing clips. A steady hiss (like a fan) is left for later.
 - November 2, 2026: trim and speed (build step 4): "Start here" and "End here" while it plays, or sliders in tenths of a second; speeds 0.5×, 1×, 1.5× and 2×; the sound follows the speed like a tape, so faster sounds higher (Dan's "b").
 - November 2, 2026: the app makes each new video frame by frame (Mediabunny's `CanvasSink` and `CanvasSource`, the sound through an `OfflineAudioContext`), instead of the one-step `Conversion`, which has no speed setting.
 - November 2, 2026: the filter and lighting question (whole video or each clip) waits for build step 8.
@@ -113,3 +113,10 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Why: `Conversion` can trim but has no speed setting (its type notes, Mediabunny 1.65.0). Frame by frame handles trim and speed exactly, keeps a steady frame rate, and is the path better sound (step 5) and several clips (step 8) need. The file is written fresh, so none of the original's tags come along (`tags: {}` was a `Conversion` setting; the phone test still uses it).
 - Checked in Claude's test browser, with a made-up "clock" video (a gray that brightens each second, and a 330 Hz tone): trimmed to 2 to 6 seconds at 2×, the new video is 2.0 seconds, a steady 30 frames a second, each frame shows the right moment, and the tone is 660 Hz; 0 to 2 at 0.5× is 4 seconds at 165 Hz; the whole 8 seconds at 1.5× is 5.3 seconds. The earlier checks (looks, lighting, the upload rules, Stop, Back) pass on the new path.
 - Not checked yet: how long it takes on Dan's phone.
+
+### November 3, 2026: better sound, three switches and a volume (pull request 129)
+- Decision: a fifth tab, "Sound," with three switches, all off at first: "Cut rumble" (wind, traffic and bumps from holding the phone), "Clearer voice" (brings voices forward and takes out boominess) and "Even out the volume" (quiet words louder, loud moments softer), and a Volume slider from Off (0%) to 200% in steps of 10, with "Reset the sound." The playing video sounds the same way as the new video will.
+- Why: Dan chose "B": "Three separate switches (Cut rumble, Clearer voice, Even out the volume), plus the Volume slider. You get more control, but there's more to think about." (Claude's words for the option.)
+- Turned down: "A) One switch, 'Clearer sound,'" that turns on the first three fixes together, plus a Volume slider (Claude's recommendation: one tap, nothing to adjust); "C) Just the Volume slider for now." Also left for later (Claude's suggestion, told to Dan with the question): turning down a steady hiss like a fan or an air conditioner (without AI it helps only some, it's the most work, and pushed too far it makes voices sound watery). Other people talking or music in the background can't be removed without AI (the owner's no-AI rule).
+- How (Claude's choices, measured with test tones in Claude's test browser, November 3, 2026): Cut rumble is two high-pass filters at 80 Hz (50 Hz 17.7 dB quieter, a voice's range almost unchanged); Clearer voice is 3 dB less around 300 Hz and 4 dB more around 3,500 Hz; Even out the volume is a compressor (above −30 dB, 4 to 1; a 30 dB gap became 18 dB); then the volume; then a safety limit (above −3 dB, 20 to 1), only when something is changed, so a louder volume never clips. The playing video's sound goes through the same steps from the first change on the Sound tab, so nothing changes for a video whose sound isn't touched. Each compressor holds the sound back 6 thousandths of a second; the new video's sound is moved back in line, and the saved checks show it lines up with the original to the sample (a hiss lined up both ways; a check that times a sudden tone was dropped, since AAC smears a sudden start by about 14 thousandths of a second with or without the steps).
+- Not checked yet: how it sounds on Dan's phone with a real voice, and whether the playing video's sound stays in step with the picture there once it goes through Chrome's sound tools (they may add a small delay on a phone; unverified).

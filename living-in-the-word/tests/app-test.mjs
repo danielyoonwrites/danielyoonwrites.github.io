@@ -61,6 +61,8 @@ let offline = false;
 let requests = 0;
 const asked = [];   // each set of questions asked for, like "Philippians 2|personal"
 let hold = null;    // { passage, waiting }: that passage's answer waits until released (section W)
+let hang = null;    // a passage whose answer never comes, like a connection that hangs (section HANG)
+const held = new Map();   // passage → a promise: more than one answer held back at once (section W9)
 let textAsks = 0;   // requests for the Bible text (none while the ESV is on hold; section E)
 let phoneIp = '203.0.113.9';   // the internet address the stand-in server sees for every phone
 
@@ -89,7 +91,9 @@ async function newPhone(width = 360, height = 740) {
       if (sent.want === 'text') textAsks += 1;
       if (sent.passage && !sent.want) {
         asked.push(sent.passage + '|' + sent.method);
+        if (hang && hang === sent.passage) return;   // never answered: only the app's own timer ends it
         if (hold && hold.passage === sent.passage) await hold.waiting;
+        if (held.has(sent.passage)) await held.get(sent.passage);
       }
     }
     const response = await worker.fetch(new Request(WORKER, init), env);
@@ -480,6 +484,61 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
     check('W8: no errors', errors.length === 0, errors.join(' | '));
     await context.close();
   }
+
+  // W9, W10. Ending a plan while its first reading is written, then starting another
+  // (AUDIT.md, item 6; November 3, 2026). Someone new, so the owner's daily limit doesn't
+  // get in the way.
+  {
+    await call(worker, env, { action: 'invite', email: 'plans@example.com', name: 'Plans' }, { key: ownerKey3 });
+    const plansKey = (await signIn(worker, env, 'plans@example.com', '198.51.100.64')).body.session;
+    const { context, page, errors } = await newPhone();
+    await signedInAs(page, plansKey, 'plans@example.com', false);
+    page.on('dialog', (dialog) => dialog.accept());
+    const begin = async (book) => {
+      await page.click('[data-action="reading"]');
+      await page.selectOption('#plan-book', book);
+      await page.click('#plan-setup button[type="submit"]');
+      await page.waitForFunction((name) => document.querySelector('.reading-name').textContent === name, book + ' 1');
+    };
+    let releaseOld;
+    let releaseNew;
+    held.set('Jonah 1', new Promise((resolve) => { releaseOld = resolve; }));
+    held.set('Ruth 1', new Promise((resolve) => { releaseNew = resolve; }));
+
+    // W9. Jonah 1 is being written when that plan ends; then a plan for Ruth starts
+    await begin('Jonah');
+    await waitUntil(() => times('Jonah 1') > 0);
+    await page.click('[data-action="end-plan"]');
+    await begin('Ruth');
+    await waitUntil(() => times('Ruth 1') > 0);
+    check('W9: Ruth 1 says it is being written', (await writing(page)) && (await text(page, '.reading-status')).startsWith('Writing questions for Ruth 1.'), await text(page, '.reading-status'));
+    releaseOld();   // Jonah's answer arrives while Ruth's is still being written
+    await new Promise((r) => setTimeout(r, 600));
+    check('W9: the old plan\'s answer leaves Ruth 1\'s writing lines alone', (await writing(page)) && (await text(page, '.reading-status')).startsWith('Writing questions for Ruth 1.'), await text(page, '.reading-status'));
+    await page.click('#today .back');
+    await page.click('[data-action="reading"]');
+    await new Promise((r) => setTimeout(r, 300));
+    check('W9: opened again, Ruth 1 is not asked for twice', times('Ruth 1') === 1 && (await writing(page)), JSON.stringify(asked.filter((item) => item.startsWith('Ruth'))));
+    releaseNew();
+    await page.waitForFunction(() => !document.querySelector('.reading-check').hidden);
+    check('W9: then Ruth 1\'s questions show', (await text(page, '.reading-name')) === 'Ruth 1' && (await page.locator('.reflect-list li').count()) === 3 && times('Ruth 1') === 1);
+    held.clear();
+
+    // W10. A reading that failed in one plan is asked for by itself in the next plan
+    await page.click('[data-action="end-plan"]');
+    ai.fail = { status: 500, body: { type: 'error', error: { type: 'api_error', message: 'Internal server error' } } };
+    await begin('Esther');
+    await page.waitForFunction(() => !document.getElementById('today').classList.contains('writing'));
+    check('W10: Esther 1 failed, so "Questions for this reading" shows', await visible(page, '[data-action="reading-ai"]'));
+    ai.fail = null;
+    await page.click('[data-action="end-plan"]');
+    const before = times('Esther 1');
+    await begin('Esther');
+    const cameBack = await page.waitForFunction(() => !document.querySelector('.reading-check').hidden, null, { timeout: 8000 }).then(() => true, () => false);
+    check('W10: a new plan asks for its first reading by itself', cameBack && times('Esther 1') === before + 1, JSON.stringify(asked.filter((item) => item.startsWith('Esther'))));
+    check('W9, W10: no errors', errors.length === 0, errors.join(' | '));
+    await context.close();
+  }
 }
 
 // ---- Y. Prepare for a Bible study: the next chapter's questions are written ahead, quietly
@@ -564,6 +623,40 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
     await typePassage(page, 'Philippians 1');
     await new Promise((r) => setTimeout(r, 500));
     check('Y8: not signed in: nothing asked for', asked.length === before && !(await saved(page)).ahead, JSON.stringify(asked.slice(before)));
+    await context.close();
+  }
+
+  // Y9. A chapter written ahead opens at once even while the AI is writing another passage's
+  // questions, and that answer is then ignored (AUDIT.md, item 7; November 3, 2026). Someone
+  // new, so the owner's daily limit doesn't get in the way.
+  {
+    await call(worker, env, { action: 'invite', email: 'ahead@example.com', name: 'Ahead' }, { key: ownerKey3 });
+    const aheadKey = (await signIn(worker, env, 'ahead@example.com', '198.51.100.65')).body.session;
+    const { context, page, errors } = await newPhone();
+    await page.goto(APP + '?test');
+    await page.evaluate((key) => localStorage.setItem('living-in-the-word', JSON.stringify({ version: 1, session: key, email: 'ahead@example.com' })), aheadKey);
+    await page.goto(APP + '?test');
+    await page.waitForLoadState('networkidle');
+
+    await typePassage(page, 'Titus 1');
+    await questionsShow(page);
+    await page.waitForFunction(() => (JSON.parse(localStorage.getItem('living-in-the-word')).ahead || {}).passage === 'Titus 2');
+    let releaseOther;
+    held.set('Hosea 1', new Promise((resolve) => { releaseOther = resolve; }));
+    await typePassage(page, 'Hosea 1');
+    await waitUntil(() => times('Hosea 1') > 0);
+    check('Y9: Hosea 1 is being written', await writing(page));
+    await typePassage(page, 'Titus 2');
+    check('Y9: Titus 2 opens at once, written ahead', (await text(page, '.passage-name')) === 'Titus 2' && !(await writing(page))
+      && (await page.locator('.question-list textarea').count()) === 3 && (await text(page, '.suggest-status')) === CHECK
+      && (await text(page, '.test-cost')) === 'Written ahead, so no wait.', (await text(page, '.suggest-status')) + ' | ' + (await text(page, '.test-cost')));
+    check('Y9: not asked for again', times('Titus 2') === 1, JSON.stringify(asked.filter((item) => item.startsWith('Titus'))));
+    releaseOther();   // Hosea 1's answer comes after all
+    held.clear();
+    await new Promise((r) => setTimeout(r, 600));
+    check('Y9: Hosea 1\'s answer leaves Titus 2 as it is', (await text(page, '.passage-name')) === 'Titus 2' && (await text(page, '.suggest-status')) === CHECK
+      && (await page.evaluate(() => document.querySelector('[data-action="suggest"]').textContent)) === 'Write new questions', await text(page, '.suggest-status'));
+    check('Y9: no errors', errors.length === 0, errors.join(' | '));
     await context.close();
   }
 }
@@ -700,6 +793,45 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
   await context.close();
 }
 
+// ---- HANG. A reading's questions give up after 2 minutes, like a study's, when the connection
+// hangs (AUDIT.md, item 5; November 3, 2026). For this check only, the phone's 2-minute timer is
+// shortened to 1.5 seconds, and the stand-in server never answers Ruth 1 (hang).
+{
+  await call(worker, env, { action: 'invite', email: 'hang@example.com', name: 'Hang' }, { key: ownerKey3 });
+  const hangKey = (await signIn(worker, env, 'hang@example.com', '198.51.100.63')).body.session;
+  const { context, page, errors } = await newPhone();
+  await page.addInitScript(() => {
+    const realSetTimeout = window.setTimeout;
+    window.setTimeout = (fn, ms, ...rest) => realSetTimeout(fn, ms === 120000 ? 1500 : ms, ...rest);
+  });
+  await signedInAs(page, hangKey, 'hang@example.com', false);
+  const earlier = asked.filter((item) => item === 'Ruth 1|personal').length;   // Ruth 1 asked for in other sections
+  const times = () => asked.filter((item) => item === 'Ruth 1|personal').length - earlier;
+  const writing = () => page.evaluate(() => document.getElementById('today').classList.contains('writing'));
+  const OFFLINE = 'Couldn’t reach the AI helper, so these are general questions. Check your connection and try again.';
+
+  hang = 'Ruth 1';
+  await page.click('[data-action="reading"]');
+  await page.selectOption('#plan-book', 'Ruth');
+  await page.click('#plan-setup button[type="submit"]');
+  await page.waitForFunction(() => document.querySelector('.reading-name').textContent === 'Ruth 1');
+  check('HANG: Ruth 1 says its questions are being written', (await writing()) && (await text(page, '.reading-status')).startsWith('Writing questions for Ruth 1.'), await text(page, '.reading-status'));
+  const gaveUp = await page.waitForFunction(() => !document.getElementById('today').classList.contains('writing'), null, { timeout: 8000 }).then(() => true, () => false);
+  check('HANG: it gives up instead of waiting forever', gaveUp && (await text(page, '.reading-status')) === OFFLINE, await text(page, '.reading-status'));
+  check('HANG: with the general questions', (await page.locator('.reflect-list li').count()) > 0 && !(await visible(page, '.reading-check')));
+  await page.evaluate(() => document.querySelector('.reading-status').scrollIntoView({ block: 'center' }));
+  await page.screenshot({ path: SHOTS + 'hang-reading-gave-up.png' });
+
+  // The connection works again: opening the reading again asks again, and the questions come
+  hang = null;
+  await page.click('#today .back');
+  await page.click('[data-action="reading"]');
+  const cameBack = await page.waitForFunction(() => !document.querySelector('.reading-check').hidden, null, { timeout: 8000 }).then(() => true, () => false);
+  check('HANG: opened again, it asks again and the questions come', cameBack && times() === 2 && (await page.locator('.reflect-list li').count()) === 3, JSON.stringify([cameBack, times()]));
+  check('HANG: no errors', errors.length === 0, errors.join(' | '));
+  await context.close();
+}
+
 // ---- SW. The offline helper (sw.js), which the checks above turn off. A small stand-in website
 // on port 8766 serves two made-up versions of the app, ignores the ?v= part of an address the way
 // GitHub Pages does, and can be slowed down or cut off. The new script doesn't fit the old page
@@ -818,7 +950,7 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
 // ?v= number in index.html, then put the new number and the fingerprint this check prints in KNOWN.
 {
   const KNOWN = {
-    'app.js?v=39': '3f5ab06ba63f21f4',
+    'app.js?v=42': 'd177779d8cd2b595',
     'style.css?v=25': 'a79e0238a9c905fd',
   };
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');

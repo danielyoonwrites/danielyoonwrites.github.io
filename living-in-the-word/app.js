@@ -277,8 +277,11 @@ function startStudy(text) {
   }
 
   // A new passage starts fresh, with its questions at once if they were written ahead
-  // (see "Next chapter ahead"; not while the AI is still writing another passage's)
-  const ready = asking ? null : takeReadyAhead(text);
+  // (see "Next chapter ahead"). If the AI is still writing another passage's questions, that
+  // answer is ignored, as when a saved study opens, so the ready set is used, not paid for
+  // again (AUDIT.md, item 7)
+  const ready = takeReadyAhead(text);
+  if (ready && asking) stopAsking();
   showNotFound(false);
   passage = text;
   fill('.passage-name', passage);
@@ -1305,16 +1308,21 @@ function updateSaveButton() {
   document.querySelector('[data-action="unsave"]').hidden = !study;
 }
 
-// Opens a saved study's questions, ready to use, change or share
-function openStudy(study) {
-  showNotFound(false);
-  // If the AI is still writing for another passage, its answer is ignored
+// Stops waiting for the AI's answer for another passage: when it comes, it's ignored
+// (requestSuggestions checks latestRequest), and the button and the screen are ready again
+function stopAsking() {
   latestRequest++;
   asking = false;
   const button = document.querySelector('[data-action="suggest"]');
   button.disabled = false;
   button.textContent = 'Write new questions';
   showWriting('questions', false);
+}
+
+// Opens a saved study's questions, ready to use, change or share
+function openStudy(study) {
+  showNotFound(false);
+  stopAsking();   // if the AI is still writing for another passage, its answer is ignored
 
   passage = study.passage;
   questions = study.questions.slice();
@@ -1498,6 +1506,17 @@ let readingRequest = null;  // the reading number the AI is writing questions fo
 // Readings whose AI questions failed while the page is open: they aren't asked for again
 // by themselves (each try can cost), only when "Questions for this reading" is tapped
 const readingFailed = new Set();
+// Goes up each time a plan ends or starts, so an answer that arrives for an old plan changes
+// nothing: not the new plan's "writing" lines, and not its place in line (AUDIT.md, item 6)
+let planCount = 0;
+
+// A plan ended or a new one started: questions still being written belong to the old plan,
+// and the old plan's failed readings say nothing about the new one's
+function leavePlan() {
+  planCount += 1;
+  readingRequest = null;
+  readingFailed.clear();
+}
 
 // Today's date as 2026-10-25, in this phone's own time zone
 function today() {
@@ -1573,6 +1592,7 @@ document.querySelector('#plan-setup form').addEventListener('submit', (event) =>
   const saved = readSaved();
   saved.plan = setupChoices();
   writeSaved(saved);
+  leavePlan();
   readingAhead = false;
   visited = ['home'];   // Back from today's reading goes to the start, not to setup
   showToday(false);
@@ -1655,6 +1675,7 @@ function writingText(name) {
 async function fetchReadingQuestions(n) {
   if (readingRequest === n) return;
   readingRequest = n;
+  const forPlan = planCount;   // the plan this request belongs to (see leavePlan)
   const plan = readSaved().plan;
   const name = readingName(plan, n);
   const key = questionsKey(n);
@@ -1664,17 +1685,26 @@ async function fetchReadingQuestions(n) {
     showWriting('today', true);
   }
 
+  // Like a study, give up after 2 minutes: a connection that hangs would otherwise leave
+  // "Writing questions…" on screen and block every later reading (AUDIT.md, item 5)
   let result;
+  const stop = new AbortController();
+  const timer = setTimeout(() => stop.abort(), 120000);   // give up after 2 minutes
   try {
-    const response = await askServer({ passage: name, method: 'personal' });
+    const response = await askServer({ passage: name, method: 'personal' }, stop.signal);
     result = await response.json();
   } catch (error) {
     result = { error: 'offline' };
   }
-  if (readingRequest === n) readingRequest = null;   // (a newer plan's request keeps its place)
+  clearTimeout(timer);
+  // The plan ended (or a new one started) while waiting: this answer belongs to the old plan,
+  // so it changes nothing, even when the new plan is waiting for the same reading number
+  if (forPlan !== planCount) return;
+  if (readingRequest === n) readingRequest = null;
   if (shownReading === n) showWriting('today', false);
 
-  // The plan was ended or changed while waiting: these questions don't belong anymore
+  // The saved plan was ended or changed some other way while waiting (like in another tab):
+  // these questions don't belong anymore
   const saved = readSaved();
   const now = saved.plan;
   if (!now || now.book !== plan.book || now.perDay !== plan.perDay || now.start !== plan.start) return;
@@ -1791,7 +1821,7 @@ Object.assign(actions, {
     const saved = readSaved();
     delete saved.plan;
     writeSaved(saved);
-    readingRequest = null;   // a set still being written belonged to the old plan
+    leavePlan();   // a set still being written belonged to the old plan
     showSetup();
     visited = ['home'];
   },
@@ -1812,7 +1842,7 @@ Object.assign(actions, {
     const saved = readSaved();
     delete saved.plan;
     writeSaved(saved);
-    readingRequest = null;   // a set still being written belonged to the old plan
+    leavePlan();   // a set still being written belonged to the old plan
     goHome();
   },
 });
