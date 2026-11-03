@@ -57,7 +57,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 27 and 28, 2026: no app store for now; the free steps of `STORE-PLAN.md` first, in its order.
 - October 28, 2026: Android's back gesture goes back one screen, like Back.
 - October 29, 2026: install help: "Install the app" in Chrome, or the steps for iPhone and Android; no KakaoTalk step.
-- November 2, 2026: the offline helper takes the phone's exact copy of a versioned file (`app.js?v=…`) at once; every change to app.js or style.css gets a new `?v=` (the VERSIONS check).
+- November 2, 2026: the offline helper takes the phone's exact copy of a versioned file (`app.js?v=…`) at once; every change to app.js or style.css gets a new `?v=` (the VERSIONS check). Since November 3, 2026, the fonts too (their instructions are fetched again quietly, for next time).
 - October 29, 2026: Cloudflare deploys the server on every merge (Workers Builds, settings in `server/wrangler.jsonc`, build watch paths `*`): the one exception to "no npm." Preview builds stay off.
 
 ## Log (oldest first)
@@ -495,3 +495,10 @@ The "In force" list right below is every decision that still holds, one line eac
 - Why: `AUDIT.md`, item 9. The app ignored the failed save, then tried to open a plan that was never kept, and stopped on a script error: the tap did nothing, with no word why. The audit's fix was "the same gentle message Save shows," so the words are Save's, not new ones.
 - Checks: section NOSAVE of `tests/app-test.mjs`: a phone whose storage refuses every save (signed in earlier, through `window.realSetItem`). On the old code, 3 of its checks fail. It also checks that Save still says the same words.
 - Not changed: the reading plan's other saves ("Done for today," the questions kept with the plan, and ending a plan) still don't say anything if the browser won't save; the audit didn't list them, and a plan can't start in such a browser now.
+
+### November 3, 2026: small speed fixes, the audit's last item (pull request 134)
+- Decision: three of `AUDIT.md` item 10's speed details. The server makes its 4 tables in one trip to the database (a batch) on a fresh copy, and reads a signed-in person's session and invitation in one trip (a join) instead of two, with the same rule as before (the owner always; anyone else only while invited and turned on). The offline helper uses the phone's copy of the fonts at once, and fetches the fonts' instructions again quietly, for next time.
+- Why: Dan, November 2, 2026: "Can we work on perfecting it not just building it". The two server trips are small (the audit estimated 0.01 to 0.25 seconds for all its server details). The fonts matter more: the page doesn't show until it has the fonts' instructions, so on a weak connection the helper's 4-second wait held up every open.
+- Checks: server section 26 (the stand-in database counts its trips; 2 checks fail on the old code), app section SW4 (a stand-in Google Fonts slowed to 6 seconds; with the old helper the page waited 4,055 milliseconds). The batch and the join were also tried in Cloudflare's local runtime (Wrangler's local mode, with a local database): the 4 tables were made, and the owner, an invited person, a turned-off person and someone not on the list got the same answers as before.
+- Left out: counting first, instead of reading the counts and then adding one. It would save one quick trip per set, but someone who keeps trying after their 20 would then show more than 20 on the owner's list (since item 8, it could no longer use up everyone's). The words "This can take up to a minute": Dan's choice, asked November 3 (Claude's recommendation: keep them until he has seen 3 or 4 more waits in the `?test` line; only Romans 16 has been measured, 13.6 to 16 seconds).
+- Not changed: the page itself is still asked for from the internet first (up to 4 seconds), so a new version reaches phones.

@@ -10,6 +10,8 @@
 //   internet, and the copy on the phone is updated.
 // - Without reception (or if the internet takes longer than 4 seconds),
 //   the copy on the phone is used instead.
+// - A file with a version number (app.js?v=43) and the fonts come from the
+//   copy on the phone at once, when it has them: they don't change.
 // - Only the app's own files and its fonts are kept. Requests to the
 //   AI helper are never touched or kept.
 // ============================================================
@@ -101,9 +103,28 @@ async function newestOrCopy(event, request) {
   // at once, without the internet. This keeps an older page with its own older script:
   // GitHub Pages ignores the ?v= part, so the internet would send the newest app.js, which
   // doesn't fit an older page, and no button would work (found in the audit, November 2, 2026).
-  if (new URL(request.url).searchParams.has('v')) {
+  const url = new URL(request.url);
+  if (url.searchParams.has('v')) {
     const exact = await findCopy(request, false);
     if (exact) return exact;
+  }
+
+  // The fonts don't change at the same address either: each font file has its own address on
+  // fonts.gstatic.com, and the fonts' instructions (FONTS) only point to those files. So the
+  // phone's copy is used at once. The page doesn't show until it has the instructions, so on
+  // a weak connection this saves up to WAIT (found in the audit: AUDIT.md, item 10). The
+  // instructions are still fetched again quietly, so if Google ever changes them, the next
+  // open has the new ones.
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+    const copy = await findCopy(request, false);
+    if (copy) {
+      if (url.hostname === 'fonts.googleapis.com') {
+        event.waitUntil(fetch(request).then((response) => {
+          if (response.ok || response.type === 'opaque') return keepCopy(request, response);
+        }).catch(() => {}));
+      }
+      return copy;
+    }
   }
 
   const fromInternet = fetch(request).then((response) => {

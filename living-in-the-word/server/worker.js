@@ -326,10 +326,11 @@ const TABLES = [
 
 // Makes the tables the first time they're needed, then remembers they're there until
 // Cloudflare restarts the Worker. ("IF NOT EXISTS" leaves tables that are already there alone.)
+// All of them in one trip to the database, a batch, instead of one trip each (AUDIT.md, item 10).
 let tablesMade = false;
 async function makeTables(env) {
   if (tablesMade) return;
-  for (const sql of TABLES) await env.DB.prepare(sql).run();
+  await env.DB.batch(TABLES.map((sql) => env.DB.prepare(sql)));
   tablesMade = true;
 }
 
@@ -464,10 +465,15 @@ async function signedInPerson(request, env) {
   const key = sessionKey(request);
   if (!key) return '';
   if (!/^[0-9a-f]{64}$/.test(key)) return SIGNED_OUT;
-  const session = await env.DB.prepare('SELECT email, expires FROM sessions WHERE key = ?')
-    .bind(await scramble(key)).first();
+  // The session, and whether its person is invited and turned on, in one trip to the
+  // database instead of two (AUDIT.md, item 10). The same rule as mayUseApp: the owner
+  // always may use the app; anyone else only while invited and not turned off.
+  const session = await env.DB.prepare(
+    'SELECT sessions.email AS email, sessions.expires AS expires, people.active AS active ' +
+    'FROM sessions LEFT JOIN people ON people.email = sessions.email WHERE sessions.key = ?',
+  ).bind(await scramble(key)).first();
   if (!session || session.expires < Date.now()) return SIGNED_OUT;
-  return (await mayUseApp(env, session.email)) ? session.email : SIGNED_OUT;
+  return isOwner(env, session.email) || session.active === 1 ? session.email : SIGNED_OUT;
 }
 
 // "Email me a code": sends a new code to an address that may sign in. The answers are the
