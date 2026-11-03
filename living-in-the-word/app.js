@@ -347,7 +347,7 @@ const actions = {
     const others = (saved.studies || []).filter((study) => !samePassage(study.passage, passage));
     saved.studies = [{ passage, questions: ready, note: leaderNote, saved: today() }, ...others];
     if (!writeSaved(saved)) {
-      setShareStatus('This browser wouldn’t save it. In a private window, nothing can be kept.');
+      setShareStatus(SAVE_BLOCKED);
       return;
     }
     edited = false;   // nothing unsaved now, so writing new questions won't lose anything
@@ -582,6 +582,9 @@ function tidySaved(saved) {
   }
   return clean;
 }
+
+// What Save and "Start the plan" say when this browser won't save
+const SAVE_BLOCKED = 'This browser wouldn’t save it. In a private window, nothing can be kept.';
 
 // Returns false if this browser won't save (a private window, for example)
 function writeSaved(saved) {
@@ -1591,7 +1594,16 @@ document.querySelector('#plan-setup form').addEventListener('submit', (event) =>
   event.preventDefault();
   const saved = readSaved();
   saved.plan = setupChoices();
-  writeSaved(saved);
+  // If this browser won't save (a private window, for example), say so under the button,
+  // as Save does, and stay here: a plan that isn't kept can't open (AUDIT.md, item 9).
+  // The note hides again when this screen opens again (see show).
+  if (!writeSaved(saved)) {
+    const note = document.querySelector('#plan-setup .gentle-error');
+    note.textContent = SAVE_BLOCKED;
+    note.hidden = false;
+    note.scrollIntoView({ block: 'nearest' });   // on a small phone it's below the bottom edge
+    return;
+  }
   leavePlan();
   readingAhead = false;
   visited = ['home'];   // Back from today's reading goes to the start, not to setup
