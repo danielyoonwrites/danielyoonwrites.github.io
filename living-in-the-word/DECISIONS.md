@@ -478,7 +478,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - Checks: sections W9 and W10 of `tests/app-test.mjs`, with two answers held back at once (`held`). On the old code, 4 of their checks fail.
 - Kept: the check of the saved plan when an answer comes, for a plan changed some other way (like in another tab).
 
-### November 3, 2026: a chapter written ahead opens at once, even while the AI writes another passage (pull request NNN)
+### November 3, 2026: a chapter written ahead opens at once, even while the AI writes another passage (pull request 130)
 - Decision: `startStudy` in `app.js` takes the chapter written ahead whenever it's there. If the AI is still writing another passage's questions, `stopAsking` makes that answer be ignored, as opening a saved study already did (`openStudy` now uses `stopAsking` too).
 - Why: `AUDIT.md`, item 7. The ready set was skipped while the AI was writing anything else, so the chapter was asked for again (paid twice) and the ready set was later replaced unused. The ready set couldn't simply be shown before, because the other answer would then have cleared its "check it" line when it came; `stopAsking` makes that answer change nothing.
 - Checks: section Y9 of `tests/app-test.mjs` (Titus 1, then Hosea 1 held back, then Titus 2). On the old code, 2 of its checks fail.
