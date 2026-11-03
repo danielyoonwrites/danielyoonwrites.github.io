@@ -1,6 +1,6 @@
 # Handoff: where everything stands
 
-Last updated November 2, 2026, at the end of the eleventh session (with pull request 115), and Living in the Word's lines at the end of the twelfth session, November 3, 2026 (handoff notes, pull request NNN). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
+Last updated November 2, 2026, at the end of the eleventh session (with pull request 115), and Living in the Word's lines at the end of the twelfth session, November 3, 2026 (handoff notes, pull request 131). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
 
 - How to work with Dan, and the rules for every project: `CLAUDE.md`.
 - Each project: its folder's `PROGRESS.md` (where it stands, the next step), `DECISIONS.md` (choices and their reasons) and `SPEC.md`. The website's decisions are in the root `DECISIONS.md`.
@@ -31,7 +31,7 @@ This repository is public. Keep personal details out of this file.
 ## Waiting on Dan
 
 1. Idea board: merge pull request 124, Idea board on the Projects page (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/124, Conversation tab, Merge pull request, Confirm merge), then the checks: the Projects page on his phone, the dots on his computer, photos on his phone. Every step is in `idea-board/PROGRESS.md`.
-2. Living in the Word: merge the twelfth session's handoff notes, pull request NNN (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/NNN, Conversation tab, Merge pull request, Confirm merge). Then the checks for pull requests 119, 120, 126, 127, 128 and 130 on his phone, with every step in `living-in-the-word/PROGRESS.md` ("Waiting on Dan"). His Max plan's API credit was already linked on October 26, 2026: nothing to do.
+2. Living in the Word: merge the twelfth session's handoff notes, pull request 131 (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/131, Conversation tab, Merge pull request, Confirm merge). Then the checks for pull requests 119, 120, 126, 127, 128 and 130 on his phone, with every step in `living-in-the-word/PROGRESS.md` ("Waiting on Dan"). His Max plan's API credit was already linked on October 26, 2026: nothing to do.
 3. The Anthropic API key expires November 24, 2026: a new key, saved in Cloudflare as `ANTHROPIC_API_KEY`. Remind him in good time, with every step (in `living-in-the-word/PROGRESS.md`).
 4. The other apps: Fewer spam calls needs the Samsung steps checked on a real Samsung phone; First step smaller waits for his daily trial. Details in each `PROGRESS.md`.
 5. Video editor: merge pull request 125, trim and speed (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/125, Conversation tab, Merge pull request, Confirm merge), then the check on his phone; his notes on the Korean looks and the private test uploads to YouTube, TikTok and Instagram are still to do. Every step is in `video-editor/PROGRESS.md`.
