@@ -32,7 +32,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 26, 2026: "Go deeper with AI," a loading screen with placeholder lines, and a clean screen when a passage isn't recognized.
 - October 26, 2026: saved studies stay on the phone; the Save button says what it saves; "Remove" sits under the Save bar.
 - October 31, 2026: the reading plan writes the next reading's questions ahead, quietly, one reading ahead only.
-- November 3, 2026: a reading's questions give up after 2 minutes, like a study's.
+- November 3, 2026: a reading's questions give up after 2 minutes, like a study's; an answer for an ended plan changes nothing in the next one.
 - October 31, 2026: "Prepare for a Bible study" writes the next chapter's questions ahead after a whole chapter (one set kept on the phone, used once).
 - October 31, 2026: the test link (`?test`) shows how long the wait was and the AI's part of it, and since November 2 which AI wrote the set; the wait is measured before changing anything about speed.
 - October 26, 2026: the home screen icon is the full name in EB Garamond, and the name under it is "In the Word."
@@ -471,3 +471,9 @@ The "In force" list right below is every decision that still holds, one line eac
 - Why: `AUDIT.md`, item 5. With no timer, a connection that hung (no answer and no error) left "Writing questions for …" on the reading for as long as the app stayed open, and blocked every later reading's questions too, including the one written ahead, because only one reading is asked for at a time (`readingRequest`).
 - Checks: section HANG of `tests/app-test.mjs`: the phone's 2-minute timer shortened to 1.5 seconds for that check only, and a stand-in server that never answers. On the old code, 2 of its checks fail.
 - Not changed: what a reading does without reception (no "Questions for this reading" button; the next visit asks again by itself).
+
+### November 3, 2026: an answer for an ended plan changes nothing in the next one (pull request NNN)
+- Decision: `app.js` keeps a plan counter, `planCount`. It goes up each time a plan ends or starts (`leavePlan`, called by "End this plan," "Start a new plan" and the plan setup), and `leavePlan` also clears the reading the AI is writing (`readingRequest`) and the readings that failed (`readingFailed`). `fetchReadingQuestions` remembers the counter when it asks; if it changed by the time the answer comes, the answer changes nothing.
+- Why: `AUDIT.md`, item 6. Ending a plan while its first reading was being written, then starting another, let the old plan's late answer clear the new plan's place in line and hide its "Writing questions" lines, because both plans' first readings are number 0. Opening the new reading again then asked the AI a second time, so it was paid for twice. And a reading that failed in the old plan wasn't asked for by itself in the new one.
+- Checks: sections W9 and W10 of `tests/app-test.mjs`, with two answers held back at once (`held`). On the old code, 4 of their checks fail.
+- Kept: the check of the saved plan when an answer comes, for a plan changed some other way (like in another tab).
