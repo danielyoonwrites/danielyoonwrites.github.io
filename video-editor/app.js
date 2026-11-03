@@ -1,11 +1,12 @@
 'use strict';
 
 /*
-  Video editor (build step 3 in SPEC.md): one clip with a look.
+  Video editor (build steps 3 and 4 in SPEC.md): one clip, trimmed, at a speed, with a look.
 
   1. Start: choose a video from the phone.
-  2. The look: a filter and the lighting, shown on the video as it plays.
-  3. Making the video: a new MP4 file, frame by frame, with the look drawn into every frame.
+  2. Edit: trim, speed, a look (filter) and the lighting, shown on the video as it plays.
+  3. Making the video: a new MP4 file, frame by frame, with the look drawn into every frame, and the
+     sound at the same speed.
   4. Your video: it plays, the page checks it against Instagram's, TikTok's and YouTube Shorts'
      upload rules, and you can save it or share it.
 
@@ -31,6 +32,16 @@ const FILTERS = [
   { id: 'film', name: 'Film', ko: '필름', css: 'url(#look-film)' },
   { id: 'bw', name: 'Black and white', ko: '흑백', css: 'grayscale(1)' },
 ];
+
+// The speeds. The sound speeds up or slows down with the picture, like a tape, so faster sounds
+// higher (the owner's choice "b", November 2, 2026: "just have it match the speed, keep it simple").
+const SPEEDS = [
+  { value: 0.5, name: '0.5×', words: 'half speed' },
+  { value: 1, name: '1×', words: 'normal' },
+  { value: 1.5, name: '1.5×', words: 'faster' },
+  { value: 2, name: '2×', words: 'double speed' },
+];
+const SHORTEST_TRIM = 0.5; // seconds: the trimmed clip is never shorter than this
 
 // What every new video is made like, so it fits Instagram's, TikTok's and YouTube Shorts' upload
 // rules (the rules and their sources are in SPEC.md, "Made for Instagram, TikTok and YouTube Shorts").
@@ -59,14 +70,17 @@ const ADDON_URL = 'lib/mediabunny-aac-encoder.min.js?v=1.65.0'; // AAC sound, on
 const state = {
   file: null,          // the video you chose (it's only read, never changed)
   facts: null,         // its length, size, frames a second, and whether it has sound
+  trimStart: 0,        // where the clip starts and ends, in seconds of your video
+  trimEnd: 0,
+  speed: 1,            // 0.5, 1, 1.5 or 2
+  tab: 'trim',         // the open tab on the Edit screen
   filter: 'none',      // the look
   brightness: 0,       // -50 to 50
   contrast: 0,         // -50 to 50
   previewUrl: null,    // your video, as a link the page can play
   resultUrl: null,     // the new video, as a link the page can play and save
   resultFile: null,    // the new video, as a file for sharing
-  conversion: null,    // the video being made, so "Stop" can stop it
-  making: false,
+  making: false,       // a video is being made
   stopAsked: false,
 };
 
@@ -86,6 +100,21 @@ function formatSize(bytes) {
   if (bytes >= 1e6) return (bytes / 1e6).toFixed(1) + ' MB';
   return Math.max(1, Math.round(bytes / 1e3)) + ' KB';
 }
+
+// 62.47 → "1:02.5" (minutes, seconds and tenths)
+function formatTenths(seconds) {
+  const tenths = Math.round(seconds * 10);
+  const minutes = Math.floor(tenths / 600);
+  const rest = (tenths % 600) / 10;
+  return minutes + ':' + rest.toFixed(1).padStart(4, '0');
+}
+
+// A length in plain words: 4 → "4.0 seconds", 75.5 → "1:15.5"
+function formatLength(seconds) {
+  return seconds < 60 ? seconds.toFixed(1) + ' seconds' : formatTenths(seconds);
+}
+
+const roundTenth = (seconds) => Math.round(seconds * 10) / 10;
 
 // -20 → "−20", 0 → "0", 15 → "+15"
 function formatAmount(value) {
@@ -283,6 +312,9 @@ async function readVideo(file) {
       hasSound: Boolean(audio && (await audio.canDecode())),
     };
     state.file = file;
+    state.trimStart = 0;
+    state.trimEnd = state.facts.duration;
+    state.speed = 1;
     state.filter = 'none';
     state.brightness = 0;
     state.contrast = 0;
@@ -290,7 +322,8 @@ async function readVideo(file) {
     state.previewUrl = URL.createObjectURL(file);
     el('preview').src = state.previewUrl;
     updateLook();
-    selectTab('filter');
+    updateTrimAndSpeed();
+    selectTab('trim');
     hideProblem('look-problem');
     goDeeper('look');
   } catch (error) {
@@ -302,7 +335,79 @@ async function readVideo(file) {
   }
 }
 
-// ---------- Screen 2: the look ----------
+// ---------- Screen 2: edit (trim, speed, a look and the lighting) ----------
+
+// Trim and speed: the numbers on the screen, and the playing video's speed. The sound of the playing
+// video changes pitch with the speed, like the new video will (preservesPitch off).
+function updateTrimAndSpeed() {
+  const duration = state.facts ? state.facts.duration : 0;
+  const top = Math.floor(duration * 10) / 10; // the sliders move in tenths of a second
+  for (const id of ['trim-start', 'trim-end']) el(id).max = String(top);
+  el('trim-start').value = String(state.trimStart);
+  el('trim-end').value = String(Math.min(state.trimEnd, top));
+  el('trim-start-value').textContent = formatTenths(state.trimStart);
+  el('trim-end-value').textContent = formatTenths(state.trimEnd);
+
+  const kept = state.trimEnd - state.trimStart;
+  const speed = SPEEDS.find((s) => s.value === state.speed) || SPEEDS[1];
+  el('trim-length').textContent = 'Your clip: ' + formatLength(kept) +
+    (state.speed === 1 ? '' : ' (' + formatLength(kept / state.speed) + ' at ' + speed.name + ')');
+  el('speed-length').textContent = 'The new video: ' + formatLength(kept / state.speed) + ' long';
+  for (const chip of el('speeds').children) {
+    const chosen = Number(chip.dataset.speed) === state.speed;
+    chip.setAttribute('aria-checked', String(chosen));
+    chip.tabIndex = chosen ? 0 : -1;
+  }
+  const preview = el('preview');
+  preview.preservesPitch = false;
+  preview.defaultPlaybackRate = state.speed;
+  preview.playbackRate = state.speed;
+}
+
+// The start and end of the trim, kept in order and at least SHORTEST_TRIM apart (or the whole video,
+// if it's shorter than that). The end never goes past the end of the video.
+function setTrimStart(seconds) {
+  state.trimStart = Math.max(0, Math.min(roundTenth(seconds), state.trimEnd - SHORTEST_TRIM));
+  updateTrimAndSpeed();
+}
+function setTrimEnd(seconds, toTheEnd) {
+  const duration = state.facts.duration;
+  const end = toTheEnd ? duration : Math.min(duration, roundTenth(seconds));
+  state.trimEnd = Math.min(duration, Math.max(end, state.trimStart + SHORTEST_TRIM));
+  updateTrimAndSpeed();
+}
+
+function buildSpeedChips() {
+  for (const speed of SPEEDS) {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'chip';
+    chip.setAttribute('role', 'radio');
+    chip.dataset.speed = String(speed.value);
+    const name = document.createElement('span');
+    name.className = 'en';
+    name.textContent = speed.name;
+    const words = document.createElement('span');
+    words.className = 'sub';
+    words.textContent = speed.words;
+    chip.append(name, words);
+    chip.addEventListener('click', () => {
+      state.speed = speed.value;
+      updateTrimAndSpeed();
+    });
+    el('speeds').append(chip);
+  }
+}
+
+// On the Trim tab the video plays freely, so you can find new start and end points. On the other
+// tabs it plays only the trimmed part, over and over, so you see the clip as it will be.
+function keepPreviewInTrim() {
+  const preview = el('preview');
+  if (!state.facts || state.tab === 'trim') return;
+  if (preview.currentTime >= state.trimEnd - 0.03 || preview.currentTime < state.trimStart - 0.3) {
+    preview.currentTime = state.trimStart;
+  }
+}
 
 function buildChips() {
   for (const filter of FILTERS) {
@@ -342,13 +447,16 @@ function updateLook() {
   el('contrast-value').textContent = formatAmount(state.contrast);
 }
 
+const TABS = ['trim', 'speed', 'filter', 'light'];
 function selectTab(name) {
-  for (const tab of ['filter', 'light']) {
+  state.tab = name;
+  for (const tab of TABS) {
     const chosen = tab === name;
     el('tab-' + tab).setAttribute('aria-selected', String(chosen));
     el('tab-' + tab).tabIndex = chosen ? 0 : -1;
     el('panel-' + tab).hidden = !chosen;
   }
+  keepPreviewInTrim();
 }
 
 // Arrow keys move between the filters, and between the tabs (the usual way for these controls)
@@ -386,28 +494,67 @@ function loadSoundAddon() {
   return addonLoading;
 }
 
-// Why Mediabunny might leave out the picture or the sound, in plain words
-const DROP_REASONS = {
-  undecodable_source_codec: 'Chrome can\'t read it',
-  no_encodable_target_codec: 'Chrome can\'t make it as MP4',
-  unknown_source_codec: 'Chrome doesn\'t know what kind it is',
-};
+// Thrown when "Stop" is tapped, to stop making the video
+class Stopped extends Error {}
+
+// The sound from "start" to "end" in your video, played at the chosen speed: faster sounds higher,
+// like a tape (the owner's choice "b"). It comes out as 48 kHz stereo, ready for AAC.
+async function soundAtSpeed(audioTrack, start, end, speed) {
+  // 1. Gather the original sound from start to end into one piece
+  const sink = new MB.AudioBufferSink(audioTrack);
+  let whole = null;
+  for await (const { buffer, timestamp } of sink.buffers(start, end)) {
+    if (state.stopAsked) throw new Stopped();
+    if (!whole) {
+      whole = new AudioBuffer({
+        length: Math.max(1, Math.round((end - start) * buffer.sampleRate)),
+        numberOfChannels: Math.min(2, buffer.numberOfChannels),
+        sampleRate: buffer.sampleRate,
+      });
+    }
+    const offset = Math.round((timestamp - start) * whole.sampleRate); // where this bit goes
+    for (let channel = 0; channel < whole.numberOfChannels; channel++) {
+      const from = buffer.getChannelData(Math.min(channel, buffer.numberOfChannels - 1));
+      const skip = Math.max(0, -offset); // the part before "start" is left out
+      const count = Math.min(from.length - skip, whole.length - (offset + skip));
+      if (count > 0) whole.getChannelData(channel).set(from.subarray(skip, skip + count), offset + skip);
+    }
+  }
+  // 2. Play it at the speed, faster than real time, into a new 48 kHz stereo piece
+  const length = Math.max(1, Math.round(((end - start) / speed) * OUTPUT.sampleRate));
+  const studio = new OfflineAudioContext({ numberOfChannels: OUTPUT.channels, length, sampleRate: OUTPUT.sampleRate });
+  if (whole) {
+    const player = studio.createBufferSource();
+    player.buffer = whole;
+    player.playbackRate.value = speed; // like a tape: faster is higher
+    player.connect(studio.destination);
+    player.start();
+  }
+  return studio.startRendering();
+}
 
 async function makeVideo() {
   hideProblem('look-problem');
   state.making = true;
   state.stopAsked = false;
   el('bar').value = 0;
-  el('making-words').textContent = '0%';
+  el('making-words').textContent = 'Getting ready…';
   el('stop').disabled = false;
   goDeeper('making');
 
   const filter = lookFilter();
   const size = fitSize(state.facts.width, state.facts.height);
   const fps = chooseFps(state.facts.fps);
+  const start = state.trimStart;
+  const end = state.trimEnd;
+  const speed = state.speed;
+  const frameCount = Math.max(1, Math.round(((end - start) / speed) * fps)); // frames in the new video
+
   const input = new MB.Input({ source: new MB.BlobSource(state.file), formats: MB.ALL_FORMATS });
+  // A new MP4 file, with its details at the front. Nothing from the original's tags is copied, so
+  // hidden details like where it was filmed stay behind.
   const output = new MB.Output({
-    format: new MB.Mp4OutputFormat({ fastStart: 'in-memory' }), // the file's details at the front
+    format: new MB.Mp4OutputFormat({ fastStart: 'in-memory' }),
     target: new MB.BufferTarget(),
   });
 
@@ -417,81 +564,76 @@ async function makeVideo() {
     if ('wakeLock' in navigator) screenLock = await navigator.wakeLock.request('screen');
   } catch (error) { /* the video still gets made */ }
 
-  let canvas = null;
   setGlowFor(size.width); // the glow, sized for the full-size picture
+  let started = false;
   try {
-    // AAC sound: built into Chrome on the owner's phone (the phone test, November 2, 2026); the
-    // add-on is only for a phone or browser without it
-    if (state.facts.hasSound && !(await MB.canEncodeAudio('aac'))) await loadSoundAddon();
+    const videoTrack = await input.getPrimaryVideoTrack();
+    const audioTrack = state.facts.hasSound ? await input.getPrimaryAudioTrack() : null;
 
-    const conversion = await MB.Conversion.init({
-      input,
-      output,
-      tags: {},             // copy none of the original's tags, so hidden details stay behind
-      showWarnings: false,  // the page explains problems itself
-      video: {
-        codec: 'avc',                       // H.264, the usual picture for MP4 files
-        width: size.width,
-        height: size.height,
-        fit: 'fill',
-        allowTransformationMetadata: false, // turn the picture upright now, instead of a "turn it" note in the file
-        frameRate: fps,                     // a steady number of frames each second
-        quality: new MB.Quality({ bitrate: chooseBitrate(size, fps), bitrateMode: 'variable' }),
-        // Each frame is drawn onto a canvas with the look: the same CSS filter as the preview.
-        // (A normal canvas, not an OffscreenCanvas: only a normal one can use the SVG looks.)
-        process: (sample) => {
-          if (!canvas) {
-            canvas = document.createElement('canvas');
-            canvas.width = sample.displayWidth;
-            canvas.height = sample.displayHeight;
-          }
-          const context = canvas.getContext('2d');
-          context.filter = filter || 'none';
-          sample.draw(context, 0, 0);
-          return canvas;
-        },
-      },
-      audio: {
-        codec: 'aac',              // AAC, the usual sound for MP4 files
-        sampleRate: OUTPUT.sampleRate,
-        numberOfChannels: OUTPUT.channels,
-        forceTranscode: true,      // always make the sound fresh, so every video is the same kind
-        quality: new MB.Quality({ bitrate: OUTPUT.audioBitrate }),
-      },
+    // The picture: each new frame is drawn on this canvas with the look (the same CSS filter as the
+    // preview), then added to the new file as H.264. A normal canvas, not an OffscreenCanvas: only a
+    // normal one can use the SVG looks.
+    const canvas = document.createElement('canvas');
+    canvas.width = size.width;
+    canvas.height = size.height;
+    const context = canvas.getContext('2d');
+    context.filter = filter || 'none';
+    const pictures = new MB.CanvasSource(canvas, {
+      codec: 'avc',
+      quality: new MB.Quality({ bitrate: chooseBitrate(size, fps), bitrateMode: 'variable' }),
     });
-    state.conversion = conversion;
-    if (state.stopAsked) {
-      // "Stop" was tapped while the video was still being set up
-      await conversion.cancel();
-      throw new MB.ConversionCanceledError();
-    }
-    if (!conversion.isValid) {
-      const why = conversion.discardedTracks
-        .map((d) => (d.track.isVideoTrack() ? 'the picture: ' : 'the sound: ') + (DROP_REASONS[d.reason] || d.reason))
-        .join('; ');
-      throw new Error('Mediabunny couldn\'t set up the video (' + why + ').');
+    output.addVideoTrack(pictures, { frameRate: fps });
+
+    // The sound: AAC, built into Chrome on the owner's phone (the phone test, November 2, 2026); the
+    // add-on is only for a phone or browser without it
+    let sound = null;
+    if (audioTrack) {
+      if (!(await MB.canEncodeAudio('aac'))) await loadSoundAddon();
+      sound = new MB.AudioBufferSource({ codec: 'aac', quality: new MB.Quality({ bitrate: OUTPUT.audioBitrate }) });
+      output.addAudioTrack(sound);
     }
 
-    conversion.onProgress = (progress) => {
-      const percent = Math.round(progress * 100);
+    await output.start();
+    started = true;
+    if (state.stopAsked) throw new Stopped();
+
+    if (sound) {
+      el('making-words').textContent = 'Getting the sound ready…';
+      await sound.add(await soundAtSpeed(audioTrack, start, end, speed));
+      sound.close();
+    }
+
+    // The frames: the new video has "fps" frames each second, and each one shows the moment in your
+    // video that the trim and the speed point to. Mediabunny turns the video upright and makes it
+    // the new size on the way (CanvasSink).
+    const frames = new MB.CanvasSink(videoTrack, { width: size.width, height: size.height, fit: 'fill', poolSize: 2 });
+    const moments = Array.from({ length: frameCount }, (_, k) => start + (k / fps) * speed);
+    let made = 0;
+    for await (const frame of frames.canvasesAtTimestamps(moments)) {
+      if (state.stopAsked) throw new Stopped();
+      if (frame) context.drawImage(frame.canvas, 0, 0, size.width, size.height);
+      await pictures.add(made / fps, 1 / fps);
+      made += 1;
+      const percent = Math.round((made / frameCount) * 100);
       el('bar').value = percent;
       el('making-words').textContent = percent + '%';
-    };
-    await conversion.execute();
+    }
+    pictures.close();
+    await output.finalize();
 
     const blob = new Blob([output.target.buffer], { type: 'video/mp4' });
     state.making = false;
     await showResult(blob);
   } catch (error) {
-    const stopped = error instanceof MB.ConversionCanceledError || state.stopAsked;
+    const stopped = error instanceof Stopped || state.stopAsked;
     state.making = false;
-    // Back to the look, with a note
+    if (started) await output.cancel().catch(() => {});
+    // Back to Edit, with a note
     if (history.state && history.state.screen === 'making') history.back();
     else show('look');
     if (stopped) showProblem('look-problem', 'Stopped. Nothing was made.');
     else showProblem('look-problem', 'Making the video stopped with a problem. Send Claude a screenshot of this.', error);
   } finally {
-    state.conversion = null;
     state.making = false;
     input.dispose();
     fitGlowToPreview(); // the glow, sized for the preview again
@@ -503,7 +645,6 @@ function stopMaking() {
   state.stopAsked = true;
   el('stop').disabled = true;
   el('making-words').textContent = 'Stopping…';
-  if (state.conversion) state.conversion.cancel();
 }
 
 // ---------- Screen 4: your video ----------
@@ -669,6 +810,7 @@ if (!MB) {
 }
 
 buildChips();
+buildSpeedChips();
 updateLook();
 el('choose').addEventListener('click', () => el('pick').click());
 el('pick').addEventListener('change', () => {
@@ -678,14 +820,34 @@ el('pick').addEventListener('change', () => {
 });
 el('look-back').addEventListener('click', () => history.back());
 el('done-back').addEventListener('click', () => history.back());
-el('tab-filter').addEventListener('click', () => selectTab('filter'));
-el('tab-light').addEventListener('click', () => selectTab('light'));
+for (const tab of TABS) el('tab-' + tab).addEventListener('click', () => selectTab(tab));
+el('start-here').addEventListener('click', () => setTrimStart(el('preview').currentTime));
+el('end-here').addEventListener('click', () => setTrimEnd(el('preview').currentTime));
+el('trim-start').addEventListener('input', () => {
+  setTrimStart(Number(el('trim-start').value));
+  el('preview').currentTime = state.trimStart; // show where it starts
+});
+el('trim-end').addEventListener('input', () => {
+  const slider = el('trim-end');
+  setTrimEnd(Number(slider.value), slider.value === slider.max); // all the way right means the very end
+  el('preview').currentTime = Math.max(state.trimStart, state.trimEnd - 1); // show the last second
+});
+el('reset-trim').addEventListener('click', () => {
+  state.trimStart = 0;
+  state.trimEnd = state.facts.duration;
+  updateTrimAndSpeed();
+});
+el('preview').addEventListener('timeupdate', keepPreviewInTrim);
+el('speeds').addEventListener('keydown', (event) => arrowKeys(event, [...el('speeds').children], (chip) => {
+  state.speed = Number(chip.dataset.speed);
+  updateTrimAndSpeed();
+}));
 el('chips').addEventListener('keydown', (event) => arrowKeys(event, [...el('chips').children], (chip) => {
   state.filter = chip.dataset.filter;
   updateLook();
 }));
-document.querySelector('.tabs').addEventListener('keydown', (event) => arrowKeys(event, [el('tab-filter'), el('tab-light')],
-  (tab) => selectTab(tab.id === 'tab-filter' ? 'filter' : 'light')));
+document.querySelector('.tabs').addEventListener('keydown', (event) => arrowKeys(event, TABS.map((t) => el('tab-' + t)),
+  (tab) => selectTab(tab.id.replace('tab-', ''))));
 el('brightness').addEventListener('input', () => { state.brightness = Number(el('brightness').value); updateLook(); });
 el('contrast').addEventListener('input', () => { state.contrast = Number(el('contrast').value); updateLook(); });
 el('reset-light').addEventListener('click', () => { state.brightness = 0; state.contrast = 0; updateLook(); });

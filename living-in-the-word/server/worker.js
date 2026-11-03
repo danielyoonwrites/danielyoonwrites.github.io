@@ -152,7 +152,10 @@ Here the commentary for the leader is a short note for the reader instead: speak
 // with their depth). Then Sonnet 5.5 again the same day, to save cost and time (the owner's
 // choice), with the two changes Anthropic suggests for JSON answers: EFFORT 'high' and
 // THINK_FIRST below. Sonnet costs about half as much per answer as Opus (prices below).
-// To go back to Opus: MODEL 'claude-opus-5-5', EFFORT 'medium', THINK_FIRST '' and MAX_TOKENS 4000.
+// Then Opus 5.5 again on November 2, 2026, for every set, at normal speed (the owner's choice:
+// "I'll try opus but not fast mode because that is quite expensive"; his "A" for all sets).
+// To go back to Sonnet: MODEL 'claude-sonnet-5-5', EFFORT 'high', THINK_FIRST
+// 'Think the problem through before you answer.' and MAX_TOKENS 8000.
 // The others stay in the list only to price an answer if the model is ever changed.
 // Prices in US dollars per million tokens, from https://platform.claude.com/docs/en/about-claude/pricing
 // (checked again October 28, 2026). Used only to show what each answer cost.
@@ -161,24 +164,25 @@ const MODELS = {
   'claude-sonnet-5-5': { input: 2,    output: 10 },
   'claude-haiku-5-5':  { input: 0.10, output: 0.50 },
 };
-const MODEL = 'claude-sonnet-5-5';
+const MODEL = 'claude-opus-5-5';
 
 // How much the AI thinks before it writes: 'low', 'medium', 'high', 'xhigh' or 'max'.
 // 'high' is Sonnet 5.5's default, 'medium' is Opus 5.5's. From October 26 to 28, 2026, Sonnet
-// ran at 'medium', where it often skips thinking when the answer must be JSON.
+// ran at 'medium', where it often skips thinking when the answer must be JSON. Opus 5.5 runs
+// at its own default, 'medium', as on October 28, 2026, when the owner found its questions deeper.
 // https://platform.claude.com/docs/en/build-with-claude/effort
-const EFFORT = 'high';
+const EFFORT = 'medium';
 
 // One line at the very end of the guidance, from Anthropic's Sonnet 5.5 guide ("Reasoning
 // tasks with JSON output"): it helps the AI think before it writes a JSON answer.
 // https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-sonnet-5-5
-// For Opus 5.5, leave it empty (''): it decides by itself how much to think.
-const THINK_FIRST = 'Think the problem through before you answer.';
+// For Opus 5.5, leave it empty (''): it decides by itself how much to think. For Sonnet 5.5:
+// 'Think the problem through before you answer.'
+const THINK_FIRST = '';
 
 // The longest an answer can be, thinking included (a hard limit that also caps the cost:
-// with Sonnet 5.5, 8,000 tokens is at most 8 cents of writing, the same as 4,000 with Opus).
-// The room is for the longer thinking at 'high' effort.
-const MAX_TOKENS = 8000;
+// with Opus 5.5, 4,000 tokens is at most 8 cents of writing, the same as 8,000 with Sonnet).
+const MAX_TOKENS = 4000;
 
 // Only the website (and a local copy while building) may use this server
 const ALLOWED_ORIGINS = ['https://danielyoonwrites.github.io', 'http://127.0.0.1:8765'];
@@ -302,7 +306,7 @@ const WRONG_LIMIT = 10;            // wrong passcodes or sign-in codes from each
 // The counts are kept in a small Cloudflare database (D1), connected to this Worker under
 // the name DB (see AI-PLAN.md). One row a day for everyone, and for each person or connection:
 //   day "2026-10-26", who "everyone", "person:dan@example.com", "questions:9f2c...",
-//   "wrong:9f2c...", "codes:dan@example.com", "invites:dan@example.com", "code-asks:9f2c..."
+//   "wrong:9f2c...", "codes:4b1e..." (an address, scrambled), "invites:dan@example.com", "code-asks:9f2c..."
 //   or "emails", count 7
 // Each connection gets a scrambled code instead of its internet address, so the address
 // itself is never kept. Days before yesterday are deleted.
@@ -310,7 +314,8 @@ const WRONG_LIMIT = 10;            // wrong passcodes or sign-in codes from each
 // The database's tables. The server makes any that are missing (see makeTables).
 //   usage: the daily counts above
 //   people: who may sign in besides the owner (the owner's page adds them, sign-up step S4)
-//   codes: sign-in codes, kept only scrambled, one at a time for each email address
+//   codes: sign-in codes, kept only scrambled, one at a time for each email address; since
+//     November 2, 2026 the "email" column holds the address scrambled too (see codeKey)
 //   sessions: one row for each signed-in phone, its key kept only scrambled
 const TABLES = [
   'CREATE TABLE IF NOT EXISTS usage (day TEXT NOT NULL, who TEXT NOT NULL, count INTEGER NOT NULL, PRIMARY KEY (day, who))',
@@ -455,8 +460,12 @@ async function signedInPerson(request, env) {
   return (await mayUseApp(env, session.email)) ? session.email : SIGNED_OUT;
 }
 
-// "Email me a code": sends a new code to an address that may sign in. The answer is the
-// same for any address, so nobody can use it to find out who's invited.
+// "Email me a code": sends a new code to an address that may sign in. The answers are the
+// same for any address, so nobody can use them to find out who's invited (the owner's rule,
+// October 28, 2026): every address is counted and gets a scrambled code the same way, and
+// only an invited address is emailed. Until November 2, 2026, an address that wasn't invited
+// got no code, so "check a code" answered differently for it (found in the audit: AUDIT.md,
+// item 2).
 async function sendCode(input, request, env, cors) {
   const email = cleanEmail(input.email);
   if (!email) return reply({ error: 'bad-email' }, 400, cors);
@@ -465,24 +474,35 @@ async function sendCode(input, request, env, cors) {
   const day = dayInPacific();
   const asks = 'code-asks:' + await connectionCode(request, env, day);
   if ((await addOne(env, day, [asks]))[asks] > CODE_ASKS_EACH) return reply({ error: 'too-many-codes' }, 429, cors);
-  if (!(await mayUseApp(env, email))) return reply({ sent: true }, 200, cors);
-
-  const mine = 'codes:' + email;
-  const counts = await addOne(env, day, [mine, 'emails']);
-  if (counts[mine] > CODES_EACH || counts.emails > EMAILS_ALL) return reply({ error: 'too-many-codes' }, 429, cors);
+  // The day's emails for everyone: checked the same way for any address, but counted only
+  // when an email goes (below), so asking again and again for one address can't use them up
+  if ((await readCounts(env, day, ['emails'])).emails >= EMAILS_ALL) return reply({ error: 'too-many-codes' }, 429, cors);
+  const key = await codeKey(email);
+  const mine = 'codes:' + key.slice(0, 24);
+  if ((await addOne(env, day, [mine]))[mine] > CODES_EACH) return reply({ error: 'too-many-codes' }, 429, cors);
 
   // A new code replaces any earlier one for this address. Only a scrambled copy is kept.
   const code = newCode();
   await env.DB.batch([
     env.DB.prepare('DELETE FROM codes WHERE expires < ?').bind(Date.now()),
     env.DB.prepare('INSERT OR REPLACE INTO codes (email, code, expires, tries) VALUES (?, ?, ?, 0)')
-      .bind(email, await scramble(email + '|' + code), Date.now() + CODE_MINUTES * 60000),
+      .bind(key, await scramble(email + '|' + code), Date.now() + CODE_MINUTES * 60000),
   ]);
+  if (!(await mayUseApp(env, email))) return reply({ sent: true }, 200, cors);   // not invited: no email
+
+  await addOne(env, day, ['emails']);
   const problem = await emailCode(env.RESEND_API_KEY, email, code);
-  // Resend's reason goes back too, so the test link can show it (like a web address
-  // that isn't verified yet). It never holds a key.
-  if (problem) return reply({ error: 'email-failed', detail: problem }, 502, cors);
+  // No reason from Resend in this answer: it goes to anyone who types an address. (The owner
+  // still sees Resend's reason when an invite email fails.)
+  if (problem) return reply({ error: 'email-failed' }, 502, cors);
   return reply({ sent: true }, 200, cors);
+}
+
+// The name a sign-in code is kept under (in the codes table's "email" column) and counted
+// under: the address scrambled, so the database never keeps an address that someone only
+// typed (since November 2, 2026, when every address started getting a code the same way)
+async function codeKey(email) {
+  return scramble('code|' + email);
 }
 
 // The email with the code. Returns '' when it's sent, or else Resend's reason.
@@ -531,9 +551,10 @@ async function checkCode(input, request, env, cors) {
   const wrong = 'wrong:' + await connectionCode(request, env, day);
   if ((await readCounts(env, day, [wrong]))[wrong] >= WRONG_LIMIT) return reply({ error: 'too-many-tries' }, 429, cors);
 
+  const codeName = await codeKey(email);
   const [, found] = await env.DB.batch([
-    env.DB.prepare('UPDATE codes SET tries = tries + 1 WHERE email = ?').bind(email),
-    env.DB.prepare('SELECT code, expires, tries FROM codes WHERE email = ?').bind(email),
+    env.DB.prepare('UPDATE codes SET tries = tries + 1 WHERE email = ?').bind(codeName),
+    env.DB.prepare('SELECT code, expires, tries FROM codes WHERE email = ?').bind(codeName),
   ]);
   const saved = found.results[0];
   if (!saved || saved.expires < Date.now() || saved.tries > CODE_TRIES) return reply({ error: 'code-expired' }, 401, cors);
@@ -548,7 +569,7 @@ async function checkCode(input, request, env, cors) {
   // Only a scrambled copy of the key is kept, so the database alone can't sign anyone in.
   const key = newKey();
   await env.DB.batch([
-    env.DB.prepare('DELETE FROM codes WHERE email = ?').bind(email),
+    env.DB.prepare('DELETE FROM codes WHERE email = ?').bind(codeName),
     env.DB.prepare('DELETE FROM sessions WHERE expires < ?').bind(Date.now()),
     env.DB.prepare('INSERT INTO sessions (key, email, expires) VALUES (?, ?, ?)')
       .bind(await scramble(key), email, Date.now() + SESSION_DAYS * 86400000),
@@ -619,7 +640,7 @@ async function ownerPage(input, request, env, cors) {
     await env.DB.batch([
       env.DB.prepare('UPDATE people SET active = 0 WHERE email = ?').bind(email),
       env.DB.prepare('DELETE FROM sessions WHERE email = ?').bind(email),
-      env.DB.prepare('DELETE FROM codes WHERE email = ?').bind(email),
+      env.DB.prepare('DELETE FROM codes WHERE email = ?').bind(await codeKey(email)),
     ]);
   }
 

@@ -2,7 +2,7 @@
 
 The "In force" list right below is every decision that still holds, one line each; it's rewritten at each handoff. The log under it has each decision with its reason, oldest first, and is only added to: if a decision changes, add a new entry that says which one it replaces, and one "Status" line on the old entry. The decisions from before October 27, 2026 were copied in on October 28, 2026 from the root `HANDOFF.md` ("Project 5"), `SPEC.md`, `AI-PLAN.md` and `SIGNUP-PLAN.md`; those files keep their own text too. When the notes give no reason, an entry says "not recorded."
 
-## In force (rewritten October 31, 2026, at the end of the eighth session)
+## In force (rewritten November 2, 2026, at the end of the ninth session)
 
 **Who it's for, and how the work goes**
 - October 25, 2026: stages: Dan's small group first, then anyone online later (stage 3). Dan reviews every question, and nothing is shared on its own.
@@ -20,10 +20,10 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 31, 2026: don't draw attention to something the text itself doesn't (a genealogy's names don't bring in the sins in those people's stories); the leader's heads-up is only for hard things the passage itself tells of.
 - October 26, 2026: no questions about God's silence, where God was, or why he didn't stop it (Dan: such questions "can hurt people's faith").
 - October 28, 2026: the commentary for the leader (about 100 words, written with the questions) and the reading's note start open.
-- October 29, 2026: Sonnet 5.5 at `high` effort, with "Think the problem through before you answer."; uneven sets get guidance fixes, not a model switch.
+- November 2, 2026: Opus 5.5 writes every set, at `medium` effort and normal speed (no fast mode: "quite expensive"); it replaces Sonnet 5.5 at `high` (October 29). Uneven sets still get guidance fixes.
 - October 29, 2026: question 2 asks why what the passage shows about God matters there.
 - October 29, 2026: the "check it" line wherever the AI's words show; a "pastor wrote the guidelines" line may go on the start screen, never inside that warning.
-- October 26, 2026: the ESV text is on hold: only a "Read it on esv.org" button. Don't ask Dan to set up the key.
+- October 26, 2026: the ESV text is on hold: only a "Read it on esv.org" button. Don't ask Dan to set up the key. Since November 2, 2026 the app doesn't ask the server for the text either (`ESV_TEXT` off in `app.js`; the code stays).
 
 **The look and the screens**
 - October 26, 2026: the "Paper and ink" look; October 28, 2026: the magazine layout, and no text under 13 pixels except verse numbers.
@@ -32,7 +32,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 26, 2026: saved studies stay on the phone; the Save button says what it saves; "Remove" sits under the Save bar.
 - October 31, 2026: the reading plan writes the next reading's questions ahead, quietly, one reading ahead only.
 - October 31, 2026: "Prepare for a Bible study" writes the next chapter's questions ahead after a whole chapter (one set kept on the phone, used once).
-- October 31, 2026: the test link (`?test`) shows how long the wait was and the AI's part of it; the wait is measured before changing anything about speed.
+- October 31, 2026: the test link (`?test`) shows how long the wait was and the AI's part of it, and since November 2 which AI wrote the set; the wait is measured before changing anything about speed.
 - October 26, 2026: the home screen icon is the full name in EB Garamond, and the name under it is "In the Word."
 - October 26, 2026: verse numbers follow the NASB, ESV and NIV; "Choose from the Bible" sits above the typing box.
 - October 28, 2026: typed short names are written out in full ("Phil 2" becomes "Philippians 2").
@@ -44,6 +44,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 28, 2026: daily limits: 20 sets a day for each signed-in person (or each connection using the passcode), 60 for everyone, and 10 wrong passcodes or codes a day for each connection. The counts start over at midnight Pacific time.
 - October 26, 2026: invite only; sign in with an email code (built) or Google (step S5, later); Apple only if wanted. The passcode goes away at step S6.
 - October 28, 2026: sign-in codes have 6 digits and last 10 minutes or 5 tries; a phone stays signed in 90 days; the app never says whether an address is invited.
+- November 2, 2026: every address asking for a code is counted and gets a scrambled code the same way (kept under the address scrambled); only invited ones are emailed; the day's emails count only emails that go.
 - October 26, 2026: emails go through Resend, from `sign-in@mail.danielyoonwrites.com`. Dan's web address `danielyoonwrites.com` has auto-renew off and expires October 26, 2027: remind him once, in September 2027 (sign-in and invite emails depend on it).
 - October 29, 2026: the owner's page ("Invite people"), only for Dan: two screens; "Turn off" signs someone out everywhere; rows stay in place.
 - October 29, 2026: "Daily AI limits" explained on the owner's page; no "testing only" note (only Dan sees it).
@@ -318,6 +319,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - Decision: keep Sonnet 5.5 at `high` effort, and even out the sets through the guidance, starting with question 2 (next entry).
 - Why: Dan, after pasting pull request 84: "hmmm the questions are a bit inconsistent, some better than others, but it seems useable." Then he chose "A": send a weaker and a stronger set so Claude could suggest a guidance line. Its real cost on Romans 14: about 2.32 and 2.21 cents a set (Opus: 2.96).
 - Turned down: keeping it as it is ("B"); `xhigh` effort ("C": more tokens, so it costs more and is slower); going back to Opus ("D").
+- Status: replaced by November 2, 2026: Opus 5.5 writes every set (pull request 122).
 
 ### October 29, 2026: question 2 asks why what the passage shows about God matters there (pull request 85)
 - Decision: question 2 in `PATTERNS` (`server/worker.js`) gets one more sentence. Group study: "Guide the group a bit: not just who God is, but why that matters in this specific passage." Reading plan: "Guide the reader a bit: not just who God is, but why that matters in this specific reading."
@@ -410,6 +412,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - Checked for the options (Anthropic's reference in Claude Code's claude-api skill, last updated October 6, 2026): fast mode on Opus 5.5 is $8 / $40 per million tokens (twice Opus 5.5's $4 / $20), "up to 2.5x higher output tokens per second", a research preview, on Claude's own API only; Sonnet 5.5 is $2 / $10. Not re-checked: that fast mode needs the Start tier or higher (the morning's research, in pull request 96's entry). For the timing, Cloudflare's docs (`cloudflare/cloudflare-docs` on GitHub, `workers/runtime-apis/performance.mdx`, read October 31, 2026): a Worker's timers "only advance or increment after I/O occurs," and wrapping a subrequest in them measures it, so the server's clock times just the AI's request.
 - Turned down for now: "(a)" fast mode for the set someone waits for (about 6 cents a set instead of about 2.3, by Claude's estimate from the Romans 14 costs; Dan found Opus's questions deeper on October 28, but the first chapter's set could read differently from the ones written ahead on Sonnet); "(c)" leaving it.
 - Revisit when: Dan has the seconds for a first chapter or two. Then "(a)" or "(c)".
+- Result (November 1 and 2, 2026): Romans 16, "You waited 15.0 seconds; the AI took 13.8 of them." Then fast mode was built and tested but not used ("quite expensive"), and Opus 5.5 at normal speed writes every set instead (the entry "Opus 5.5 writes every set," November 2, 2026).
 - Correction (November 2, 2026): Anthropic's live fast mode page (https://platform.claude.com/docs/en/build-with-claude/fast-mode, read November 2, 2026) lists fast mode on Opus 5.5 as "Available," not a research preview (that's Opus 5 and Opus 4.8 only), with no beta header for Opus 5.5. The Start tier requirement is confirmed there: "Organizations in the Evaluation tier can use fast mode with Claude Opus 5.5 once they move to the Start, Build, or Scale tier." The skill's reference cached October 6 was out of date.
 
 ### November 2, 2026: perfect what's built: an audit, then its fixes in order
@@ -423,3 +426,24 @@ The "In force" list right below is every decision that still holds, one line eac
 - Turned down: only lowering the 4-second wait to 2 (the speed review's smallest change): shorter waits, but the old page could still get the new script.
 - Cost of the change: a file changed without a new `?v=` number would now never reach installed phones (before, within about 10 minutes). The VERSIONS check catches it in Claude's sessions; the rule is in `CLAUDE.md`.
 - Revisit if: the app ever needs to change a file without a new number.
+
+### November 2, 2026: sign-in answers the same for every address (pull request 120)
+- Decision: in `sendCode` (`server/worker.js`), every address is counted and gets a code the same way, invited or not, and only an invited address is emailed. The code is kept under the address scrambled (`codeKey`), so the database never keeps an address someone only typed; the day's email budget (90) is checked the same way for any address but counted only when an email goes; and the answer no longer carries Resend's reason (the owner still sees it when an invite email fails).
+- Why: `AUDIT.md`, item 2, proved by running. Someone who knew an address could tell whether it was invited: "check a code" answered "wrong code, 4 tries left" for an invited address and "code expired" for any other, and the 6th code of a day was refused only for an invited one. That broke the October 28, 2026 rule that the app never says who's invited. And because the day's 90 emails were counted before the 5-a-day limit for one address refused, 100 requests for one invited address (the owner's is the reply-to on every invite) used up the day's sign-in emails for everyone. The new checks (`tests/server-test.mjs`, section 22) fail 7 times on the old code.
+- Turned down: answering "sent" when an email fails (the person would wait for a code that never comes); waiting a fixed time before every answer to hide the email's speed (slower for everyone, for a small gain).
+- Accepted (low): an invited address still answers a little slower; during an outage at Resend only an invited address answers "email-failed"; anyone who knows an address can use up its 5 codes a day.
+- On the day it's deployed, a code asked for just before won't work (it was kept under the old name): ask for a new one.
+
+### November 2, 2026: the app stops asking for the Bible text while the ESV is on hold (pull request 121)
+- Decision: an on/off switch, `ESV_TEXT = false`, near the top of the AI helper part of `app.js`. While it's off, `showPassageText` doesn't ask the server for the passage's text; the "Read ... on esv.org" row shows at once, as it did after the request failed. The code stays, as the October 26, 2026 decision (pull request 55) says; turning the text on takes the switch and the `ESV_API_KEY` secret.
+- Why: `AUDIT.md`, item 3, found by two of the audit's reviewers. With no ESV key, every study and reading sent a request that could only fail, and the server checks the passcode before it looks at what's asked. So each open with a wrong or old passcode counted as two wrong tries, and a few group phones with an old passcode on one church Wi-Fi could reach the 10 a day and block everyone there, email sign-in too, until midnight Pacific. Section E of `tests/app-test.mjs`: with the switch on, the run asked for the text 16 times and an old passcode counted 2 wrong tries per open; with it off, none and 1.
+- Turned down: not counting wrong passcodes on text requests on the server (it would let someone guess the passcode through that route).
+
+### November 2, 2026: Opus 5.5 writes every set, at normal speed, and no fast mode (pull request 122)
+- Decision: `MODEL` in `server/worker.js` is `claude-opus-5-5` again, with `EFFORT` `medium` (Opus 5.5's own default), no `THINK_FIRST` line (it's for Sonnet) and `MAX_TOKENS` 4,000 (at most 8 cents of writing, the same cap as before). Every set uses it: the ones someone waits for and the ones written ahead. The test link (`?test`) now starts with the model's name, like "Opus 5.5.", so it shows which AI wrote a set.
+- Why: Dan, November 2, 2026, after asking whether fast mode is the regular Opus or a separate Opus he'd pay for (it's the same model on a faster setup, at twice Opus's price): "I have Max account. I'll try opus but not fast mode because that is quite expensive." Asked which sets Opus should write, he chose "A": all of them (Claude's recommendation: one style every week, and without fast mode, splitting saves little and isn't faster). On October 28, 2026 he had found Opus's questions deeper: "ok I think this is better."
+- Expected: about 3 cents a set instead of about 2.4 (Romans 14 cost 2.96 cents with Opus on October 28); probably no shorter wait (on October 28 Dan said Opus "takes a while to load," and on October 31 that Sonnet was "maybe as slow as Opus"). The `?test` line shows each set's real cost and seconds, to compare with Romans 16's 15.0.
+- Turned down: Opus 5.5 in fast mode for the sets someone waits for ("quite expensive": about 6 cents a set, twice Opus's price; it was built and tested, then removed unused); Opus for the waited sets only ("(b)": different styles from week to week, and no faster without fast mode).
+- Also: Dan has a Max plan, which includes $100 a month of credit for Anthropic's API (https://platform.claude.com/docs/en/about-claude/api-credits-for-subscribers, read November 2, 2026), claimed by linking the Console organization that holds the app's key, on claude.ai under Settings, Billing. Not linked yet as far as Claude knows; optional.
+- Revisit if: Opus's sets aren't clearly better than Sonnet's, the wait bothers Dan more, or the cost line is clearly over about 3 cents. Going back to Sonnet is the four lines named in `server/worker.js`.
+- Correction (November 2, 2026, at the handoff): the Max plan's credit was already linked on October 26, 2026 (`AI-PLAN.md`, step B: "The Claude Console org gets $100 a month of API credits from the owner's Max plan"), so the app's AI is paid from it. The "Not linked yet as far as Claude knows" above was wrong.

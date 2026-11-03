@@ -8,6 +8,7 @@ import { copyFileSync, mkdtempSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import os from 'node:os';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 
 // worker.js is copied to a temporary folder as a module (.mjs), so Node can load it
 const source = fileURLToPath(new URL('../server/worker.js', import.meta.url));
@@ -68,7 +69,7 @@ globalThis.fetch = async (url, init) => {
     if (ai.delay) await new Promise((resolve) => setTimeout(resolve, ai.delay));
     const answer = { known_passage: true, leader_note: 'A short note.', questions: ['What stands out?', 'What does it show about God?', 'How will you respond?'] };
     return new Response(JSON.stringify({
-      model: 'claude-sonnet-5-5', stop_reason: 'end_turn',
+      model: ai.last.model, stop_reason: 'end_turn',   // answers as the model it was asked for
       content: [{ type: 'text', text: JSON.stringify(answer) }],
       usage: { input_tokens: 100, output_tokens: 50 },
     }), { status: 200 });
@@ -329,6 +330,59 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const seconds = timed.body.aiSeconds;
   check('aiSeconds: 1.2 seconds is about 1.2', seconds >= 1.1 && seconds < 2.5, JSON.stringify(timed.body));
   check('aiSeconds: one decimal place', Number.isInteger(Math.round(seconds * 10)) && String(seconds).split('.')[1]?.length <= 1, String(seconds));
+
+  // 22. Sign-in answers are the same for any address, and the day's emails can't be used up
+  // by asking for one address again and again (AUDIT.md, item 2; November 2, 2026)
+  const worker5 = await freshWorker();
+  const env5 = makeEnv();
+  const owner5 = (await signIn(worker5, env5, 'owner@example.com', '198.51.100.70')).body.session;
+  await call(worker5, env5, { action: 'invite', email: 'member@example.com', name: 'Member' }, { key: owner5 });
+  await call(worker5, env5, { action: 'invite', email: 'second@example.com' }, { key: owner5 });
+  const db5 = env5.DB.raw;
+  const emailsToday = () => (db5.prepare("SELECT count FROM usage WHERE who = 'emails'").get() || { count: 0 }).count;
+  const send5 = (email, ip) => call(worker5, env5, { action: 'send-code', email }, { ip });
+  const check5 = (email, ip) => call(worker5, env5, { action: 'check-code', email, code: '000000' }, { ip });
+
+  const mailBefore5 = mail.length;
+  const sentMember = await send5('member@example.com', '198.51.100.71');
+  const sentStranger = await send5('stranger@example.com', '198.51.100.71');
+  check('same answers: "send a code"', JSON.stringify([sentMember.status, sentMember.body]) === JSON.stringify([sentStranger.status, sentStranger.body]), JSON.stringify([sentMember, sentStranger]));
+  check('same answers: only the invited address is emailed', mail.length === mailBefore5 + 1 && mail[mail.length - 1].to[0] === 'member@example.com');
+  const wrongMember = await check5('member@example.com', '198.51.100.72');
+  const wrongStranger = await check5('stranger@example.com', '198.51.100.72');
+  check('same answers: a wrong code', JSON.stringify([wrongMember.status, wrongMember.body]) === JSON.stringify([wrongStranger.status, wrongStranger.body])
+    && wrongMember.body.error === 'wrong-code' && wrongMember.body.triesLeft === 4, JSON.stringify([wrongMember, wrongStranger]));
+  for (let i = 0; i < 4; i += 1) { await send5('member@example.com', '198.51.100.73'); await send5('stranger@example.com', '198.51.100.73'); }
+  const sixthMember = await send5('member@example.com', '198.51.100.73');
+  const sixthStranger = await send5('stranger@example.com', '198.51.100.73');
+  check('same answers: the 6th code of the day', JSON.stringify([sixthMember.status, sixthMember.body]) === JSON.stringify([sixthStranger.status, sixthStranger.body])
+    && sixthMember.body.error === 'too-many-codes', JSON.stringify([sixthMember, sixthStranger]));
+
+  const emailsBefore = emailsToday();
+  for (let i = 0; i < 100; i += 1) await send5('owner@example.com', '198.51.100.' + (80 + (i % 4)));   // 25 from each of 4 connections
+  check('the day\'s emails: 100 asks for one address count only the emails sent', emailsToday() <= emailsBefore + 4, emailsBefore + ' then ' + emailsToday());
+  const mailBefore2 = mail.length;
+  const secondCode = await send5('second@example.com', '198.51.100.90');
+  check('the day\'s emails: someone else still gets a code', secondCode.body.sent === true && mail.length === mailBefore2 + 1, JSON.stringify(secondCode));
+
+  await call(worker5, env5, { action: 'invite', email: 'fail@example.com' }, { key: owner5 });
+  const failed5 = await send5('fail@example.com', '198.51.100.91');
+  check('a failed email: says so, with no reason from Resend', failed5.status === 502 && failed5.body.error === 'email-failed' && !('detail' in failed5.body), JSON.stringify(failed5));
+
+  const keptCodes = db5.prepare('SELECT email FROM codes').all().map((row) => row.email);
+  const keptCounts = db5.prepare("SELECT who FROM usage WHERE who LIKE 'codes:%'").all().map((row) => row.who);
+  check('no typed address is kept with the codes or their counts', keptCodes.length > 0 && !keptCodes.concat(keptCounts).some((name) => name.includes('@')), JSON.stringify(keptCodes.concat(keptCounts)));
+  const codeName = (email) => createHash('sha256').update('code|' + email).digest('hex');
+  check('a code is kept under the scrambled address', keptCodes.includes(codeName('stranger@example.com')));
+  await call(worker5, env5, { action: 'turn-off', email: 'member@example.com' }, { key: owner5 });
+  check('turning someone off deletes their code', !db5.prepare('SELECT email FROM codes').all().some((row) => row.email === codeName('member@example.com')));
+
+  // 23. Opus 5.5 writes every set, at normal speed (the owner's choice, November 2, 2026)
+  const opus = await call(worker3, env3, { passage: 'John 8', method: 'study', passcode: env3.PASSCODE });
+  const sent = ai.last;
+  check('Opus 5.5 at medium effort, 4,000 tokens, normal speed', sent.model === 'claude-opus-5-5' && sent.output_config.effort === 'medium' && sent.max_tokens === 4000 && !('speed' in sent), JSON.stringify([sent.model, sent.output_config.effort, sent.max_tokens, sent.speed]));
+  check('no Sonnet-only "think" line at the end of the guidance', !sent.system.includes('Think the problem through before you answer.'));
+  check('the answer says Opus 5.5, priced at $4 / $20 per million', opus.body.model === 'claude-opus-5-5' && Math.abs(opus.body.cost - (100 * 4 + 50 * 20) / 1e6) < 1e-12, JSON.stringify(opus.body));
 
   console.log(passed + ' passed, ' + failed + ' failed');
   process.exit(failed ? 1 : 0);

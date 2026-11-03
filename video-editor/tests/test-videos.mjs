@@ -73,6 +73,35 @@ export function makeChart() {
   return file;
 }
 
+// A "clock" video: 8 seconds, 360 by 640, gray that brightens steadily (16 + 25 for each second), with
+// a 330 Hz tone. A frame's brightness tells which moment of the clock it shows; the tone's pitch tells
+// the speed of the sound.
+export function makeClock() {
+  const file = VIDEOS + 'clock.mp4';
+  if (existsSync(file)) return file;
+  ffmpeg(['-f', 'lavfi', '-i', 'color=c=gray:s=360x640:r=30:d=8', '-f', 'lavfi', '-i', 'sine=frequency=330:sample_rate=48000:duration=8',
+    '-vf', "geq=lum='16+T*25':cb=128:cr=128,format=yuv420p", '-ac', '2', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '10',
+    '-c:a', 'aac', '-b:a', '128k', file]);
+  return file;
+}
+
+// The average color of a whole frame at a moment (as ffmpeg shows it)
+export function frameColor(file, at) {
+  const run = spawnSync('ffmpeg', ['-v', 'error', '-ss', String(at), '-i', file, '-vf', 'scale=1:1:flags=area,format=rgb24',
+    '-frames:v', '1', '-f', 'rawvideo', '-']);
+  return [...run.stdout];
+}
+
+// The sound of a file: its length in seconds, and its pitch (from how often the wave crosses zero)
+export function soundFacts(file) {
+  const run = spawnSync('ffmpeg', ['-v', 'error', '-i', file, '-ac', '1', '-ar', '48000', '-f', 's16le', '-'], { maxBuffer: 1 << 28 });
+  const samples = new Int16Array(run.stdout.buffer, run.stdout.byteOffset, Math.floor(run.stdout.length / 2));
+  const middle = samples.subarray(4800, Math.max(4800, samples.length - 4800)); // skip the edges
+  let crossings = 0;
+  for (let i = 1; i < middle.length; i++) if ((middle[i - 1] < 0) !== (middle[i] < 0)) crossings += 1;
+  return { seconds: samples.length / 48000, hertz: middle.length ? crossings / 2 / (middle.length / 48000) : 0 };
+}
+
 // The average color of a patch's middle, from a video file (as ffmpeg shows it)
 export function patchColor(file, patch, at = 0.5, width = 540) {
   const scale = width / 540;

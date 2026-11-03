@@ -2,7 +2,7 @@
 
 Read `PROGRESS.md` first (where it stands and the next step), then `DECISIONS.md` (choices and their reasons) and `SPEC.md`.
 
-A little app for typed notes, photos and links on boards, like Apple's Freeform, for the owner's Android phone and a computer's web browser, planned November 2, 2026. It lives in this folder and is published at https://danielyoonwrites.github.io/idea-board (not listed in search engines). Keep the "Build plan" in `SPEC.md` up to date.
+A little app for typed notes, photos and links on boards, like Apple's Freeform, for the owner's Android phone and a computer's web browser, planned November 2, 2026. It lives in this folder and is published at https://danielyoonwrites.github.io/idea-board (not listed in search engines; the website's Projects page links to it). Keep the "Build plan" in `SPEC.md` up to date.
 
 ## Rules for working here
 
@@ -21,3 +21,4 @@ A little app for typed notes, photos and links on boards, like Apple's Freeform,
 - A tap that opens a screen also sends a click a moment later, to whatever is under the finger on the new screen (see `putCursorAtEnd()` in `openNote()`). Keep that in mind for anything a tap opens.
 - Screenshots for pull requests use made-up notes and plain test photos, never the owner's own boards (the privacy rule in the root `CLAUDE.md`).
 - Raise the `?v=` number on file links whenever a file changes.
+- It's on the website's Projects page (`projects.html`, since pull request 124): a short line and a "How I built it" note, in the website's voice (`.claude/rules/website.md`). The line says only what works today. When what the app can do changes (saving to an account, links), update both in the same pull request.
