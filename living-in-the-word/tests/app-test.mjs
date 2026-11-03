@@ -61,6 +61,7 @@ let offline = false;
 let requests = 0;
 const asked = [];   // each set of questions asked for, like "Philippians 2|personal"
 let hold = null;    // { passage, waiting }: that passage's answer waits until released (section W)
+let hang = null;    // a passage whose answer never comes, like a connection that hangs (section HANG)
 let textAsks = 0;   // requests for the Bible text (none while the ESV is on hold; section E)
 let phoneIp = '203.0.113.9';   // the internet address the stand-in server sees for every phone
 
@@ -89,6 +90,7 @@ async function newPhone(width = 360, height = 740) {
       if (sent.want === 'text') textAsks += 1;
       if (sent.passage && !sent.want) {
         asked.push(sent.passage + '|' + sent.method);
+        if (hang && hang === sent.passage) return;   // never answered: only the app's own timer ends it
         if (hold && hold.passage === sent.passage) await hold.waiting;
       }
     }
@@ -700,6 +702,44 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
   await context.close();
 }
 
+// ---- HANG. A reading's questions give up after 2 minutes, like a study's, when the connection
+// hangs (AUDIT.md, item 5; November 3, 2026). For this check only, the phone's 2-minute timer is
+// shortened to 1.5 seconds, and the stand-in server never answers Ruth 1 (hang).
+{
+  await call(worker, env, { action: 'invite', email: 'hang@example.com', name: 'Hang' }, { key: ownerKey3 });
+  const hangKey = (await signIn(worker, env, 'hang@example.com', '198.51.100.63')).body.session;
+  const { context, page, errors } = await newPhone();
+  await page.addInitScript(() => {
+    const realSetTimeout = window.setTimeout;
+    window.setTimeout = (fn, ms, ...rest) => realSetTimeout(fn, ms === 120000 ? 1500 : ms, ...rest);
+  });
+  await signedInAs(page, hangKey, 'hang@example.com', false);
+  const times = () => asked.filter((item) => item === 'Ruth 1|personal').length;
+  const writing = () => page.evaluate(() => document.getElementById('today').classList.contains('writing'));
+  const OFFLINE = 'Couldn’t reach the AI helper, so these are general questions. Check your connection and try again.';
+
+  hang = 'Ruth 1';
+  await page.click('[data-action="reading"]');
+  await page.selectOption('#plan-book', 'Ruth');
+  await page.click('#plan-setup button[type="submit"]');
+  await page.waitForFunction(() => document.querySelector('.reading-name').textContent === 'Ruth 1');
+  check('HANG: Ruth 1 says its questions are being written', (await writing()) && (await text(page, '.reading-status')).startsWith('Writing questions for Ruth 1.'), await text(page, '.reading-status'));
+  const gaveUp = await page.waitForFunction(() => !document.getElementById('today').classList.contains('writing'), null, { timeout: 8000 }).then(() => true, () => false);
+  check('HANG: it gives up instead of waiting forever', gaveUp && (await text(page, '.reading-status')) === OFFLINE, await text(page, '.reading-status'));
+  check('HANG: with the general questions', (await page.locator('.reflect-list li').count()) > 0 && !(await visible(page, '.reading-check')));
+  await page.evaluate(() => document.querySelector('.reading-status').scrollIntoView({ block: 'center' }));
+  await page.screenshot({ path: SHOTS + 'hang-reading-gave-up.png' });
+
+  // The connection works again: opening the reading again asks again, and the questions come
+  hang = null;
+  await page.click('#today .back');
+  await page.click('[data-action="reading"]');
+  const cameBack = await page.waitForFunction(() => !document.querySelector('.reading-check').hidden, null, { timeout: 8000 }).then(() => true, () => false);
+  check('HANG: opened again, it asks again and the questions come', cameBack && times() === 2 && (await page.locator('.reflect-list li').count()) === 3, JSON.stringify([cameBack, times()]));
+  check('HANG: no errors', errors.length === 0, errors.join(' | '));
+  await context.close();
+}
+
 // ---- SW. The offline helper (sw.js), which the checks above turn off. A small stand-in website
 // on port 8766 serves two made-up versions of the app, ignores the ?v= part of an address the way
 // GitHub Pages does, and can be slowed down or cut off. The new script doesn't fit the old page
@@ -818,7 +858,7 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
 // ?v= number in index.html, then put the new number and the fingerprint this check prints in KNOWN.
 {
   const KNOWN = {
-    'app.js?v=39': '3f5ab06ba63f21f4',
+    'app.js?v=40': '7f30abddddd3a5af',
     'style.css?v=25': 'a79e0238a9c905fd',
   };
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');

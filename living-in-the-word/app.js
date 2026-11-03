@@ -1664,13 +1664,18 @@ async function fetchReadingQuestions(n) {
     showWriting('today', true);
   }
 
+  // Like a study, give up after 2 minutes: a connection that hangs would otherwise leave
+  // "Writing questions…" on screen and block every later reading (AUDIT.md, item 5)
   let result;
+  const stop = new AbortController();
+  const timer = setTimeout(() => stop.abort(), 120000);   // give up after 2 minutes
   try {
-    const response = await askServer({ passage: name, method: 'personal' });
+    const response = await askServer({ passage: name, method: 'personal' }, stop.signal);
     result = await response.json();
   } catch (error) {
     result = { error: 'offline' };
   }
+  clearTimeout(timer);
   if (readingRequest === n) readingRequest = null;   // (a newer plan's request keeps its place)
   if (shownReading === n) showWriting('today', false);
 

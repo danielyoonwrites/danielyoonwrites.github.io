@@ -32,6 +32,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 26, 2026: "Go deeper with AI," a loading screen with placeholder lines, and a clean screen when a passage isn't recognized.
 - October 26, 2026: saved studies stay on the phone; the Save button says what it saves; "Remove" sits under the Save bar.
 - October 31, 2026: the reading plan writes the next reading's questions ahead, quietly, one reading ahead only.
+- November 3, 2026: a reading's questions give up after 2 minutes, like a study's.
 - October 31, 2026: "Prepare for a Bible study" writes the next chapter's questions ahead after a whole chapter (one set kept on the phone, used once).
 - October 31, 2026: the test link (`?test`) shows how long the wait was and the AI's part of it, and since November 2 which AI wrote the set; the wait is measured before changing anything about speed.
 - October 26, 2026: the home screen icon is the full name in EB Garamond, and the name under it is "In the Word."
@@ -464,3 +465,9 @@ The "In force" list right below is every decision that still holds, one line eac
 - Checks: section 24 of `tests/server-test.mjs` (nine problems; the 4 "busy" checks fail on the old code) and section BUSY of `tests/app-test.mjs` (the words on the screen, and a phone screenshot).
 - Turned down: recognizing the spend cap by its missing `retry-after` header (Anthropic: "Not every 429 carries it"); trying again by itself after a busy answer (a longer wait; "Write new questions" is one tap).
 - Not changed: "Today's AI limit is reached," which the app's own daily counts give.
+
+### November 3, 2026: a reading's questions give up after 2 minutes, like a study's (pull request 127)
+- Decision: `fetchReadingQuestions` in `app.js` gives up after 2 minutes, with the same timer as a study (`requestSuggestions`) and the next chapter written ahead (`prepareStudyAhead`). Then the reading shows the general questions with "Couldn’t reach the AI helper, so these are general questions. Check your connection and try again.", as without reception, and opening the reading again asks again.
+- Why: `AUDIT.md`, item 5. With no timer, a connection that hung (no answer and no error) left "Writing questions for …" on the reading for as long as the app stayed open, and blocked every later reading's questions too, including the one written ahead, because only one reading is asked for at a time (`readingRequest`).
+- Checks: section HANG of `tests/app-test.mjs`: the phone's 2-minute timer shortened to 1.5 seconds for that check only, and a stand-in server that never answers. On the old code, 2 of its checks fail.
+- Not changed: what a reading does without reception (no "Questions for this reading" button; the next visit asks again by itself).
