@@ -373,11 +373,21 @@ async function readCounts(env, day, names) {
 // Adds one to each count, then reads them back, all in one step: D1 runs a batch as one
 // transaction, one at a time, so requests arriving together still get different numbers
 // and can't slip past a limit together. Also deletes the days before yesterday.
-async function addOne(env, day, names) {
+// With ownLimit, the first name is one person's own count (or one address's), and the
+// names after it are shared counts, like everyone's: those go up only while the first is
+// within ownLimit. So one person's requests sent all at the same moment use up only their
+// own limit, never everyone's (AUDIT.md, item 8; November 3, 2026).
+async function addOne(env, day, names, ownLimit) {
   const steps = [];
-  names.forEach((name) => {
+  names.forEach((name, place) => {
     steps.push(env.DB.prepare('INSERT OR IGNORE INTO usage (day, who, count) VALUES (?, ?, 0)').bind(day, name));
-    steps.push(env.DB.prepare('UPDATE usage SET count = count + 1 WHERE day = ? AND who = ?').bind(day, name));
+    if (place > 0 && ownLimit !== undefined) {
+      // A shared count: only if the first count (just added to, above) is still within its limit
+      steps.push(env.DB.prepare('UPDATE usage SET count = count + 1 WHERE day = ? AND who = ? ' +
+        'AND (SELECT count FROM usage WHERE day = ? AND who = ?) <= ?').bind(day, name, day, names[0], ownLimit));
+    } else {
+      steps.push(env.DB.prepare('UPDATE usage SET count = count + 1 WHERE day = ? AND who = ?').bind(day, name));
+    }
   });
   steps.push(env.DB.prepare('DELETE FROM usage WHERE day < ?').bind(dayInPacific(Date.now() - 86400000)));
   const marks = names.map(() => '?').join(', ');
@@ -659,7 +669,8 @@ async function ownerPage(input, request, env, cors) {
 async function emailInvite(env, email, name) {
   if (!env.RESEND_API_KEY) return { emailed: false, problem: 'not-set-up' };
   const mine = 'invites:' + email;
-  const counts = await addOne(env, dayInPacific(), [mine, 'emails']);
+  // The day's emails go up only within this address's 3 (see addOne; AUDIT.md, item 8)
+  const counts = await addOne(env, dayInPacific(), [mine, 'emails'], INVITES_EACH);
   if (counts[mine] > INVITES_EACH || counts.emails > EMAILS_ALL) return { emailed: false, problem: 'too-many-emails' };
   const problem = await sendEmail(env.RESEND_API_KEY, {
     to: [email],
@@ -866,7 +877,8 @@ export default {
       if (counts[mine] >= DAILY_LIMIT_EACH || counts.everyone >= DAILY_LIMIT_ALL) {
         return reply({ error: 'daily-limit' }, 429, cors);
       }
-      after = await addOne(env, day, [mine, 'everyone']);
+      // Everyone's count goes up only within this person's own 20 (see addOne)
+      after = await addOne(env, day, [mine, 'everyone'], DAILY_LIMIT_EACH);
     } catch (error) {
       return reply({ error: 'ai-unavailable' }, 503, cors);
     }

@@ -15,9 +15,14 @@ const source = fileURLToPath(new URL('../server/worker.js', import.meta.url));
 const work = mkdtempSync(path.join(os.tmpdir(), 'living-in-the-word-tests-'));
 copyFileSync(source, path.join(work, 'worker.mjs'));
 
-// ---- D1 stand-in: prepare/bind/first/run/all, and batch as one transaction
+// ---- D1 stand-in: prepare/bind/first/run/all, and batch as one transaction.
+// hold() makes every batch wait until the function it returns is called, and waiting() says
+// how many are waiting. So requests sent at the same moment can all read their counts before
+// any of them adds one, as on Cloudflare, where each step is a trip over the network (section 25).
 export function makeD1() {
   const db = new DatabaseSync(':memory:');
+  let gate = null;   // while set, every batch waits for it
+  let waiting = 0;
   class Statement {
     constructor(sql, params = []) { this.sql = sql; this.params = params; }
     bind(...params) { return new Statement(this.sql, params); }
@@ -37,6 +42,7 @@ export function makeD1() {
   return {
     prepare: (sql) => new Statement(sql),
     async batch(statements) {
+      if (gate) { waiting += 1; await gate; waiting -= 1; }
       db.exec('BEGIN');
       try {
         const results = statements.map((statement) => statement.runNow());
@@ -47,6 +53,12 @@ export function makeD1() {
         throw error;
       }
     },
+    hold() {
+      let open;
+      gate = new Promise((resolve) => { open = resolve; });
+      return () => { gate = null; open(); };
+    },
+    waiting: () => waiting,
     raw: db,
   };
 }
@@ -422,6 +434,40 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   ai.fail = null;
   const afterProblems = await call(worker3, env3, { passage: 'John 10', method: 'study', passcode: env3.PASSCODE });
   check('AI problem: the next set works again', afterProblems.status === 200 && afterProblems.body.questions.length === 3, JSON.stringify(afterProblems));
+
+  // 25. One person's requests sent all at the same moment use up only their own 20 sets, never
+  // everyone's 60; and taps of Invite past 3 for one address don't use up the day's emails
+  // (AUDIT.md, item 8; November 3, 2026)
+  const worker6 = await freshWorker();
+  const env6 = makeEnv();
+  const owner6 = (await signIn(worker6, env6, 'owner@example.com', '198.51.100.110')).body.session;
+  await call(worker6, env6, { action: 'invite', email: 'eager@example.com', name: 'Eager' }, { key: owner6 });
+  const eager6 = (await signIn(worker6, env6, 'eager@example.com', '198.51.100.111')).body.session;
+  const asked6 = ai.calls;
+  const release6 = env6.DB.hold();
+  const burstAnswers = Promise.all(Array.from({ length: 60 }, () =>
+    call(worker6, env6, { passage: 'Mark 1', method: 'study' }, { key: eager6, ip: '198.51.100.111' })));
+  for (let i = 0; i < 500 && env6.DB.waiting() < 60; i += 1) await new Promise((resolve) => setTimeout(resolve, 10));
+  check('60 at once from one person: all 60 read their counts before any adds one', env6.DB.waiting() === 60, 'waiting: ' + env6.DB.waiting());
+  release6();
+  const burst = await burstAnswers;
+  const written6 = burst.filter((answer) => answer.status === 200).length;
+  check('60 at once from one person: 20 sets written, and the AI asked 20 times', written6 === 20 && ai.calls - asked6 === 20, written6 + ' written, ' + (ai.calls - asked6) + ' asked');
+  check('60 at once from one person: the other 40 hit the daily limit', burst.filter((answer) => answer.status === 429 && answer.body.error === 'daily-limit').length === 40);
+  const limits6 = await call(worker6, env6, { action: 'people' }, { key: owner6 });
+  check('60 at once from one person: everyone together counts only their 20', limits6.body.everyone === 20, 'everyone: ' + limits6.body.everyone);
+  const ownerSet6 = await call(worker6, env6, { passage: 'Mark 2', method: 'study' }, { key: owner6 });
+  check('60 at once from one person: someone else still gets a set', ownerSet6.status === 200 && ownerSet6.body.questions.length === 3, JSON.stringify(ownerSet6));
+  const passcodeSet6 = await call(worker6, env6, { passage: 'Mark 3', method: 'study', passcode: env6.PASSCODE }, { ip: '192.0.2.60' });
+  check('60 at once from one person: a phone with the passcode still gets a set', passcodeSet6.status === 200, JSON.stringify(passcodeSet6));
+
+  const emails6 = () => (env6.DB.raw.prepare("SELECT count FROM usage WHERE who = 'emails'").get() || { count: 0 }).count;
+  const emailsBefore6 = emails6();
+  const mailBefore6 = mail.length;
+  const taps6 = [];
+  for (let i = 0; i < 10; i += 1) taps6.push((await call(worker6, env6, { action: 'invite', email: 'eager@example.com' }, { key: owner6 })).body.emailed);
+  check('Invite tapped 10 more times for one address: 2 more emails go (3 for the day)', mail.length === mailBefore6 + 2 && taps6.filter(Boolean).length === 2, JSON.stringify(taps6));
+  check('Invite tapped 10 more times: the day\'s emails count only those 2', emails6() === emailsBefore6 + 2, emailsBefore6 + ' then ' + emails6());
 
   console.log(passed + ' passed, ' + failed + ' failed');
   process.exit(failed ? 1 : 0);
