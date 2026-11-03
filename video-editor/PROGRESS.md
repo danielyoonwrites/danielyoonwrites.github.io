@@ -21,6 +21,7 @@ A simple video editor, just for the owner, on his Android phone in Chrome: trim,
 - Branch: `ccr-f31dd4eb-gq2mec` (the video editor's session), restarted from main after each merge; everything up to pull request 129 is merged into main.
 - Open pull requests: pull request 135, these handoff notes (notes only). Nothing to do after it merges except the checks below.
 - Claude's rough estimate: 4 more small pull requests (build steps 6 to 9).
+- Dan's Master Notes (Notion), the page "Simple video editor: how hard to build (Nov 2026)," gets one entry after each merge (what merged, what was checked, what's next).
 
 ## Waiting on Dan
 1. Merge the handoff notes, pull request 135: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/135, Conversation tab, Merge pull request, Confirm merge.
@@ -31,11 +32,23 @@ A simple video editor, just for the owner, on his Android phone in Chrome: trim,
    4. Tap the Sound tab. While it plays, turn each switch on and off and listen: Cut rumble, Clearer voice, Even out the volume. Then try the Volume slider.
    5. Keep the switches you like, tap "Make the video," and play it: it should sound like what you heard while editing.
    6. Tell Claude which switches helped, whether any made it sound worse, and whether the voice stayed in step with the lips while editing.
-3. The trim and speed check, with the same video: on the Trim tab, tap "Start here," let it play about 10 seconds, tap "End here"; on the Speed tab, tap 2×; tap "Make the video," note roughly how long it takes, and play it (it should start and end where you chose, at double speed, with the sound higher). Keep at least 6 seconds: shorter at 2× makes a video under 3 seconds, and "Your video" will say it's too short for Instagram (expected).
-4. Still open from before: his notes on the Korean looks (any to change or drop), how long Soft glow takes to make, a screenshot of "What was checked" on "Your video" (it has the "For Claude" line), and private test uploads (YouTube as a Short set to Private, TikTok with "Only me," Instagram as a Reel saved to drafts).
+3. The trim and speed check (pull request 125), any time:
+   1. On your phone, open Chrome and go to https://danielyoonwrites.github.io/video-editor (if you're on "Your video" from item 2, tap "← Edit" at the top left instead and skip to step 3).
+   2. Tap "Choose a video" and pick a video of your own at least 15 seconds long. It opens on the Trim tab and starts playing.
+   3. Tap "Start here" a moment in. Let it play about 10 more seconds, then tap "End here." Keep at least 6 seconds: shorter at 2× makes a video under 3 seconds, and "Your video" will say it's too short for Instagram (expected).
+   4. Tap the Speed tab, then 2×.
+   5. Tap "Make the video," note roughly how long it takes, then play it: it should start and end where you chose, at double speed, with the sound higher.
+   6. Tell Claude how it went and how long it took.
+4. Still open from before (pull requests 112 and 116), any time:
+   1. On your phone, open Chrome, go to https://danielyoonwrites.github.io/video-editor, tap "Choose a video" and pick one of your own, with a face in it if you like.
+   2. Tap the Filter tab, then each look while it plays: Milky, Peach, Soft glow, Café, Clear, Film. Note any you'd change or drop.
+   3. Tap Soft glow, then "Make the video," and note roughly how long it takes.
+   4. On "Your video," tap "What was checked" to open it, and take a screenshot (it has the "For Claude" line).
+   5. Tap "Save to phone." Then upload that video privately in each app: YouTube as a Short set to Private, TikTok with "Only me," Instagram as a Reel saved to drafts. Unverified: Claude couldn't open those apps' help pages (blocked from its session), so it can't name their exact buttons; note any app that refuses the video and what it says.
+   6. Send Claude your notes on the looks, the time, the screenshot, and how the uploads went.
 
 ## Next step
-Start with `/pickup video editor` and ask Dan for his phone checks (items 2 to 4 above). Adjust whatever he asks: the sound's numbers are in `buildSoundSteps()` in `app.js` (check with the saved checks, section J), the looks' numbers in the SVG filters near the top of `index.html` (check with `tests/looks-sheet.mjs` and section H). Then build step 6, shape and crop: first ask Dan which shapes he wants (`SPEC.md`, "How it works," suggests tall 9:16, square or wide), one question at a time.
+Start with `/pickup video editor` and ask Dan for his phone checks (items 2 to 4 above). Adjust whatever he asks: the sound's numbers are in `buildSoundSteps()` in `app.js` (check with the saved checks, section J), the looks' numbers in the SVG filters near the top of `index.html` (check with `tests/looks-sheet.mjs` and section H). Then build step 6, shape and crop. Ask Dan first, one question at a time, each with options and a recommendation: (1) which shapes: tall 9:16 and square both count as YouTube Shorts (up to 3 minutes), but wide doesn't (`SPEC.md`, "Made for Instagram, TikTok and YouTube Shorts"), so wide would need a warning, or be left out; (2) the starting shape (Claude would suggest tall); (3) how to choose which part shows: dragging the picture, or a few buttons (left, middle, right). Where it goes on the screen is Claude's design to show in screenshots (likely a sixth tab, "Shape," on the Edit screen; the first plan in `SPEC.md`, "How it works," had separate screens before the app became one Edit screen with tabs).
 
 ## Ideas, not done
 - A note on the Trim and Speed tabs when the new video would be under 3 seconds or over 3 minutes (now only "Your video" says so, after it's made).
@@ -57,6 +70,6 @@ Start with `/pickup video editor` and ask Dan for his phone checks (items 2 to 4
 
 ## How to run and check it
 - Run: nothing to install; the pages are plain files. Open https://danielyoonwrites.github.io/video-editor (the app) or https://danielyoonwrites.github.io/video-editor/phone-test.html (the phone test), or serve the repository folder (`python3 -m http.server`) and open `/video-editor/`.
-- Check the app: `node video-editor/tests/app-test.mjs` from the repository folder. It makes made-up test videos, a color chart, a "clock" video and test sounds with ffmpeg (`tests/test-videos.mjs`), serves the repository on http://127.0.0.1:8768 (that port must be free) and runs Chromium at 360 wide with touch, 180 wide (a phone at 200% zoom) and 1280 with a mouse. Success ends "182 passed, 0 failed" (in about 2 minutes); screenshots go to the temporary folder it prints.
+- Check the app (needs Playwright with Chromium, and ffmpeg; both are installed in Claude's cloud sessions): `node video-editor/tests/app-test.mjs` from the repository folder. It makes made-up test videos, a color chart, a "clock" video and test sounds with ffmpeg (`tests/test-videos.mjs`), serves the repository on http://127.0.0.1:8768 (that port must be free) and runs Chromium at 360 wide with touch, 180 wide (a phone at 200% zoom) and 1280 with a mouse. Success ends "182 passed, 0 failed" (in about 2 minutes); screenshots go to the temporary folder it prints.
 - See the looks side by side: `node video-editor/tests/looks-sheet.mjs` (port 8769; needs Python with Pillow and numpy for the test scene). It prints where the picture is.
 - Check the phone test: `node video-editor/tests/phone-test.mjs` (port 8767). Success ends "71 passed, 0 failed."
