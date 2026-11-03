@@ -832,6 +832,52 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
   await context.close();
 }
 
+// ---- NOSAVE. If this browser won't save (a private window, for example), "Start the plan" says
+// so, the same way Save does, instead of silently doing nothing (AUDIT.md, item 9; November 3,
+// 2026). For this check only, the phone's storage refuses every save, like a phone whose storage
+// is full; realSetItem puts the owner's sign-in there first, as if the phone signed in earlier.
+{
+  const BLOCKED = 'This browser wouldn’t save it. In a private window, nothing can be kept.';
+  const { context, page, errors } = await newPhone();
+  await page.addInitScript(() => {
+    const realSetItem = Storage.prototype.setItem;
+    window.realSetItem = (key, value) => realSetItem.call(localStorage, key, value);
+    Storage.prototype.setItem = () => { throw new DOMException('The quota has been exceeded.', 'QuotaExceededError'); };
+  });
+  await page.goto(APP);
+  await page.evaluate((key) => window.realSetItem('living-in-the-word', JSON.stringify({ version: 1, session: key, email: 'owner@example.com', owner: true })), ownerKey3);
+  await page.goto(APP);
+  await page.waitForLoadState('networkidle');
+  const note = '#plan-setup .gentle-error';
+  const noteText = async () => ((await page.locator(note).count()) ? page.locator(note).innerText() : '(no message on the page)');
+
+  await page.click('[data-action="reading"]');
+  check('NOSAVE: the plan setup opens, with no message yet', (await active(page)) === 'plan-setup' && !(await visible(page, note)), await active(page));
+  await page.click('#plan-setup button[type="submit"]');
+  check('NOSAVE: "Start the plan" says the browser wouldn\'t save it', (await visible(page, note)) && (await noteText()) === BLOCKED, await noteText());
+  check('NOSAVE: and stays on the plan setup', (await active(page)) === 'plan-setup', await active(page));
+  const box = (await page.locator(note).count()) ? await page.locator(note).boundingBox() : null;
+  check('NOSAVE: the whole message is on the screen (360 by 740, within a pixel)', Boolean(box) && box.y >= 0 && box.y + box.height <= 741, JSON.stringify(box));
+  await page.screenshot({ path: SHOTS + 'nosave-start-the-plan.png' });
+
+  // Opened again, the message is gone until the next tap
+  await page.click('#plan-setup .back');
+  await page.click('[data-action="reading"]');
+  check('NOSAVE: opened again, the message is gone', (await active(page)) === 'plan-setup' && !(await visible(page, note)));
+
+  // Save under a study says the same words (a few verses, so nothing is written ahead)
+  await page.click('#plan-setup .back');
+  await page.click('[data-action="study"]');
+  await page.fill('#passage-text', 'Philippians 1:1-11');
+  await page.click('#passage button[type="submit"]');
+  await page.waitForFunction(() => document.querySelectorAll('.question-list textarea').length > 0
+    && !document.getElementById('questions').classList.contains('writing'));
+  await page.click('[data-action="save"]');
+  check('NOSAVE: Save says the same words', (await text(page, '.share-status')) === BLOCKED, await text(page, '.share-status'));
+  check('NOSAVE: no errors', errors.length === 0, errors.join(' | '));
+  await context.close();
+}
+
 // ---- SW. The offline helper (sw.js), which the checks above turn off. A small stand-in website
 // on port 8766 serves two made-up versions of the app, ignores the ?v= part of an address the way
 // GitHub Pages does, and can be slowed down or cut off. The new script doesn't fit the old page
@@ -950,7 +996,7 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
 // ?v= number in index.html, then put the new number and the fingerprint this check prints in KNOWN.
 {
   const KNOWN = {
-    'app.js?v=42': 'd177779d8cd2b595',
+    'app.js?v=43': '3c5381d4596eda5c',
     'style.css?v=25': 'a79e0238a9c905fd',
   };
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
