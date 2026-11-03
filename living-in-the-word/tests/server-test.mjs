@@ -19,10 +19,12 @@ copyFileSync(source, path.join(work, 'worker.mjs'));
 // hold() makes every batch wait until the function it returns is called, and waiting() says
 // how many are waiting. So requests sent at the same moment can all read their counts before
 // any of them adds one, as on Cloudflare, where each step is a trip over the network (section 25).
+// trips() counts the trips to the database: each first, run, all or batch (section 26).
 export function makeD1() {
   const db = new DatabaseSync(':memory:');
   let gate = null;   // while set, every batch waits for it
   let waiting = 0;
+  let trips = 0;
   class Statement {
     constructor(sql, params = []) { this.sql = sql; this.params = params; }
     bind(...params) { return new Statement(this.sql, params); }
@@ -33,15 +35,17 @@ export function makeD1() {
       return { results: [], success: true, meta: { changes: info.changes } };
     }
     async first() {
+      trips += 1;
       const row = db.prepare(this.sql).get(...this.params);
       return row ? { ...row } : null;
     }
-    async run() { return this.runNow(); }
-    async all() { return this.runNow(); }
+    async run() { trips += 1; return this.runNow(); }
+    async all() { trips += 1; return this.runNow(); }
   }
   return {
     prepare: (sql) => new Statement(sql),
     async batch(statements) {
+      trips += 1;
       if (gate) { waiting += 1; await gate; waiting -= 1; }
       db.exec('BEGIN');
       try {
@@ -59,6 +63,7 @@ export function makeD1() {
       return () => { gate = null; open(); };
     },
     waiting: () => waiting,
+    trips: () => trips,
     raw: db,
   };
 }
@@ -468,6 +473,31 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   for (let i = 0; i < 10; i += 1) taps6.push((await call(worker6, env6, { action: 'invite', email: 'eager@example.com' }, { key: owner6 })).body.emailed);
   check('Invite tapped 10 more times for one address: 2 more emails go (3 for the day)', mail.length === mailBefore6 + 2 && taps6.filter(Boolean).length === 2, JSON.stringify(taps6));
   check('Invite tapped 10 more times: the day\'s emails count only those 2', emails6() === emailsBefore6 + 2, emailsBefore6 + ' then ' + emails6());
+
+  // 26. Fewer trips to the database (AUDIT.md, item 10; November 3, 2026): a fresh server copy
+  // makes its 4 tables in one trip, not four, and a signed-in person's session and invitation
+  // are read in one trip, not two. The rule stays the same: turned off or not on the list, signed out.
+  const worker7 = await freshWorker();
+  const env7 = makeEnv();
+  const start7 = env7.DB.trips();
+  const out7 = await call(worker7, env7, { action: 'sign-out' });   // no session key: nothing else to read
+  const tables7 = env7.DB.raw.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all().map((row) => row.name);
+  check('a fresh server copy makes its 4 tables in one trip', out7.status === 200 && env7.DB.trips() - start7 === 1
+    && JSON.stringify(tables7) === JSON.stringify(['codes', 'people', 'sessions', 'usage']), (env7.DB.trips() - start7) + ' trips, ' + JSON.stringify(tables7));
+  const owner7 = (await signIn(worker7, env7, 'owner@example.com', '198.51.100.120')).body.session;
+  await call(worker7, env7, { action: 'invite', email: 'ruth@example.com', name: 'Ruth' }, { key: owner7 });
+  const ruth7 = (await signIn(worker7, env7, 'ruth@example.com', '198.51.100.121')).body.session;
+  const before7 = env7.DB.trips();
+  const set7 = await call(worker7, env7, { passage: 'Ruth 1', method: 'study' }, { key: ruth7 });
+  check('an invited person\'s set: 3 trips (the sign-in, today\'s counts, adding one)', set7.status === 200 && env7.DB.trips() - before7 === 3, (env7.DB.trips() - before7) + ' trips');
+  env7.DB.raw.prepare("UPDATE people SET active = 0 WHERE email = 'ruth@example.com'").run();   // turned off, session left
+  const off7 = await call(worker7, env7, { passage: 'Ruth 2', method: 'study' }, { key: ruth7 });
+  check('a session whose person is turned off: signed out', off7.status === 401 && off7.body.error === 'signed-out', JSON.stringify(off7));
+  env7.DB.raw.prepare("DELETE FROM people WHERE email = 'ruth@example.com'").run();
+  const gone7 = await call(worker7, env7, { passage: 'Ruth 2', method: 'study' }, { key: ruth7 });
+  check('a session whose person isn\'t on the list: signed out', gone7.status === 401 && gone7.body.error === 'signed-out', JSON.stringify(gone7));
+  const ownerSet7 = await call(worker7, env7, { passage: 'Ruth 3', method: 'study' }, { key: owner7 });
+  check('the owner (never on the list) still gets a set', ownerSet7.status === 200 && ownerSet7.body.questions.length === 3, JSON.stringify(ownerSet7));
 
   console.log(passed + ' passed, ' + failed + ' failed');
   process.exit(failed ? 1 : 0);

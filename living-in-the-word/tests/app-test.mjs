@@ -986,6 +986,42 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
     site.slow = {};
     await context.close();
   }
+
+  // SW4. The fonts' instructions come from the phone's copy at once (AUDIT.md, item 10; November 3,
+  // 2026). A page doesn't show (or run its script) until it has them, so on a weak connection they
+  // used to hold it up for the helper's 4 seconds. Here a stand-in Google Fonts answers in 6 seconds.
+  {
+    const FONTS = readFileSync(path.join(appFolder, 'sw.js'), 'utf8').match(/const FONTS = '([^']+)'/)[1];
+    versions.fonts = {
+      '': page(3, 'fonts').replace('<link rel="stylesheet"', '<link rel="stylesheet" href="' + FONTS + '"><link rel="stylesheet"'),
+      'app.js': script('fonts'),
+      'style.css': 'p { color: #1D1B18; }',
+    };
+    Object.assign(site, { version: 'fonts', down: false, slow: {} });
+    const { context, page: tab, errors } = await swPhone();
+    let fontsDelay = 0;
+    let fontsAsked = 0;
+    await context.route('https://fonts.googleapis.com/**', async (route) => {
+      fontsAsked += 1;
+      await pause(fontsDelay);
+      await route.fulfill({ status: 200, contentType: 'text/css', headers: { 'access-control-allow-origin': '*' }, body: 'p { font-style: italic; }' }).catch(() => {});
+    });
+    await tab.goto(SW_APP);
+    await helped(tab);
+    await tab.reload();   // a visit with the helper on: the fonts' instructions are kept
+    await scriptRan(tab);
+    await pause(300);
+    fontsDelay = 6000;    // a weak connection, for the fonts
+    const askedBefore = fontsAsked;
+    const start = Date.now();
+    await tab.reload({ timeout: 20000 });
+    await scriptRan(tab);
+    const waited = Date.now() - start;
+    check('SW4: with slow fonts, the page opens at once, from the phone\'s copy', (await shown(tab)) === 'fonts page, fonts script' && waited < 2500, waited + ' ms, ' + (await shown(tab)));
+    check('SW4: and the fonts\' instructions are still asked for quietly, for next time', fontsAsked > askedBefore, String(fontsAsked - askedBefore));
+    check('SW4: no errors', errors.length === 0, errors.join(' | '));
+    await context.close();
+  }
   server.close();
   for (const socket of sockets) socket.destroy();
 }
