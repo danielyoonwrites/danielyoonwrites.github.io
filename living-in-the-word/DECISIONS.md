@@ -472,7 +472,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - Checks: section HANG of `tests/app-test.mjs`: the phone's 2-minute timer shortened to 1.5 seconds for that check only, and a stand-in server that never answers. On the old code, 2 of its checks fail.
 - Not changed: what a reading does without reception (no "Questions for this reading" button; the next visit asks again by itself).
 
-### November 3, 2026: an answer for an ended plan changes nothing in the next one (pull request NNN)
+### November 3, 2026: an answer for an ended plan changes nothing in the next one (pull request 128)
 - Decision: `app.js` keeps a plan counter, `planCount`. It goes up each time a plan ends or starts (`leavePlan`, called by "End this plan," "Start a new plan" and the plan setup), and `leavePlan` also clears the reading the AI is writing (`readingRequest`) and the readings that failed (`readingFailed`). `fetchReadingQuestions` remembers the counter when it asks; if it changed by the time the answer comes, the answer changes nothing.
 - Why: `AUDIT.md`, item 6. Ending a plan while its first reading was being written, then starting another, let the old plan's late answer clear the new plan's place in line and hide its "Writing questions" lines, because both plans' first readings are number 0. Opening the new reading again then asked the AI a second time, so it was paid for twice. And a reading that failed in the old plan wasn't asked for by itself in the new one.
 - Checks: sections W9 and W10 of `tests/app-test.mjs`, with two answers held back at once (`held`). On the old code, 4 of their checks fail.
