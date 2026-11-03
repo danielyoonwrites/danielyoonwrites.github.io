@@ -946,13 +946,32 @@ async function askClaude(apiKey, passage, pattern) {
     headers,
     body: JSON.stringify(body),
   });
-  const result = await response.json();
+  let result = {};
+  try {
+    result = await response.json();
+  } catch (error) {
+    // Not JSON (rare, like a busy gateway's page): judged by its status number below
+  }
   const aiSeconds = Math.round((Date.now() - started) / 100) / 10;   // like 38.4
 
-  // The monthly spending limit, a rate limit, or the month's credits were used up
-  if (response.status === 429 || (result.error && /usage limits|credit balance/i.test(result.error.message || ''))) {
+  // This month's limit: the AI stays off until the next month (or new credits), so the app
+  // says "This month's AI limit is reached." Anthropic's pages (read November 3, 2026):
+  // - the usage tier's monthly spend cap: HTTP 429, with error_code "enforced_spend_limit_reached"
+  //   https://platform.claude.com/docs/en/api/rate-limits#reaching-your-spend-cap
+  // - a spend limit set in the Claude Console: HTTP 400, "You have reached your specified API usage limits"
+  //   https://platform.claude.com/docs/en/api/rate-limits#setting-your-own-spend-limit
+  // - the credits used up: "Your credit balance is too low to access the Anthropic API. ..."
+  //   https://platform.claude.com/docs/en/about-claude/api-credits-for-subscribers
+  const problem = (result && result.error) || {};
+  const errorCode = problem.details && problem.details.error_code;
+  if (errorCode === 'enforced_spend_limit_reached' || /usage limits|credit balance/i.test(problem.message || '')) {
     return { error: 'limit-reached' };
   }
+  // Busy for a moment: any other 429 (a rate limit: too many requests in a short time) or a 529
+  // (Anthropic overloaded). Trying again soon works, so the app says the AI is busy instead
+  // of "this month's limit" (AUDIT.md, item 4; November 3, 2026).
+  // https://platform.claude.com/docs/en/api/errors
+  if (response.status === 429 || response.status === 529) return { error: 'busy' };
   if (!response.ok) return { error: 'ai-unavailable' };
   if (result.stop_reason === 'refusal') return { error: 'declined' };
   if (result.stop_reason === 'max_tokens') return { error: 'too-long' };
