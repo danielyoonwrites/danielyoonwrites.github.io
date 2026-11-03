@@ -625,6 +625,40 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
     check('Y8: not signed in: nothing asked for', asked.length === before && !(await saved(page)).ahead, JSON.stringify(asked.slice(before)));
     await context.close();
   }
+
+  // Y9. A chapter written ahead opens at once even while the AI is writing another passage's
+  // questions, and that answer is then ignored (AUDIT.md, item 7; November 3, 2026). Someone
+  // new, so the owner's daily limit doesn't get in the way.
+  {
+    await call(worker, env, { action: 'invite', email: 'ahead@example.com', name: 'Ahead' }, { key: ownerKey3 });
+    const aheadKey = (await signIn(worker, env, 'ahead@example.com', '198.51.100.65')).body.session;
+    const { context, page, errors } = await newPhone();
+    await page.goto(APP + '?test');
+    await page.evaluate((key) => localStorage.setItem('living-in-the-word', JSON.stringify({ version: 1, session: key, email: 'ahead@example.com' })), aheadKey);
+    await page.goto(APP + '?test');
+    await page.waitForLoadState('networkidle');
+
+    await typePassage(page, 'Titus 1');
+    await questionsShow(page);
+    await page.waitForFunction(() => (JSON.parse(localStorage.getItem('living-in-the-word')).ahead || {}).passage === 'Titus 2');
+    let releaseOther;
+    held.set('Hosea 1', new Promise((resolve) => { releaseOther = resolve; }));
+    await typePassage(page, 'Hosea 1');
+    await waitUntil(() => times('Hosea 1') > 0);
+    check('Y9: Hosea 1 is being written', await writing(page));
+    await typePassage(page, 'Titus 2');
+    check('Y9: Titus 2 opens at once, written ahead', (await text(page, '.passage-name')) === 'Titus 2' && !(await writing(page))
+      && (await page.locator('.question-list textarea').count()) === 3 && (await text(page, '.suggest-status')) === CHECK
+      && (await text(page, '.test-cost')) === 'Written ahead, so no wait.', (await text(page, '.suggest-status')) + ' | ' + (await text(page, '.test-cost')));
+    check('Y9: not asked for again', times('Titus 2') === 1, JSON.stringify(asked.filter((item) => item.startsWith('Titus'))));
+    releaseOther();   // Hosea 1's answer comes after all
+    held.clear();
+    await new Promise((r) => setTimeout(r, 600));
+    check('Y9: Hosea 1\'s answer leaves Titus 2 as it is', (await text(page, '.passage-name')) === 'Titus 2' && (await text(page, '.suggest-status')) === CHECK
+      && (await page.evaluate(() => document.querySelector('[data-action="suggest"]').textContent)) === 'Write new questions', await text(page, '.suggest-status'));
+    check('Y9: no errors', errors.length === 0, errors.join(' | '));
+    await context.close();
+  }
 }
 
 // ---- Z. The test link (?test) says how long the wait was, and the AI's part of it
@@ -916,7 +950,7 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
 // ?v= number in index.html, then put the new number and the fingerprint this check prints in KNOWN.
 {
   const KNOWN = {
-    'app.js?v=41': '9f5b9c471e542816',
+    'app.js?v=42': 'd177779d8cd2b595',
     'style.css?v=25': 'a79e0238a9c905fd',
   };
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
