@@ -653,6 +653,53 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
   await context.close();
 }
 
+// ---- BUSY. When Anthropic is busy for a moment (a rate limit, or overloaded), the app says so,
+// not "This month's AI limit is reached"; this month's limit still says that (AUDIT.md, item 4;
+// November 3, 2026). The stand-in AI answers with each problem (ai.fail in server-test.mjs).
+{
+  await call(worker, env, { action: 'invite', email: 'busy@example.com', name: 'Busy' }, { key: ownerKey3 });
+  const busyKey = (await signIn(worker, env, 'busy@example.com', '198.51.100.62')).body.session;
+  const { context, page, errors } = await newPhone();
+  await page.goto(APP);
+  await page.evaluate((key) => localStorage.setItem('living-in-the-word', JSON.stringify({ version: 1, session: key, email: 'busy@example.com' })), busyKey);
+  await page.goto(APP);
+  await page.waitForLoadState('networkidle');
+  const askFor = async (typed) => {
+    const now = await active(page);
+    if (now === 'home') await page.click('[data-action="study"]');
+    else if (now !== 'passage') await page.click('#questions .back');
+    await page.fill('#passage-text', typed);
+    await page.click('#passage button[type="submit"]');
+    await page.waitForFunction(() => {
+      const status = document.querySelector('.suggest-status').textContent;
+      return !document.getElementById('questions').classList.contains('writing') && status !== '' && !status.startsWith('Writing');
+    });
+    return text(page, '.suggest-status');
+  };
+  const BUSY = 'The AI is busy right now, so these are general questions. Try again in a minute.';
+  const MONTH = 'This month’s AI limit is reached, so these are general questions.';
+  const problem = (type, message, details) => ({ type: 'error', error: details ? { type, message, details } : { type, message } });
+
+  ai.fail = { status: 429, headers: { 'retry-after': '20' }, body: problem('rate_limit_error', 'A rate limit was exceeded (stand-in wording).') };
+  const rateLimited = await askFor('Luke 1');
+  check('BUSY: a rate limit says the AI is busy', rateLimited === BUSY, rateLimited);
+  check('BUSY: with the general questions', (await page.locator('.question-list textarea').count()) > 0);
+  await page.evaluate(() => document.querySelector('.suggest-status').scrollIntoView({ block: 'center' }));
+  await page.screenshot({ path: SHOTS + 'busy-message.png' });
+
+  ai.fail = { status: 529, body: problem('overloaded_error', 'Overloaded') };
+  const overloaded = await askFor('Luke 2');
+  check('BUSY: Anthropic overloaded says the AI is busy', overloaded === BUSY, overloaded);
+
+  ai.fail = { status: 429, body: problem('rate_limit_error', 'You have reached your API usage limits: your organization has crossed its monthly API usage threshold, set based on your organization\'s API tier. You will regain access on 2026-09-01 at 00:00 UTC.', { error_code: 'enforced_spend_limit_reached' }) };
+  const spendCap = await askFor('Luke 3');
+  check('BUSY: the monthly spend cap still says this month\'s limit', spendCap === MONTH, spendCap);
+
+  ai.fail = null;
+  check('BUSY: no errors', errors.length === 0, errors.join(' | '));
+  await context.close();
+}
+
 // ---- SW. The offline helper (sw.js), which the checks above turn off. A small stand-in website
 // on port 8766 serves two made-up versions of the app, ignores the ?v= part of an address the way
 // GitHub Pages does, and can be slowed down or cut off. The new script doesn't fit the old page
@@ -771,7 +818,7 @@ const holdAnswer = (passage) => { hold = { passage, waiting: new Promise((resolv
 // ?v= number in index.html, then put the new number and the fingerprint this check prints in KNOWN.
 {
   const KNOWN = {
-    'app.js?v=38': '2cf8d2a4711b0454',
+    'app.js?v=39': '3f5ab06ba63f21f4',
     'style.css?v=25': 'a79e0238a9c905fd',
   };
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');

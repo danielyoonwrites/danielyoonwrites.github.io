@@ -53,7 +53,8 @@ export function makeD1() {
 
 // ---- Stand-ins for Resend and Anthropic
 export const mail = [];
-export const ai = { calls: 0, delay: 0 };   // delay: milliseconds the stand-in AI takes (for the timing checks)
+export const ai = { calls: 0, delay: 0, fail: null };   // delay: milliseconds the stand-in AI takes (for the timing checks)
+// fail: { status, body, headers }: the stand-in AI answers with that problem instead (section 24)
 globalThis.fetch = async (url, init) => {
   if (String(url).startsWith('https://api.resend.com/')) {
     const body = JSON.parse(init.body);
@@ -67,6 +68,10 @@ globalThis.fetch = async (url, init) => {
     ai.calls += 1;
     ai.last = JSON.parse(init.body);   // what the server sent, for the guidance checks
     if (ai.delay) await new Promise((resolve) => setTimeout(resolve, ai.delay));
+    if (ai.fail) {
+      const body = typeof ai.fail.body === 'string' ? ai.fail.body : JSON.stringify(ai.fail.body);
+      return new Response(body, { status: ai.fail.status, headers: ai.fail.headers || {} });
+    }
     const answer = { known_passage: true, leader_note: 'A short note.', questions: ['What stands out?', 'What does it show about God?', 'How will you respond?'] };
     return new Response(JSON.stringify({
       model: ai.last.model, stop_reason: 'end_turn',   // answers as the model it was asked for
@@ -383,6 +388,40 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   check('Opus 5.5 at medium effort, 4,000 tokens, normal speed', sent.model === 'claude-opus-5-5' && sent.output_config.effort === 'medium' && sent.max_tokens === 4000 && !('speed' in sent), JSON.stringify([sent.model, sent.output_config.effort, sent.max_tokens, sent.speed]));
   check('no Sonnet-only "think" line at the end of the guidance', !sent.system.includes('Think the problem through before you answer.'));
   check('the answer says Opus 5.5, priced at $4 / $20 per million', opus.body.model === 'claude-opus-5-5' && Math.abs(opus.body.cost - (100 * 4 + 50 * 20) / 1e6) < 1e-12, JSON.stringify(opus.body));
+
+  // 24. The AI's problems: a busy moment isn't "this month's limit" (AUDIT.md, item 4; November 3,
+  // 2026). Anthropic's answers as its pages show them (read November 3, 2026; links in askClaude in
+  // worker.js). The spend cap and credit messages, and the start of the Console limit's, are
+  // Anthropic's own words; the rest are stand-ins.
+  const problemBody = (type, message, details) => ({ type: 'error', error: details ? { type, message, details } : { type, message }, request_id: 'req_test' });
+  const problems = [
+    ['a rate limit (429, with retry-after) is busy', 'busy',
+      { status: 429, headers: { 'retry-after': '20' }, body: problemBody('rate_limit_error', 'A rate limit was exceeded (stand-in wording).') }],
+    ['a 429 without retry-after (like an acceleration limit) is busy', 'busy',
+      { status: 429, body: problemBody('rate_limit_error', 'Too many requests (stand-in wording).') }],
+    ['Anthropic overloaded (529) is busy', 'busy',
+      { status: 529, body: problemBody('overloaded_error', 'Overloaded') }],
+    ['a 529 that isn\'t JSON is still busy', 'busy',
+      { status: 529, body: '<html>Overloaded</html>' }],
+    ['the usage tier\'s monthly spend cap (429) is this month\'s limit', 'limit-reached',
+      { status: 429, body: problemBody('rate_limit_error', 'You have reached your API usage limits: your organization has crossed its monthly API usage threshold, set based on your organization\'s API tier. You will regain access on 2026-09-01 at 00:00 UTC.', { error_code: 'enforced_spend_limit_reached' }) }],
+    ['the spend cap, known by its error_code alone', 'limit-reached',
+      { status: 429, body: problemBody('rate_limit_error', 'Paused (stand-in wording).', { error_code: 'enforced_spend_limit_reached' }) }],
+    ['a spend limit set in the Console (400) is this month\'s limit', 'limit-reached',
+      { status: 400, body: problemBody('invalid_request_error', 'You have reached your specified API usage limits. You will regain access on 2026-12-01 at 00:00 UTC.') }],
+    ['the credits used up is this month\'s limit', 'limit-reached',
+      { status: 400, body: problemBody('invalid_request_error', 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.') }],
+    ['a server error (500) is "unavailable"', 'ai-unavailable',
+      { status: 500, body: problemBody('api_error', 'Internal server error') }],
+  ];
+  for (const [what, expected, fail] of problems) {
+    ai.fail = fail;
+    const answer = await call(worker3, env3, { passage: 'John 9', method: 'study', passcode: env3.PASSCODE });
+    check('AI problem: ' + what, answer.status === 502 && answer.body.error === expected, JSON.stringify(answer));
+  }
+  ai.fail = null;
+  const afterProblems = await call(worker3, env3, { passage: 'John 10', method: 'study', passcode: env3.PASSCODE });
+  check('AI problem: the next set works again', afterProblems.status === 200 && afterProblems.body.questions.length === 3, JSON.stringify(afterProblems));
 
   console.log(passed + ' passed, ' + failed + ' failed');
   process.exit(failed ? 1 : 0);

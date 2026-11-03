@@ -14,7 +14,7 @@ Fast mode (Opus 5.5 in fast mode for sets someone waits for) was built and teste
 
 ## Smaller (low), one at a time after that
 
-4. When Anthropic is briefly busy (a 429 rate limit), the app says "This month's AI limit is reached." Fix: a separate "busy" answer and message; keep "limit" for the spending-limit and credit messages. (`worker.js`, `askClaude`)
+4. When Anthropic is briefly busy (a 429 rate limit), the app says "This month's AI limit is reached." Fix: a separate "busy" answer and message; keep "limit" for the spending-limit and credit messages. (`worker.js`, `askClaude`) Status: fixed in pull request 126 (November 3, 2026). Only Anthropic's monthly spend cap (a 429 marked `enforced_spend_limit_reached`), a spend limit set in the Console and used-up credits say "This month's AI limit is reached"; any other 429, and a 529 (overloaded), say "The AI is busy right now, so these are general questions. Try again in a minute." Proved by section 24 of `tests/server-test.mjs` (its 4 "busy" checks fail on the old code) and section BUSY of `tests/app-test.mjs`.
 5. A reading's questions never give up if the connection hangs (studies give up after 2 minutes). Fix: the same 2-minute timer. (`app.js`, `fetchReadingQuestions`)
 6. Ending a plan while its first reading is written, then starting another, can hide the new plan's "writing" lines and pay for its first reading twice; `readingFailed` isn't cleared with the plan. Fix: a plan counter checked when an answer arrives. (`app.js`)
 7. A chapter written ahead is skipped (and later replaced) if the AI is still writing another passage when it's opened. Fix: take the ready set and cancel the other request, as opening a saved study does. (`app.js`, `startStudy`)
@@ -35,4 +35,4 @@ Fast mode (Opus 5.5 in fast mode for sets someone waits for) was built and teste
 - `readSaved` treats any `version` other than 1 as empty, and the next save replaces everything. If the version is ever raised, an older app.js still on a phone would wipe saved studies.
 - `connectionCode` uses the passcode as its secret; step S6 already plans a separate secret.
 - Prompt caching was checked again: still not worth it. In steady use each request written ahead goes alone, so the cache write costs more than it saves (`PROGRESS.md`, "Dead ends").
-- Gaps in the saved checks: AI errors all the way to the screen (429, 529, a refusal, a hung request), and plan restarts. Each fix above adds its own checks.
+- Gaps in the saved checks: AI errors all the way to the screen (a refusal, a hung request; 429 and 529 are checked since pull request 126), and plan restarts. Each fix above adds its own checks.

@@ -644,6 +644,8 @@ const PROBLEMS = {
   'not-set-up': 'The AI helper isn’t fully set up yet, so these are general questions.',
   'too-long': 'This passage was too long for the AI to answer, so these are general questions. Try a shorter passage.',
   declined: 'The AI couldn’t write questions for this one, so these are general questions.',
+  // Anthropic was busy for a moment (a rate limit or overloaded): not this month's limit
+  busy: 'The AI is busy right now, so these are general questions. Try again in a minute.',
   offline: 'Couldn’t reach the AI helper, so these are general questions. Check your connection and try again.',
   other: 'The AI helper couldn’t answer just now, so these are general questions. Try again in a moment.',
 };
