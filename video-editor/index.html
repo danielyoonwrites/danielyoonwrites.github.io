@@ -11,7 +11,7 @@
        If you add anything from outside (a font, an image, a server), it has to be added here too. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src blob:; style-src 'self'; media-src blob:; img-src 'self' data: blob:; base-uri 'none'; form-action 'none'">
   <title>Video editor</title>
-  <meta name="description" content="Make a short video look its best: a filter and lighting, saved on this phone.">
+  <meta name="description" content="Make a short video look and sound its best: trim, speed, a filter, lighting and sound, saved on this phone.">
   <!-- The color of the phone's top bar: the same near-black as the app -->
   <meta name="theme-color" content="#121212">
 
@@ -20,10 +20,10 @@
 
   <!-- The app's look: dark, so the video stands out (the owner's choice, November 2, 2026; see SPEC.md).
        Raise the ?v= numbers whenever a file changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
   <!-- Mediabunny, the library that reads and writes video files (see lib/README.md) -->
   <script src="lib/mediabunny.min.js?v=1.65.0" defer></script>
-  <script src="app.js?v=3" defer></script>
+  <script src="app.js?v=4" defer></script>
 </head>
 <body>
 
@@ -152,6 +152,7 @@
       <button type="button" role="tab" class="tab" id="tab-speed" aria-selected="false" aria-controls="panel-speed" tabindex="-1">Speed</button>
       <button type="button" role="tab" class="tab" id="tab-filter" aria-selected="false" aria-controls="panel-filter" tabindex="-1">Filter</button>
       <button type="button" role="tab" class="tab" id="tab-light" aria-selected="false" aria-controls="panel-light" tabindex="-1">Lighting</button>
+      <button type="button" role="tab" class="tab" id="tab-sound" aria-selected="false" aria-controls="panel-sound" tabindex="-1">Sound</button>
     </div>
 
     <!-- Trim: where the clip starts and ends. On this tab the whole video plays, so new points are easy to find;
@@ -200,6 +201,45 @@
         <input type="range" id="contrast" min="-50" max="50" step="5" value="0">
       </div>
       <button type="button" class="button quiet" id="reset-light">Reset the lighting</button>
+    </div>
+
+    <!-- Sound: three switches and the volume (the owner's choice "B", November 3, 2026). The playing video
+         sounds the same way as the new video will (app.js, "Better sound"). -->
+    <div class="panel" role="tabpanel" id="panel-sound" aria-labelledby="tab-sound" hidden>
+      <p class="length" id="no-sound" hidden>This video has no sound.</p>
+      <div id="sound-controls">
+        <button type="button" class="switch" role="switch" aria-checked="false" id="sound-rumble"
+          aria-labelledby="sound-rumble-name" aria-describedby="sound-rumble-words">
+          <span class="switch-words">
+            <span class="switch-name" id="sound-rumble-name">Cut rumble</span>
+            <span class="sub" id="sound-rumble-words">Wind, traffic and bumps from holding the phone</span>
+          </span>
+          <span class="switch-track" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="switch" role="switch" aria-checked="false" id="sound-voice"
+          aria-labelledby="sound-voice-name" aria-describedby="sound-voice-words">
+          <span class="switch-words">
+            <span class="switch-name" id="sound-voice-name">Clearer voice</span>
+            <span class="sub" id="sound-voice-words">Brings voices forward and takes out boominess</span>
+          </span>
+          <span class="switch-track" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="switch" role="switch" aria-checked="false" id="sound-even"
+          aria-labelledby="sound-even-name" aria-describedby="sound-even-words">
+          <span class="switch-words">
+            <span class="switch-name" id="sound-even-name">Even out the volume</span>
+            <span class="sub" id="sound-even-words">Quiet words louder, loud moments softer</span>
+          </span>
+          <span class="switch-track" aria-hidden="true"></span>
+        </button>
+        <div class="slider">
+          <label for="volume">Volume</label>
+          <output id="volume-value" for="volume">100%</output>
+          <input type="range" id="volume" min="0" max="200" step="10" value="100">
+        </div>
+        <p class="small">Turn on the video's sound (the speaker on the video) to hear the changes.</p>
+        <button type="button" class="button quiet" id="reset-sound">Reset the sound</button>
+      </div>
     </div>
     <div class="action">
       <p class="problem" id="look-problem" role="alert" hidden></p>

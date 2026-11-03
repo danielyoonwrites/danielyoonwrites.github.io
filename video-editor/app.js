@@ -1,12 +1,12 @@
 'use strict';
 
 /*
-  Video editor (build steps 3 and 4 in SPEC.md): one clip, trimmed, at a speed, with a look.
+  Video editor (build steps 3 to 5 in SPEC.md): one clip, trimmed, at a speed, with a look and better sound.
 
   1. Start: choose a video from the phone.
-  2. Edit: trim, speed, a look (filter) and the lighting, shown on the video as it plays.
+  2. Edit: trim, speed, a look (filter), the lighting and the sound, shown and heard on the video as it plays.
   3. Making the video: a new MP4 file, frame by frame, with the look drawn into every frame, and the
-     sound at the same speed.
+     sound at the same speed, with the same sound changes.
   4. Your video: it plays, the page checks it against Instagram's, TikTok's and YouTube Shorts'
      upload rules, and you can save it or share it.
 
@@ -43,6 +43,11 @@ const SPEEDS = [
 ];
 const SHORTEST_TRIM = 0.5; // seconds: the trimmed clip is never shorter than this
 
+// Better sound (the owner's choice "B", November 3, 2026): three switches and the volume. The steps
+// themselves are in buildSoundSteps(), under "Better sound."
+const SOUND_SWITCHES = ['rumble', 'voice', 'even']; // Cut rumble, Clearer voice, Even out the volume
+const SOUND_DEFAULTS = { rumble: false, voice: false, even: false, volume: 100 }; // volume: 0 to 200 (%)
+
 // What every new video is made like, so it fits Instagram's, TikTok's and YouTube Shorts' upload
 // rules (the rules and their sources are in SPEC.md, "Made for Instagram, TikTok and YouTube Shorts").
 const OUTPUT = {
@@ -77,6 +82,7 @@ const state = {
   filter: 'none',      // the look
   brightness: 0,       // -50 to 50
   contrast: 0,         // -50 to 50
+  sound: { ...SOUND_DEFAULTS }, // the three sound switches and the volume
   previewUrl: null,    // your video, as a link the page can play
   resultUrl: null,     // the new video, as a link the page can play and save
   resultFile: null,    // the new video, as a file for sharing
@@ -318,11 +324,13 @@ async function readVideo(file) {
     state.filter = 'none';
     state.brightness = 0;
     state.contrast = 0;
+    state.sound = { ...SOUND_DEFAULTS };
     if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
     state.previewUrl = URL.createObjectURL(file);
     el('preview').src = state.previewUrl;
     updateLook();
     updateTrimAndSpeed();
+    updateSound();
     selectTab('trim');
     hideProblem('look-problem');
     goDeeper('look');
@@ -447,7 +455,7 @@ function updateLook() {
   el('contrast-value').textContent = formatAmount(state.contrast);
 }
 
-const TABS = ['trim', 'speed', 'filter', 'light'];
+const TABS = ['trim', 'speed', 'filter', 'light', 'sound'];
 function selectTab(name) {
   state.tab = name;
   for (const tab of TABS) {
@@ -468,6 +476,101 @@ function arrowKeys(event, items, choose) {
   const next = items[(now + keys[event.key] + items.length) % items.length];
   choose(next);
   next.focus();
+}
+
+// ---------- Better sound: three switches and the volume ----------
+// The same steps go on the playing video's sound (while you edit) and on the new video's sound, so what
+// you hear is what you get. Each step is one of Chrome's sound tools (Web Audio). The numbers were measured
+// with test tones in Claude's test browser (November 3, 2026), and the saved checks test them (section J).
+
+const LOOK_AHEAD = 0.006; // seconds: each compressor holds the sound back this long (the Web Audio spec)
+const LIMIT = { threshold: -3, ratio: 20 }; // the safety limit: nothing louder than about -2.3 dB, so no clipping
+
+// True when anything on the Sound tab isn't at its starting setting
+function soundIsChanged(sound) {
+  return sound.rumble || sound.voice || sound.even || sound.volume !== 100;
+}
+
+// How long the steps hold the sound back: LOOK_AHEAD for each compressor in buildSoundSteps()
+function soundDelay(sound) {
+  return (sound.even ? LOOK_AHEAD : 0) + (soundIsChanged(sound) ? LOOK_AHEAD : 0);
+}
+
+// Builds the steps in an audio context ("audio"): the playing video's, or the one that makes the new
+// video's sound. Returns where the sound goes in and comes out, the steps, and the volume step.
+// (Each compressor here holds the sound back LOOK_AHEAD; if you add or remove one, change soundDelay().)
+function buildSoundSteps(audio, sound) {
+  const steps = [];
+  if (sound.rumble) {
+    // Cut rumble: two high-pass filters at 80 Hz take out the deep sounds under a voice (wind, traffic,
+    // bumps): 50 Hz drops by about 18 dB, and a voice (from about 150 Hz up) stays almost the same.
+    // For this kind of filter Chrome takes Q in decibels (the Web Audio spec): -3.01 dB is the smooth
+    // "Butterworth" shape; a plain 0.707 would make a small bump at 100 Hz.
+    for (let i = 0; i < 2; i++) steps.push(new BiquadFilterNode(audio, { type: 'highpass', frequency: 80, Q: -3.01 }));
+  }
+  if (sound.voice) {
+    // Clearer voice: a little less of the boomy middle (3 dB less around 300 Hz) and more of the part of
+    // a voice that carries the words (4 dB more around 3,500 Hz)
+    steps.push(new BiquadFilterNode(audio, { type: 'peaking', frequency: 300, Q: 1, gain: -3 }));
+    steps.push(new BiquadFilterNode(audio, { type: 'peaking', frequency: 3500, Q: 0.9, gain: 4 }));
+  }
+  if (sound.even) {
+    // Even out the volume: a compressor turns down whatever is louder than -30 dB, and then Chrome turns
+    // everything up by itself (its "makeup gain"), so quiet words come up and loud moments go down.
+    // A 30 dB gap between quiet and loud becomes about 18 dB (measured in a saved video).
+    steps.push(new DynamicsCompressorNode(audio, { threshold: -30, knee: 10, ratio: 4, attack: 0.005, release: 0.25 }));
+  }
+  const volume = new GainNode(audio, { gain: sound.volume / 100 });
+  steps.push(volume);
+  if (soundIsChanged(sound)) {
+    // The safety limit: a compressor that only acts on sound louder than -3 dB, so a louder volume or a
+    // clearer voice never clips. Chrome turns its output up by itself, by 0.6 times its full-range
+    // reduction (the Web Audio spec, "computing the makeup gain"): 1.71 dB here. The next step turns
+    // that back down, so everything under -3 dB comes out just as it went in.
+    steps.push(new DynamicsCompressorNode(audio, { threshold: LIMIT.threshold, knee: 0, ratio: LIMIT.ratio, attack: 0.001, release: 0.1 }));
+    const makeup = -0.6 * LIMIT.threshold * (1 - 1 / LIMIT.ratio); // in dB
+    steps.push(new GainNode(audio, { gain: 10 ** (-makeup / 20) }));
+  }
+  for (let i = 1; i < steps.length; i++) steps[i - 1].connect(steps[i]);
+  return { input: steps[0], output: steps[steps.length - 1], steps, volume };
+}
+
+// The playing video's sound goes through the same steps, from the first change on the Sound tab (until
+// then Chrome plays it directly, as before). Chrome lets a video's sound be sent through steps only once,
+// and then always, so the steps are swapped as the settings change. The video's own sound button still
+// turns it on and off.
+let liveSound = null; // { audio, source, chain, shape }
+function updateLiveSound() {
+  if (!liveSound) {
+    if (!soundIsChanged(state.sound)) return;
+    const audio = new AudioContext();
+    liveSound = { audio, source: audio.createMediaElementSource(el('preview')), chain: null, shape: '' };
+  }
+  const { audio } = liveSound;
+  // Only the volume changed: just turn it, smoothly (no new steps, so no click while sliding)
+  const shape = JSON.stringify([state.sound.rumble, state.sound.voice, state.sound.even, soundIsChanged(state.sound)]);
+  if (liveSound.chain && shape === liveSound.shape) {
+    liveSound.chain.volume.gain.setTargetAtTime(state.sound.volume / 100, audio.currentTime, 0.02);
+  } else {
+    liveSound.source.disconnect();
+    if (liveSound.chain) for (const step of liveSound.chain.steps) step.disconnect();
+    liveSound.chain = buildSoundSteps(audio, state.sound);
+    liveSound.source.connect(liveSound.chain.input);
+    liveSound.chain.output.connect(audio.destination);
+    liveSound.shape = shape;
+  }
+  if (audio.state !== 'running') audio.resume().catch(() => {});
+}
+
+// Marks the switches and the volume on the Sound tab, and puts the settings on the playing video
+function updateSound() {
+  const hasSound = Boolean(state.facts && state.facts.hasSound);
+  el('no-sound').hidden = hasSound;
+  el('sound-controls').hidden = !hasSound;
+  for (const id of SOUND_SWITCHES) el('sound-' + id).setAttribute('aria-checked', String(state.sound[id]));
+  el('volume').value = state.sound.volume;
+  el('volume-value').textContent = state.sound.volume === 0 ? 'Off' : state.sound.volume + '%';
+  updateLiveSound();
 }
 
 // ---------- Screen 3: making the video ----------
@@ -497,9 +600,9 @@ function loadSoundAddon() {
 // Thrown when "Stop" is tapped, to stop making the video
 class Stopped extends Error {}
 
-// The sound from "start" to "end" in your video, played at the chosen speed: faster sounds higher,
-// like a tape (the owner's choice "b"). It comes out as 48 kHz stereo, ready for AAC.
-async function soundAtSpeed(audioTrack, start, end, speed) {
+// The sound from "start" to "end" in your video, played at the chosen speed (faster sounds higher, like a
+// tape: the owner's choice "b"), through the Sound tab's steps. It comes out as 48 kHz stereo, ready for AAC.
+async function soundAtSpeed(audioTrack, start, end, speed, sound) {
   // 1. Gather the original sound from start to end into one piece
   const sink = new MB.AudioBufferSink(audioTrack);
   let whole = null;
@@ -520,17 +623,29 @@ async function soundAtSpeed(audioTrack, start, end, speed) {
       if (count > 0) whole.getChannelData(channel).set(from.subarray(skip, skip + count), offset + skip);
     }
   }
-  // 2. Play it at the speed, faster than real time, into a new 48 kHz stereo piece
+  // 2. Play it at the speed, faster than real time, through the sound steps, into a new 48 kHz stereo
+  //    piece. The steps hold the sound back a few thousandths of a second (soundDelay()), so a little more is
+  //    made, and the start is cut off again below, to keep the sound in line with the picture.
   const length = Math.max(1, Math.round(((end - start) / speed) * OUTPUT.sampleRate));
-  const studio = new OfflineAudioContext({ numberOfChannels: OUTPUT.channels, length, sampleRate: OUTPUT.sampleRate });
+  const late = Math.round(soundDelay(sound) * OUTPUT.sampleRate); // how many samples late the steps make it
+  const studio = new OfflineAudioContext({ numberOfChannels: OUTPUT.channels, length: length + late, sampleRate: OUTPUT.sampleRate });
+  const steps = buildSoundSteps(studio, sound);
   if (whole) {
     const player = studio.createBufferSource();
     player.buffer = whole;
     player.playbackRate.value = speed; // like a tape: faster is higher
-    player.connect(studio.destination);
+    player.connect(steps.input);
     player.start();
   }
-  return studio.startRendering();
+  steps.output.connect(studio.destination);
+  const made = await studio.startRendering();
+  if (!late) return made;
+  // 3. Cut off the late start
+  const inLine = new AudioBuffer({ length, numberOfChannels: OUTPUT.channels, sampleRate: OUTPUT.sampleRate });
+  for (let channel = 0; channel < OUTPUT.channels; channel++) {
+    inLine.getChannelData(channel).set(made.getChannelData(channel).subarray(late, late + length));
+  }
+  return inLine;
 }
 
 async function makeVideo() {
@@ -599,7 +714,7 @@ async function makeVideo() {
 
     if (sound) {
       el('making-words').textContent = 'Getting the sound ready…';
-      await sound.add(await soundAtSpeed(audioTrack, start, end, speed));
+      await sound.add(await soundAtSpeed(audioTrack, start, end, speed, state.sound));
       sound.close();
     }
 
@@ -851,6 +966,11 @@ document.querySelector('.tabs').addEventListener('keydown', (event) => arrowKeys
 el('brightness').addEventListener('input', () => { state.brightness = Number(el('brightness').value); updateLook(); });
 el('contrast').addEventListener('input', () => { state.contrast = Number(el('contrast').value); updateLook(); });
 el('reset-light').addEventListener('click', () => { state.brightness = 0; state.contrast = 0; updateLook(); });
+for (const id of SOUND_SWITCHES) {
+  el('sound-' + id).addEventListener('click', () => { state.sound[id] = !state.sound[id]; updateSound(); });
+}
+el('volume').addEventListener('input', () => { state.sound.volume = Number(el('volume').value); updateSound(); });
+el('reset-sound').addEventListener('click', () => { state.sound = { ...SOUND_DEFAULTS }; updateSound(); });
 el('make').addEventListener('click', makeVideo);
 el('preview').addEventListener('loadedmetadata', fitGlowToPreview);
 window.addEventListener('resize', fitGlowToPreview);

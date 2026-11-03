@@ -17,7 +17,8 @@ import os from 'node:os';
 import path from 'node:path';
 import {
   VIDEOS, haveFfmpeg, makeTestVideos, makeChart, makeClock, frameColor, soundFacts, PATCHES, patchColor, probe,
-  thumbnail, likeness, average, colorfulness, mp4Boxes, contrast,
+  thumbnail, likeness, average, colorfulness, mp4Boxes, contrast, makeSoundTests, soundSamples, toneLevel, soundLevel,
+  soundPeak, soundLag,
 } from './test-videos.mjs';
 
 const require = createRequire(import.meta.url);
@@ -48,6 +49,7 @@ if (!haveFfmpeg()) {
 const videos = makeTestVideos();
 const chart = makeChart();
 const clock = makeClock();
+const soundTests = makeSoundTests();
 
 // ---------- Serve the repository, like GitHub Pages does ----------
 const webServer = spawn('python3', ['-m', 'http.server', '8768', '--bind', '127.0.0.1'], { cwd: repository, stdio: 'ignore' });
@@ -438,7 +440,7 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   await page.goto(APP);
   await choose(page, clock);
   const tabs = await page.locator('.tab').allInnerTexts();
-  check('I1 four tabs: Trim, Speed, Filter, Lighting', JSON.stringify(tabs) === JSON.stringify(['Trim', 'Speed', 'Filter', 'Lighting']), JSON.stringify(tabs));
+  check('I1 five tabs: Trim, Speed, Filter, Lighting, Sound', JSON.stringify(tabs) === JSON.stringify(['Trim', 'Speed', 'Filter', 'Lighting', 'Sound']), JSON.stringify(tabs));
   check('I2 the whole clip at first', (await text(page, '#trim-length')) === 'Your clip: 8.0 seconds' &&
     (await text(page, '#trim-start-value')) === '0:00.0' && (await text(page, '#trim-end-value')) === '0:08.0');
   const startHere = await page.locator('#start-here').boundingBox();
@@ -527,6 +529,163 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   check('I22 a new video starts with the whole clip at 1×', (await text(page, '#trim-length')) === 'Your clip: 3.0 seconds' &&
     await page.evaluate(() => document.querySelector('#speeds .chip[aria-checked="true"]').dataset.speed) === '1', await text(page, '#trim-length'));
   check('I no page errors', page.problems.length === 0, page.problems.join('\n'));
+  await context.close();
+}
+
+// ---------- J. Better sound: three switches and the volume (Dan's choice "B") ----------
+// The made-up "tones" sound has 50, 300, 1,000 and 3,500 Hz together, so each switch's effect shows on
+// one tone; "quiet-loud" is silent for 1 second, quiet until 3.5 seconds, then loud (a 30 dB gap).
+{
+  const { context, page } = await openPhone();
+  await page.goto(APP);
+  await choose(page, soundTests.tones);
+  const tabBoxes = await page.locator('.tab').evaluateAll((all) => all.map((t) => [t.textContent, Math.round(t.getBoundingClientRect().top)]));
+  check('J1 five tabs in one row on the phone', tabBoxes.map((t) => t[0]).join() === 'Trim,Speed,Filter,Lighting,Sound' &&
+    tabBoxes.every((t) => t[1] === tabBoxes[0][1]), JSON.stringify(tabBoxes));
+  await page.click('#tab-sound');
+  const switches = await page.locator('#panel-sound .switch').evaluateAll((all) => all.map((b) => ({
+    name: b.querySelector('.switch-name').textContent, role: b.getAttribute('role'), on: b.getAttribute('aria-checked'),
+    height: b.getBoundingClientRect().height })));
+  check('J2 three switches, all off, each at least 48 tall', switches.map((w) => w.name).join() === 'Cut rumble,Clearer voice,Even out the volume' &&
+    switches.every((w) => w.role === 'switch' && w.on === 'false' && w.height >= 48), JSON.stringify(switches));
+  check('J3 the volume starts at 100%, and the playing video\'s sound goes straight out', (await text(page, '#volume-value')) === '100%' &&
+    await page.evaluate(() => liveSound === null));
+  await page.click('#sound-rumble');
+  check('J4 "Cut rumble" turns on', (await page.getAttribute('#sound-rumble', 'aria-checked')) === 'true');
+  check('J5 the playing video\'s sound now goes through the steps (2 filters, the volume, the safety limit)',
+    await page.evaluate(() => liveSound && liveSound.chain.steps.length === 5 && liveSound.audio.state === 'running'),
+    await page.evaluate(() => liveSound && [liveSound.chain.steps.length, liveSound.audio.state].join()));
+  await setSlider(page, 'volume', 150);
+  await page.waitForTimeout(400);
+  check('J6 the volume slider turns the playing video up (150%)', (await text(page, '#volume-value')) === '150%' &&
+    await page.evaluate(() => Math.abs(liveSound.chain.volume.gain.value - 1.5) < 0.01), await page.evaluate(() => liveSound.chain.volume.gain.value));
+  await setSlider(page, 'volume', 0);
+  check('J7 at 0 it says "Off"', (await text(page, '#volume-value')) === 'Off');
+  await page.click('#sound-voice');
+  await page.click('#sound-even');
+  await setSlider(page, 'volume', 120);
+  check('J7b nothing wider than the phone', await page.evaluate(() => document.documentElement.scrollWidth <= 360));
+  await page.screenshot({ path: SHOTS + '13-sound.png' });
+  await page.click('#reset-sound');
+  check('J8 "Reset the sound": all off, 100%, and the sound goes through unchanged', (await text(page, '#volume-value')) === '100%' &&
+    (await page.locator('#panel-sound .switch[aria-checked="true"]').count()) === 0 && await page.evaluate(() => liveSound.chain.steps.length === 1));
+  check('J8b the switches stand out (3 to 1): the edge, and the knob off and on', contrast('#8a8a8a', '#1f1f1f') >= 3 && contrast('#b8b8b8', '#121212') >= 3 &&
+    contrast('#121212', '#f2f2f2') >= 3);
+
+  // The steps themselves, measured in the page with test tones (the app's own buildSoundSteps)
+  const measured = await page.evaluate(async () => {
+    const RATE = 48000;
+    const db = (x) => 20 * Math.log10(Math.max(x, 1e-9));
+    async function run(sound, parts, seconds = 2) {
+      const audio = new OfflineAudioContext({ numberOfChannels: 1, length: seconds * RATE, sampleRate: RATE });
+      const buffer = new AudioBuffer({ length: seconds * RATE, numberOfChannels: 1, sampleRate: RATE });
+      const d = buffer.getChannelData(0);
+      for (const { hz, amp } of parts) for (let i = 0; i < d.length; i++) d[i] += amp * Math.sin((2 * Math.PI * hz * i) / RATE);
+      const player = audio.createBufferSource();
+      player.buffer = buffer;
+      const steps = buildSoundSteps(audio, { ...SOUND_DEFAULTS, ...sound });
+      player.connect(steps.input);
+      steps.output.connect(audio.destination);
+      player.start();
+      return { input: d, output: (await audio.startRendering()).getChannelData(0) };
+    }
+    function tone(d, hz) { // the tone's level in the second half, in dB
+      const a = d.length / 2;
+      const k = 2 * Math.cos((2 * Math.PI * hz) / RATE);
+      let s1 = 0; let s2 = 0;
+      for (let i = a; i < d.length; i++) { const s0 = d[i] + k * s1 - s2; s2 = s1; s1 = s0; }
+      return db((2 * Math.sqrt(Math.max(s1 * s1 + s2 * s2 - k * s1 * s2, 0))) / (d.length - a));
+    }
+    const peak = (d) => db(d.slice(d.length / 2).reduce((m, v) => Math.max(m, Math.abs(v)), 0));
+    const mix = [50, 300, 1000, 3500].map((hz) => ({ hz, amp: 0.1 }));
+    const out = {};
+    const same = await run({}, mix);
+    out.unchanged = same.output.reduce((m, v, i) => Math.max(m, Math.abs(v - same.input[i])), 0);
+    const rumble = await run({ rumble: true }, mix);
+    out.rumble = [50, 300, 1000].map((hz) => tone(rumble.output, hz) - tone(rumble.input, hz));
+    const voice = await run({ voice: true }, mix);
+    out.voice = [300, 1000, 3500].map((hz) => tone(voice.output, hz) - tone(voice.input, hz));
+    const quiet = await run({ even: true }, [{ hz: 440, amp: 10 ** (-36 / 20) }]);
+    const loud = await run({ even: true }, [{ hz: 440, amp: 10 ** (-6 / 20) }]);
+    out.gap = tone(loud.output, 440) - tone(quiet.output, 440);
+    const louder = await run({ volume: 200 }, [{ hz: 440, amp: 0.1 }]);
+    out.louder = tone(louder.output, 440) - tone(louder.input, 440);
+    const loudest = await run({ volume: 200 }, [{ hz: 440, amp: 10 ** (-1 / 20) }]);
+    out.loudestPeak = peak(loudest.output);
+    const half = await run({ volume: 50 }, [{ hz: 440, amp: 0.1 }]);
+    out.half = tone(half.output, 440) - tone(half.input, 440);
+    return out;
+  });
+  check('J9 with nothing changed, the sound comes out exactly as it went in', measured.unchanged < 1e-6, measured.unchanged);
+  check('J10 Cut rumble: 50 Hz at least 15 dB quieter; 300 and 1,000 Hz within 0.5 dB', measured.rumble[0] <= -15 &&
+    Math.abs(measured.rumble[1]) <= 0.5 && Math.abs(measured.rumble[2]) <= 0.5, JSON.stringify(measured.rumble));
+  check('J11 Clearer voice: 300 Hz 2 to 4 dB quieter, 1,000 Hz within 1 dB, 3,500 Hz 3 to 5 dB louder', measured.voice[0] <= -2 && measured.voice[0] >= -4 &&
+    Math.abs(measured.voice[1]) <= 1 && measured.voice[2] >= 3 && measured.voice[2] <= 5, JSON.stringify(measured.voice));
+  check('J12 Even out: a 30 dB gap between quiet and loud becomes 20 dB or less', measured.gap <= 20 && measured.gap >= 8, measured.gap);
+  check('J13 Volume 200% makes it twice as loud (+6 dB)', Math.abs(measured.louder - 6.02) <= 0.3, measured.louder);
+  check('J14 and a loud sound at 200% never clips (its peak stays under -2 dB)', measured.loudestPeak <= -2, measured.loudestPeak);
+  check('J15 Volume 50% is 6 dB quieter', Math.abs(measured.half + 6.02) <= 0.3, measured.half);
+
+  // In the new video: Cut rumble and Clearer voice on the tones
+  await page.click('#sound-rumble');
+  await page.click('#sound-voice');
+  await makeVideo(page);
+  check('J16 made with Cut rumble and Clearer voice', (await screenShown(page)) === 'done-screen', await text(page, '#look-problem').catch(() => ''));
+  const before = soundSamples(soundTests.tones);
+  let after = soundSamples((await download(page, 'sound-rumble-voice.mp4')).where);
+  const change = (hz) => toneLevel(after, hz, 1, 5) - toneLevel(before, hz, 1, 5);
+  check('J17 in the new video, the 50 Hz rumble is at least 12 dB quieter', change(50) <= -12, change(50));
+  check('J18 and next to 1,000 Hz, 3,500 Hz is louder (3 to 5 dB) and 300 Hz quieter (2 to 4 dB)',
+    change(3500) - change(1000) >= 3 && change(3500) - change(1000) <= 5 && change(300) - change(1000) <= -2 && change(300) - change(1000) >= -4,
+    [change(300), change(1000), change(3500)].map((v) => v.toFixed(2)).join());
+
+  await page.goBack();
+  await page.waitForSelector('#look-screen:not([hidden])');
+  check('J19 back on Edit, the sound settings are kept', (await page.getAttribute('#sound-rumble', 'aria-checked')) === 'true' &&
+    (await page.getAttribute('#sound-voice', 'aria-checked')) === 'true');
+  await page.click('#reset-sound');
+  await setSlider(page, 'volume', 50);
+  await makeVideo(page);
+  after = soundSamples((await download(page, 'sound-half.mp4')).where);
+  const halfLevel = soundLevel(after, 1, 5) - soundLevel(before, 1, 5);
+  check('J20 Volume 50%: the new video is 6 dB quieter (within 1 dB)', Math.abs(halfLevel + 6.02) <= 1, halfLevel);
+
+  // Even out on "quiet-loud", and the sound stays in line with the picture
+  await page.click('#new-video');
+  await page.waitForSelector('#start-screen:not([hidden])');
+  await choose(page, soundTests.quietLoud);
+  await page.click('#tab-sound');
+  check('J21 a new video starts with the sound unchanged', (await text(page, '#volume-value')) === '100%' &&
+    (await page.locator('#panel-sound .switch[aria-checked="true"]').count()) === 0);
+  await page.click('#sound-even');
+  await makeVideo(page);
+  const original = soundSamples(soundTests.quietLoud);
+  after = soundSamples((await download(page, 'sound-even.mp4')).where);
+  const gapBefore = soundLevel(original, 4, 5.8) - soundLevel(original, 1.5, 3.3);
+  const gapAfter = soundLevel(after, 4, 5.8) - soundLevel(after, 1.5, 3.3);
+  check('J22 Even out in the new video: the 30 dB gap becomes 20 dB or less', Math.abs(gapBefore - 30) <= 1 && gapAfter <= 20, `${gapBefore.toFixed(2)} → ${gapAfter.toFixed(2)}`);
+  check('J23 and it never clips (its peak stays under -1 dB)', soundPeak(after) <= -1, soundPeak(after));
+
+  // The steps hold the sound back 12 thousandths of a second here (two compressors); the app moves it back
+  // in line. A hiss lines up with the original at only one point, so it shows any shift exactly.
+  await page.click('#new-video');
+  await page.waitForSelector('#start-screen:not([hidden])');
+  await choose(page, soundTests.noise);
+  await page.click('#tab-sound');
+  await page.click('#sound-even');
+  await makeVideo(page);
+  after = soundSamples((await download(page, 'sound-even-noise.mp4')).where);
+  const lag = soundLag(soundSamples(soundTests.noise), after, 1.5, 3.5);
+  check('J24 the sound stays in line with the picture: not one sample early or late', lag === 0, `${lag} samples`);
+
+  // A video without sound
+  await page.click('#new-video');
+  await page.waitForSelector('#start-screen:not([hidden])');
+  await choose(page, videos.silent);
+  await page.click('#tab-sound');
+  check('J25 a video without sound: the Sound tab says so, with no switches', (await visible(page, 'no-sound')) && !(await visible(page, 'sound-controls')) &&
+    (await text(page, '#no-sound')) === 'This video has no sound.');
+  check('J no page errors', page.problems.length === 0, page.problems.join('\n'));
   await context.close();
 }
 
