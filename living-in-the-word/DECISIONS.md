@@ -466,7 +466,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - Turned down: recognizing the spend cap by its missing `retry-after` header (Anthropic: "Not every 429 carries it"); trying again by itself after a busy answer (a longer wait; "Write new questions" is one tap).
 - Not changed: "Today's AI limit is reached," which the app's own daily counts give.
 
-### November 3, 2026: a reading's questions give up after 2 minutes, like a study's (pull request NNN)
+### November 3, 2026: a reading's questions give up after 2 minutes, like a study's (pull request 127)
 - Decision: `fetchReadingQuestions` in `app.js` gives up after 2 minutes, with the same timer as a study (`requestSuggestions`) and the next chapter written ahead (`prepareStudyAhead`). Then the reading shows the general questions with "Couldn’t reach the AI helper, so these are general questions. Check your connection and try again.", as without reception, and opening the reading again asks again.
 - Why: `AUDIT.md`, item 5. With no timer, a connection that hung (no answer and no error) left "Writing questions for …" on the reading for as long as the app stayed open, and blocked every later reading's questions too, including the one written ahead, because only one reading is asked for at a time (`readingRequest`).
 - Checks: section HANG of `tests/app-test.mjs`: the phone's 2-minute timer shortened to 1.5 seconds for that check only, and a stand-in server that never answers. On the old code, 2 of its checks fail.
