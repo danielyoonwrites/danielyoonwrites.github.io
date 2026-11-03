@@ -22,6 +22,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 28, 2026: the commentary for the leader (about 100 words, written with the questions) and the reading's note start open.
 - November 2, 2026: Opus 5.5 writes every set, at `medium` effort and normal speed (no fast mode: "quite expensive"); it replaces Sonnet 5.5 at `high` (October 29). Uneven sets still get guidance fixes.
 - November 3, 2026: the speed stays as it is (Dan's "C"; about 13 to 16 seconds, almost all of it the AI). If speed comes up again: `low` effort is the free test, fast mode the sure one at twice the price.
+- November 3, 2026: the waiting words stay "This can take up to a minute" until Dan has seen 3 or 4 more waits in the `?test` line (his "A").
 - October 29, 2026: question 2 asks why what the passage shows about God matters there.
 - October 29, 2026: the "check it" line wherever the AI's words show; a "pastor wrote the guidelines" line may go on the start screen, never inside that warning.
 - October 26, 2026: the ESV text is on hold: only a "Read it on esv.org" button. Don't ask Dan to set up the key. Since November 2, 2026 the app doesn't ask the server for the text either (`ESV_TEXT` off in `app.js`; the code stays).
@@ -502,3 +503,8 @@ The "In force" list right below is every decision that still holds, one line eac
 - Checks: server section 26 (the stand-in database counts its trips; 2 checks fail on the old code), app section SW4 (a stand-in Google Fonts slowed to 6 seconds; with the old helper the page waited 4,055 milliseconds). The batch and the join were also tried in Cloudflare's local runtime (Wrangler's local mode, with a local database): the 4 tables were made, and the owner, an invited person, a turned-off person and someone not on the list got the same answers as before.
 - Left out: counting first, instead of reading the counts and then adding one. It would save one quick trip per set, but someone who keeps trying after their 20 would then show more than 20 on the owner's list (since item 8, it could no longer use up everyone's). The words "This can take up to a minute": Dan's choice, asked November 3 (Claude's recommendation: keep them until he has seen 3 or 4 more waits in the `?test` line; only Romans 16 has been measured, 13.6 to 16 seconds).
 - Not changed: the page itself is still asked for from the internet first (up to 4 seconds), so a new version reaches phones.
+
+### November 3, 2026: the waiting words stay "up to a minute" for now (no pull request)
+- Decision: Dan chose "A": keep "This can take up to a minute." (on "Prepare for a Bible study," and in the line while the AI writes a study's or a reading's questions) until he has seen 3 or 4 more waits in the `?test` line; then he chooses the words.
+- Why: only Romans 16 has been timed (13.6 seconds on November 3, 15.0 on November 1), too few to promise a shorter time, and a promise that's sometimes broken feels worse than a long one that's usually beaten (Claude's recommendation, which Dan chose).
+- Turned down for now: "This usually takes 15 to 30 seconds" ("B"), and his own words now ("C").
