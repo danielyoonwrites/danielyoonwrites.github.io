@@ -115,7 +115,7 @@ video {
   max-width: 100%;
 }
 
-/* ---------- Tabs: Trim, Speed, Filter, Lighting and Sound ---------- */
+/* ---------- Tabs: Filter, Lighting, Sound, Trim and Speed ---------- */
 .tabs {
   display: flex;
   flex-wrap: wrap;   /* five tabs in a row on a phone; more rows when zoomed in */

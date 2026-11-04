@@ -4,7 +4,7 @@
   Video editor (build steps 3 to 5 in SPEC.md): one clip, trimmed, at a speed, with a look and better sound.
 
   1. Start: choose a video from the phone.
-  2. Edit: trim, speed, a look (filter), the lighting and the sound, shown and heard on the video as it plays.
+  2. Edit: a look (filter), the lighting, the sound, trim and speed, shown and heard on the video as it plays.
   3. Making the video: a new MP4 file, frame by frame, with the look drawn into every frame, and the
      sound at the same speed, with the same sound changes.
   4. Your video: it plays, the page checks it against Instagram's, TikTok's and YouTube Shorts'
@@ -78,7 +78,7 @@ const state = {
   trimStart: 0,        // where the clip starts and ends, in seconds of your video
   trimEnd: 0,
   speed: 1,            // 0.5, 1, 1.5 or 2
-  tab: 'trim',         // the open tab on the Edit screen
+  tab: 'filter',       // the open tab on the Edit screen (Filter, the first tab, when a video opens)
   filter: 'none',      // the look
   brightness: 0,       // -50 to 50
   contrast: 0,         // -50 to 50
@@ -331,7 +331,7 @@ async function readVideo(file) {
     updateLook();
     updateTrimAndSpeed();
     updateSound();
-    selectTab('trim');
+    selectTab('filter');
     hideProblem('look-problem');
     goDeeper('look');
   } catch (error) {
@@ -343,7 +343,7 @@ async function readVideo(file) {
   }
 }
 
-// ---------- Screen 2: edit (trim, speed, a look and the lighting) ----------
+// ---------- Screen 2: edit (a look, the lighting, the sound, trim and speed) ----------
 
 // Trim and speed: the numbers on the screen, and the playing video's speed. The sound of the playing
 // video changes pitch with the speed, like the new video will (preservesPitch off).
@@ -455,7 +455,8 @@ function updateLook() {
   el('contrast-value').textContent = formatAmount(state.contrast);
 }
 
-const TABS = ['trim', 'speed', 'filter', 'light', 'sound'];
+// The Edit screen's tabs, in the owner's order (November 3, 2026). The arrow keys follow this order too.
+const TABS = ['filter', 'light', 'sound', 'trim', 'speed'];
 function selectTab(name) {
   state.tab = name;
   for (const tab of TABS) {

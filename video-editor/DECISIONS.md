@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 3, 2026, at the handoff; pull requests 110 to 112, 116, 125 and 129)
+## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129 and 137)
 
 Every decision below that still holds, one line each, by date; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -21,7 +21,7 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - November 2, 2026: the looks are Korean styles (Dan's "a"): Original, Milky 우유빛, Peach 복숭아, Soft glow 뽀샤시, Café 카페, Clear 맑음, Film 필름, Black and white 흑백, each with its English name and the Korean word under it. They're SVG filters, drawn on a normal canvas.
 - November 2, 2026: trim and speed (build step 4): "Start here" and "End here" while it plays, or sliders in tenths of a second; speeds 0.5×, 1×, 1.5× and 2×; the sound follows the speed like a tape, so faster sounds higher (Dan's "b").
 - November 2, 2026: the app makes each new video frame by frame (Mediabunny's `CanvasSink` and `CanvasSource`, the sound through an `OfflineAudioContext`), instead of the one-step `Conversion`, which has no speed setting.
-- November 2, 2026 (the Sound tab November 3): the screens: Start, "Edit" (Trim, Speed, Filter, Lighting and Sound tabs; called "The look" until build step 4), "Making the video," "Your video"; Brightness and Contrast from −50 to +50.
+- November 2, 2026 (the Sound tab and the tabs' order November 3): the screens: Start, "Edit" (Filter, Lighting, Sound, Trim and Speed tabs, in Dan's order, opening on Filter; called "The look" until build step 4), "Making the video," "Your video"; Brightness and Contrast from −50 to +50.
 - November 3, 2026: better sound, without AI (build step 5): three switches, Cut rumble, Clearer voice and Even out the volume, and a Volume slider from Off to 200% (Dan's "B"); the same steps on the playing video and in the new video, with a safety limit so nothing clips. A steady hiss (like a fan) is left for later.
 - November 2, 2026: the filter and lighting question (whole video or each clip) waits for build step 8.
 
@@ -120,3 +120,8 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - Turned down: "A) One switch, 'Clearer sound,'" that turns on the first three fixes together, plus a Volume slider (Claude's recommendation: one tap, nothing to adjust); "C) Just the Volume slider for now." Also left for later (Claude's suggestion, told to Dan with the question): turning down a steady hiss like a fan or an air conditioner (without AI it helps only some, it's the most work, and pushed too far it makes voices sound watery). Other people talking or music in the background can't be removed without AI (the owner's no-AI rule).
 - How (Claude's choices, measured with test tones in Claude's test browser, November 3, 2026): Cut rumble is two high-pass filters at 80 Hz (50 Hz 17.7 dB quieter, a voice's range almost unchanged); Clearer voice is 3 dB less around 300 Hz and 4 dB more around 3,500 Hz; Even out the volume is a compressor (above −30 dB, 4 to 1; a 30 dB gap became 18 dB); then the volume; then a safety limit (above −3 dB, 20 to 1), only when something is changed, so a louder volume never clips. The playing video's sound goes through the same steps from the first change on the Sound tab, so nothing changes for a video whose sound isn't touched. Each compressor holds the sound back 6 thousandths of a second; the new video's sound is moved back in line, and the saved checks show it lines up with the original to the sample (a hiss lined up both ways; a check that times a sudden tone was dropped, since AAC smears a sudden start by about 14 thousandths of a second with or without the steps).
 - Not checked yet: how it sounds on Dan's phone with a real voice, and whether the playing video's sound stays in step with the picture there once it goes through Chrome's sound tools (they may add a small delay on a phone; unverified).
+
+### November 3, 2026: the tabs in Dan's order (pull request 137)
+- Decision: the Edit screen's tabs are Filter, Lighting, Sound, Trim and Speed, in that order, and the screen opens on Filter, the first tab. This replaces the order in "trim and speed (pull request 125)": Trim, Speed, Filter and Lighting (with Sound added after them in pull request 129), opening on Trim (Claude's design then).
+- Why: Dan, November 3, 2026: "Let's arrange the tabs, filter, lighting, sound, then trim and speed." Opening on Filter is Claude's choice, so the screen opens on the first tab of the row.
+- Unchanged: on the Trim tab the whole video plays, so new points are easy to find; on the other tabs only the trimmed part plays, over and over. The arrow keys follow the new order (the saved checks, I1b).
