@@ -38,19 +38,20 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
    Right after opening it, Claude subscribes to the pull request's activity (`subscribe_pr_activity`), so the merge wakes the session. Dan should never have to say "it merged." Claude also sets one backup check-in about 50 minutes later (`send_later`), and cancels it when the merge arrives.
 3. Dan reviews and merges on GitHub (Conversation tab, Merge pull request, Confirm merge).
 4. GitHub Actions publishes the site (workflow `.github/workflows/publish.yml`; GitHub Pages source is set to "GitHub Actions"). It takes a minute or two; check for a green mark next to **main** at https://github.com/danielyoonwrites/danielyoonwrites.github.io/actions
-   Every merge also deploys Living in the Word's server: Cloudflare builds it (Workers Builds; its build watch paths are left at `*`, so it runs on every merge) and shows its own check next to the merge, so Dan no longer pastes `worker.js` into Cloudflare.
+   Every merge also deploys Living in the Word's server: Cloudflare builds it (Workers Builds; its build watch paths are left at `*`, so it runs on every merge) and shows its own check next to the merge, so Dan no longer pastes `worker.js` into Cloudflare. Once Dan connects it (video editor build step 7a), the video editor's captions server deploys the same way, with its own check (likely "Workers Builds: video-editor-captions").
 5. Dan checks on his phone.
 6. When the merge wakes the session, Claude does the follow-up on its own: checks that the publish run on main succeeded, restarts the branch from main, updates the project's page in Dan's Master Notes (Notion), then tells Dan in one short message. Auto mode only skips permission prompts; it doesn't let Claude see GitHub between messages, and each new session has to subscribe again.
 
 Only one pull request at a time from the branch: wait for a merge before starting the next one, or the new work lands in the open pull request.
 
-Two or more sessions can work in this repository at the same time, on different projects (November 2, 2026: Idea board, the video editor and Photo Filters). Pull request numbers then jump, so write a number into the notes only after GitHub gives it. When shared notes clash (`HANDOFF.md`, `CHANGELOG.md`), merge main into the branch and keep both projects' lines. Never rewrite history that's already pushed.
+Two or more sessions can work in this repository at the same time, on different projects (November 2, 2026: Idea board, the video editor and Photo Filters). Pull request numbers then jump, so write a number into the notes only after GitHub gives it. When shared notes clash (`HANDOFF.md`, `CHANGELOG.md`), merge main into the branch and keep both projects' lines. Never rewrite history that's already pushed. Before opening a pull request while another session's is open, try merging the two branches in a scratch copy (`git worktree add`, then `git merge --no-commit`): git counts changes on neighboring lines as a clash, so put your note lines where they don't touch the other session's (a changelog entry can start its own line), and then either can merge first (November 3, 2026).
 
 When Dan says "do the rest," Claude works through the build plan one pull request at a time, starting the next one as soon as the last merges.
 
 
 ## Handoffs and decisions
 
+- Dates in the notes are the session's date, and the session's clock runs on UTC: from 4 p.m. Pacific (5 p.m. in summer) it already shows the next day, so Dan's evening can read as tomorrow (his evening of November 3, 2026 shows as November 4). When the day matters, say "the evening of [date], Pacific."
 - HANDOFF.md is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines. It points to each app's PROGRESS.md for what's waiting there instead of copying it, and each session's summary goes to CHANGELOG.md ("Session summaries"), not HANDOFF.md.
 - Each app folder has PROGRESS.md (where it stands and the next step; rewritten, under about 100 lines) and DECISIONS.md (each decision with its reason, in Dan's words when he gave them, and what was turned down; only added to). Website decisions go in the root DECISIONS.md.
 - Every pull request updates its project's PROGRESS.md and adds any new decisions to DECISIONS.md, so nothing depends on the chat.
@@ -65,7 +66,7 @@ When Dan says "do the rest," Claude works through the build plan one pull reques
 
 - Explain every change in plain words a beginner can follow: what changed, why, and how to check it.
 - One small change per pull request.
-- No build tools: no npm, no frameworks, no generators. One exception (Dan chose it, October 29, 2026): Cloudflare runs its own deploy tool, Wrangler, on its computers to deploy Living in the Word's server (`living-in-the-word/server/wrangler.jsonc`). Nothing runs on Dan's computer, and the code stays plain files.
+- No build tools: no npm, no frameworks, no generators. One exception (Dan chose it, October 29, 2026): Cloudflare runs its own deploy tool, Wrangler, on its computers to deploy Living in the Word's server (`living-in-the-word/server/wrangler.jsonc`), and, since November 4, 2026, the video editor's captions server the same way (`video-editor/server/wrangler.jsonc`, build step 7a). Nothing runs on Dan's computer, and the code stays plain files.
 - Keep the code simple and commented so the owner can edit it later.
 - Every page must look good on a phone first, then on a computer.
 

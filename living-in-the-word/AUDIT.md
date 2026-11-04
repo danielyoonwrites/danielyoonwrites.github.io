@@ -1,5 +1,7 @@
 # Living in the Word: the audit (November 2, 2026)
 
+Status: done, November 3, 2026: all ten items fixed (pull requests 119 to 121, 126 to 128, 130 and 132 to 134), with two parts of item 10 left out on purpose (its status says why). "For Dan" and "Notes for later" below still apply.
+
 Dan asked, November 2, 2026: "Can we audit our code to check for reliability, bugs, security issues, and speed? Can we work on perfecting it not just building it". Three reviewers read every file separately (security and privacy, reliability and bugs, speed and cost). Claude checked each finding against the code before it went on this list. Each fix is its own small pull request, in the order below. Mark each item's status here when its pull request merges. The decision and its reasons are in `DECISIONS.md` (November 2, 2026).
 
 No high-severity problems were found. Checked and sound: nobody can spend the AI money without signing in or the passcode, a real passage and room in the daily limits; the owner's page answers only Dan's own session; sign-in codes and session keys are kept only scrambled; every database query uses placeholders; emails are plain text; the app never puts text into the page as HTML; saved studies aren't lost; questions never show under the wrong passage; the back gesture stays in step; the daily counts and the plan's days are safe across daylight saving.

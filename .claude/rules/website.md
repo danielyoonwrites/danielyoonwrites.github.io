@@ -17,10 +17,11 @@ Each pattern in `paths` at the top starts with `/`, which means "at the top of t
 
 - Home (`index.html`), Writing (`writing.html`), Projects (`projects.html`), About (`about.html`).
 - The menu shows Writing, Projects, About. There's no Home link: the name "Daniel Yoon" goes to Home. Four links didn't fit on one line on a small phone (360px wide, checked October 2026).
-- Projects is for two kinds of readers. All projects come first and stay short (label, name, one friendly line, link), so every project shows near the top. The "How I built it" notes (what I wanted, the problem, what I decided, the trade-off) come after, in their own section as fold-outs, for anyone checking how he thinks. Never put the notes inside the project list: they push the next project out of sight (the owner's rule, October 2026). The page says once, at the top, that he builds them with AI. Quiet room is listed as in progress with no link, because the room is shared by private link.
+- Projects is for two kinds of readers. All projects come first and stay short (label, name, one line of what it is, a small "What I set out to learn" line under it, link), so every project shows near the top; each line must show whole on a phone 320 pixels wide (lines stop after 3). The order is Dan's, most impressive first (November 4, 2026): Video editor, Living in the Word, Idea board, Fewer spam calls, This website. The "How I built it" notes (what I wanted, the problem, what I decided, the trade-off) come after, in the same order, in their own section as fold-outs, for anyone checking how he thinks. Never put the notes inside the project list: they push the next project out of sight (the owner's rule, October 2026). The page says once, at the top, that he builds them with AI. Quiet room is off the page for now (Dan, November 4, 2026: "remove quiet room for now because it is not functional"); once it works, it goes back with no link, because the room is shared by private link.
 - Keep pages short on a phone (the owner's rule, October 2026): people won't scroll far. Use tabs or fold-outs instead of long lists.
   - Writing: two tabs, "Start here" and "Latest" (`tabs.js`). Without JavaScript both lists show.
   - Projects: the "How I built it" notes are fold-outs (HTML's own `<details>`), closed until tapped.
+  - After changing the Projects page, run `node scripts/check-projects-page.mjs` from the repository folder (Playwright, in Claude's sessions only; port 8795): Dan's order, every line whole at 320 and 360 pixels wide, a "What I set out to learn" line and a link for each project, the notes in the same order, nothing scrolling sideways. Success ends "38 passed, 0 failed" (with five projects). Change its `ORDER` when Dan changes the order.
   - Post opening lines stop after 3 lines (`.post-excerpt` in `style.css`).
 - One shared stylesheet: `style.css`. Pages link it as `style.css?v=2`: raise the number on every page whenever `style.css` changes, so phones don't keep an old copy (GitHub Pages lets browsers keep files for 10 minutes). The same for `tabs.js?v=1`.
 
@@ -34,7 +35,7 @@ Each pattern in `paths` at the top starts with `/`, which means "at the top of t
 
 ## Content
 
-- The voice is like the Substack: writing, family life, the shy Korean voice.
+- The voice is like the Substack: writing, family life, the shy Korean voice. The Projects page is the exception (Dan, November 4, 2026: "I want to make it sound more impressive, as if in linkedin or something, something to sell myself"; then, the same day: "please don't use linkedin language, more normal language, but still selling myself"): it sells his work in normal words, never LinkedIn's (no "ship," "engineering partner," "product decision"), and every claim is true.
 - Readers: millennial Asian Christians. Faith is part of what the site is about.
 - Pastor work is not the focus of the Home or Writing pages. The About page can say more (a short paragraph). Never word it so it sounds like just a job.
 

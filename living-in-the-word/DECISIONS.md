@@ -2,7 +2,7 @@
 
 The "In force" list right below is every decision that still holds, one line each; it's rewritten at each handoff. The log under it has each decision with its reason, oldest first, and is only added to: if a decision changes, add a new entry that says which one it replaces, and one "Status" line on the old entry. The decisions from before October 27, 2026 were copied in on October 28, 2026 from the root `HANDOFF.md` ("Project 5"), `SPEC.md`, `AI-PLAN.md` and `SIGNUP-PLAN.md`; those files keep their own text too. When the notes give no reason, an entry says "not recorded."
 
-## In force (rewritten November 3, 2026, at the end of the twelfth session)
+## In force (rewritten November 3, 2026, at the end of the twelfth session; brought up to date November 4, 2026, at the end of the thirteenth)
 
 **Who it's for, and how the work goes**
 - October 25, 2026: stages: Dan's small group first, then anyone online later (stage 3). Dan reviews every question, and nothing is shared on its own.
@@ -60,6 +60,8 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 29, 2026: install help: "Install the app" in Chrome, or the steps for iPhone and Android; no KakaoTalk step.
 - November 2, 2026: the offline helper takes the phone's exact copy of a versioned file (`app.js?v=…`) at once; every change to app.js or style.css gets a new `?v=` (the VERSIONS check). Since November 3, 2026, the fonts too (their instructions are fetched again quietly, for next time).
 - October 29, 2026: Cloudflare deploys the server on every merge (Workers Builds, settings in `server/wrangler.jsonc`, build watch paths `*`): the one exception to "no npm." Preview builds stay off.
+- November 3, 2026: the server makes its tables in one trip and reads a session and its invitation in one trip; the read before the count stays, so the owner's list never shows more than 20 for anyone.
+- November 4, 2026: no scheduled reminder for the API key, which expires November 24, 2026 (Dan's "C": he'll remember it); mention it once if a session falls between November 10 and 24.
 
 ## Log (oldest first)
 
@@ -519,3 +521,8 @@ The "In force" list right below is every decision that still holds, one line eac
   - Not checked: the US trademark office's own search (Trademark Search, https://tmsearch.uspto.gov), and other countries.
   - Claude's view, not legal advice: fine for a free, invite-only app on a personal website. Before stage 3 (anyone online), any store listing or charging, do a proper trademark search, as the October 25 decision says.
 - Turned down: renaming it (nothing found that calls for it).
+
+### November 4, 2026: no scheduled reminder for the API key (no pull request)
+- Decision: no scheduled reminder for the Anthropic API key (`ANTHROPIC_API_KEY`, saved in Cloudflare), which expires November 24, 2026. Dan will remember it himself. If a session falls between November 10 and 24, mention it once, with every step (`PROGRESS.md`, "Waiting on Dan").
+- Why: Dan chose "C" ("no, you'll remember it yourself") when Claude asked. His reason: not recorded.
+- Turned down: a reminder on Tuesday, November 17, 2026, at 10 a.m. Pacific, as a new session in the Claude app with every step ("A," Claude's recommendation); the same on another day ("B").
