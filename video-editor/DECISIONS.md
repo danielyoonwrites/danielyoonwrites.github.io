@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 4, 2026; pull requests 110 to 112, 116, 125, 129, 137 to 140, and build step 7a's)
+## In force (November 4, 2026; pull requests 110 to 112, 116, 125, 129, 137 to 140 and 144)
 
 Every decision below that still holds, one line each, by date; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -160,18 +160,18 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - Claude's choices in the plan, for Dan to change if he likes: a Language choice (English first, or 한국어); captions burned into the video (no separate file); the line of text sits above a caption when both are at the bottom; fixing words one line at a time, one screen deeper.
 - What it changes: his no-AI rule (November 2) gets this one exception, and "the videos never leave the phone" gets one: the sound only, for his captions only, when he taps. Claude can't check the real AI from its session (it can't use his Cloudflare account): stand-ins are checked, and his phone checks the rest.
 
-### November 4, 2026: no daily limit, because Dan's Cloudflare account is on the free plan (build step 7a)
+### November 4, 2026: no daily limit, because Dan's Cloudflare account is on the free plan (build step 7a, pull request 144)
 - Decision: the captions server has no daily limit of its own. Dan's Cloudflare account is on Workers Free.
 - Why: asked which plan his account is on (with the link to check it), Dan answered "a. workers free" (November 4, 2026). On Workers Free nothing can be charged: past the free allowance (10,000 Neurons a day, about 214 minutes of sound with this model), Workers AI fails with an error (3036) until midnight UTC (Cloudflare's Workers AI pricing and errors, read from their source on GitHub, November 4, 2026). So a leaked passcode or a mistake can only use up a day's free captions, never cost money. Claude's recommendation, given with the question: if it's Free, keep it Free.
 - Turned down: nothing; the daily-limit question was only for the Paid plan, so it wasn't asked.
 - Revisit if: the account moves to Workers Paid (then ask about a daily limit).
 
-### November 4, 2026: the captions server in the same Cloudflare account as Living in the Word's (build step 7a)
+### November 4, 2026: the captions server in the same Cloudflare account as Living in the Word's (build step 7a, pull request 144)
 - Decision: the Worker `video-editor-captions` goes in the same Cloudflare account as Living in the Word's server, so its address is https://video-editor-captions.danyoonsignup.workers.dev (Cloudflare names each Worker "name.subdomain.workers.dev," and the account's subdomain is danyoonsignup).
 - Why: Dan chose "a" (November 4, 2026), Claude's recommendation: the least setup (one sign-in, and GitHub is already connected to that account for Living in the Word's deploys), and it's still its own Worker, so a mistake in its code can't break Living in the Word (his "A," November 3). What they share: the free plan's 100,000 requests a day for the whole account (Cloudflare's Workers limits, read November 4, 2026); their use is far below it (Claude's estimate: hundreds a day at most). Living in the Word doesn't use Workers AI, so it can't use up the captions' free minutes.
 - Turned down: "B," a new Cloudflare account (nothing shared, but a new sign-up, a new subdomain and connecting GitHub again).
 
-### November 4, 2026: how the captions server and the passcode are built (build step 7a)
+### November 4, 2026: how the captions server and the passcode are built (build step 7a, pull request 144)
 - Decision (Claude's choices, for Dan to change if he likes):
   - One address, `POST /captions?language=en` (or `ko`): the passcode in the Authorization header, the sound as base64 text in the body, up to 700,000 letters (about 16 seconds of the app's sound), so build step 7b sends pieces of up to 15 seconds instead of the plan's 30. It sends back each word with its start and end, and the piece's length. The sound goes to the AI as it came, never decoded on the server.
   - The passcode is compared scrambled (SHA-256), byte by byte; capital letters and extra spaces don't matter (a phone's keyboard may add a capital). No lockout for wrong tries: it would need a database, and a passcode of four or more random words can't be guessed.
