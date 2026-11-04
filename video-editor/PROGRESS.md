@@ -1,6 +1,6 @@
-# Video editor: progress (updated November 3, 2026, with the Projects page listing)
+# Video editor: progress (updated November 3, 2026, with text)
 
-A simple video editor, just for the owner, on his Android phone in Chrome: trim, speed, a look (Korean styles), lighting and better sound now; shape, text and clip order next. The videos never leave the phone, and every video is made to fit Instagram, TikTok and YouTube Shorts. Read `SPEC.md` (what it does, the looks, the platforms' rules, the build plan), `DECISIONS.md` (the "In force" list first) and `CLAUDE.md`.
+A simple video editor, just for the owner, on his Android phone in Chrome: a look (Korean styles), lighting, better sound, a line of text, trim and speed now; AI captions only for Dan (being planned), shape and crop, and clip order next. The videos never leave the phone, and every video is made to fit Instagram, TikTok and YouTube Shorts. Read `SPEC.md` (what it does, the looks, the platforms' rules, the build plan), `DECISIONS.md` (the "In force" list first) and `CLAUDE.md`.
 
 ## Where it stands
 - Done and checked on Dan's phone:
@@ -12,21 +12,29 @@ A simple video editor, just for the owner, on his Android phone in Chrome: trim,
   - Build step 4, trim and speed (pull request 125): the "Edit" screen with Trim and Speed tabs; the sound follows the speed like a tape (Dan's "b"); each new video made frame by frame.
   - Build step 5, better sound (pull request 129, merged November 3, 2026, Dan's "B"): a fifth tab, "Sound," with three switches (Cut rumble, Clearer voice, Even out the volume) and a Volume slider from Off to 200%. The playing video sounds the same way as the new video will. How it works: `SPEC.md`, "Tech notes," "Better sound."
   - The tabs in Dan's order (pull request 137, merged November 3, 2026, his request): Filter, Lighting, Sound, Trim, Speed; the Edit screen opens on Filter.
-  - On the website's Projects page (pull request 138, Dan's "A"): https://danielyoonwrites.github.io/projects.html, between Idea board and Quiet room, with a link, a gray line saying it's made for an Android phone in Chrome, and a "How I built it" note. Checked in Claude's test browser at 320 and 360 pixels wide: the line shows whole (3 lines), nothing scrolls sideways, and the link opens the app.
-- Checked in Claude's test browser (November 3, 2026): 184 saved checks pass (`tests/app-test.mjs`), including made-up test sounds: in a saved video, the 50 Hz rumble 17.7 dB quieter, 300 Hz 3.0 dB quieter and 3,500 Hz 4.0 dB louder, a 30 dB gap between quiet and loud down to 18 dB, Volume 50% exactly 6.0 dB quieter, nothing clipping, and the sound in line with the original to the sample. The phone test's 71 pass.
+  - On the website's Projects page (pull request 138, Dan's "A"): https://danielyoonwrites.github.io/projects.html, between Idea board and Quiet room, with a link, a gray line saying it's made for an Android phone in Chrome, and a "How I built it" note. Checked in Claude's test browser at 320 and 360 pixels wide: the line shows whole (3 lines), nothing scrolls sideways, and the link opens the app. Merged November 3, 2026.
+  - Text (pull request PULL_REQUEST_NUMBER, Dan's "A"): a Text tab with one line per video, Top, Middle or Bottom, for the new video's first 3 seconds or the whole video. The Projects page line now says "text" too. How it works: `SPEC.md`, "Tech notes," "Text."
+- Checked in Claude's test browser (November 3, 2026): 207 saved checks pass (`tests/app-test.mjs`), including text (section K: the words land within 3% of where they showed while editing, stay white with the lighting at −50, and go after the new video's first 3 seconds, at 2× too) and made-up test sounds: in a saved video, the 50 Hz rumble 17.7 dB quieter, 300 Hz 3.0 dB quieter and 3,500 Hz 4.0 dB louder, a 30 dB gap between quiet and loud down to 18 dB, Volume 50% exactly 6.0 dB quieter, nothing clipping, and the sound in line with the original to the sample. The phone test's 71 pass.
 - Not checked yet:
   - The sound switches on Dan's phone with a real voice, and whether the playing video's sound stays in step with the lips while editing.
   - Trim and speed on the phone, and how long making a video takes there now that it's frame by frame.
   - Real uploads to the three platforms (asked with pull request 112; not reported yet).
   - What the owner's phone writes in the "For Claude" line on "Your video" (color tags, edit lists).
   - How fast Soft glow is on the phone, and the looks on real faces (Claude's test scene is made up).
-- Branch: `ccr-f31dd4eb-gq2mec` (the video editor's session), restarted from main after each merge; everything up to pull request 137 is merged into main.
-- Open pull requests: pull request 138, the video editor on the Projects page.
-- Claude's rough estimate: 4 more small pull requests (build steps 6 to 9).
+  - Text on the phone: the phone's font and Korean letters, the size, and whether Top and Bottom stay clear of the apps' buttons in a real upload.
+- Branch: `ccr-f31dd4eb-gq2mec` (the video editor's session), restarted from main after each merge; everything up to pull request 138 is merged into main.
+- Open pull requests: pull request PULL_REQUEST_NUMBER, text on the videos.
+- Claude's rough estimate: 3 more small pull requests for the plan (shape and crop, several clips, polish), plus AI captions (likely 3 or more: a plan, a server piece if Dan chooses one, the captions screen; a guess until the plan is chosen).
 - Dan's Master Notes (Notion), the page "Simple video editor: how hard to build (Nov 2026)," gets one entry after each merge (what merged, what was checked, what's next).
 
 ## Waiting on Dan
-1. Merge the video editor on the Projects page, pull request 138: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/138, Conversation tab, Merge pull request, Confirm merge. Then, on his phone in Chrome, open https://danielyoonwrites.github.io/projects.html: "Video editor" shows between "Idea board" and "Quiet room," its line whole. Tap "Open the video editor": the app opens; tap < to come back. Under "How I built it," tap "Video editor": its note opens. Also the tabs (pull request 137, merged): in the app, tap "Choose a video": it opens on Filter, and the tabs read Filter, Lighting, Sound, Trim, Speed (if either still shows the old page, wait a few minutes and reload: a phone can keep the old copy for a short while after a merge).
+1. Merge text on the videos, pull request PULL_REQUEST_NUMBER: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/PULL_REQUEST_NUMBER, Conversation tab, Merge pull request, Confirm merge. Then the check on his phone:
+   1. Open Chrome and go to https://danielyoonwrites.github.io/video-editor
+   2. Tap "Choose a video" and pick a video of yourself talking.
+   3. Tap the Text tab and type a short line, like "Three things I wish I knew at 20." While it plays, try Top, Middle and Bottom.
+   4. Leave "First 3 seconds" chosen, tap "Make the video," and play it: the words show for the first 3 seconds, where they showed while editing.
+   5. Tell Claude whether the words are big enough, whether their place looks right, and whether anything covers them after a test upload.
+   Also, when it's handy (merged): https://danielyoonwrites.github.io/projects.html shows "Video editor" between "Idea board" and "Quiet room" (pull request 138), and the app's tabs read Filter, Lighting, Sound, Text, Trim, Speed (137, and this one). A phone can keep the old copy for a short while after a merge: wait a few minutes and reload.
 2. The better sound check on his phone (any time; it's live):
    1. On your phone, open Chrome and go to https://danielyoonwrites.github.io/video-editor
    2. Tap "Choose a video" and pick a video of yourself talking, at least 15 seconds long, ideally one with some wind or traffic in it (it stays on your phone).
@@ -50,11 +58,12 @@ A simple video editor, just for the owner, on his Android phone in Chrome: trim,
    6. Send Claude your notes on the looks, the time, the screenshot, and how the uploads went.
 
 ## Next step
-After this pull request merges, Dan's request: text on the videos ("I want the ability to add text to the videos," November 3, 2026), before shape and crop. The plan in `SPEC.md` ("How it works," step 4, and "Tech notes"): type a line, put it at the top, middle or bottom, and choose when it shows; on the playing video it's a page box over the video, and each frame of the new video gets the same text drawn on it. Ask Dan first, one question at a time, with options and a recommendation, starting with how many lines and when they show. When it's built, update the Projects page line and note too (`CLAUDE.md`). Then ask for his phone checks (items 2 to 4 above). Adjust whatever he asks: the sound's numbers are in `buildSoundSteps()` in `app.js` (check with the saved checks, section J), the looks' numbers in the SVG filters near the top of `index.html` (check with `tests/looks-sheet.mjs` and section H). Then build step 6, shape and crop. Ask Dan first, one question at a time, each with options and a recommendation: (1) which shapes: tall 9:16 and square both count as YouTube Shorts (up to 3 minutes), but wide doesn't (`SPEC.md`, "Made for Instagram, TikTok and YouTube Shorts"), so wide would need a warning, or be left out; (2) the starting shape (Claude would suggest tall); (3) how to choose which part shows: dragging the picture, or a few buttons (left, middle, right). Where it goes on the screen is Claude's design to show in screenshots (likely a sixth tab, "Shape," on the Edit screen; the first plan in `SPEC.md`, "How it works," had separate screens before the app became one Edit screen with tabs).
+AI captions, only for Dan (his request, November 3, 2026). Claude's research on the ways to do it (on the phone, or a small server of his own on Cloudflare that gets only the sound; the cost, the privacy, timing for each word or line, Korean) comes first, with sources; then ask Dan one question at a time, starting with where the speech-to-text runs, and write the plan in `SPEC.md` before building. They change two of his earlier rules (no AI; the videos never leave the phone), so say so plainly with each choice. When anything ships, update the Projects page line and note (`CLAUDE.md`). Also ask for his phone checks (the items above), and adjust whatever he asks: the text's numbers are in `TEXT_LOOK` in `app.js` (check with the saved checks, section K). Then build step 7, shape and crop: ask first (1) which shapes: tall 9:16 and square both count as YouTube Shorts (up to 3 minutes), but wide doesn't (`SPEC.md`, "Made for Instagram, TikTok and YouTube Shorts"), so wide would need a warning, or be left out; (2) the starting shape (Claude would suggest tall); (3) how to choose which part shows: dragging the picture, or a few buttons (left, middle, right).
 
 ## Ideas, not done
 - A note on the Trim and Speed tabs when the new video would be under 3 seconds or over 3 minutes (now only "Your video" says so, after it's made).
 - Turning down a steady hiss, like a fan (left for later, November 3, 2026; `SPEC.md`, "Not in version 1").
+- More for the text, if Dan asks after using it: a bigger or smaller size, another color, a time other than 3 seconds.
 
 ## Dead ends
 - jsDelivr, unpkg and chromestatus.com couldn't be reached from Claude's session (November 2, 2026). Mediabunny's files came from the npm registry (`registry.npmjs.org`, reachable).
@@ -72,6 +81,6 @@ After this pull request merges, Dan's request: text on the videos ("I want the a
 
 ## How to run and check it
 - Run: nothing to install; the pages are plain files. Open https://danielyoonwrites.github.io/video-editor (the app) or https://danielyoonwrites.github.io/video-editor/phone-test.html (the phone test), or serve the repository folder (`python3 -m http.server`) and open `/video-editor/`.
-- Check the app (needs Playwright with Chromium, and ffmpeg; both are installed in Claude's cloud sessions): `node video-editor/tests/app-test.mjs` from the repository folder. It makes made-up test videos, a color chart, a "clock" video and test sounds with ffmpeg (`tests/test-videos.mjs`), serves the repository on http://127.0.0.1:8768 (that port must be free) and runs Chromium at 360 wide with touch, 180 wide (a phone at 200% zoom) and 1280 with a mouse. Success ends "184 passed, 0 failed" (in about 2 minutes); screenshots go to the temporary folder it prints.
+- Check the app (needs Playwright with Chromium, and ffmpeg; both are installed in Claude's cloud sessions): `node video-editor/tests/app-test.mjs` from the repository folder. It makes made-up test videos, a color chart, a "clock" video and test sounds with ffmpeg (`tests/test-videos.mjs`), serves the repository on http://127.0.0.1:8768 (that port must be free) and runs Chromium at 360 wide with touch, 180 wide (a phone at 200% zoom) and 1280 with a mouse. Success ends "207 passed, 0 failed" (in about 2 minutes); screenshots go to the temporary folder it prints.
 - See the looks side by side: `node video-editor/tests/looks-sheet.mjs` (port 8769; needs Python with Pillow and numpy for the test scene). It prints where the picture is.
 - Check the phone test: `node video-editor/tests/phone-test.mjs` (port 8767). Success ends "71 passed, 0 failed."

@@ -2,11 +2,11 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129, 137 and 138)
+## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129, 137 and 138 and PULL_REQUEST_NUMBER)
 
 Every decision below that still holds, one line each, by date; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
-- November 2, 2026: a simple video editor that does a few things well (a filter, lighting, text, clip order, crop, speed); no music button, nothing copyrighted, no AI (the owner's words).
+- November 2, 2026: a simple video editor that does a few things well (a filter, lighting, text, clip order, crop, speed); no music button, nothing copyrighted, no AI (the owner's words), except the AI captions only he can use, which he asked for on November 3 (being planned).
 - November 2, 2026: just for Dan, on his Android phone in Chrome (his "A"); since November 3 it's on the website's Projects page with a link anyone can open, saying it's made for an Android phone in Chrome (his "A"), and it's still built and checked only for his phone.
 - November 2, 2026: the name "Video editor," at https://danielyoonwrites.github.io/video-editor (his "A").
 - November 2, 2026: everything happens on the phone; the videos are never uploaded. Mediabunny makes the new video, frame by frame.
@@ -21,8 +21,10 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - November 2, 2026: the looks are Korean styles (Dan's "a"): Original, Milky 우유빛, Peach 복숭아, Soft glow 뽀샤시, Café 카페, Clear 맑음, Film 필름, Black and white 흑백, each with its English name and the Korean word under it. They're SVG filters, drawn on a normal canvas.
 - November 2, 2026: trim and speed (build step 4): "Start here" and "End here" while it plays, or sliders in tenths of a second; speeds 0.5×, 1×, 1.5× and 2×; the sound follows the speed like a tape, so faster sounds higher (Dan's "b").
 - November 2, 2026: the app makes each new video frame by frame (Mediabunny's `CanvasSink` and `CanvasSource`, the sound through an `OfflineAudioContext`), instead of the one-step `Conversion`, which has no speed setting.
-- November 2, 2026 (the Sound tab and the tabs' order November 3): the screens: Start, "Edit" (Filter, Lighting, Sound, Trim and Speed tabs, in Dan's order, opening on Filter; called "The look" until build step 4), "Making the video," "Your video"; Brightness and Contrast from −50 to +50.
+- November 2, 2026 (the Sound tab and the tabs' order November 3): the screens: Start, "Edit" (Filter, Lighting, Sound, Text, Trim and Speed tabs, in Dan's order with Text before Trim, opening on Filter; called "The look" until build step 4), "Making the video," "Your video"; Brightness and Contrast from −50 to +50.
 - November 3, 2026: better sound, without AI (build step 5): three switches, Cut rumble, Clearer voice and Even out the volume, and a Volume slider from Off to 200% (Dan's "B"); the same steps on the playing video and in the new video, with a safety limit so nothing clips. A steady hiss (like a fan) is left for later.
+- November 3, 2026: text for anyone using the app: one line per video (Dan's "A"), Top, Middle or Bottom, for the new video's first 3 seconds or the whole video; white bold letters on soft dark boxes, drawn by the same code on the playing video and on each frame.
+- November 3, 2026: AI captions only Dan can use (his words); how (on the phone, or a small server of his own) isn't chosen yet.
 - November 2, 2026: the filter and lighting question (whole video or each clip) waits for build step 8.
 
 ## Log (oldest first)
@@ -131,3 +133,11 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - Why: Dan, November 3, 2026: "Also let's add this to my website." Asked about a link, he chose "A": "Yes, with a link," with the line about Android phones (Claude's recommendation: people can try what he built, and anyone who tries it keeps their videos on their own phone, since there's no server).
 - Turned down: "B", no link, like Quiet room; "C", a link with nothing about phones.
 - The name: "Video editor" is the plain name of what it is. Claude's view, not legal advice: a name like that can't be anyone's trademark for a video editor, since US trademark rules don't let a generic name be registered for the thing it names (the trademark office's examining manual, TMEP 1209.01(c), seen only through a copy in search results, https://www.bitlaw.com/source/tmep/1209_01_c.html, November 3, 2026). So no name search was done, unlike Idea board's and Living in the Word's.
+
+### November 3, 2026: one line of text for everyone, and AI captions only for Dan (pull request PULL_REQUEST_NUMBER)
+- Decision: text, for anyone using the app: a sixth tab, "Text," with one line per video: "Your text" (up to 100 letters), "Where" (Top, Middle, Bottom) and "When" (First 3 seconds of the new video, or Whole video), and "Remove the text." Text moves ahead of shape and crop in the build plan (now step 6).
+- Why: Dan, November 3, 2026: "I want the ability to add text to the videos." Then: "Let's actually add the option to do AI generated captions, and let's make it so only I can use it. But anyone with link can add their own text to a video normally." Asked how many pieces of normal text a video should have, he chose "A": one line (Claude's recommendation: it fits his hook plan in Master Notes, "the first line spoken and shown as text," kept to "about 8 to 12 words").
+- Turned down: "B", up to 3 lines with their own start and end times; "C", typed captions for everything said (his AI captions request replaces it).
+- How (Claude's choices, shown in screenshots): the tab goes before Trim, with the look-and-sound tabs; white bold letters in the phone's own font, each line on a soft dark box, so they show on any picture; letters 6% of the picture's shorter side; lines at most 74% of the width; Top from 14% down, Bottom ending 70% down, to stay clear of the apps' buttons and captions (guides disagree on how much: `SPEC.md`, "Tech notes," "Text"); even line breaks with no one-letter word like "I" ending a line when that can be helped; and the same drawing on the playing video and on each frame, with the look and the lighting only on the picture. "First 3 seconds" means the new video's first 3 seconds, at any speed.
+- AI captions: they change two of Dan's earlier rules, no AI (November 2) and the videos never leaving the phone. He was told, and it's his call. Being researched before he's asked where the speech-to-text runs: on the phone, or on a small server of his own (like Living in the Word's, on Cloudflare) that gets only the sound, when he taps the button; the cost, the privacy, timing for each word or line, and Korean. Nothing about them is built.
+- Not checked yet: text on Dan's phone (its font and Korean letters; the size; Top and Bottom against the apps' real buttons after an upload).

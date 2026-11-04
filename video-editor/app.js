@@ -1,12 +1,13 @@
 'use strict';
 
 /*
-  Video editor (build steps 3 to 5 in SPEC.md): one clip, trimmed, at a speed, with a look and better sound.
+  Video editor (build steps 3 to 6 in SPEC.md): one clip, trimmed, at a speed, with a look, better sound
+  and a line of text.
 
   1. Start: choose a video from the phone.
-  2. Edit: a look (filter), the lighting, the sound, trim and speed, shown and heard on the video as it plays.
-  3. Making the video: a new MP4 file, frame by frame, with the look drawn into every frame, and the
-     sound at the same speed, with the same sound changes.
+  2. Edit: a look (filter), the lighting, the sound, text, trim and speed, shown and heard on the video as it plays.
+  3. Making the video: a new MP4 file, frame by frame, with the look and the text drawn into every frame,
+     and the sound at the same speed, with the same sound changes.
   4. Your video: it plays, the page checks it against Instagram's, TikTok's and YouTube Shorts'
      upload rules, and you can save it or share it.
 
@@ -48,6 +49,36 @@ const SHORTEST_TRIM = 0.5; // seconds: the trimmed clip is never shorter than th
 const SOUND_SWITCHES = ['rumble', 'voice', 'even']; // Cut rumble, Clearer voice, Even out the volume
 const SOUND_DEFAULTS = { rumble: false, voice: false, even: false, volume: 100 }; // volume: 0 to 200 (%)
 
+// Text: one line of words on the video (the owner's choice "A", November 3, 2026): what it says, where
+// it goes and when it shows. drawText(), under "Text," draws it the same way on the playing video and on
+// each frame of the new video.
+const TEXT_PLACES = [
+  { id: 'top', name: 'Top' },
+  { id: 'middle', name: 'Middle' },
+  { id: 'bottom', name: 'Bottom' },
+];
+const TEXT_TIMES = [
+  { id: 'first', name: 'First 3 seconds' },
+  { id: 'whole', name: 'Whole video' },
+];
+const TEXT_FIRST_SECONDS = 3; // "First 3 seconds": the first 3 seconds of the new video
+const TEXT_DEFAULTS = { words: '', place: 'top', time: 'first' };
+// The text's look, as shares of the picture, so it looks the same on the small preview and in the
+// full-size video. Top and Bottom stay clear of the edges and the narrow middle stays clear of the
+// sides, where Instagram, TikTok and YouTube put their buttons and captions (guides disagree on how
+// much; SPEC.md, "Tech notes," "Text").
+const TEXT_LOOK = {
+  font: 'system-ui, Roboto, "Noto Sans CJK KR", sans-serif',
+  size: 0.06,              // the letters: a share of the picture's shorter side (65 pixels in a 1080-wide video)
+  width: 0.74,             // the longest line: a share of the picture's width
+  lineHeight: 1.3,         // each line's box, in letter sizes
+  padding: 0.3,            // the space at each end of a line's box, in letter sizes
+  top: 0.14,               // "Top": the text starts 14% of the way down
+  bottom: 0.70,            // "Bottom": the text ends 70% of the way down
+  box: 'rgba(0, 0, 0, 0.55)', // a soft dark box behind each line, so white letters show on any picture
+  color: '#ffffff',
+};
+
 // What every new video is made like, so it fits Instagram's, TikTok's and YouTube Shorts' upload
 // rules (the rules and their sources are in SPEC.md, "Made for Instagram, TikTok and YouTube Shorts").
 const OUTPUT = {
@@ -83,6 +114,7 @@ const state = {
   brightness: 0,       // -50 to 50
   contrast: 0,         // -50 to 50
   sound: { ...SOUND_DEFAULTS }, // the three sound switches and the volume
+  text: { ...TEXT_DEFAULTS },   // the line of text: its words, where it goes and when it shows
   previewUrl: null,    // your video, as a link the page can play
   resultUrl: null,     // the new video, as a link the page can play and save
   resultFile: null,    // the new video, as a file for sharing
@@ -263,6 +295,7 @@ function show(name) {
   if (name === 'look') {
     el('preview').play().catch(() => {});
     fitGlowToPreview();
+    startTextLayer();
   }
   else el('preview').pause();
   if (name !== 'done') el('result').pause();
@@ -325,12 +358,14 @@ async function readVideo(file) {
     state.brightness = 0;
     state.contrast = 0;
     state.sound = { ...SOUND_DEFAULTS };
+    state.text = { ...TEXT_DEFAULTS };
     if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
     state.previewUrl = URL.createObjectURL(file);
     el('preview').src = state.previewUrl;
     updateLook();
     updateTrimAndSpeed();
     updateSound();
+    updateText();
     selectTab('filter');
     hideProblem('look-problem');
     goDeeper('look');
@@ -343,7 +378,7 @@ async function readVideo(file) {
   }
 }
 
-// ---------- Screen 2: edit (a look, the lighting, the sound, trim and speed) ----------
+// ---------- Screen 2: edit (a look, the lighting, the sound, text, trim and speed) ----------
 
 // Trim and speed: the numbers on the screen, and the playing video's speed. The sound of the playing
 // video changes pitch with the speed, like the new video will (preservesPitch off).
@@ -455,8 +490,8 @@ function updateLook() {
   el('contrast-value').textContent = formatAmount(state.contrast);
 }
 
-// The Edit screen's tabs, in the owner's order (November 3, 2026). The arrow keys follow this order too.
-const TABS = ['filter', 'light', 'sound', 'trim', 'speed'];
+// The Edit screen's tabs, in the owner's order (November 3, 2026), with Text before Trim. The arrow keys follow this order too.
+const TABS = ['filter', 'light', 'sound', 'text', 'trim', 'speed'];
 function selectTab(name) {
   state.tab = name;
   for (const tab of TABS) {
@@ -477,6 +512,187 @@ function arrowKeys(event, items, choose) {
   const next = items[(now + keys[event.key] + items.length) % items.length];
   choose(next);
   next.focus();
+}
+
+// ---------- Text: one line of words on the video ----------
+// drawText() draws the text the same way on the playing video (on a see-through canvas over it) and on
+// each frame of the new video, so what you see is what you get. Everything is a share of the picture's
+// size (TEXT_LOOK), and the lines break in the same places at any size.
+
+const textMeasure = document.createElement('canvas').getContext('2d');
+
+// Splits the words into lines no wider than TEXT_LOOK.width of the picture: as few lines as it takes,
+// as even as they can be, and a line doesn't end with a one-letter word like "I" or "a" if that can be
+// helped. The widths are measured in letter sizes at one fixed size, so the lines break in the same
+// places on the small preview and in the full-size video. A word too long for a line is split.
+let textLinesBefore = { key: '', lines: [] }; // the last answer: every frame of a new video asks the same
+function textLines(words, width, height) {
+  const key = words + '|' + width + '|' + height;
+  if (textLinesBefore.key === key) return textLinesBefore.lines;
+  const fits = (TEXT_LOOK.width * width) / (TEXT_LOOK.size * Math.min(width, height)); // in letter sizes
+  textMeasure.font = '700 100px ' + TEXT_LOOK.font;
+  const wide = (text) => textMeasure.measureText(text).width / 100;
+  // The words, with any word too long for a line split into pieces that fit
+  const pieces = [];
+  for (const word of words.trim().split(/\s+/).filter(Boolean)) {
+    let rest = Array.from(word); // letter by letter
+    while (rest.length > 1 && wide(rest.join('')) > fits) {
+      let cut = rest.length - 1;
+      while (cut > 1 && wide(rest.slice(0, cut).join('')) > fits) cut -= 1;
+      pieces.push(rest.slice(0, cut).join(''));
+      rest = rest.slice(cut);
+    }
+    pieces.push(rest.join(''));
+  }
+  const count = pieces.length;
+  const lineOf = (from, to) => pieces.slice(from, to).join(' ');
+  // How few lines it takes, filling each line as full as it goes
+  let fewest = 0;
+  for (let from = 0; from < count; fewest += 1) {
+    let to = from + 1;
+    while (to < count && wide(lineOf(from, to + 1)) <= fits) to += 1;
+    from = to;
+  }
+  // The most even way to put the pieces from "from" on in this many lines: the lines' widths, squared and
+  // added up, are as small as they can be (plus a full line's worth for each line ending with a one-letter
+  // word). Longer lines are tried first, so when two ways are as good, the top lines are the fuller ones.
+  const tried = new Map();
+  const best = (from, lines) => {
+    if (from === count) return lines === 0 ? { cost: 0, ends: [] } : null;
+    if (lines === 0) return null;
+    const id = from + ',' + lines;
+    if (tried.has(id)) return tried.get(id);
+    let found = null;
+    for (let to = count; to > from; to--) {
+      const across = wide(lineOf(from, to));
+      if (across > fits) continue;
+      const rest = best(to, lines - 1);
+      if (!rest) continue;
+      const lonely = to < count && Array.from(pieces[to - 1]).length === 1 ? fits * fits : 0;
+      const cost = across * across + lonely + rest.cost;
+      if (!found || cost < found.cost - 1e-9) found = { cost, ends: [to, ...rest.ends] };
+    }
+    tried.set(id, found);
+    return found;
+  };
+  const lines = [];
+  const plan = count ? best(0, fewest) : null;
+  if (plan) {
+    let from = 0;
+    for (const to of plan.ends) {
+      const line = lineOf(from, to);
+      lines.push({ words: line, wide: wide(line) });
+      from = to;
+    }
+  }
+  textLinesBefore = { key, lines };
+  return lines;
+}
+
+// Draws the text on a picture this many pixels wide and high: white letters, each line on a soft dark box
+function drawText(context, width, height, text) {
+  const lines = textLines(text.words, width, height);
+  if (!lines.length) return;
+  const size = TEXT_LOOK.size * Math.min(width, height);
+  const step = TEXT_LOOK.lineHeight * size;
+  const tall = lines.length * step;
+  const top = text.place === 'top' ? TEXT_LOOK.top * height
+    : text.place === 'bottom' ? TEXT_LOOK.bottom * height - tall
+    : (height - tall) / 2;
+  context.save();
+  context.filter = 'none'; // the look and the lighting are for the picture, not the words
+  context.font = '700 ' + size + 'px ' + TEXT_LOOK.font;
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  lines.forEach((line, i) => {
+    const boxWidth = (line.wide + 2 * TEXT_LOOK.padding) * size;
+    const middle = top + (i + 0.5) * step;
+    context.fillStyle = TEXT_LOOK.box;
+    context.beginPath();
+    context.roundRect(width / 2 - boxWidth / 2, middle - step / 2, boxWidth, step, 0.15 * size);
+    context.fill();
+    context.fillStyle = TEXT_LOOK.color;
+    context.fillText(line.words, width / 2, middle);
+  });
+  context.restore();
+}
+
+// Whether the text shows at this moment of the new video (in seconds from its start)
+function textShowsAt(seconds) {
+  return state.text.words.trim() !== '' && (state.text.time === 'whole' || seconds < TEXT_FIRST_SECONDS);
+}
+
+// The text over the playing video: a see-through canvas put exactly over the picture. It shows the text
+// only at the moments the new video will, and draws again only when something changes.
+let textLayerShows = '';
+let textLayerRunning = false;
+function updateTextLayer() {
+  const preview = el('preview');
+  const layer = el('text-layer');
+  const box = preview.getBoundingClientRect();
+  const stage = preview.parentElement.getBoundingClientRect();
+  const ratio = window.devicePixelRatio || 1;
+  const width = Math.round(box.width * ratio);
+  const height = Math.round(box.height * ratio);
+  const now = preview.currentTime;
+  const inClip = now >= state.trimStart - 0.05 && now < state.trimEnd; // on the Trim tab the whole video plays
+  const shows = Boolean(state.facts) && width > 0 && inClip && textShowsAt((now - state.trimStart) / state.speed);
+  const what = shows ? [width, height, state.text.words, state.text.place].join('|') : 'nothing';
+  if (what === textLayerShows) return;
+  textLayerShows = what;
+  layer.style.left = (box.left - stage.left) + 'px';
+  layer.style.top = (box.top - stage.top) + 'px';
+  layer.style.width = box.width + 'px';
+  layer.style.height = box.height + 'px';
+  layer.width = Math.max(1, width);
+  layer.height = Math.max(1, height);
+  const context = layer.getContext('2d');
+  context.clearRect(0, 0, layer.width, layer.height);
+  if (shows) drawText(context, width, height, state.text);
+}
+// Keeps the text layer up to date while the Edit screen shows (once a frame; it's quick)
+function startTextLayer() {
+  if (textLayerRunning) return;
+  textLayerRunning = true;
+  const step = () => {
+    if (el('look-screen').hidden) { textLayerRunning = false; return; }
+    updateTextLayer();
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+// The Text tab: one row of buttons for where, one for when
+function buildTextChips() {
+  for (const [choices, holder, key] of [[TEXT_PLACES, 'text-places', 'place'], [TEXT_TIMES, 'text-times', 'time']]) {
+    for (const choice of choices) {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'chip';
+      chip.setAttribute('role', 'radio');
+      chip.dataset.choice = choice.id;
+      chip.textContent = choice.name;
+      chip.addEventListener('click', () => {
+        state.text[key] = choice.id;
+        updateText();
+      });
+      el(holder).append(chip);
+    }
+  }
+}
+
+// Marks the chosen buttons, keeps the typed words in step, and draws the text layer again
+function updateText() {
+  if (el('text-words').value !== state.text.words) el('text-words').value = state.text.words;
+  for (const [holder, key] of [['text-places', 'place'], ['text-times', 'time']]) {
+    for (const chip of el(holder).children) {
+      const chosen = chip.dataset.choice === state.text[key];
+      chip.setAttribute('aria-checked', String(chosen));
+      chip.tabIndex = chosen ? 0 : -1;
+    }
+  }
+  textLayerShows = ''; // draw again
+  updateTextLayer();
 }
 
 // ---------- Better sound: three switches and the volume ----------
@@ -687,7 +903,7 @@ async function makeVideo() {
     const audioTrack = state.facts.hasSound ? await input.getPrimaryAudioTrack() : null;
 
     // The picture: each new frame is drawn on this canvas with the look (the same CSS filter as the
-    // preview), then added to the new file as H.264. A normal canvas, not an OffscreenCanvas: only a
+    // preview) and the text (drawText(), as on the preview), then added to the new file as H.264. A normal canvas, not an OffscreenCanvas: only a
     // normal one can use the SVG looks.
     const canvas = document.createElement('canvas');
     canvas.width = size.width;
@@ -728,6 +944,7 @@ async function makeVideo() {
     for await (const frame of frames.canvasesAtTimestamps(moments)) {
       if (state.stopAsked) throw new Stopped();
       if (frame) context.drawImage(frame.canvas, 0, 0, size.width, size.height);
+      if (textShowsAt(made / fps)) drawText(context, size.width, size.height, state.text);
       await pictures.add(made / fps, 1 / fps);
       made += 1;
       const percent = Math.round((made / frameCount) * 100);
@@ -927,7 +1144,9 @@ if (!MB) {
 
 buildChips();
 buildSpeedChips();
+buildTextChips();
 updateLook();
+updateText();
 el('choose').addEventListener('click', () => el('pick').click());
 el('pick').addEventListener('change', () => {
   const file = el('pick').files[0];
@@ -972,6 +1191,15 @@ for (const id of SOUND_SWITCHES) {
 }
 el('volume').addEventListener('input', () => { state.sound.volume = Number(el('volume').value); updateSound(); });
 el('reset-sound').addEventListener('click', () => { state.sound = { ...SOUND_DEFAULTS }; updateSound(); });
+el('text-words').addEventListener('input', () => { state.text.words = el('text-words').value; updateText(); });
+el('text-words').addEventListener('keydown', (event) => { if (event.key === 'Enter') el('text-words').blur(); });
+for (const [holder, key] of [['text-places', 'place'], ['text-times', 'time']]) {
+  el(holder).addEventListener('keydown', (event) => arrowKeys(event, [...el(holder).children], (chip) => {
+    state.text[key] = chip.dataset.choice;
+    updateText();
+  }));
+}
+el('reset-text').addEventListener('click', () => { state.text = { ...TEXT_DEFAULTS }; updateText(); });
 el('make').addEventListener('click', makeVideo);
 el('preview').addEventListener('loadedmetadata', fitGlowToPreview);
 window.addEventListener('resize', fitGlowToPreview);
