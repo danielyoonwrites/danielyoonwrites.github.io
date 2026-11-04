@@ -44,7 +44,7 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
 
 Only one pull request at a time from the branch: wait for a merge before starting the next one, or the new work lands in the open pull request.
 
-Two or more sessions can work in this repository at the same time, on different projects (November 2, 2026: Idea board, the video editor and Photo Filters). Pull request numbers then jump, so write a number into the notes only after GitHub gives it. When shared notes clash (`HANDOFF.md`, `CHANGELOG.md`), merge main into the branch and keep both projects' lines. Never rewrite history that's already pushed.
+Two or more sessions can work in this repository at the same time, on different projects (November 2, 2026: Idea board, the video editor and Photo Filters). Pull request numbers then jump, so write a number into the notes only after GitHub gives it. When shared notes clash (`HANDOFF.md`, `CHANGELOG.md`), merge main into the branch and keep both projects' lines. Never rewrite history that's already pushed. Before opening a pull request while another session's is open, try merging the two branches in a scratch copy (`git worktree add`, then `git merge --no-commit`): git counts changes on neighboring lines as a clash, so put your note lines where they don't touch the other session's (a changelog entry can start its own line), and then either can merge first (November 3, 2026).
 
 When Dan says "do the rest," Claude works through the build plan one pull request at a time, starting the next one as soon as the last merges.
 

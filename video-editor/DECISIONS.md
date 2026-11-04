@@ -2,14 +2,14 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129, 137 and 138 and 139 and 140)
+## In force (November 3, 2026, at the handoff; pull requests 110 to 112, 116, 125, 129 and 137 to 140)
 
 Every decision below that still holds, one line each, by date; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
-- November 2, 2026: a simple video editor that does a few things well (a filter, lighting, text, clip order, crop, speed); no music button, nothing copyrighted, no AI (the owner's words), except the AI captions only he can use, which he asked for on November 3 (being planned).
+- November 2, 2026: a simple video editor that does a few things well (a filter, lighting, text, clip order, crop, speed); no music button, nothing copyrighted, no AI (the owner's words), except AI captions only he can use (planned November 3, not built yet).
 - November 2, 2026: just for Dan, on his Android phone in Chrome (his "A"); since November 3 it's on the website's Projects page with a link anyone can open, saying it's made for an Android phone in Chrome (his "A"), and it's still built and checked only for his phone.
 - November 2, 2026: the name "Video editor," at https://danielyoonwrites.github.io/video-editor (his "A").
-- November 2, 2026: everything happens on the phone; the videos are never uploaded. Mediabunny makes the new video, frame by frame.
+- November 2, 2026: everything happens on the phone; the videos are never uploaded. Mediabunny makes the new video, frame by frame. One planned exception (November 3): for Dan's AI captions only, the sound of the trimmed clip goes to his own Cloudflare server when he taps "Make captions."
 - November 2, 2026: Mediabunny's ready-made file saved in the folder; no npm (the website's rule, kept after Dan asked whether it helps).
 - November 2, 2026: the riskiest part first: build step 2 is a phone test (Claude's plan).
 - November 2, 2026: the phone test is its own page, `phone-test.html`, kept for checking other phones or Chrome updates later.
@@ -21,11 +21,11 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - November 2, 2026: the looks are Korean styles (Dan's "a"): Original, Milky 우유빛, Peach 복숭아, Soft glow 뽀샤시, Café 카페, Clear 맑음, Film 필름, Black and white 흑백, each with its English name and the Korean word under it. They're SVG filters, drawn on a normal canvas.
 - November 2, 2026: trim and speed (build step 4): "Start here" and "End here" while it plays, or sliders in tenths of a second; speeds 0.5×, 1×, 1.5× and 2×; the sound follows the speed like a tape, so faster sounds higher (Dan's "b").
 - November 2, 2026: the app makes each new video frame by frame (Mediabunny's `CanvasSink` and `CanvasSource`, the sound through an `OfflineAudioContext`), instead of the one-step `Conversion`, which has no speed setting.
+- November 2, 2026: the filter and lighting question (whole video or each clip) waits for build step 9, several clips.
 - November 2, 2026 (the Sound tab and the tabs' order November 3): the screens: Start, "Edit" (Filter, Lighting, Sound, Text, Trim and Speed tabs, in Dan's order with Text before Trim, opening on Filter; called "The look" until build step 4), "Making the video," "Your video"; Brightness and Contrast from −50 to +50.
 - November 3, 2026: better sound, without AI (build step 5): three switches, Cut rumble, Clearer voice and Even out the volume, and a Volume slider from Off to 200% (Dan's "B"); the same steps on the playing video and in the new video, with a safety limit so nothing clips. A steady hiss (like a fan) is left for later.
 - November 3, 2026: text for anyone using the app: one line per video (Dan's "A"), Top, Middle or Bottom, for the new video's first 3 seconds or the whole video; white bold letters on soft dark boxes, drawn by the same code on the playing video and on each frame.
 - November 3, 2026: AI captions only Dan can use (his words), planned, not built: his own small Cloudflare server with Workers AI's Whisper, its own server rather than part of Living in the Word's, one short line at a time (his "A" three times), locked with a passcode; only the sound of the trimmed clip leaves the phone, only when he taps "Make captions."
-- November 2, 2026: the filter and lighting question (whole video or each clip) waits for build step 8.
 
 ## Log (oldest first)
 
@@ -33,16 +33,19 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - Decision: plan a simple video editor: a filter, lighting, text, the order of clips, cropping, and speeding up or slowing down. No music button, nothing copyrighted, no AI.
 - Why: the owner: "This is for research and asking questions, how hard would it be to make a simple video editor? It's not trying to do everything, just simple things well. Like applying a filter, changing lighting, adding text, arranging video order, cropping video, speeding up or slowing down. It doesn't need an add music button or anything copyrighted, and it doesn't need AI added. I just want a simple one that can do the basic things but make them easy to use." Claude's research (his Notion page "Simple video editor: how hard to build (Nov 2026)"): doable in Chrome on the phone, harder than Idea board, with nearly all the difficulty in saving the finished video.
 - Also: trimming (cutting off a clip's start and end) was Claude's suggestion, not on the owner's list; Mediabunny has it built in.
+- Status: one exception added November 3, 2026: the plan for AI captions (pull request 140).
 
 ### November 2, 2026: just for the owner, on his Android phone in Chrome (pull request 110)
 - Decision: version 1 is only for the owner's Android phone, in Chrome.
 - Why: his answer, "Yea let's try A," to "Who's it for?", where "A" was "Just you, on your Android phone in Chrome" (Claude's recommendation: everything checked works there).
 - Turned down: "B", other people too, including on iPhones. Safari draws filters on a canvas only behind an experimental setting ("Canvas Filters," Safari 18), and its AudioEncoder arrived only in Safari 26 (MDN's browser-compat-data, read November 2, 2026).
+- Status: widened November 3, 2026: on the Projects page now (pull request 138): anyone with the link can open it; it's still built and checked only for his phone.
 
 ### November 2, 2026: everything on the phone; Mediabunny makes the video (pull request 110)
 - Decision: the app makes the new video frame by frame in Chrome, with the browser's video tools (WebCodecs, Chrome 94 and later, Android included) and the free Mediabunny library (MPL-2.0; version 1.65.0, October 30, 2026). The videos never leave the phone.
 - Why: Claude's research, November 2, 2026: Mediabunny's conversion tools have trimming, cropping, resizing and frame-by-frame drawing (for filters and text) built in, with progress and a way to stop, and it comes as one ready-made file (its README and guide on GitHub, and the npm registry).
 - Turned down: ffmpeg.wasm (FFmpeg in the browser): its main file is 32.2 MB, and its own speed test took 60 to 129 seconds to convert a 10-second 720p clip on a computer (Intel Core i5, Chrome 116), so a phone would likely be slower (its FAQ and Performance pages on GitHub). "Play and record" with the browser's MediaRecorder: no library, but saving takes as long as the video plays, with the screen on, and whether Chrome on Android records MP4 couldn't be confirmed (a third-party table, addpipe's, says Chrome 126 and later can, without saying whether Android is included); kept as a backup plan. A server: the videos would leave the phone.
+- Status: one planned exception, November 3, 2026: the plan for AI captions (pull request 140): for his captions only, the sound of the trimmed clip goes to his own Cloudflare server when he taps.
 
 ### November 2, 2026: Mediabunny's file saved in the folder, no npm (pull request 110)
 - Decision: Mediabunny's ready-made file goes in `video-editor/lib/`, with its license and a link to its source, and the app loads it with `import`. One version stays until an update is chosen on purpose.
@@ -89,6 +92,7 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - Decision (Claude's design, for Dan to judge in the screenshots): Start → "The look" → "Making the video" → "Your video." On "The look," the video plays at the top without sound (it can be turned on), with a "Filter" tab (None, Black and white, Warm, Vivid, Soft, Old film) and a "Lighting" tab (Brightness and Contrast, −50 to +50 in steps of 5, "Reset the lighting"); "Make the video" stays at the bottom. The phone's Back button goes back one screen, and stops a video being made. A saved video is named for its time, like `video-2026-11-02-0913.mp4`.
 - Why: Dan's rules: one thing per screen and short pages on a phone (tabs instead of one long page). The filters are CSS filters, so the playing video and the new file use the same words and look the same.
 - The filter and lighting question (`SPEC.md`, open question 4) waits for build step 7: with one clip, the whole video and each clip are the same.
+- Status: its screens replaced by November 2, 2026: trim and speed (pull request 125), where "The look" became "Edit" with tabs; the filter and lighting question now waits for build step 9, several clips.
 
 ### November 2, 2026: Korean looks (pull request 116)
 - Decision: the looks are Original (원본), six Korean looks, Milky (우유빛), Peach (복숭아), Soft glow (뽀샤시), Café (카페), Clear (맑음) and Film (필름), and Black and white (흑백), in that order. Each button shows the English name with the Korean word under it. They replace None, Warm, Vivid, Soft and Old film.
@@ -100,10 +104,12 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 ### November 2, 2026: better sound becomes build step 5 (pull request 116)
 - Decision: add "Better sound" to the build plan as step 5, after trim and speed, without AI: even out the volume, cut low rumble, a clearer voice, the volume up or down. Which of these, and how they're shown, is asked at step 5 (`SPEC.md`, open question 6). The later steps move down one (shape and crop 6, text 7, several clips 8, polish 9).
 - Why: Dan: "can you also create a part of the app to help with audio as well? Like maybe making the audio better or things like that? Let me know if it is possible." Claude's answer: possible without AI. Chrome has OfflineAudioContext (Chrome 35 and later), BiquadFilterNode and DynamicsCompressorNode (Chrome 14 and later) (MDN's browser-compat-data, November 2, 2026), and Mediabunny can hand the sound over and take it back (AudioBufferSink, AudioBufferSource). Its limit: changing background noise like other people talking or music can't really be removed without AI, and steady noise like a fan only a little. After trim and speed, because speed changes the sound too.
+- Status: the later steps moved again November 3, 2026: text became step 6 (pull request 139), AI captions step 7 and shape and crop step 8 (pull request 140); several clips is 9, polish 10.
 
 ### November 2, 2026: trim and speed (pull request 125)
 - Decision (Claude's design, for Dan to judge in the screenshots): the second screen is now "Edit," with four tabs, Trim, Speed, Filter and Lighting, and it opens on Trim. Trim: "Your clip: 4.0 seconds"; "Start here" and "End here" set the start or the end to the moment that's playing; Start and End sliders in tenths of a second; "Reset the trim"; a clip is at least half a second long, and the end never goes past the video's end. On the Trim tab the whole video plays, so new points are easy to find; the other tabs play only the trimmed part, over and over, so you see the clip as it will be. Speed: 0.5× (half speed), 1× (normal), 1.5× (faster) and 2× (double speed), as buttons in one row, with the new video's length under them.
 - Why: the plan's build step 4, with Dan's rules: one thing per screen, short pages on a phone (tabs instead of one long page), big buttons. Tapping "Start here" while it plays is easier on a phone than dragging to an exact moment; the sliders are for fine-tuning.
+- Status: its tab order and opening on Trim replaced by November 3, 2026: the tabs in Dan's order (pull request 137); Text joined before Trim in pull request 139.
 
 ### November 2, 2026: the sound follows the speed, like a tape (pull request 125)
 - Decision: when a clip is sped up or slowed down, its sound plays faster or slower with it, like a tape: faster sounds higher, slower sounds lower. The playing video sounds the same way (`preservesPitch` off), so what you hear is what you get.
