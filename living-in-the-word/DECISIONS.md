@@ -6,7 +6,7 @@ The "In force" list right below is every decision that still holds, one line eac
 
 **Who it's for, and how the work goes**
 - October 25, 2026: stages: Dan's small group first, then anyone online later (stage 3). Dan reviews every question, and nothing is shared on its own.
-- October 25, 2026: the name "Living in the Word"; a trademark search before any public launch or store listing.
+- October 25, 2026: the name "Living in the Word"; a trademark search before any public launch or store listing. On the website's Projects page since November 4, 2026, after a name check through search results (no live US trademark found; the trademark office's own search not checked).
 - October 25, 2026: Claude's effort: High for most steps; Extra high was for building the AI helper.
 - October 29, 2026: the checks live in `living-in-the-word/tests/`; run them after any change to `app.js` or `server/worker.js`.
 - November 2, 2026: perfect what's built: the audit's fixes come first, one pull request each, in `AUDIT.md`'s order.
@@ -508,3 +508,14 @@ The "In force" list right below is every decision that still holds, one line eac
 - Decision: Dan chose "A": keep "This can take up to a minute." (on "Prepare for a Bible study," and in the line while the AI writes a study's or a reading's questions) until he has seen 3 or 4 more waits in the `?test` line; then he chooses the words.
 - Why: only Romans 16 has been timed (13.6 seconds on November 3, 15.0 on November 1), too few to promise a shorter time, and a promise that's sometimes broken feels worse than a long one that's usually beaten (Claude's recommendation, which Dan chose).
 - Turned down for now: "This usually takes 15 to 30 seconds" ("B"), and his own words now ("C").
+
+### November 4, 2026: on the website's Projects page, and the name check (pull request NNN)
+- Decision: the app is listed on the website's Projects page; the words and their reasons are in the root `DECISIONS.md`. The name stays "Living in the Word," and the AI stays invite only.
+- Why: Dan: "Yes let's just add this to my website in projects".
+- The name check, November 4, 2026, through search results only (no page below was opened):
+  - No US trademark for "Living in the Word" turned up, in searches for the phrase with "trademark," "USPTO," "serial number" and "owner," including on Justia's, Trademarkia's and uspto.report's trademark pages.
+  - The closest: "THE LIVING WORD IN 3D" (serial number 87058311; a series of books in biblical studies, filed June 2, 2016), shown as abandoned on April 27, 2017, on Justia's page in search results.
+  - No app called "Living in the Word" turned up in a search for Bible study apps. (October 25, 2026: a sermon podcast called "Living in the Word" and a ministry called "Life in the Word" were found.)
+  - Not checked: the US trademark office's own search (Trademark Search, https://tmsearch.uspto.gov), and other countries.
+  - Claude's view, not legal advice: fine for a free, invite-only app on a personal website. Before stage 3 (anyone online), any store listing or charging, do a proper trademark search, as the October 25 decision says.
+- Turned down: renaming it (nothing found that calls for it).

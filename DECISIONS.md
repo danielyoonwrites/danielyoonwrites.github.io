@@ -17,6 +17,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - October 24, 2026: Latest posts filled in on GitHub through Jina Reader, before each publish.
 - October 24, 2026: the menu is Writing, Projects, About (no Home link); Projects lists every project first, then "How I built it" as fold-outs.
 - November 2, 2026: Idea board is on the Projects page as a web app in progress, with a link, before its polish step (Dan's wish); its line says only what it does today.
+- November 4, 2026: Living in the Word is on the Projects page, listed first, as "Web app · For my small group," with a link (Dan's wish); its line says only what it does today, and its note says the AI is invite only for now.
 - October 24, 2026: version numbers on the stylesheet and script links, raised on every change.
 
 **The notes and handoffs**
@@ -155,3 +156,10 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - How the words were chosen (Claude's choices, put to Dan with the pull request and its screenshots): the line says only what works today. It makes no promise about phones in general (the app was checked on Dan's Android phone in Chrome and on his computer, never on an iPhone) or about the same boards on every device (that's build step 7). At 83 characters it shows whole even on a phone 320 pixels wide, where project lines stop after 3 lines (Quiet room's is cut there). The note's trade-off says the boards stay in the browser they were made in, for now. The name check is in `idea-board/DECISIONS.md`.
 - Turned down: waiting for build step 9; "on a phone or a computer" in the line (an iPhone was never tested); a longer line (it would be cut on small phones).
 - Revisit if: what the app can do changes (saving to an account, links): update its line and its note in the same pull request (`idea-board/CLAUDE.md`).
+
+### November 4, 2026: Living in the Word on the Projects page (pull request NNN)
+- Decision: Living in the Word is listed first on the Projects page: the label "Web app · For my small group," its name linked to the app, the line "AI-written discussion questions for any Bible passage, and a daily reading plan.", "Open Living in the Word," and a "How I built it" note with the four parts (listed first there too).
+- Why: Dan, November 4, 2026, after the app's audit was done: "Yes let's just add this to my website in projects". Listed first because it's the most finished of the apps and fits the site's readers (Claude's choice, put to Dan with the pull request and its screenshots).
+- How the words were chosen (Claude's, put to Dan with the pull request): the line says only what works today, and says "AI-written" plainly. The label and the note's trade-off say who it's for: the AI is invite only for now; anyone else gets general questions, and the reading plan works for everyone (checked in the app as a visitor who isn't signed in, November 4). At 80 characters the line shows whole on a phone 320 pixels wide, in 3 lines. The note says "my own theological guidelines," never that a pastor checked each set (`living-in-the-word/DECISIONS.md`, October 29, 2026: the "check it" line). The name check is in `living-in-the-word/DECISIONS.md`.
+- Turned down: a time for the wait in the note: only one passage has been timed (Dan's "A", November 3, 2026); listing it without a link, like Quiet room: anyone can use the general questions and the reading plan.
+- Revisit if: what the app can do changes (the AI opening to more people, sign-ups, a store listing): update its line and its note in the same pull request (`living-in-the-word/CLAUDE.md`).
