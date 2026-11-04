@@ -139,9 +139,10 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
     const preview = document.getElementById('preview');
     return Boolean(preview.src) && preview.muted && !preview.paused;
   }));
-  check('B3 "Trim" is open first', (await page.getAttribute('#tab-trim', 'aria-selected')) === 'true' && await visible(page, 'panel-trim'));
-  await page.click('#tab-filter');
-  check('B3b "Filter" opens, with "Original" chosen', await visible(page, 'panel-filter') && (await chosenFilter(page)) === 'none');
+  check('B3 "Filter" is open first (the first tab)', (await page.getAttribute('#tab-filter', 'aria-selected')) === 'true' &&
+    await visible(page, 'panel-filter') && !(await visible(page, 'panel-trim')));
+  check('B3b with "Original" chosen', (await chosenFilter(page)) === 'none');
+  await page.screenshot({ path: SHOTS + '2a-edit-opens-on-filter.png' });
   const looks = await page.locator('#chips .chip').evaluateAll((all) => all.map((c) => [c.querySelector('.en').textContent, c.querySelector('.ko').textContent, c.querySelector('.ko').lang]));
   check('B4 eight looks, each with its Korean word', JSON.stringify(looks) === JSON.stringify([
     ['Original', '원본', 'ko'], ['Milky', '우유빛', 'ko'], ['Peach', '복숭아', 'ko'], ['Soft glow', '뽀샤시', 'ko'],
@@ -440,7 +441,16 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   await page.goto(APP);
   await choose(page, clock);
   const tabs = await page.locator('.tab').allInnerTexts();
-  check('I1 five tabs: Trim, Speed, Filter, Lighting, Sound', JSON.stringify(tabs) === JSON.stringify(['Trim', 'Speed', 'Filter', 'Lighting', 'Sound']), JSON.stringify(tabs));
+  check('I1 five tabs, in the owner\'s order: Filter, Lighting, Sound, Trim, Speed', JSON.stringify(tabs) === JSON.stringify(['Filter', 'Lighting', 'Sound', 'Trim', 'Speed']), JSON.stringify(tabs));
+  await page.focus('#tab-filter');
+  await page.keyboard.press('ArrowRight');
+  const afterRight = await page.evaluate(() => document.activeElement.id);
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  const afterLeft = await page.evaluate(() => document.activeElement.id);
+  check('I1b the arrow keys follow that order (Filter → Lighting; Filter ← goes round to Speed)',
+    afterRight === 'tab-light' && afterLeft === 'tab-speed' && await visible(page, 'panel-speed'), `${afterRight}, ${afterLeft}`);
+  await page.click('#tab-trim');
   check('I2 the whole clip at first', (await text(page, '#trim-length')) === 'Your clip: 8.0 seconds' &&
     (await text(page, '#trim-start-value')) === '0:00.0' && (await text(page, '#trim-end-value')) === '0:08.0');
   const startHere = await page.locator('#start-here').boundingBox();
@@ -526,7 +536,9 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   await page.click('#new-video');
   await page.waitForSelector('#start-screen:not([hidden])');
   await choose(page, videos.short);
-  check('I22 a new video starts with the whole clip at 1×', (await text(page, '#trim-length')) === 'Your clip: 3.0 seconds' &&
+  check('I22 a new video opens on "Filter" again', (await page.getAttribute('#tab-filter', 'aria-selected')) === 'true' && await visible(page, 'panel-filter'));
+  await page.click('#tab-trim');
+  check('I22b and starts with the whole clip at 1×', (await text(page, '#trim-length')) === 'Your clip: 3.0 seconds' &&
     await page.evaluate(() => document.querySelector('#speeds .chip[aria-checked="true"]').dataset.speed) === '1', await text(page, '#trim-length'));
   check('I no page errors', page.problems.length === 0, page.problems.join('\n'));
   await context.close();
@@ -540,7 +552,7 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   await page.goto(APP);
   await choose(page, soundTests.tones);
   const tabBoxes = await page.locator('.tab').evaluateAll((all) => all.map((t) => [t.textContent, Math.round(t.getBoundingClientRect().top)]));
-  check('J1 five tabs in one row on the phone', tabBoxes.map((t) => t[0]).join() === 'Trim,Speed,Filter,Lighting,Sound' &&
+  check('J1 five tabs in one row on the phone', tabBoxes.map((t) => t[0]).join() === 'Filter,Lighting,Sound,Trim,Speed' &&
     tabBoxes.every((t) => t[1] === tabBoxes[0][1]), JSON.stringify(tabBoxes));
   await page.click('#tab-sound');
   const switches = await page.locator('#panel-sound .switch').evaluateAll((all) => all.map((b) => ({
@@ -713,7 +725,7 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   check('G4 the keyboard reaches "Choose a video"', await page.evaluate(() => document.activeElement.id === 'choose'));
   await page.setInputFiles('#pick', videos.short);
   await page.waitForSelector('#look-screen:not([hidden])');
-  const panel = await page.locator('#panel-trim').boundingBox();
+  const panel = await page.locator('#panel-filter').boundingBox();
   check('G5 on a computer the controls sit in a readable column', panel.width <= 600, JSON.stringify(panel));
   check('G6 nothing wider than the window', await page.evaluate(() => document.documentElement.scrollWidth <= 1280));
   const makeButton = await page.locator('#make').boundingBox();
