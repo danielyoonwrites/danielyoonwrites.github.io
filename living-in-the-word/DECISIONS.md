@@ -509,7 +509,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - Why: only Romans 16 has been timed (13.6 seconds on November 3, 15.0 on November 1), too few to promise a shorter time, and a promise that's sometimes broken feels worse than a long one that's usually beaten (Claude's recommendation, which Dan chose).
 - Turned down for now: "This usually takes 15 to 30 seconds" ("B"), and his own words now ("C").
 
-### November 4, 2026: on the website's Projects page, and the name check (pull request NNN)
+### November 4, 2026: on the website's Projects page, and the name check (pull request 136)
 - Decision: the app is listed on the website's Projects page; the words and their reasons are in the root `DECISIONS.md`. The name stays "Living in the Word," and the AI stays invite only.
 - Why: Dan: "Yes let's just add this to my website in projects".
 - The name check, November 4, 2026, through search results only (no page below was opened):
