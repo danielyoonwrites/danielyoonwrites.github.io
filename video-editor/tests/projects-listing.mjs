@@ -55,10 +55,8 @@ for (const width of [320, 360]) {
   });
   check(`${width}: its line shows whole (project lines stop after 3 lines)`, !excerpt.cut, JSON.stringify(excerpt));
   console.log(`(${width} wide) the line takes ${excerpt.lines} lines`);
-  // Its small lines: "What I set out to learn" (since pull request 142) and the one about phones
-  const smallLines = await entry.locator('.post-date').allTextContents();
   check(`${width}: its gray line says it's made for an Android phone in Chrome`,
-    smallLines.some((line) => /Android phone in Chrome/.test(line)), JSON.stringify(smallLines));
+    /Android phone in Chrome/.test((await entry.locator('.post-date').allTextContents()).join(' ')));   // two gray lines since pull request 142: what Dan set out to learn, then this one
   check(`${width}: nothing wider than the screen`, await page.evaluate((w) => document.documentElement.scrollWidth <= w, width));
   const links = await entry.locator('a').evaluateAll((all) => all.map((a) => a.getAttribute('href')));
   check(`${width}: both links go to the video editor`, links.length === 2 && links.every((h) => h === 'video-editor/'), JSON.stringify(links));
