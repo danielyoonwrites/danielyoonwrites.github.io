@@ -10,7 +10,7 @@
 // with the add-on, and it can't share (sharing is stood in for below). The owner's phone checks the rest.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import os from 'node:os';
@@ -18,7 +18,7 @@ import path from 'node:path';
 import {
   VIDEOS, haveFfmpeg, makeTestVideos, makeChart, makeClock, frameColor, soundFacts, PATCHES, patchColor, probe,
   thumbnail, likeness, average, colorfulness, mp4Boxes, contrast, makeSoundTests, soundSamples, toneLevel, soundLevel,
-  soundPeak, soundLag,
+  soundPeak, soundLag, frameGray, lettersBox,
 } from './test-videos.mjs';
 
 const require = createRequire(import.meta.url);
@@ -441,7 +441,7 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   await page.goto(APP);
   await choose(page, clock);
   const tabs = await page.locator('.tab').allInnerTexts();
-  check('I1 five tabs, in the owner\'s order: Filter, Lighting, Sound, Trim, Speed', JSON.stringify(tabs) === JSON.stringify(['Filter', 'Lighting', 'Sound', 'Trim', 'Speed']), JSON.stringify(tabs));
+  check('I1 six tabs, in the owner\'s order with Text before Trim: Filter, Lighting, Sound, Text, Trim, Speed', JSON.stringify(tabs) === JSON.stringify(['Filter', 'Lighting', 'Sound', 'Text', 'Trim', 'Speed']), JSON.stringify(tabs));
   await page.focus('#tab-filter');
   await page.keyboard.press('ArrowRight');
   const afterRight = await page.evaluate(() => document.activeElement.id);
@@ -552,7 +552,7 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   await page.goto(APP);
   await choose(page, soundTests.tones);
   const tabBoxes = await page.locator('.tab').evaluateAll((all) => all.map((t) => [t.textContent, Math.round(t.getBoundingClientRect().top)]));
-  check('J1 five tabs in one row on the phone', tabBoxes.map((t) => t[0]).join() === 'Filter,Lighting,Sound,Trim,Speed' &&
+  check('J1 six tabs in one row on the phone', tabBoxes.map((t) => t[0]).join() === 'Filter,Lighting,Sound,Text,Trim,Speed' &&
     tabBoxes.every((t) => t[1] === tabBoxes[0][1]), JSON.stringify(tabBoxes));
   await page.click('#tab-sound');
   const switches = await page.locator('#panel-sound .switch').evaluateAll((all) => all.map((b) => ({
@@ -698,6 +698,169 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   check('J25 a video without sound: the Sound tab says so, with no switches', (await visible(page, 'no-sound')) && !(await visible(page, 'sound-controls')) &&
     (await text(page, '#no-sound')) === 'This video has no sound.');
   check('J no page errors', page.problems.length === 0, page.problems.join('\n'));
+  await context.close();
+}
+
+// ---------- K. Text: one line on the video (Dan's choice "A", November 3, 2026) ----------
+// The clock video is one plain gray (it brightens each second), so white letters are easy to find. The
+// same drawing goes on the playing video (a see-through canvas over it) and on each frame of the new
+// video: these checks compare where the letters land in both.
+{
+  const { context, page } = await openPhone();
+  await page.goto(APP);
+  await choose(page, clock);
+  // Where the letters are on the text layer, as shares of its width and height (null if there are none):
+  // a letter is bright and solid; the box behind it is dark and see-through
+  const layerLetters = () => page.evaluate(() => {
+    const layer = document.getElementById('text-layer');
+    const { width, height } = layer;
+    const data = layer.getContext('2d').getImageData(0, 0, width, height).data;
+    let top = height;
+    let bottom = -1;
+    let left = width;
+    let right = -1;
+    let count = 0;
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 4;
+        if (data[i + 3] <= 200 || data[i] <= 150) continue;
+        count += 1;
+        top = Math.min(top, y);
+        bottom = Math.max(bottom, y);
+        left = Math.min(left, x);
+        right = Math.max(right, x);
+      }
+    }
+    return count ? { top: top / height, bottom: (bottom + 1) / height, left: left / width, right: (right + 1) / width, count } : null;
+  });
+  const showAt = async (seconds) => {
+    await page.evaluate((at) => { const v = document.getElementById('preview'); v.pause(); v.currentTime = at; }, seconds);
+    await page.waitForTimeout(300);
+  };
+  const savedLetters = (file, at) => lettersBox(frameGray(file, at), 180, 320);
+  const near = (a, b, most = 0.03) => Boolean(a && b) && ['top', 'bottom', 'left', 'right'].every((k) => Math.abs(a[k] - b[k]) <= most);
+  const chosenIn = (holder) => page.evaluate((h) => document.querySelector('#' + h + ' .chip[aria-checked="true"]').dataset.choice, holder);
+
+  await page.click('#tab-text');
+  await showAt(1);
+  check('K1 the Text tab: an empty line, "Top" and "First 3 seconds" chosen, nothing on the video',
+    await visible(page, 'panel-text') && (await page.inputValue('#text-words')) === '' &&
+    (await chosenIn('text-places')) === 'top' && (await chosenIn('text-times')) === 'first' && (await layerLetters()) === null);
+  const choices = await page.locator('#panel-text .chip').allTextContents();
+  check('K1b its buttons: Top, Middle, Bottom; First 3 seconds, Whole video',
+    JSON.stringify(choices) === JSON.stringify(['Top', 'Middle', 'Bottom', 'First 3 seconds', 'Whole video']), JSON.stringify(choices));
+  const chipHeights = await page.locator('#panel-text .chip, #text-words').evaluateAll((all) => all.map((c) => c.getBoundingClientRect().height));
+  check('K1c the line and every Text button are at least 48 tall', chipHeights.every((h) => h >= 48), JSON.stringify(chipHeights));
+
+  await page.fill('#text-words', 'Hello from the video editor');
+  await page.waitForTimeout(200);
+  const atTop = await layerLetters();
+  check('K2 the words show over the playing video, near the top (from 14% down)', Boolean(atTop) && atTop.top >= 0.14 && atTop.top < 0.22, JSON.stringify(atTop));
+  const boxes = await page.evaluate(() => {
+    const a = document.getElementById('text-layer').getBoundingClientRect();
+    const b = document.getElementById('preview').getBoundingClientRect();
+    return [a.left, a.top, a.width, a.height, b.left, b.top, b.width, b.height];
+  });
+  check('K3 the text layer sits exactly over the picture', Math.max(...[0, 1, 2, 3].map((i) => Math.abs(boxes[i] - boxes[i + 4]))) <= 1, JSON.stringify(boxes));
+  check('K3b taps go through the text layer to the video', await page.evaluate(() => getComputedStyle(document.getElementById('text-layer')).pointerEvents === 'none'));
+
+  await page.click('#text-places .chip[data-choice="middle"]');
+  await page.waitForTimeout(150);
+  const atMiddle = await layerLetters();
+  check('K4 "Middle" puts it in the middle', Boolean(atMiddle) && Math.abs((atMiddle.top + atMiddle.bottom) / 2 - 0.5) < 0.03, JSON.stringify(atMiddle));
+  await page.click('#text-places .chip[data-choice="bottom"]');
+  await page.waitForTimeout(150);
+  const atBottom = await layerLetters();
+  check('K4b "Bottom" puts it low, but above 70% down (clear of the apps\' buttons)', Boolean(atBottom) && atBottom.bottom <= 0.70 && atBottom.bottom > 0.62, JSON.stringify(atBottom));
+  await page.click('#text-places .chip[data-choice="top"]');
+
+  await showAt(4);
+  const late = await layerLetters();
+  await showAt(2.5);
+  const early = await layerLetters();
+  check('K5 "First 3 seconds": on the playing video it shows at 2.5 seconds and is gone at 4', late === null && early !== null, JSON.stringify([early, late]));
+  await showAt(1);
+  const inPreview = await layerLetters();
+
+  // Lighting −50 darkens the picture; the words should stay white
+  await page.click('#tab-light');
+  await setSlider(page, 'brightness', -50);
+  await makeVideo(page);
+  check('K6 a video with text is made', (await screenShown(page)) === 'done-screen', await text(page, '#look-problem').catch(() => ''));
+  let saved = (await download(page, 'text-top.mp4')).where;
+  const savedAt1 = savedLetters(saved, 1);
+  check('K6b in the saved video, the words are where they showed while editing', near(savedAt1, inPreview), JSON.stringify({ savedAt1, inPreview }));
+  check('K6c the words stay white (the lighting is only for the picture)', Boolean(savedAt1) && savedAt1.brightest >= 220, JSON.stringify(savedAt1));
+  check('K6d and they\'re gone after 3 seconds', savedLetters(saved, 4) === null, JSON.stringify(savedLetters(saved, 4)));
+
+  await page.goBack();
+  await page.waitForSelector('#look-screen:not([hidden])');
+  check('K7 back on Edit, the text is kept', (await page.inputValue('#text-words')) === 'Hello from the video editor');
+  await page.click('#tab-text');
+  await page.click('#text-times .chip[data-choice="whole"]');
+  await makeVideo(page);
+  saved = (await download(page, 'text-whole.mp4')).where;
+  const savedAt7 = savedLetters(saved, 7);
+  check('K8 "Whole video": the words are still there at 7 seconds, in the same place', near(savedAt7, savedAt1), JSON.stringify(savedAt7));
+
+  await page.goBack();
+  await page.waitForSelector('#look-screen:not([hidden])');
+  await page.click('#tab-text');
+  await page.click('#text-times .chip[data-choice="first"]');
+  await page.click('#tab-speed');
+  await page.click('#speeds .chip[data-speed="2"]');
+  await makeVideo(page);
+  saved = (await download(page, 'text-2x.mp4')).where;
+  check('K9 at 2×, "First 3 seconds" means the new video\'s first 3 seconds', savedLetters(saved, 2.5) !== null && savedLetters(saved, 3.5) === null,
+    JSON.stringify([savedLetters(saved, 2.5), savedLetters(saved, 3.5)]));
+
+  await page.goBack();
+  await page.waitForSelector('#look-screen:not([hidden])');
+  await page.click('#tab-speed');
+  await page.click('#speeds .chip[data-speed="1"]');
+  await page.click('#tab-text');
+  await showAt(1);
+  await page.fill('#text-words', 'A much longer line of text that has to wrap onto more than one line on the video');
+  await page.waitForTimeout(200);
+  const long = await layerLetters();
+  check('K10 a long line wraps, and stays clear of the sides', Boolean(long) && long.left >= 0.1 && long.right <= 0.9 && long.bottom - long.top > 0.1, JSON.stringify(long));
+  const even = await page.evaluate(() => textLines('Three things I wish I knew at 20', 540, 960).map((line) => [line.words, line.wide]));
+  const widths = even.map((line) => line[1]);
+  check('K10b the lines break evenly, and "I" doesn\'t end a line', even.length === 2 && Math.min(...widths) >= 0.55 * Math.max(...widths) &&
+    even.slice(0, -1).every((line) => !/(^|\s)\S$/u.test(line[0])), JSON.stringify(even));
+  await page.fill('#text-words', '안녕하세요 반가워요');
+  await page.waitForTimeout(200);
+  check('K11 Korean words show too', (await layerLetters()) !== null);
+  await page.click('#reset-text');
+  await page.waitForTimeout(150);
+  check('K12 "Remove the text" empties the line and the video', (await page.inputValue('#text-words')) === '' && (await layerLetters()) === null);
+  check('K13 drawing the words ignores the look and the lighting, and puts them back after', await page.evaluate(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 360;
+    canvas.height = 640;
+    const ctx = canvas.getContext('2d');
+    ctx.filter = 'brightness(0.5)';
+    drawText(ctx, 360, 640, { words: 'Hello', place: 'middle', time: 'whole' });
+    const data = ctx.getImageData(0, 0, 360, 640).data;
+    let brightest = 0;
+    for (let i = 0; i < data.length; i += 4) brightest = Math.max(brightest, data[i]);
+    return brightest === 255 && ctx.filter === 'brightness(0.5)';
+  }));
+  await page.fill('#text-words', 'Something');
+  await page.setInputFiles('#pick', videos.short);
+  await page.waitForFunction(() => document.getElementById('text-words').value === '');
+  check('K14 a new video starts with no text', (await page.inputValue('#text-words')) === '' && (await chosenIn('text-places')) === 'top');
+
+  // For Dan's screenshots: the color chart with a line at the top, while editing and in the saved video
+  await choose(page, chart);
+  await page.click('#tab-text');
+  await page.fill('#text-words', 'Three things I wish I knew at 20');
+  await showAt(0.5);
+  await page.screenshot({ path: SHOTS + '14-text.png' });
+  await makeVideo(page);
+  saved = (await download(page, 'text-chart.mp4')).where;
+  spawnSync('ffmpeg', ['-v', 'error', '-y', '-ss', '0.5', '-i', saved, '-frames:v', '1', SHOTS + '15-text-in-the-saved-video.png']);
+  check('K no page errors', page.problems.length === 0, page.problems.join('\n'));
   await context.close();
 }
 

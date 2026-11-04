@@ -96,6 +96,7 @@ p { margin: 8px 0; }
 
 /* ---------- The video ---------- */
 .stage {
+  position: relative; /* so the text layer can sit right over the playing video */
   display: flex;
   justify-content: center;
   background: #000000;
@@ -114,18 +115,26 @@ video {
   height: auto;
   max-width: 100%;
 }
+/* The text over the playing video: app.js puts it exactly over the picture and draws on it. Taps go
+   through it to the video's own buttons. */
+#text-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
 
-/* ---------- Tabs: Filter, Lighting, Sound, Trim and Speed ---------- */
+/* ---------- Tabs: Filter, Lighting, Sound, Text, Trim and Speed ---------- */
 .tabs {
   display: flex;
-  flex-wrap: wrap;   /* five tabs in a row on a phone; more rows when zoomed in */
+  flex-wrap: wrap;   /* six tabs in a row on a phone; more rows when zoomed in */
   width: 100%;
   max-width: 36rem;
   margin: 0 auto;
   border-bottom: 1px solid var(--line);
 }
 .tab {
-  flex: 1 1 64px;    /* five fit in a row on a phone 360 wide */
+  flex: 1 1 52px;    /* six fit in a row on a phone 360 wide */
   min-height: 48px;
   padding: 0 2px;
   border: none;
@@ -205,6 +214,31 @@ video {
 /* The four speeds sit in one row on a phone, and two by two when zoomed in */
 #speeds { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); }
 #panel-trim .buttons .button { margin-top: 0; }
+
+/* Text: the line you type, and the names over its choices ("Where", "When") */
+.field-name {
+  display: block;
+  margin: 12px 0 6px;
+  font-weight: 600;
+}
+.field-name:first-child { margin-top: 0; }
+.text-input {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 2px solid var(--edge);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+.text-input::placeholder { color: var(--soft); }
+.text-input + .small { margin: 6px 0 0; }
+/* Top, Middle, Bottom in one row; "First 3 seconds" and "Whole video" in another */
+.chips.three { grid-template-columns: repeat(3, 1fr); }
+.chips.two { grid-template-columns: repeat(2, 1fr); }
+#panel-text .button { margin-top: 16px; }
 
 /* The sound switches: what it does on the left, an on-off switch on the right; the whole row is the button */
 .switch {
