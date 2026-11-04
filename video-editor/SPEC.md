@@ -48,7 +48,7 @@ Built so far (build steps 3 to 6, Claude's design, shown to the owner in screens
 ## Not in version 1 (ideas for later)
 
 - Music, sound effects, a voice-over (no music button, the owner's words).
-- AI of any kind (the owner's words, November 2, 2026), with one exception he asked for on November 3, 2026: AI captions that only he can use, being planned (where the speech-to-text runs, the cost and the privacy are still his to choose).
+- AI of any kind (the owner's words, November 2, 2026), with one exception he asked for on November 3, 2026: AI captions that only he can use, planned in "AI captions, only for the owner."
 - Fades between clips, stickers, moving text.
 - iPhones and other browsers.
 - Keeping an unfinished edit after Chrome closes (open question 5).
@@ -56,7 +56,7 @@ Built so far (build steps 3 to 6, Claude's design, shown to the owner in screens
 
 ## Privacy and safety
 
-- The videos never leave the phone: Chrome reads them and writes the new file on the phone. Nothing goes to a server, an AI or anyone else. The app's code is public; the videos never touch the repository.
+- The videos never leave the phone: Chrome reads them and writes the new file on the phone. Nothing goes to a server, an AI or anyone else. The app's code is public; the videos never touch the repository. The one planned exception: for the owner's AI captions only, the sound of the trimmed clip goes to his own Cloudflare server and its speech-to-text, when he taps "Make captions" (see "AI captions, only for the owner"); never the picture.
 - The new video carries none of the original's hidden details, like where it was filmed: Mediabunny copies the original's tags unless told not to, so every copy is made with `tags: {}`. Checked in build step 2: a test video's location doesn't reach the copy.
 - Screenshots and checks use made-up test videos, never the owner's own videos, and never his kids.
 
@@ -122,6 +122,30 @@ Browser support below is from MDN's browser-compat-data on GitHub, read November
 - Why not iPhones yet: Safari draws filters on a canvas only behind an experimental setting ("Canvas Filters," Safari 18), and its AudioEncoder arrived only in Safari 26.
 - Turned down for making the video (details in `DECISIONS.md`): ffmpeg.wasm (a 32.2 MB file, and slow even on a computer), "play and record" with MediaRecorder (kept as a backup plan) and a server (the videos would leave the phone).
 
+## AI captions, only for the owner (the plan, November 3, 2026)
+
+The owner, November 3, 2026: "Let's actually add the option to do AI generated captions, and let's make it so only I can use it. But anyone with link can add their own text to a video normally." This is the one exception to "no AI," and the one time anything leaves the phone: only the sound of the trimmed clip, only when he taps the button. His choices, each from options with Claude's recommendation, all November 3, 2026: "A," his own small server on Cloudflare, not speech-to-text on the phone; "A," its own server, not a new part of Living in the Word's; "A," one short line at a time. Nothing here is built yet.
+
+How it will work (Claude's design; the owner can change any of it):
+1. Only him: he opens the app once as https://danielyoonwrites.github.io/video-editor/?owner and types his passcode, which is saved in Chrome on his phone only. Without it, nothing about captions shows. The passcode is a secret in Cloudflare (four or more random words), never in this repository, which is public.
+2. "Make captions," on the Text tab under the line of text: the app takes the sound of the trimmed part of the original video at normal speed (one channel, 16,000 samples a second, as a WAV file), in pieces of about 30 seconds cut at quiet moments, and sends each piece with the passcode to his server. A "Language" choice, English (chosen at first) or 한국어, tells the AI which language to listen for: Whisper can guess, but naming it helps (Claude's choice).
+3. The server (`video-editor/server/worker.js`, a Cloudflare Worker named `video-editor-captions`) checks the passcode, answers only the app's own address, passes each piece to Workers AI's `@cf/openai/whisper-large-v3-turbo`, and sends back each word with its start and end time. It keeps nothing and writes no sound or words to its logs.
+4. Showing them: the words are grouped into lines of up to about 5 words, breaking at pauses and at the ends of sentences. Each line shows from its first word to its last, at the bottom (ending 70% of the way down, like the text's "Bottom"), in the text's look: white letters on soft dark boxes. When nothing is said for a moment, nothing shows. The times follow the trim and the speed. When the line of text is also at the bottom, it sits just above the caption.
+5. Fixing words: "Fix the captions" opens a list of the lines with their times, one screen deeper (the phone's Back button returns); tap a line to change its words. "Remove the captions" takes them all off.
+6. The new video gets the captions drawn into every frame, like the text, by the same drawing code, so they look the same on Instagram, TikTok and YouTube (no separate caption file).
+
+Cost and limits (Cloudflare's docs, read from their source on GitHub, November 3, 2026: https://github.com/cloudflare/cloudflare-docs/blob/production/src/content/docs/workers-ai/platform/pricing.mdx and https://github.com/cloudflare/cloudflare-docs/blob/production/src/content/docs/workers-ai/platform/data-usage.mdx):
+- The model costs "$0.0005 per audio minute" (46.63 Neurons a minute). "Our free allocation allows anyone to use a total of 10,000 Neurons per day at no charge," which is about 214 minutes of sound a day (Claude's arithmetic). On the Workers Free plan, use past that "will fail with an error" and costs nothing; on Workers Paid it's "$0.011 / 1,000 Neurons" above the free allocation. Which plan the owner's account is on isn't known yet: asked at setup.
+- "Cloudflare does not use Customer Content processed by Workers AI to train AI models." For standard requests, Cloudflare "does not retain inputs or outputs after they are no longer needed to process the request and deliver the response," with listed exceptions: storage or logging the owner turns on, metadata such as sizes and times, and legal obligations.
+- The model's own file (https://github.com/cloudflare/cloudflare-docs/tree/production/src/content/workers-ai-models) takes the sound as base64 and an optional `language`, and returns segments with each word's start and end, and a WebVTT caption file. It names no sound formats and no longest length, so the app sends pieces of about 30 seconds (Cloudflare's own tutorial cuts the sound into 1 MB pieces).
+- Korean is in the model's list of languages (Cloudflare's docs, as found by Claude's research on November 3 to 4, 2026; saved in his Master Notes).
+
+The owner's setup, once, with the server's pull request (every step given then, checked against Cloudflare's docs at that time): make the Worker in Cloudflare from this repository with Workers Builds (root folder `video-editor/server`), so it deploys itself after each merge, like Living in the Word's server; add the secret `CAPTIONS_PASSCODE`; then open the app with `?owner` and type it. Like Living in the Word's server, it's the one exception to "no build tools": Cloudflare's own deploy tool (Wrangler) runs on Cloudflare's computers, nothing runs on his, and the code stays plain files (the root `CLAUDE.md` says so once the server is added).
+
+Checking it: Claude can't use the owner's Cloudflare account, so the server's code is checked against a stand-in for Workers AI, and the app's checks use a stand-in server that answers with made-up words and times. The real AI is checked on the owner's phone, with a video of himself talking, in English and in Korean.
+
+Not known yet: how long a piece takes to come back; how well it hears his voice and Korean; where the pieces are best cut.
+
 ## Build plan (one pull request each, each with a check the owner does)
 
 1. This plan, with the folder's `CLAUDE.md`, `PROGRESS.md` and `DECISIONS.md`. Check: read "How it works" and this build plan.
@@ -131,11 +155,14 @@ Browser support below is from MDN's browser-compat-data on GitHub, read November
 4. Built (pull request 125; the owner's phone check still to come): trim and speed; the sound follows the speed like a tape (the owner's "b"). Check: cut the start and end off a clip, speed it up, make the video and play it.
 5. Built (pull request 129; the owner's phone check still to come): better sound (added November 2, 2026, after the owner asked; without AI; three switches and a Volume slider, the owner's "B"): even out the volume, cut low rumble, a clearer voice, the volume up or down. Chrome's sound tools can do these faster than the video plays (OfflineAudioContext, BiquadFilterNode, DynamicsCompressorNode). They can't really remove changing background noise like voices or music. Check: make a video with "better sound" and compare.
 6. Built (pull request 139; the owner's phone check still to come): text, one line (the owner's "A", November 3, 2026), moved ahead of shape and crop at his request. Check: add a title for the first 3 seconds.
-7. Shape and crop. Check: make a tall video from a wide clip, choosing which part shows.
-8. Several clips: add more, put them in order, remove one; they join into one video. Check: join three short clips in a new order.
-9. Polish after a week of real use (like keeping an unfinished edit, if wanted). It went on the Projects page early, in pull request 138, at the owner's request (November 3, 2026).
+7. AI captions, only for the owner (his request and choices, November 3, 2026; see "AI captions, only for the owner"), in three pull requests, each with a check on his phone:
+   - 7a. The server and the passcode. Check: after his one-time setup in Cloudflare, the app (opened with `?owner`) says his passcode works.
+   - 7b. Making and showing captions. Check: captions on a video of himself talking, in English and in Korean, timed to his words.
+   - 7c. Fixing words, and the Projects page note updated. Check: fix a word, make the video, and see it.
+8. Shape and crop. Check: make a tall video from a wide clip, choosing which part shows.
+9. Several clips: add more, put them in order, remove one; they join into one video. Check: join three short clips in a new order.
+10. Polish after a week of real use (like keeping an unfinished edit, if wanted). It went on the Projects page early, in pull request 138, at the owner's request (November 3, 2026).
 
-Also asked for (November 3, 2026), not planned yet: AI captions, only for the owner ("Let's actually add the option to do AI generated captions, and let's make it so only I can use it"). It changes two earlier rules (no AI; the videos never leave the phone), so where the speech-to-text runs (on the phone, or on a small server of his own that gets only the sound), its cost and its privacy come to him as questions first.
 
 ## Open questions (ask one at a time)
 

@@ -1,6 +1,6 @@
-# Video editor: progress (updated November 3, 2026, with text)
+# Video editor: progress (updated November 3, 2026, with the plan for AI captions)
 
-A simple video editor, just for the owner, on his Android phone in Chrome: a look (Korean styles), lighting, better sound, a line of text, trim and speed now; AI captions only for Dan (being planned), shape and crop, and clip order next. The videos never leave the phone, and every video is made to fit Instagram, TikTok and YouTube Shorts. Read `SPEC.md` (what it does, the looks, the platforms' rules, the build plan), `DECISIONS.md` (the "In force" list first) and `CLAUDE.md`.
+A simple video editor, just for the owner, on his Android phone in Chrome: a look (Korean styles), lighting, better sound, a line of text, trim and speed now; AI captions only for Dan (planned, build step 7), then shape and crop, and clip order. The videos never leave the phone, and every video is made to fit Instagram, TikTok and YouTube Shorts. Read `SPEC.md` (what it does, the looks, the platforms' rules, the build plan), `DECISIONS.md` (the "In force" list first) and `CLAUDE.md`.
 
 ## Where it stands
 - Done and checked on Dan's phone:
@@ -13,7 +13,7 @@ A simple video editor, just for the owner, on his Android phone in Chrome: a loo
   - Build step 5, better sound (pull request 129, merged November 3, 2026, Dan's "B"): a fifth tab, "Sound," with three switches (Cut rumble, Clearer voice, Even out the volume) and a Volume slider from Off to 200%. The playing video sounds the same way as the new video will. How it works: `SPEC.md`, "Tech notes," "Better sound."
   - The tabs in Dan's order (pull request 137, merged November 3, 2026, his request): Filter, Lighting, Sound, Trim, Speed; the Edit screen opens on Filter.
   - On the website's Projects page (pull request 138, Dan's "A"): https://danielyoonwrites.github.io/projects.html, between Idea board and Quiet room, with a link, a gray line saying it's made for an Android phone in Chrome, and a "How I built it" note. Checked in Claude's test browser at 320 and 360 pixels wide: the line shows whole (3 lines), nothing scrolls sideways, and the link opens the app. Merged November 3, 2026.
-  - Text (pull request 139, Dan's "A"): a Text tab with one line per video, Top, Middle or Bottom, for the new video's first 3 seconds or the whole video. The Projects page line now says "text" too. How it works: `SPEC.md`, "Tech notes," "Text."
+  - Text (pull request 139, merged November 3, 2026, Dan's "A"): a Text tab with one line per video, Top, Middle or Bottom, for the new video's first 3 seconds or the whole video. The Projects page line now says "text" too. How it works: `SPEC.md`, "Tech notes," "Text."
 - Checked in Claude's test browser (November 3, 2026): 207 saved checks pass (`tests/app-test.mjs`), including text (section K: the words land within 3% of where they showed while editing, stay white with the lighting at −50, and go after the new video's first 3 seconds, at 2× too) and made-up test sounds: in a saved video, the 50 Hz rumble 17.7 dB quieter, 300 Hz 3.0 dB quieter and 3,500 Hz 4.0 dB louder, a 30 dB gap between quiet and loud down to 18 dB, Volume 50% exactly 6.0 dB quieter, nothing clipping, and the sound in line with the original to the sample. The phone test's 71 pass.
 - Not checked yet:
   - The sound switches on Dan's phone with a real voice, and whether the playing video's sound stays in step with the lips while editing.
@@ -22,13 +22,14 @@ A simple video editor, just for the owner, on his Android phone in Chrome: a loo
   - What the owner's phone writes in the "For Claude" line on "Your video" (color tags, edit lists).
   - How fast Soft glow is on the phone, and the looks on real faces (Claude's test scene is made up).
   - Text on the phone: the phone's font and Korean letters, the size, and whether Top and Bottom stay clear of the apps' buttons in a real upload.
-- Branch: `ccr-f31dd4eb-gq2mec` (the video editor's session), restarted from main after each merge; everything up to pull request 138 is merged into main.
-- Open pull requests: pull request 139, text on the videos.
+- Branch: `ccr-f31dd4eb-gq2mec` (the video editor's session), restarted from main after each merge; everything up to pull request 139 is merged into main.
+- Open pull requests: pull request PULL_REQUEST_NUMBER, the plan for AI captions (notes only).
 - Claude's rough estimate: 3 more small pull requests for the plan (shape and crop, several clips, polish), plus AI captions (likely 3 or more: a plan, a server piece if Dan chooses one, the captions screen; a guess until the plan is chosen).
 - Dan's Master Notes (Notion), the page "Simple video editor: how hard to build (Nov 2026)," gets one entry after each merge (what merged, what was checked, what's next).
 
 ## Waiting on Dan
-1. Merge text on the videos, pull request 139: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/139, Conversation tab, Merge pull request, Confirm merge. Then the check on his phone:
+1. Read and merge the plan for AI captions, pull request PULL_REQUEST_NUMBER (notes only): https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/PULL_REQUEST_NUMBER, Files changed tab, `video-editor/SPEC.md`, the part headed "AI captions, only for the owner"; then the Conversation tab, Merge pull request, Confirm merge. Change anything in it first if he likes.
+   The text check (pull request 139, merged), on his phone:
    1. Open Chrome and go to https://danielyoonwrites.github.io/video-editor
    2. Tap "Choose a video" and pick a video of yourself talking.
    3. Tap the Text tab and type a short line, like "Three things I wish I knew at 20." While it plays, try Top, Middle and Bottom.
@@ -58,7 +59,7 @@ A simple video editor, just for the owner, on his Android phone in Chrome: a loo
    6. Send Claude your notes on the looks, the time, the screenshot, and how the uploads went.
 
 ## Next step
-AI captions, only for Dan (his request, November 3, 2026). Claude's research on the ways to do it (on the phone, or a small server of his own on Cloudflare that gets only the sound; the cost, the privacy, timing for each word or line, Korean) comes first, with sources; then ask Dan one question at a time, starting with where the speech-to-text runs, and write the plan in `SPEC.md` before building. They change two of his earlier rules (no AI; the videos never leave the phone), so say so plainly with each choice. When anything ships, update the Projects page line and note (`CLAUDE.md`). Also ask for his phone checks (the items above), and adjust whatever he asks: the text's numbers are in `TEXT_LOOK` in `app.js` (check with the saved checks, section K). Then build step 7, shape and crop: ask first (1) which shapes: tall 9:16 and square both count as YouTube Shorts (up to 3 minutes), but wide doesn't (`SPEC.md`, "Made for Instagram, TikTok and YouTube Shorts"), so wide would need a warning, or be left out; (2) the starting shape (Claude would suggest tall); (3) how to choose which part shows: dragging the picture, or a few buttons (left, middle, right).
+Build step 7a, the captions server and the passcode, after the plan merges: `video-editor/server/worker.js` and `wrangler.jsonc` (Worker `video-editor-captions`, Workers AI binding), the `?owner` passcode box in the app, saved checks with a stand-in for Workers AI, and Dan's one-time setup steps in Cloudflare, each checked against Cloudflare's docs (read from `cloudflare/cloudflare-docs` on GitHub; their site is blocked from Claude's session). Ask him then which Cloudflare plan his account is on (Free: captions just stop for the day past the free allowance). Add the captions server to the root `CLAUDE.md`'s one exception to "no build tools" in the same pull request. Then 7b (making and showing captions) and 7c (fixing words, and the Projects page note: it says "no AI" and that the videos never leave the phone, so it changes when captions ship). Also ask for his phone checks (the items above), and adjust whatever he asks. Then build step 8, shape and crop: ask first (1) which shapes: tall 9:16 and square both count as YouTube Shorts (up to 3 minutes), but wide doesn't (`SPEC.md`, "Made for Instagram, TikTok and YouTube Shorts"), so wide would need a warning, or be left out; (2) the starting shape (Claude would suggest tall); (3) how to choose which part shows: dragging the picture, or a few buttons (left, middle, right).
 
 ## Ideas, not done
 - A note on the Trim and Speed tabs when the new video would be under 3 seconds or over 3 minutes (now only "Your video" says so, after it's made).

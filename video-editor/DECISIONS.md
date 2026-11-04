@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129, 137 and 138 and 139)
+## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129, 137 and 138 and 139 and PULL_REQUEST_NUMBER)
 
 Every decision below that still holds, one line each, by date; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -24,7 +24,7 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - November 2, 2026 (the Sound tab and the tabs' order November 3): the screens: Start, "Edit" (Filter, Lighting, Sound, Text, Trim and Speed tabs, in Dan's order with Text before Trim, opening on Filter; called "The look" until build step 4), "Making the video," "Your video"; Brightness and Contrast from −50 to +50.
 - November 3, 2026: better sound, without AI (build step 5): three switches, Cut rumble, Clearer voice and Even out the volume, and a Volume slider from Off to 200% (Dan's "B"); the same steps on the playing video and in the new video, with a safety limit so nothing clips. A steady hiss (like a fan) is left for later.
 - November 3, 2026: text for anyone using the app: one line per video (Dan's "A"), Top, Middle or Bottom, for the new video's first 3 seconds or the whole video; white bold letters on soft dark boxes, drawn by the same code on the playing video and on each frame.
-- November 3, 2026: AI captions only Dan can use (his words); how (on the phone, or a small server of his own) isn't chosen yet.
+- November 3, 2026: AI captions only Dan can use (his words), planned, not built: his own small Cloudflare server with Workers AI's Whisper, its own server rather than part of Living in the Word's, one short line at a time (his "A" three times), locked with a passcode; only the sound of the trimmed clip leaves the phone, only when he taps "Make captions."
 - November 2, 2026: the filter and lighting question (whole video or each clip) waits for build step 8.
 
 ## Log (oldest first)
@@ -141,3 +141,12 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - How (Claude's choices, shown in screenshots): the tab goes before Trim, with the look-and-sound tabs; white bold letters in the phone's own font, each line on a soft dark box, so they show on any picture; letters 6% of the picture's shorter side; lines at most 74% of the width; Top from 14% down, Bottom ending 70% down, to stay clear of the apps' buttons and captions (guides disagree on how much: `SPEC.md`, "Tech notes," "Text"); even line breaks with no one-letter word like "I" ending a line when that can be helped; and the same drawing on the playing video and on each frame, with the look and the lighting only on the picture. "First 3 seconds" means the new video's first 3 seconds, at any speed.
 - AI captions: they change two of Dan's earlier rules, no AI (November 2) and the videos never leaving the phone. He was told, and it's his call. Being researched before he's asked where the speech-to-text runs: on the phone, or on a small server of his own (like Living in the Word's, on Cloudflare) that gets only the sound, when he taps the button; the cost, the privacy, timing for each word or line, and Korean. Nothing about them is built.
 - Not checked yet: text on Dan's phone (its font and Korean letters; the size; Top and Bottom against the apps' real buttons after an upload).
+
+### November 3, 2026: the plan for AI captions (pull request PULL_REQUEST_NUMBER)
+- Decision: AI captions, only for Dan, run on his own small server on Cloudflare (a Worker named `video-editor-captions`, with Workers AI's `@cf/openai/whisper-large-v3-turbo`), separate from Living in the Word's server, and show one short line at a time (up to about 5 words) at the bottom. Locked with a passcode he types once on his phone (`?owner`); the sound of the trimmed clip goes to his server in pieces of about 30 seconds, only when he taps "Make captions"; the server keeps nothing. The full plan is in `SPEC.md`, "AI captions, only for the owner." Nothing is built yet.
+- Why: Dan chose "A" each time, November 3, 2026:
+  - Where the speech-to-text runs: "A," his own small server on Cloudflare (Claude's recommendation: a large model that times each word and knows Korean; free at his use, about 214 minutes a day; Cloudflare's docs say standard requests aren't kept or trained on; he already has Cloudflare). Turned down: "B," on the phone (nothing leaves it, but a 100 to 220 MB first download, a much smaller model, and no known speed on a phone).
+  - Which server: "A," its own (Claude's recommendation: if captions break, Living in the Word keeps working for his small group). Turned down: "B," a new part of Living in the Word's server (less setup, but the two apps would share one server).
+  - How they look: "A," one short line at a time (Claude's recommendation: short enough to read while he talks, calmer than word by word; shown in a picture drawn with the app's own text code). Turned down: "B," two lines like TV subtitles; "C," word by word.
+- Claude's choices in the plan, for Dan to change if he likes: a Language choice (English first, or 한국어); captions burned into the video (no separate file); the line of text sits above a caption when both are at the bottom; fixing words one line at a time, one screen deeper.
+- What it changes: his no-AI rule (November 2) gets this one exception, and "the videos never leave the phone" gets one: the sound only, for his captions only, when he taps. Claude can't check the real AI from its session (it can't use his Cloudflare account): stand-ins are checked, and his phone checks the rest.
