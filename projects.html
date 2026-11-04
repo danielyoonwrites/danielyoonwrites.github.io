@@ -6,11 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- The name in the browser tab, and the summary search engines show -->
   <title>Projects · Daniel Yoon</title>
-  <meta name="description" content="Small tools Daniel Yoon makes for the people around him: what each one does, and how he built it.">
+  <meta name="description" content="Web apps Daniel Yoon designs and ships with AI: what each one does, what he set out to learn, and how he built it.">
 
   <!-- What shows when the link is shared in a message or on social media -->
   <meta property="og:title" content="Projects · Daniel Yoon">
-  <meta property="og:description" content="Small tools Daniel Yoon makes for the people around him: what each one does, and how he built it.">
+  <meta property="og:description" content="Web apps Daniel Yoon designs and ships with AI: what each one does, what he set out to learn, and how he built it.">
   <meta property="og:url" content="https://danielyoonwrites.github.io/projects.html">
   <meta property="og:type" content="website">
 
@@ -47,34 +47,37 @@
     <!-- Part 1: every project, short, so all of them show near the top -->
     <section>
       <h1 class="label">Projects</h1>
-      <p class="intro">Small tools I make for the people around me. I plan each one, decide what it does and what it leaves out, and build it with AI.</p>
+      <p class="intro">Web apps I design and ship with AI as my engineering partner. I make every product decision, and each one takes on something I hadn’t built before.</p>
 
       <!-- One project per block, with the same look as the post lists on the Writing page.
            To add a project: copy one whole <li class="post"> ... </li> block and change the words,
            then add its note to "How I built it" below. Keep these blocks short. -->
       <ul class="post-list">
 
+        <!-- The order is Dan's (November 4, 2026): the most impressive first. Quiet room is off
+             this page for now (Dan: "it is not functional"). Under each project's line, a small
+             line says what he set out to learn with it (it uses the small gray "post-date" style). -->
+
+        <!-- When what the video editor can do changes (like shape and crop, several clips, or captions),
+             update this line and its note in "How I built it" below. The iPhone line is there because
+             it's made for Dan's Android phone in Chrome and was never tested on an iPhone. -->
+        <li class="post">
+          <p class="label">Web app · In progress</p>
+          <h2><a href="video-editor/">Video editor</a></h2>
+          <p class="post-excerpt">A phone video editor: Korean-style looks, lighting, clearer sound, text, trim and speed.</p>
+          <p class="post-date"><em>What I set out to learn:</em> editing video frame by frame inside the browser, so nothing is ever uploaded.</p>
+          <p class="post-date">Made for an Android phone in Chrome, so it may not work on an iPhone yet.</p>
+          <a class="read-link" href="video-editor/">Open the video editor</a>
+        </li>
+
         <!-- When what Living in the Word can do changes (like the AI opening to more people),
              update this line and its note in "How I built it" below. -->
         <li class="post">
           <p class="label">Web app · For my small group</p>
           <h2><a href="living-in-the-word/">Living in the Word</a></h2>
-          <p class="post-excerpt">AI-written discussion questions for any Bible passage, and a daily reading plan.</p>
+          <p class="post-excerpt">An AI Bible study helper: questions for any passage, plus a daily reading plan.</p>
+          <p class="post-date"><em>What I set out to learn:</em> running my own server, so the AI key stays secret, with invite-only sign-in and automated tests.</p>
           <a class="read-link" href="living-in-the-word/">Open Living in the Word</a>
-        </li>
-
-        <li class="post">
-          <p class="label">Guide</p>
-          <h2><a href="fewer-spam-calls/">Fewer spam calls</a></h2>
-          <p class="post-excerpt">A step-by-step guide to fewer robocalls and spam calls, written so a grandparent could follow it.</p>
-          <a class="read-link" href="fewer-spam-calls/">Open the guide</a>
-        </li>
-
-        <li class="post">
-          <p class="label">Website</p>
-          <h2>This website</h2>
-          <p class="post-excerpt">Where my writing lives, in the same quiet look as my newsletter.</p>
-          <a class="read-link" href="writing.html">See the Writing page</a>
         </li>
 
         <!-- When what Idea board can do changes (like saving to an account, or links),
@@ -82,27 +85,25 @@
         <li class="post">
           <p class="label">Web app · In progress</p>
           <h2><a href="idea-board/">Idea board</a></h2>
-          <p class="post-excerpt">Boards for spreading out ideas: typed notes and photos that line up neatly in rows.</p>
+          <p class="post-excerpt">Boards for spreading out ideas: typed notes and photos that snap neatly into rows.</p>
+          <p class="post-date"><em>What I set out to learn:</em> dragging and zooming on an endless board, built to work for anyone, not just me.</p>
           <a class="read-link" href="idea-board/">Open Idea board</a>
         </li>
 
-        <!-- When what the video editor can do changes (like shape and crop, several clips, or captions),
-             update this line and its note in "How I built it" below. The second line is there because
-             it's made for Dan's Android phone in Chrome and was never tested on an iPhone. -->
         <li class="post">
-          <p class="label">Web app · In progress</p>
-          <h2><a href="video-editor/">Video editor</a></h2>
-          <p class="post-excerpt">A simple video editor: Korean-style looks, lighting, clearer sound, text, trim and speed.</p>
-          <p class="post-date">Made for an Android phone in Chrome, so it may not work on an iPhone yet.</p>
-          <a class="read-link" href="video-editor/">Open the video editor</a>
+          <p class="label">Guide</p>
+          <h2><a href="fewer-spam-calls/">Fewer spam calls</a></h2>
+          <p class="post-excerpt">A step-by-step guide to fewer spam calls, simple enough for a grandparent to follow.</p>
+          <p class="post-date"><em>What I set out to learn:</em> writing for seniors, with three questions first, then only the steps that fit.</p>
+          <a class="read-link" href="fewer-spam-calls/">Open the guide</a>
         </li>
 
-        <!-- No link on purpose: it's shared by private link with the group only -->
         <li class="post">
-          <p class="label">Web app · In progress</p>
-          <h2>Quiet room</h2>
-          <p class="post-excerpt">A quiet place to read, study, or work alongside friends. No notifications, no games, no distractions.</p>
-          <p class="post-date">Step 1 of 11 is done. Made for a group from my church and shared with them by private link, so there’s no link here.</p>
+          <p class="label">Website</p>
+          <h2>This website</h2>
+          <p class="post-excerpt">My writing home, styled like my newsletter, with new posts added automatically.</p>
+          <p class="post-date"><em>What I set out to learn:</em> the basics: HTML and CSS by hand, published on GitHub Pages, updated every day.</p>
+          <a class="read-link" href="writing.html">See the Writing page</a>
         </li>
 
       </ul>
@@ -118,11 +119,27 @@
       <div class="fold-list">
 
         <details class="fold">
+          <summary>Video editor</summary>
+          <p><em>What I wanted:</em> A simple video editor for my short videos that does a few things well, with no music button and no AI.</p>
+          <p><em>The problem:</em> Showing edits while a video plays is easy. Saving them into a new video is the hard part, and I didn’t want my videos uploaded anywhere to do it.</p>
+          <p><em>What I decided:</em> The app rebuilds each video frame by frame in Chrome, on my phone, so the videos never leave it. The looks are Korean styles, like a milky one (<span class="korean" lang="ko">우유빛</span>) and a soft glow (<span class="korean" lang="ko">뽀샤시</span>), and each new video is checked against Instagram’s, TikTok’s and YouTube Shorts’ upload rules.</p>
+          <p><em>The trade-off:</em> It’s made only for my Android phone in Chrome, so it may not work on an iPhone yet.</p>
+        </details>
+
+        <details class="fold">
           <summary>Living in the Word</summary>
           <p><em>What I wanted:</em> Good discussion questions for whatever passage my small group is studying, and a reading plan that never makes anyone feel behind.</p>
           <p><em>The problem:</em> AI can sound sure of itself and still get the Bible wrong, and some passages tell of suffering or violence that need a gentle hand.</p>
           <p><em>What I decided:</em> The AI gets only the passage name and my own theological guidelines, and writes 3 to 5 short questions in a set order, from what the passage says to prayer. Every set says it was written by AI and should be checked against your Bible, and nothing is shared unless you share it.</p>
           <p><em>The trade-off:</em> The AI costs money, so for now it’s invite only, for my small group. Anyone else gets general questions, and the reading plan works for everyone.</p>
+        </details>
+
+        <details class="fold">
+          <summary>Idea board</summary>
+          <p><em>What I wanted:</em> Something like Apple’s Freeform, a big board for notes and photos, on my Android phone and my computer.</p>
+          <p><em>The problem:</em> Notes placed by hand never quite line up, so a board soon looks messy.</p>
+          <p><em>What I decided:</em> When you let go of a note or a photo, it settles onto the dots, so everything lines up in rows. Photos are saved as smaller copies, which leave out hidden details like where they were taken.</p>
+          <p><em>The trade-off:</em> For now, boards are saved only in the browser they were made in, so they don’t follow me from my phone to my computer yet. Saving to an account comes next.</p>
         </details>
 
         <details class="fold">
@@ -139,29 +156,6 @@
           <p><em>The problem:</em> Substack’s security blocks GitHub’s computers, which publish this site, and the first three approaches failed.</p>
           <p><em>What I decided:</em> Go through a reading service called Jina Reader. Each time the site is published, and once a day, GitHub reads my post list through it and adds the four newest. If that fails, the page shows a link to my Substack instead, so it never looks broken.</p>
           <p><em>The trade-off:</em> A new post can take up to a day to show up.</p>
-        </details>
-
-        <details class="fold">
-          <summary>Idea board</summary>
-          <p><em>What I wanted:</em> Something like Apple’s Freeform, a big board for notes and photos, on my Android phone and my computer.</p>
-          <p><em>The problem:</em> Notes placed by hand never quite line up, so a board soon looks messy.</p>
-          <p><em>What I decided:</em> When you let go of a note or a photo, it settles onto the dots, so everything lines up in rows. Photos are saved as smaller copies, which leave out hidden details like where they were taken.</p>
-          <p><em>The trade-off:</em> For now, boards are saved only in the browser they were made in, so they don’t follow me from my phone to my computer yet. Saving to an account comes next.</p>
-        </details>
-
-        <details class="fold">
-          <summary>Video editor</summary>
-          <p><em>What I wanted:</em> A simple video editor for my short videos that does a few things well, with no music button and no AI.</p>
-          <p><em>The problem:</em> Showing edits while a video plays is easy. Saving them into a new video is the hard part, and I didn’t want my videos uploaded anywhere to do it.</p>
-          <p><em>What I decided:</em> The app rebuilds each video frame by frame in Chrome, on my phone, so the videos never leave it. The looks are Korean styles, like a milky one (<span class="korean" lang="ko">우유빛</span>) and a soft glow (<span class="korean" lang="ko">뽀샤시</span>), and each new video is checked against Instagram’s, TikTok’s and YouTube Shorts’ upload rules.</p>
-          <p><em>The trade-off:</em> It’s made only for my Android phone in Chrome, so it may not work on an iPhone yet.</p>
-        </details>
-
-        <details class="fold">
-          <summary>Quiet room</summary>
-          <p><em>What I wanted:</em> Company while you read or study, without pings, games, or anything that punishes you for leaving.</p>
-          <p><em>What I decided:</em> You set your own status, like Focusing or On a break, and the app never checks what you’re doing. The first version leaves out chat, rankings, sound and real accounts.</p>
-          <p><em>The trade-off:</em> It runs on trust, which fits a room of friends.</p>
         </details>
 
       </div>

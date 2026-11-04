@@ -6,6 +6,7 @@ The handoff file. Any new session, or a session after its memory was compressed,
 
 ## Where it stands
 - Paused after step 1 since October 24, 2026 (see "Next step").
+- Off the website's Projects page since November 4, 2026 (Dan: "remove quiet room for now because it is not functional"; pull request NNN). Put it back, with no link, once it works (`.claude/rules/website.md`).
 - Step 1 built and live (October 24, 2026, pull request 19): `quiet-room/index.html` and `quiet-room/style.css`, a page with the title, the line under it, "The room opens soon," and a link back to the website. No live features or Firebase yet.
 - `SPEC.md`, `CLAUDE.md` and this file are merged (pull request 17). `DECISIONS.md` was added on October 28, 2026, in the notes cleanup.
 - Build plan (one pull request per step, each with a check the owner does):
