@@ -51,6 +51,7 @@ When Dan says "do the rest," Claude works through the build plan one pull reques
 
 ## Handoffs and decisions
 
+- Dates in the notes are the session's date, and the session's clock runs on UTC: from 4 p.m. Pacific (5 p.m. in summer) it already shows the next day, so Dan's evening can read as tomorrow (his evening of November 3, 2026 shows as November 4). When the day matters, say "the evening of [date], Pacific."
 - HANDOFF.md is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines. It points to each app's PROGRESS.md for what's waiting there instead of copying it, and each session's summary goes to CHANGELOG.md ("Session summaries"), not HANDOFF.md.
 - Each app folder has PROGRESS.md (where it stands and the next step; rewritten, under about 100 lines) and DECISIONS.md (each decision with its reason, in Dan's words when he gave them, and what was turned down; only added to). Website decisions go in the root DECISIONS.md.
 - Every pull request updates its project's PROGRESS.md and adds any new decisions to DECISIONS.md, so nothing depends on the chat.
