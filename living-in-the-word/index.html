@@ -34,7 +34,7 @@
   <!-- The app's own look: "Paper and ink" (see SPEC.md).
        Raise the ?v= numbers whenever style.css or app.js changes, so phones load the new copy. -->
   <link rel="stylesheet" href="style.css?v=25">
-  <script src="app.js?v=42" defer></script>
+  <script src="app.js?v=43" defer></script>
 </head>
 <body>
 
@@ -318,6 +318,8 @@
         <!-- app.js fills this in, like "28 readings. If you read every day, you’ll finish Sat, Nov 28." -->
         <p class="plan-summary"></p>
         <button type="submit" class="primary">Start the plan</button>
+        <!-- Shown only if this browser won't save the plan (app.js, the plan setup) -->
+        <p class="gentle-error" role="status" hidden></p>
       </form>
       <p class="note">Saved only on this phone, in this browser. A missed day just waits for you.</p>
     </section>

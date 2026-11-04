@@ -2,7 +2,7 @@
 
 Read `PROGRESS.md` first (where it stands and the next step), then `DECISIONS.md` (choices and their reasons) and `SPEC.md`.
 
-A simple video editor for the owner's own videos, on his Android phone in Chrome, planned November 2, 2026 (the name is the owner's choice). It does a few things well: a filter, lighting, text, clip order, crop, speed and better sound. It lives in this folder and will be published at https://danielyoonwrites.github.io/video-editor (not listed in search engines). Keep the "Build plan" in `SPEC.md` up to date.
+A simple video editor for the owner's own videos, on his Android phone in Chrome, planned November 2, 2026 (the name is the owner's choice). It does a few things well: a filter, lighting, text, clip order, crop, speed and better sound. It lives in this folder and is published at https://danielyoonwrites.github.io/video-editor (live since pull request 112; not listed in search engines). Keep the "Build plan" in `SPEC.md` up to date.
 
 ## Rules for working here
 
