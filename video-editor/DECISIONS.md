@@ -2,9 +2,9 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 3, 2026, pull requests 110 to 112, 116, 125 and 129)
+## In force (November 3, 2026, at the handoff; pull requests 110 to 112, 116, 125 and 129)
 
-Every decision below that still holds, one line each; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
+Every decision below that still holds, one line each, by date; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
 - November 2, 2026: a simple video editor that does a few things well (a filter, lighting, text, clip order, crop, speed); no music button, nothing copyrighted, no AI (the owner's words).
 - November 2, 2026: just for Dan, on his Android phone in Chrome (his "A").
@@ -18,11 +18,11 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 2, 2026: the phone test passed on the owner's phone: AAC sound is built in, so the app loads the add-on only on a phone or browser without it.
 - November 2, 2026: the dark look (Dan's "A").
 - November 2, 2026: every video is made to fit Instagram's, TikTok's and YouTube Shorts' upload rules (Dan's request), and "Your video" checks it against them.
-- November 2, 2026: the screens: Start, "Edit" (Trim, Speed, Filter, Lighting and Sound tabs; called "The look" until build step 4), "Making the video," "Your video"; Brightness and Contrast from −50 to +50.
 - November 2, 2026: the looks are Korean styles (Dan's "a"): Original, Milky 우유빛, Peach 복숭아, Soft glow 뽀샤시, Café 카페, Clear 맑음, Film 필름, Black and white 흑백, each with its English name and the Korean word under it. They're SVG filters, drawn on a normal canvas.
-- November 3, 2026: better sound, without AI (build step 5): three switches, Cut rumble, Clearer voice and Even out the volume, and a Volume slider from Off to 200% (Dan's "B"); the same steps on the playing video and in the new video, with a safety limit so nothing clips. A steady hiss (like a fan) is left for later.
 - November 2, 2026: trim and speed (build step 4): "Start here" and "End here" while it plays, or sliders in tenths of a second; speeds 0.5×, 1×, 1.5× and 2×; the sound follows the speed like a tape, so faster sounds higher (Dan's "b").
 - November 2, 2026: the app makes each new video frame by frame (Mediabunny's `CanvasSink` and `CanvasSource`, the sound through an `OfflineAudioContext`), instead of the one-step `Conversion`, which has no speed setting.
+- November 2, 2026 (the Sound tab November 3): the screens: Start, "Edit" (Trim, Speed, Filter, Lighting and Sound tabs; called "The look" until build step 4), "Making the video," "Your video"; Brightness and Contrast from −50 to +50.
+- November 3, 2026: better sound, without AI (build step 5): three switches, Cut rumble, Clearer voice and Even out the volume, and a Volume slider from Off to 200% (Dan's "B"); the same steps on the playing video and in the new video, with a safety limit so nothing clips. A steady hiss (like a fan) is left for later.
 - November 2, 2026: the filter and lighting question (whole video or each clip) waits for build step 8.
 
 ## Log (oldest first)
