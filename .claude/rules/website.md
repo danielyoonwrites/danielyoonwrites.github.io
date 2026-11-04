@@ -21,6 +21,7 @@ Each pattern in `paths` at the top starts with `/`, which means "at the top of t
 - Keep pages short on a phone (the owner's rule, October 2026): people won't scroll far. Use tabs or fold-outs instead of long lists.
   - Writing: two tabs, "Start here" and "Latest" (`tabs.js`). Without JavaScript both lists show.
   - Projects: the "How I built it" notes are fold-outs (HTML's own `<details>`), closed until tapped.
+  - After changing the Projects page, run `node scripts/check-projects-page.mjs` from the repository folder (Playwright, in Claude's sessions only; port 8795): Dan's order, every line whole at 320 and 360 pixels wide, a "What I set out to learn" line and a link for each project, the notes in the same order, nothing scrolling sideways. Success ends "38 passed, 0 failed" (with five projects). Change its `ORDER` when Dan changes the order.
   - Post opening lines stop after 3 lines (`.post-excerpt` in `style.css`).
 - One shared stylesheet: `style.css`. Pages link it as `style.css?v=2`: raise the number on every page whenever `style.css` changes, so phones don't keep an old copy (GitHub Pages lets browsers keep files for 10 minutes). The same for `tabs.js?v=1`.
 

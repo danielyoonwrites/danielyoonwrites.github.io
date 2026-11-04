@@ -2,7 +2,7 @@
 
 Each decision about the website with its reason, oldest first. Each app keeps its own DECISIONS.md in its folder. Only add to this file; if a decision changes, add a new entry that says which one it replaces. Copied in on October 28, 2026 from CLAUDE.md, the .claude/rules files and HANDOFF.md.
 
-## In force (built October 31, 2026, at the end of the eighth session)
+## In force (built October 31, 2026, at the end of the eighth session; brought up to date November 4, 2026, at the end of the thirteenth)
 
 Every decision below that still holds, one line each; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -58,6 +58,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 ### October 24, 2026: the voice and the readers (pull request 3)
 - Decision: the voice is like the Substack: writing, family life, the shy Korean voice. The readers are millennial Asian Christians, and faith is part of what the site is about.
 - Why: not recorded.
+- Status: partly replaced by November 4, 2026: the Projects page in Dan's order, selling his work in plain words, with Quiet room off it (pull request 142): the Projects page sells his work in plain words; the rest of the site keeps this voice.
 
 ### October 24, 2026: Dan's words for the Home page (pull request 3)
 - Decision: the Home page uses these words, exactly: "Korean American dad. Professional overthinker, amateur life-enjoyer, tired parent of two toddlers. A millennial Asian Christian writing the things we usually don’t say out loud."
@@ -100,11 +101,13 @@ Every decision below that still holds, one line each; it's rewritten at each han
 ### October 24, 2026: a Projects page (pull request 26)
 - Decision: a fourth page, Projects. It says once, at the top, that he builds the projects with AI. Quiet room is listed as in progress, with no link.
 - Why: Quiet room has no link because the room is shared by private link. Not recorded for the rest.
+- Status: partly replaced by November 4, 2026: the Projects page in Dan's order, selling his work in plain words, with Quiet room off it (pull request 142): Quiet room is off the page until it works.
 
 ### October 24, 2026: Projects: all projects first, then "How I built it" (pull request 27)
 - Decision: all projects come first and stay short (label, name, one friendly line, link). The "How I built it" notes (what I wanted, the problem, what I decided, the trade-off) come after, in their own section, as fold-outs. Never put the notes inside the project list. Add each new app to both parts.
 - Why: Projects is for two kinds of readers: the short list shows every project near the top, and the notes are for anyone checking how he thinks. Dan's rule (October 2026): notes inside the list push the next project out of sight.
 - Turned down: the notes inside the project list.
+- Status: partly replaced by November 4, 2026: the Projects page in Dan's order, selling his work in plain words, with Quiet room off it (pull request 142): each project now has a second, small "What I set out to learn" line, and the notes follow the list's order.
 
 ### October 24, 2026: short pages on a phone, with tabs and fold-outs (pull request 27)
 - Decision: keep pages short on a phone, with tabs or fold-outs instead of long lists. The Writing page has two tabs, "Start here" and "Latest" (`tabs.js`); without JavaScript both lists show. On the Projects page, the "How I built it" notes are fold-outs (HTML's own `<details>`), closed until tapped. Post opening lines stop after 3 lines.
@@ -158,6 +161,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Turned down: "B", no link, like Quiet room; "C", a link with nothing about phones; waiting for build step 9.
 - Placed just before Idea board's entry, not at the end, so it can't clash with pull request 136 (Living in the Word on the same page), which adds its entry at the end at the same time.
 - Revisit if: what the app can do changes (text, shape and crop, several clips): update its line and its note in the same pull request (`video-editor/CLAUDE.md`).
+- Status: its place and line partly replaced by November 4, 2026: the Projects page in Dan's order, selling his work in plain words, with Quiet room off it (pull request 142): first in the list, with the line "A phone video editor: Korean-style looks, lighting, clearer sound, text, trim and speed." (its iPhone line stays).
 
 ### November 2, 2026: Idea board on the Projects page (pull request 124)
 - Decision: Idea board is listed on the Projects page, between "This website" and "Quiet room": the label "Web app · In progress," its name linked to the app, the line "Boards for spreading out ideas: typed notes and photos that line up neatly in rows.", "Open Idea board," and a "How I built it" note with the four parts (what I wanted, the problem, what I decided, the trade-off).
@@ -165,6 +169,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - How the words were chosen (Claude's choices, put to Dan with the pull request and its screenshots): the line says only what works today. It makes no promise about phones in general (the app was checked on Dan's Android phone in Chrome and on his computer, never on an iPhone) or about the same boards on every device (that's build step 7). At 83 characters it shows whole even on a phone 320 pixels wide, where project lines stop after 3 lines (Quiet room's is cut there). The note's trade-off says the boards stay in the browser they were made in, for now. The name check is in `idea-board/DECISIONS.md`.
 - Turned down: waiting for build step 9; "on a phone or a computer" in the line (an iPhone was never tested); a longer line (it would be cut on small phones).
 - Revisit if: what the app can do changes (saving to an account, links): update its line and its note in the same pull request (`idea-board/CLAUDE.md`).
+- Status: its place and line partly replaced by November 4, 2026: the Projects page in Dan's order, selling his work in plain words, with Quiet room off it (pull request 142): third in the list, with the line "Boards for spreading out ideas: typed notes and photos that snap neatly into rows."
 
 ### November 4, 2026: Living in the Word on the Projects page (pull request 136)
 - Decision: Living in the Word is listed first on the Projects page: the label "Web app · For my small group," its name linked to the app, the line "AI-written discussion questions for any Bible passage, and a daily reading plan.", "Open Living in the Word," and a "How I built it" note with the four parts (listed first there too).
@@ -172,6 +177,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - How the words were chosen (Claude's, put to Dan with the pull request): the line says only what works today, and says "AI-written" plainly. The label and the note's trade-off say who it's for: the AI is invite only for now; anyone else gets general questions, and the reading plan works for everyone (checked in the app as a visitor who isn't signed in, November 4). At 80 characters the line shows whole on a phone 320 pixels wide, in 3 lines. The note says "my own theological guidelines," never that a pastor checked each set (`living-in-the-word/DECISIONS.md`, October 29, 2026: the "check it" line). The name check is in `living-in-the-word/DECISIONS.md`.
 - Turned down: a time for the wait in the note: only one passage has been timed (Dan's "A", November 3, 2026); listing it without a link, like Quiet room: anyone can use the general questions and the reading plan.
 - Revisit if: what the app can do changes (the AI opening to more people, sign-ups, a store listing): update its line and its note in the same pull request (`living-in-the-word/CLAUDE.md`).
+- Status: its place and line partly replaced by November 4, 2026: the Projects page in Dan's order, selling his work in plain words, with Quiet room off it (pull request 142): second in the list, with the line "An AI Bible study helper: questions for any passage, plus a daily reading plan."
 
 ### November 4, 2026: the Projects page in Dan's order, selling his work in plain words, with Quiet room off it (pull request 142)
 - Decision: the projects are listed most impressive first, in Dan's order: Video editor, Living in the Word, Idea board, Fewer spam calls, This website, and the "How I built it" notes follow the same order. Quiet room is off the page (its list entry and its note) until it works. The page sells his work in normal words: the introduction is now "I build apps with AI, each one a step harder than the last. I decide what each one does, what it leaves out, and who it’s for." Dan chose it ("a") over "Real apps I’ve built with AI, from a video editor to a Bible study helper. I decide what each one does and what it leaves out." ("B") and a version closer to his original, "Small apps I build with AI for the people around me. I plan each one, decide what it does and what it leaves out, and test it on my own phone." ("C"). Each project keeps one line of what it is, reworded to sound stronger, and gets a second, small line: "What I set out to learn: ...". The page's summary for search engines and shared links matches.
