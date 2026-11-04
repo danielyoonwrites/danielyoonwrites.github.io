@@ -67,23 +67,55 @@ main {
   max-width: 32em;
 }
 
-.photo {
-  margin: 0;
+/* The original and the look, together on one screen. On a phone they're one above the other,
+   which makes both pictures bigger than side by side would; on a wider screen, side by side. */
+.pair {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
 
-/* The photo keeps its shape, as big as fits above the button bar */
-.photo canvas {
+.tile {
+  margin: 0;
+  min-width: 0;
+}
+
+.tile figcaption {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+/* Each picture keeps its shape, as big as fits: on a phone, half the room above the button bar */
+.tile canvas {
   display: block;
   max-width: 100%;
-  max-height: calc(100vh - 210px);
-  max-height: calc(100dvh - 210px);
+  max-height: calc((100vh - 250px) / 2);
+  max-height: calc((100dvh - 250px) / 2);
   width: auto;
   height: auto;
   margin: 0 auto;
 }
 
+/* The look's picture while it's being made: an empty gray box the same size */
+.tile canvas.waiting {
+  background: #2a2a2a;
+}
+
+@media (min-width: 700px) {
+  .pair {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tile canvas {
+    max-height: calc(100vh - 230px);
+    max-height: calc(100dvh - 230px);
+  }
+}
+
 .size {
-  margin-top: 8px;
+  margin: 8px 0 0;
   color: var(--soft);
   font-size: 15px;
   text-align: center;
