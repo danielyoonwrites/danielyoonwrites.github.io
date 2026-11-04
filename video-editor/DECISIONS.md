@@ -2,12 +2,12 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129 and 137)
+## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129, 137 and 138)
 
 Every decision below that still holds, one line each, by date; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
 - November 2, 2026: a simple video editor that does a few things well (a filter, lighting, text, clip order, crop, speed); no music button, nothing copyrighted, no AI (the owner's words).
-- November 2, 2026: just for Dan, on his Android phone in Chrome (his "A").
+- November 2, 2026: just for Dan, on his Android phone in Chrome (his "A"); since November 3 it's on the website's Projects page with a link anyone can open, saying it's made for an Android phone in Chrome (his "A"), and it's still built and checked only for his phone.
 - November 2, 2026: the name "Video editor," at https://danielyoonwrites.github.io/video-editor (his "A").
 - November 2, 2026: everything happens on the phone; the videos are never uploaded. Mediabunny makes the new video, frame by frame.
 - November 2, 2026: Mediabunny's ready-made file saved in the folder; no npm (the website's rule, kept after Dan asked whether it helps).
@@ -125,3 +125,9 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - Decision: the Edit screen's tabs are Filter, Lighting, Sound, Trim and Speed, in that order, and the screen opens on Filter, the first tab. This replaces the order in "trim and speed (pull request 125)": Trim, Speed, Filter and Lighting (with Sound added after them in pull request 129), opening on Trim (Claude's design then).
 - Why: Dan, November 3, 2026: "Let's arrange the tabs, filter, lighting, sound, then trim and speed." Opening on Filter is Claude's choice, so the screen opens on the first tab of the row.
 - Unchanged: on the Trim tab the whole video plays, so new points are easy to find; on the other tabs only the trimmed part plays, over and over. The arrow keys follow the new order (the saved checks, I1b).
+
+### November 3, 2026: on the Projects page now (pull request 138)
+- Decision: the video editor goes on the website's Projects page now, with a link anyone can open and a gray line saying it's made for an Android phone in Chrome, so it may not work on an iPhone yet. Build step 9 (polish) had planned to decide this after a week of real use. The app is still built and checked only for Dan's Android phone in Chrome: this changes who can open it, not who it's made for. The listing's words and their reasons are in the root `DECISIONS.md` ("the video editor on the Projects page").
+- Why: Dan, November 3, 2026: "Also let's add this to my website." Asked about a link, he chose "A": "Yes, with a link," with the line about Android phones (Claude's recommendation: people can try what he built, and anyone who tries it keeps their videos on their own phone, since there's no server).
+- Turned down: "B", no link, like Quiet room; "C", a link with nothing about phones.
+- The name: "Video editor" is the plain name of what it is. Claude's view, not legal advice: a name like that can't be anyone's trademark for a video editor, since US trademark rules don't let a generic name be registered for the thing it names (the trademark office's examining manual, TMEP 1209.01(c), seen only through a copy in search results, https://www.bitlaw.com/source/tmep/1209_01_c.html, November 3, 2026). So no name search was done, unlike Idea board's and Living in the Word's.

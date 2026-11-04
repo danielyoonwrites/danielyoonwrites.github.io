@@ -16,6 +16,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - October 24, 2026: a celadon Subscribe button, not Substack's form; four hand-picked posts under "Start here."
 - October 24, 2026: Latest posts filled in on GitHub through Jina Reader, before each publish.
 - October 24, 2026: the menu is Writing, Projects, About (no Home link); Projects lists every project first, then "How I built it" as fold-outs.
+- November 3, 2026: the video editor is on the Projects page as a web app in progress, with a link and a gray line saying it's made for an Android phone in Chrome (Dan's "A"); its line says only what it does today.
 - November 2, 2026: Idea board is on the Projects page as a web app in progress, with a link, before its polish step (Dan's wish); its line says only what it does today.
 - October 24, 2026: version numbers on the stylesheet and script links, raised on every change.
 
@@ -148,6 +149,14 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Why: Dan, while planning the video editor: "why is there a no npm rule? Does that help in any way? If not then use npm." Claude's answer: it helps in three ways. (1) The files on GitHub are exactly what runs on the phone, so Dan can open any of them, read it and change it by hand, and the change is live after the publish run. (2) There's no build step, so a merge can't be held up by a build that fails. (3) There are no package updates and warnings to keep up with: a saved library changes only when an update is chosen on purpose. And npm wouldn't help the video editor much: Mediabunny comes as one ready-made file (its docs: it can be included "directly with a script tag"), and npm's one gain there, a smaller download by keeping only the parts the app uses, is small (the whole file is about 187 KB compressed, less than a phone photo).
 - Turned down: npm with a build step on GitHub's computers (nothing would run on Dan's computer, but the files he reads would no longer be the files that run).
 - Revisit if: an app needs a library that only works through npm, or Dan wants to learn npm and build tools as their own step.
+
+### November 3, 2026: the video editor on the Projects page (pull request 138)
+- Decision: the video editor is listed on the Projects page, between Idea board and Quiet room: the label "Web app · In progress," its name linked to the app, the line "A simple video editor: Korean-style looks, lighting, clearer sound, trim and speed.", a second line in gray, "Made for an Android phone in Chrome, so it may not work on an iPhone yet.", "Open the video editor," and a "How I built it" note with the four parts.
+- Why: Dan, November 3, 2026: "Also let's add this to my website." Asked whether it should have a link anyone can open, he chose "A": a link, with a short line saying it's made for an Android phone in Chrome. The app's build plan had left the Projects page for its last step (step 9, after a week of real use).
+- How the words were chosen (Claude's choices, put to Dan with the pull request and its screenshots): the line says only what works today (text, shape and crop, and several clips aren't built yet). At 83 characters it shows whole on phones 320 and 360 pixels wide (3 lines, with the site's own fonts, checked in Claude's test browser). The gray line is there because the app was built and checked only on Dan's Android phone in Chrome, never on an iPhone. The note says each new video is "checked against" the platforms' upload rules, not that the platforms accept it: Dan's real test uploads haven't been reported yet.
+- Turned down: "B", no link, like Quiet room; "C", a link with nothing about phones; waiting for build step 9.
+- Placed just before Idea board's entry, not at the end, so it can't clash with pull request 136 (Living in the Word on the same page), which adds its entry at the end at the same time.
+- Revisit if: what the app can do changes (text, shape and crop, several clips): update its line and its note in the same pull request (`video-editor/CLAUDE.md`).
 
 ### November 2, 2026: Idea board on the Projects page (pull request 124)
 - Decision: Idea board is listed on the Projects page, between "This website" and "Quiet room": the label "Web app · In progress," its name linked to the app, the line "Boards for spreading out ideas: typed notes and photos that line up neatly in rows.", "Open Idea board," and a "How I built it" note with the four parts (what I wanted, the problem, what I decided, the trade-off).
