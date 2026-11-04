@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129 and PULL_REQUEST_NUMBER)
+## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129 and 137)
 
 Every decision below that still holds, one line each, by date; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -121,7 +121,7 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - How (Claude's choices, measured with test tones in Claude's test browser, November 3, 2026): Cut rumble is two high-pass filters at 80 Hz (50 Hz 17.7 dB quieter, a voice's range almost unchanged); Clearer voice is 3 dB less around 300 Hz and 4 dB more around 3,500 Hz; Even out the volume is a compressor (above −30 dB, 4 to 1; a 30 dB gap became 18 dB); then the volume; then a safety limit (above −3 dB, 20 to 1), only when something is changed, so a louder volume never clips. The playing video's sound goes through the same steps from the first change on the Sound tab, so nothing changes for a video whose sound isn't touched. Each compressor holds the sound back 6 thousandths of a second; the new video's sound is moved back in line, and the saved checks show it lines up with the original to the sample (a hiss lined up both ways; a check that times a sudden tone was dropped, since AAC smears a sudden start by about 14 thousandths of a second with or without the steps).
 - Not checked yet: how it sounds on Dan's phone with a real voice, and whether the playing video's sound stays in step with the picture there once it goes through Chrome's sound tools (they may add a small delay on a phone; unverified).
 
-### November 3, 2026: the tabs in Dan's order (pull request PULL_REQUEST_NUMBER)
+### November 3, 2026: the tabs in Dan's order (pull request 137)
 - Decision: the Edit screen's tabs are Filter, Lighting, Sound, Trim and Speed, in that order, and the screen opens on Filter, the first tab. This replaces the order in "trim and speed (pull request 125)": Trim, Speed, Filter and Lighting (with Sound added after them in pull request 129), opening on Trim (Claude's design then).
 - Why: Dan, November 3, 2026: "Let's arrange the tabs, filter, lighting, sound, then trim and speed." Opening on Filter is Claude's choice, so the screen opens on the first tab of the row.
 - Unchanged: on the Trim tab the whole video plays, so new points are easy to find; on the other tabs only the trimmed part plays, over and over. The arrow keys follow the new order (the saved checks, I1b).

@@ -11,7 +11,7 @@ A simple video editor, just for the owner, on his Android phone in Chrome: trim,
   - The Korean looks (pull request 116, Dan's "a"): Original, Milky 우유빛, Peach 복숭아, Soft glow 뽀샤시, Café 카페, Clear 맑음, Film 필름, Black and white 흑백.
   - Build step 4, trim and speed (pull request 125): the "Edit" screen with Trim and Speed tabs; the sound follows the speed like a tape (Dan's "b"); each new video made frame by frame.
   - Build step 5, better sound (pull request 129, merged November 3, 2026, Dan's "B"): a fifth tab, "Sound," with three switches (Cut rumble, Clearer voice, Even out the volume) and a Volume slider from Off to 200%. The playing video sounds the same way as the new video will. How it works: `SPEC.md`, "Tech notes," "Better sound."
-  - The tabs in Dan's order (pull request PULL_REQUEST_NUMBER, his request on November 3, 2026): Filter, Lighting, Sound, Trim, Speed; the Edit screen opens on Filter.
+  - The tabs in Dan's order (pull request 137, his request on November 3, 2026): Filter, Lighting, Sound, Trim, Speed; the Edit screen opens on Filter.
 - Checked in Claude's test browser (November 3, 2026): 184 saved checks pass (`tests/app-test.mjs`), including made-up test sounds: in a saved video, the 50 Hz rumble 17.7 dB quieter, 300 Hz 3.0 dB quieter and 3,500 Hz 4.0 dB louder, a 30 dB gap between quiet and loud down to 18 dB, Volume 50% exactly 6.0 dB quieter, nothing clipping, and the sound in line with the original to the sample. The phone test's 71 pass.
 - Not checked yet:
   - The sound switches on Dan's phone with a real voice, and whether the playing video's sound stays in step with the lips while editing.
@@ -20,12 +20,12 @@ A simple video editor, just for the owner, on his Android phone in Chrome: trim,
   - What the owner's phone writes in the "For Claude" line on "Your video" (color tags, edit lists).
   - How fast Soft glow is on the phone, and the looks on real faces (Claude's test scene is made up).
 - Branch: `ccr-f31dd4eb-gq2mec` (the video editor's session), restarted from main after each merge; everything up to pull request 135 is merged into main.
-- Open pull requests: pull request PULL_REQUEST_NUMBER, the tabs in Dan's order.
+- Open pull requests: pull request 137, the tabs in Dan's order.
 - Claude's rough estimate: 4 more small pull requests (build steps 6 to 9).
 - Dan's Master Notes (Notion), the page "Simple video editor: how hard to build (Nov 2026)," gets one entry after each merge (what merged, what was checked, what's next).
 
 ## Waiting on Dan
-1. Merge the tabs in his order, pull request PULL_REQUEST_NUMBER: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/PULL_REQUEST_NUMBER, Conversation tab, Merge pull request, Confirm merge. Then, on his phone in Chrome, open https://danielyoonwrites.github.io/video-editor and tap "Choose a video": it opens on Filter, and the tabs read Filter, Lighting, Sound, Trim, Speed (a phone or browser may keep the old copy for up to 10 minutes after a merge).
+1. Merge the tabs in his order, pull request 137: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/137, Conversation tab, Merge pull request, Confirm merge. Then, on his phone in Chrome, open https://danielyoonwrites.github.io/video-editor and tap "Choose a video": it opens on Filter, and the tabs read Filter, Lighting, Sound, Trim, Speed (if it still shows the old order, wait a few minutes and reload: a phone can keep the old copy for a short while after a merge).
 2. The better sound check on his phone (any time; it's live):
    1. On your phone, open Chrome and go to https://danielyoonwrites.github.io/video-editor
    2. Tap "Choose a video" and pick a video of yourself talking, at least 15 seconds long, ideally one with some wind or traffic in it (it stays on your phone).
