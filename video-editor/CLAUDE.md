@@ -2,7 +2,7 @@
 
 Read `PROGRESS.md` first (where it stands and the next step), then `DECISIONS.md` (choices and their reasons) and `SPEC.md`.
 
-A simple video editor for the owner's own videos, on his Android phone in Chrome, planned November 2, 2026 (the name is the owner's choice). It does a few things well: a filter, lighting, text, clip order, crop, speed and better sound. It lives in this folder and is published at https://danielyoonwrites.github.io/video-editor (live since pull request 112; not listed in search engines). Keep the "Build plan" in `SPEC.md` up to date.
+A simple video editor for the owner's own videos, on his Android phone in Chrome, planned November 2, 2026 (the name is the owner's choice). It does a few things well: a filter, lighting, text, clip order, crop, speed and better sound. It lives in this folder and is published at https://danielyoonwrites.github.io/video-editor (live since pull request 112; not listed in search engines; on the website's Projects page since pull request PULL_REQUEST_NUMBER). Keep the "Build plan" in `SPEC.md` up to date.
 
 ## Rules for working here
 
@@ -25,3 +25,4 @@ A simple video editor for the owner's own videos, on his Android phone in Chrome
 - Screens change only through `goDeeper()`, `show()` and `followHistory()` in `app.js`, so the phone's Back button (<) goes back one screen at a time; Back while a video is being made stops it.
 - Run the saved checks after any change, and add checks for new work, from the repository folder: `node video-editor/tests/app-test.mjs` (the app) and `node video-editor/tests/phone-test.mjs` (the phone test). Both must end "0 failed".
 - Raise the `?v=` number on file links whenever a file changes.
+- It's on the website's Projects page (`projects.html`, since pull request PULL_REQUEST_NUMBER): a short line, a gray line saying it's made for an Android phone in Chrome, and a "How I built it" note, in the website's voice (`.claude/rules/website.md`). The line says only what works today. When what the app can do changes (text, shape and crop, several clips), update both in the same pull request.

@@ -4,7 +4,7 @@ A little app at https://danielyoonwrites.github.io/video-editor (folder `video-e
 
 ## Who it's for
 
-Just the owner, on his Android phone in Chrome (his choice "A", November 2, 2026). Not iPhones or other people for now: two tools it needs work differently in Safari ("Tech notes").
+Just the owner, on his Android phone in Chrome (his choice "A", November 2, 2026). Not iPhones or other people for now: two tools it needs work differently in Safari ("Tech notes"). Since November 3, 2026 it's on the website's Projects page with a link anyone can open (his "A", pull request PULL_REQUEST_NUMBER), with a line saying it's made for an Android phone in Chrome; it's still built and checked only for his phone.
 
 ## What it is
 
@@ -131,7 +131,7 @@ Browser support below is from MDN's browser-compat-data on GitHub, read November
 6. Shape and crop. Check: make a tall video from a wide clip, choosing which part shows.
 7. Text. Check: add a title for the first 3 seconds.
 8. Several clips: add more, put them in order, remove one; they join into one video. Check: join three short clips in a new order.
-9. Polish after a week of real use (like keeping an unfinished edit, if wanted), then decide whether it goes on the Projects page.
+9. Polish after a week of real use (like keeping an unfinished edit, if wanted). It went on the Projects page early, in pull request PULL_REQUEST_NUMBER, at the owner's request (November 3, 2026).
 
 ## Open questions (ask one at a time)
 

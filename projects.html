@@ -77,6 +77,17 @@
           <a class="read-link" href="idea-board/">Open Idea board</a>
         </li>
 
+        <!-- When what the video editor can do changes (like text, shape and crop, or several clips),
+             update this line and its note in "How I built it" below. The second line is there because
+             it's made for Dan's Android phone in Chrome and was never tested on an iPhone. -->
+        <li class="post">
+          <p class="label">Web app · In progress</p>
+          <h2><a href="video-editor/">Video editor</a></h2>
+          <p class="post-excerpt">A simple video editor: Korean-style looks, lighting, clearer sound, trim and speed.</p>
+          <p class="post-date">Made for an Android phone in Chrome, so it may not work on an iPhone yet.</p>
+          <a class="read-link" href="video-editor/">Open the video editor</a>
+        </li>
+
         <!-- No link on purpose: it's shared by private link with the group only -->
         <li class="post">
           <p class="label">Web app · In progress</p>
@@ -119,6 +130,14 @@
           <p><em>The problem:</em> Notes placed by hand never quite line up, so a board soon looks messy.</p>
           <p><em>What I decided:</em> When you let go of a note or a photo, it settles onto the dots, so everything lines up in rows. Photos are saved as smaller copies, which leave out hidden details like where they were taken.</p>
           <p><em>The trade-off:</em> For now, boards are saved only in the browser they were made in, so they don’t follow me from my phone to my computer yet. Saving to an account comes next.</p>
+        </details>
+
+        <details class="fold">
+          <summary>Video editor</summary>
+          <p><em>What I wanted:</em> A simple video editor for my short videos that does a few things well, with no music button and no AI.</p>
+          <p><em>The problem:</em> Showing edits while a video plays is easy. Saving them into a new video is the hard part, and I didn’t want my videos uploaded anywhere to do it.</p>
+          <p><em>What I decided:</em> The app rebuilds each video frame by frame in Chrome, on my phone, so the videos never leave it. The looks are Korean styles, like a milky one (<span class="korean" lang="ko">우유빛</span>) and a soft glow (<span class="korean" lang="ko">뽀샤시</span>), and each new video is checked against Instagram’s, TikTok’s and YouTube Shorts’ upload rules.</p>
+          <p><em>The trade-off:</em> It’s made only for my Android phone in Chrome, so it may not work on an iPhone yet.</p>
         </details>
 
         <details class="fold">
