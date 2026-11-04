@@ -1,6 +1,6 @@
 # Handoff: where everything stands
 
-Last updated November 2, 2026, at the end of the eleventh session (with pull request 115), Living in the Word's lines on November 4, 2026, with pull request 136 (on the Projects page), and the video editor's lines on November 3, 2026, at its second session's handoff (pull request PULL_REQUEST_NUMBER). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
+Last updated November 2, 2026, at the end of the eleventh session (with pull request 115), Living in the Word's lines on November 4, 2026, with pull request 136 (on the Projects page), and the video editor's lines on November 3, 2026, at its second session's handoff (pull request 141). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
 
 - How to work with Dan, and the rules for every project: `CLAUDE.md`.
 - Each project: its folder's `PROGRESS.md` (where it stands, the next step), `DECISIONS.md` (choices and their reasons) and `SPEC.md`. The website's decisions are in the root `DECISIONS.md`.
@@ -34,7 +34,7 @@ This repository is public. Keep personal details out of this file.
 2. Living in the Word: merge pull request 136, the app on the Projects page (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/136, Conversation tab, Merge pull request, Confirm merge). Then the checks for pull requests 119, 120, 126, 127, 128, 130, 132, 133, 134 and 136 on his phone, with every step in `living-in-the-word/PROGRESS.md` ("Waiting on Dan"). His Max plan's API credit was already linked on October 26, 2026: nothing to do.
 3. The Anthropic API key expires November 24, 2026: a new key, saved in Cloudflare as `ANTHROPIC_API_KEY`. No scheduled reminder (his "C", November 4, 2026: he'll remember it); if a session falls between November 10 and 24, mention it once, with every step (in `living-in-the-word/PROGRESS.md`).
 4. The other apps: Fewer spam calls needs the Samsung steps checked on a real Samsung phone; First step smaller waits for his daily trial. Details in each `PROGRESS.md`.
-5. Video editor: merge the handoff notes, pull request PULL_REQUEST_NUMBER (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/PULL_REQUEST_NUMBER, Conversation tab, Merge pull request, Confirm merge). Then the phone checks (text, better sound, trim and speed, the looks and private test uploads), and, with build step 7a, a one-time setup in Cloudflare for the captions server and which Cloudflare plan he's on. Every step is in `video-editor/PROGRESS.md`.
+5. Video editor: merge the handoff notes, pull request 141 (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/141, Conversation tab, Merge pull request, Confirm merge). Then the phone checks (text, better sound, trim and speed, the looks and private test uploads), and, with build step 7a, a one-time setup in Cloudflare for the captions server and which Cloudflare plan he's on. Every step is in `video-editor/PROGRESS.md`.
 6. Photo Filters: merge pull request 118, build step 3 (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/118, Conversation tab, Merge pull request, Confirm merge), then the checks on his phone and MacBook. Every step is in `photo-filters/PROGRESS.md`.
 
 

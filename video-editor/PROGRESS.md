@@ -13,12 +13,12 @@ A simple video editor, just for the owner, on his Android phone in Chrome: a loo
 - Planned, not built: AI captions only for Dan (pull request 140, notes only): his own small Cloudflare server running Workers AI's Whisper, separate from Living in the Word's, one short line at a time, locked with a passcode. The whole plan: `SPEC.md`, "AI captions, only for the owner."
 - Checked in Claude's test browser (November 3, 2026): 207 saved checks pass (`tests/app-test.mjs`), including text (section K: the words land within 3% of where they showed while editing, stay white with the lighting at −50, and go after the new video's first 3 seconds, at 2× too) and better sound measured with test tones (section J). The phone test's 71 pass. The Projects page check passes (`tests/projects-listing.mjs`, 20 checks).
 - Not checked yet: the sound switches with a real voice, and whether the voice stays in step with the lips while editing; trim and speed on the phone, and how long making a video takes; real uploads to the three platforms; what the phone writes in the "For Claude" line on "Your video"; Soft glow's speed and the looks on real faces; text on the phone (its font and Korean letters, the size, and whether Top and Bottom stay clear of the apps' buttons in a real upload).
-- Branch: `ccr-f31dd4eb-gq2mec` (this session's), restarted from main after each merge; everything up to pull request 140 is merged into main. Open pull requests: pull request PULL_REQUEST_NUMBER, this handoff (notes only). Nothing to do after it merges but the items below.
+- Branch: `ccr-f31dd4eb-gq2mec` (this session's), restarted from main after each merge; everything up to pull request 140 is merged into main. Open pull requests: pull request 141, this handoff (notes only). Nothing to do after it merges but the items below.
 - Claude's rough estimate: 6 more small pull requests: AI captions 7a to 7c, then shape and crop, several clips, polish.
 - Dan's Master Notes (Notion), the page "Simple video editor: how hard to build (Nov 2026)," gets one entry after each merge (what merged, what was checked, what's next); the AI captions research is saved there too (November 3, 2026).
 
 ## Waiting on Dan
-1. Merge the handoff notes, pull request PULL_REQUEST_NUMBER (notes only): https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/PULL_REQUEST_NUMBER, Conversation tab, Merge pull request, Confirm merge.
+1. Merge the handoff notes, pull request 141 (notes only): https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/141, Conversation tab, Merge pull request, Confirm merge.
 2. The text check (pull request 139), on his phone:
    1. Open Chrome and go to https://danielyoonwrites.github.io/video-editor
    2. Tap "Choose a video" and pick a video of yourself talking.
