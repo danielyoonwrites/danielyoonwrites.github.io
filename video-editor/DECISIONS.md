@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129, 137 and PULL_REQUEST_NUMBER)
+## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129, 137 and 138)
 
 Every decision below that still holds, one line each, by date; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -126,7 +126,7 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - Why: Dan, November 3, 2026: "Let's arrange the tabs, filter, lighting, sound, then trim and speed." Opening on Filter is Claude's choice, so the screen opens on the first tab of the row.
 - Unchanged: on the Trim tab the whole video plays, so new points are easy to find; on the other tabs only the trimmed part plays, over and over. The arrow keys follow the new order (the saved checks, I1b).
 
-### November 3, 2026: on the Projects page now (pull request PULL_REQUEST_NUMBER)
+### November 3, 2026: on the Projects page now (pull request 138)
 - Decision: the video editor goes on the website's Projects page now, with a link anyone can open and a gray line saying it's made for an Android phone in Chrome, so it may not work on an iPhone yet. Build step 9 (polish) had planned to decide this after a week of real use. The app is still built and checked only for Dan's Android phone in Chrome: this changes who can open it, not who it's made for. The listing's words and their reasons are in the root `DECISIONS.md` ("the video editor on the Projects page").
 - Why: Dan, November 3, 2026: "Also let's add this to my website." Asked about a link, he chose "A": "Yes, with a link," with the line about Android phones (Claude's recommendation: people can try what he built, and anyone who tries it keeps their videos on their own phone, since there's no server).
 - Turned down: "B", no link, like Quiet room; "C", a link with nothing about phones.
