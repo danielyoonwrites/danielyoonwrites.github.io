@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129, 137 and 138 and PULL_REQUEST_NUMBER)
+## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129, 137 and 138 and 139)
 
 Every decision below that still holds, one line each, by date; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -134,7 +134,7 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - Turned down: "B", no link, like Quiet room; "C", a link with nothing about phones.
 - The name: "Video editor" is the plain name of what it is. Claude's view, not legal advice: a name like that can't be anyone's trademark for a video editor, since US trademark rules don't let a generic name be registered for the thing it names (the trademark office's examining manual, TMEP 1209.01(c), seen only through a copy in search results, https://www.bitlaw.com/source/tmep/1209_01_c.html, November 3, 2026). So no name search was done, unlike Idea board's and Living in the Word's.
 
-### November 3, 2026: one line of text for everyone, and AI captions only for Dan (pull request PULL_REQUEST_NUMBER)
+### November 3, 2026: one line of text for everyone, and AI captions only for Dan (pull request 139)
 - Decision: text, for anyone using the app: a sixth tab, "Text," with one line per video: "Your text" (up to 100 letters), "Where" (Top, Middle, Bottom) and "When" (First 3 seconds of the new video, or Whole video), and "Remove the text." Text moves ahead of shape and crop in the build plan (now step 6).
 - Why: Dan, November 3, 2026: "I want the ability to add text to the videos." Then: "Let's actually add the option to do AI generated captions, and let's make it so only I can use it. But anyone with link can add their own text to a video normally." Asked how many pieces of normal text a video should have, he chose "A": one line (Claude's recommendation: it fits his hook plan in Master Notes, "the first line spoken and shown as text," kept to "about 8 to 12 words").
 - Turned down: "B", up to 3 lines with their own start and end times; "C", typed captions for everything said (his AI captions request replaces it).

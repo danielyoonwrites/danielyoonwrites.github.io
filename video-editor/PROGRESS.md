@@ -13,7 +13,7 @@ A simple video editor, just for the owner, on his Android phone in Chrome: a loo
   - Build step 5, better sound (pull request 129, merged November 3, 2026, Dan's "B"): a fifth tab, "Sound," with three switches (Cut rumble, Clearer voice, Even out the volume) and a Volume slider from Off to 200%. The playing video sounds the same way as the new video will. How it works: `SPEC.md`, "Tech notes," "Better sound."
   - The tabs in Dan's order (pull request 137, merged November 3, 2026, his request): Filter, Lighting, Sound, Trim, Speed; the Edit screen opens on Filter.
   - On the website's Projects page (pull request 138, Dan's "A"): https://danielyoonwrites.github.io/projects.html, between Idea board and Quiet room, with a link, a gray line saying it's made for an Android phone in Chrome, and a "How I built it" note. Checked in Claude's test browser at 320 and 360 pixels wide: the line shows whole (3 lines), nothing scrolls sideways, and the link opens the app. Merged November 3, 2026.
-  - Text (pull request PULL_REQUEST_NUMBER, Dan's "A"): a Text tab with one line per video, Top, Middle or Bottom, for the new video's first 3 seconds or the whole video. The Projects page line now says "text" too. How it works: `SPEC.md`, "Tech notes," "Text."
+  - Text (pull request 139, Dan's "A"): a Text tab with one line per video, Top, Middle or Bottom, for the new video's first 3 seconds or the whole video. The Projects page line now says "text" too. How it works: `SPEC.md`, "Tech notes," "Text."
 - Checked in Claude's test browser (November 3, 2026): 207 saved checks pass (`tests/app-test.mjs`), including text (section K: the words land within 3% of where they showed while editing, stay white with the lighting at −50, and go after the new video's first 3 seconds, at 2× too) and made-up test sounds: in a saved video, the 50 Hz rumble 17.7 dB quieter, 300 Hz 3.0 dB quieter and 3,500 Hz 4.0 dB louder, a 30 dB gap between quiet and loud down to 18 dB, Volume 50% exactly 6.0 dB quieter, nothing clipping, and the sound in line with the original to the sample. The phone test's 71 pass.
 - Not checked yet:
   - The sound switches on Dan's phone with a real voice, and whether the playing video's sound stays in step with the lips while editing.
@@ -23,12 +23,12 @@ A simple video editor, just for the owner, on his Android phone in Chrome: a loo
   - How fast Soft glow is on the phone, and the looks on real faces (Claude's test scene is made up).
   - Text on the phone: the phone's font and Korean letters, the size, and whether Top and Bottom stay clear of the apps' buttons in a real upload.
 - Branch: `ccr-f31dd4eb-gq2mec` (the video editor's session), restarted from main after each merge; everything up to pull request 138 is merged into main.
-- Open pull requests: pull request PULL_REQUEST_NUMBER, text on the videos.
+- Open pull requests: pull request 139, text on the videos.
 - Claude's rough estimate: 3 more small pull requests for the plan (shape and crop, several clips, polish), plus AI captions (likely 3 or more: a plan, a server piece if Dan chooses one, the captions screen; a guess until the plan is chosen).
 - Dan's Master Notes (Notion), the page "Simple video editor: how hard to build (Nov 2026)," gets one entry after each merge (what merged, what was checked, what's next).
 
 ## Waiting on Dan
-1. Merge text on the videos, pull request PULL_REQUEST_NUMBER: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/PULL_REQUEST_NUMBER, Conversation tab, Merge pull request, Confirm merge. Then the check on his phone:
+1. Merge text on the videos, pull request 139: https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/139, Conversation tab, Merge pull request, Confirm merge. Then the check on his phone:
    1. Open Chrome and go to https://danielyoonwrites.github.io/video-editor
    2. Tap "Choose a video" and pick a video of yourself talking.
    3. Tap the Text tab and type a short line, like "Three things I wish I knew at 20." While it plays, try Top, Middle and Bottom.
