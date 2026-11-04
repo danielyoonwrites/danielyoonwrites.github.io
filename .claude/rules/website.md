@@ -34,7 +34,7 @@ Each pattern in `paths` at the top starts with `/`, which means "at the top of t
 
 ## Content
 
-- The voice is like the Substack: writing, family life, the shy Korean voice. The Projects page is the exception (Dan, November 4, 2026: "I want to make it sound more impressive, as if in linkedin or something, something to sell myself"): confident, like a portfolio, but every claim true and plain.
+- The voice is like the Substack: writing, family life, the shy Korean voice. The Projects page is the exception (Dan, November 4, 2026: "I want to make it sound more impressive, as if in linkedin or something, something to sell myself"; then, the same day: "please don't use linkedin language, more normal language, but still selling myself"): it sells his work in normal words, never LinkedIn's (no "ship," "engineering partner," "product decision"), and every claim is true.
 - Readers: millennial Asian Christians. Faith is part of what the site is about.
 - Pastor work is not the focus of the Home or Writing pages. The About page can say more (a short paragraph). Never word it so it sounds like just a job.
 
