@@ -6,7 +6,7 @@ The "In force" list right below is every decision that still holds, one line eac
 
 **Who it's for, and how the work goes**
 - October 25, 2026: stages: Dan's small group first, then anyone online later (stage 3). Dan reviews every question, and nothing is shared on its own.
-- October 25, 2026: the name "Living in the Word"; a trademark search before any public launch or store listing.
+- October 25, 2026: the name "Living in the Word"; a trademark search before any public launch or store listing. On the website's Projects page since November 4, 2026, after a name check through search results (no live US trademark found; the trademark office's own search not checked).
 - October 25, 2026: Claude's effort: High for most steps; Extra high was for building the AI helper.
 - October 29, 2026: the checks live in `living-in-the-word/tests/`; run them after any change to `app.js` or `server/worker.js`.
 - November 2, 2026: perfect what's built: the audit's fixes come first, one pull request each, in `AUDIT.md`'s order.
@@ -22,6 +22,7 @@ The "In force" list right below is every decision that still holds, one line eac
 - October 28, 2026: the commentary for the leader (about 100 words, written with the questions) and the reading's note start open.
 - November 2, 2026: Opus 5.5 writes every set, at `medium` effort and normal speed (no fast mode: "quite expensive"); it replaces Sonnet 5.5 at `high` (October 29). Uneven sets still get guidance fixes.
 - November 3, 2026: the speed stays as it is (Dan's "C"; about 13 to 16 seconds, almost all of it the AI). If speed comes up again: `low` effort is the free test, fast mode the sure one at twice the price.
+- November 3, 2026: the waiting words stay "This can take up to a minute" until Dan has seen 3 or 4 more waits in the `?test` line (his "A").
 - October 29, 2026: question 2 asks why what the passage shows about God matters there.
 - October 29, 2026: the "check it" line wherever the AI's words show; a "pastor wrote the guidelines" line may go on the start screen, never inside that warning.
 - October 26, 2026: the ESV text is on hold: only a "Read it on esv.org" button. Don't ask Dan to set up the key. Since November 2, 2026 the app doesn't ask the server for the text either (`ESV_TEXT` off in `app.js`; the code stays).
@@ -502,3 +503,19 @@ The "In force" list right below is every decision that still holds, one line eac
 - Checks: server section 26 (the stand-in database counts its trips; 2 checks fail on the old code), app section SW4 (a stand-in Google Fonts slowed to 6 seconds; with the old helper the page waited 4,055 milliseconds). The batch and the join were also tried in Cloudflare's local runtime (Wrangler's local mode, with a local database): the 4 tables were made, and the owner, an invited person, a turned-off person and someone not on the list got the same answers as before.
 - Left out: counting first, instead of reading the counts and then adding one. It would save one quick trip per set, but someone who keeps trying after their 20 would then show more than 20 on the owner's list (since item 8, it could no longer use up everyone's). The words "This can take up to a minute": Dan's choice, asked November 3 (Claude's recommendation: keep them until he has seen 3 or 4 more waits in the `?test` line; only Romans 16 has been measured, 13.6 to 16 seconds).
 - Not changed: the page itself is still asked for from the internet first (up to 4 seconds), so a new version reaches phones.
+
+### November 3, 2026: the waiting words stay "up to a minute" for now (no pull request)
+- Decision: Dan chose "A": keep "This can take up to a minute." (on "Prepare for a Bible study," and in the line while the AI writes a study's or a reading's questions) until he has seen 3 or 4 more waits in the `?test` line; then he chooses the words.
+- Why: only Romans 16 has been timed (13.6 seconds on November 3, 15.0 on November 1), too few to promise a shorter time, and a promise that's sometimes broken feels worse than a long one that's usually beaten (Claude's recommendation, which Dan chose).
+- Turned down for now: "This usually takes 15 to 30 seconds" ("B"), and his own words now ("C").
+
+### November 4, 2026: on the website's Projects page, and the name check (pull request 136)
+- Decision: the app is listed on the website's Projects page; the words and their reasons are in the root `DECISIONS.md`. The name stays "Living in the Word," and the AI stays invite only.
+- Why: Dan: "Yes let's just add this to my website in projects".
+- The name check, November 4, 2026, through search results only (no page below was opened):
+  - No US trademark for "Living in the Word" turned up, in searches for the phrase with "trademark," "USPTO," "serial number" and "owner," including on Justia's, Trademarkia's and uspto.report's trademark pages.
+  - The closest: "THE LIVING WORD IN 3D" (serial number 87058311; a series of books in biblical studies, filed June 2, 2016), shown as abandoned on April 27, 2017, on Justia's page in search results.
+  - No app called "Living in the Word" turned up in a search for Bible study apps. (October 25, 2026: a sermon podcast called "Living in the Word" and a ministry called "Life in the Word" were found.)
+  - Not checked: the US trademark office's own search (Trademark Search, https://tmsearch.uspto.gov), and other countries.
+  - Claude's view, not legal advice: fine for a free, invite-only app on a personal website. Before stage 3 (anyone online), any store listing or charging, do a proper trademark search, as the October 25 decision says.
+- Turned down: renaming it (nothing found that calls for it).

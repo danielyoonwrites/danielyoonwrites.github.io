@@ -212,6 +212,38 @@ export function likeness(a, b) {
 
 export const average = (values) => values.reduce((s, v) => s + v, 0) / values.length;
 
+// A frame's brightness, pixel by pixel (0 to 255), scaled to width by height (for finding the text)
+export function frameGray(file, at, width = 180, height = 320) {
+  const run = spawnSync('ffmpeg', ['-v', 'error', '-ss', String(at), '-i', file, '-vf', `scale=${width}:${height}:flags=area,format=gray`,
+    '-frames:v', '1', '-f', 'rawvideo', '-']);
+  return [...run.stdout];
+}
+
+// Where the white letters are in a frame's brightness values: the box around every pixel much brighter
+// than the frame's middle value, as shares of the width and height (null if there are none), with how
+// many pixels that is and the brightest one
+export function lettersBox(pixels, width, height, above = 60) {
+  const sorted = [...pixels].sort((a, b) => a - b);
+  const middle = sorted[Math.floor(sorted.length / 2)];
+  let top = height;
+  let bottom = -1;
+  let left = width;
+  let right = -1;
+  let count = 0;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (pixels[y * width + x] <= middle + above) continue;
+      count += 1;
+      top = Math.min(top, y);
+      bottom = Math.max(bottom, y);
+      left = Math.min(left, x);
+      right = Math.max(right, x);
+    }
+  }
+  if (!count) return null;
+  return { top: top / height, bottom: (bottom + 1) / height, left: left / width, right: (right + 1) / width, count, brightest: sorted[sorted.length - 1] };
+}
+
 // The largest gap between red, green and blue in any pixel of a frame (0 = black and white)
 export function colorfulness(file, at = 0) {
   const run = spawnSync('ffmpeg', ['-v', 'error', '-ss', String(at), '-i', file, '-vf', 'scale=54:96,format=rgb24',

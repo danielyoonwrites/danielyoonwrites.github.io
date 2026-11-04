@@ -20,10 +20,10 @@
 
   <!-- The app's look: dark, so the video stands out (the owner's choice, November 2, 2026; see SPEC.md).
        Raise the ?v= numbers whenever a file changes, so phones load the new copy. -->
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=6">
   <!-- Mediabunny, the library that reads and writes video files (see lib/README.md) -->
   <script src="lib/mediabunny.min.js?v=1.65.0" defer></script>
-  <script src="app.js?v=4" defer></script>
+  <script src="app.js?v=6" defer></script>
 </head>
 <body>
 
@@ -138,7 +138,9 @@
     </div>
   </section>
 
-  <!-- Screen 2: edit the clip (trim, speed, a look and the lighting), shown on the video as it plays -->
+  <!-- Screen 2: edit the clip (a look, the lighting, the sound, text, trim and speed), shown on the video as it plays.
+       The tabs' order is the owner's (November 3, 2026): Filter, Lighting, Sound, then Trim and Speed; Text
+       went in before Trim (Claude's choice, November 3, 2026). -->
   <section class="screen" id="look-screen" aria-labelledby="look-title" hidden>
     <header class="bar">
       <button type="button" class="back" id="look-back">← Back</button>
@@ -146,46 +148,20 @@
     </header>
     <div class="stage">
       <video id="preview" playsinline muted loop controls></video>
+      <!-- The text, drawn over the playing video by the same code that draws it on each frame of the new
+           video (app.js, "Text"), so what you see is what you get. Taps go through it to the video. -->
+      <canvas id="text-layer" aria-hidden="true"></canvas>
     </div>
     <div class="tabs" role="tablist" aria-label="Edit">
-      <button type="button" role="tab" class="tab" id="tab-trim" aria-selected="true" aria-controls="panel-trim">Trim</button>
-      <button type="button" role="tab" class="tab" id="tab-speed" aria-selected="false" aria-controls="panel-speed" tabindex="-1">Speed</button>
-      <button type="button" role="tab" class="tab" id="tab-filter" aria-selected="false" aria-controls="panel-filter" tabindex="-1">Filter</button>
+      <button type="button" role="tab" class="tab" id="tab-filter" aria-selected="true" aria-controls="panel-filter">Filter</button>
       <button type="button" role="tab" class="tab" id="tab-light" aria-selected="false" aria-controls="panel-light" tabindex="-1">Lighting</button>
       <button type="button" role="tab" class="tab" id="tab-sound" aria-selected="false" aria-controls="panel-sound" tabindex="-1">Sound</button>
+      <button type="button" role="tab" class="tab" id="tab-text" aria-selected="false" aria-controls="panel-text" tabindex="-1">Text</button>
+      <button type="button" role="tab" class="tab" id="tab-trim" aria-selected="false" aria-controls="panel-trim" tabindex="-1">Trim</button>
+      <button type="button" role="tab" class="tab" id="tab-speed" aria-selected="false" aria-controls="panel-speed" tabindex="-1">Speed</button>
     </div>
 
-    <!-- Trim: where the clip starts and ends. On this tab the whole video plays, so new points are easy to find;
-         the other tabs play only the trimmed part, over and over. -->
-    <div class="panel" role="tabpanel" id="panel-trim" aria-labelledby="tab-trim">
-      <p class="length" id="trim-length">8.0 seconds</p>
-      <div class="buttons">
-        <button type="button" class="button quiet" id="start-here">Start here</button>
-        <button type="button" class="button quiet" id="end-here">End here</button>
-      </div>
-      <p class="small">Tap these while it plays, or move the sliders.</p>
-      <div class="slider">
-        <label for="trim-start">Start</label>
-        <output id="trim-start-value" for="trim-start">0:00.0</output>
-        <input type="range" id="trim-start" min="0" max="8" step="0.1" value="0">
-      </div>
-      <div class="slider">
-        <label for="trim-end">End</label>
-        <output id="trim-end-value" for="trim-end">0:08.0</output>
-        <input type="range" id="trim-end" min="0" max="8" step="0.1" value="8">
-      </div>
-      <button type="button" class="button quiet" id="reset-trim">Reset the trim</button>
-    </div>
-
-    <!-- Speed: the sound speeds up or slows down with the video, like a tape (the owner's choice "b") -->
-    <div class="panel" role="tabpanel" id="panel-speed" aria-labelledby="tab-speed" hidden>
-      <!-- app.js adds one button for each speed in SPEEDS -->
-      <div class="chips" id="speeds" role="radiogroup" aria-label="Speed"></div>
-      <p class="length" id="speed-length"></p>
-      <p class="small">The sound speeds up or slows down with the video, like a tape, so faster sounds higher.</p>
-    </div>
-
-    <div class="panel" role="tabpanel" id="panel-filter" aria-labelledby="tab-filter" hidden>
+    <div class="panel" role="tabpanel" id="panel-filter" aria-labelledby="tab-filter">
       <!-- app.js adds one button for each filter in FILTERS -->
       <div class="chips" id="chips" role="radiogroup" aria-label="Filter"></div>
     </div>
@@ -240,6 +216,50 @@
         <p class="small">Turn on the video's sound (the speaker on the video) to hear the changes.</p>
         <button type="button" class="button quiet" id="reset-sound">Reset the sound</button>
       </div>
+    </div>
+
+    <!-- Text: one line of words on the video (the owner's choice "A", November 3, 2026): what it says,
+         where it goes and when it shows. app.js adds the buttons for TEXT_PLACES and TEXT_TIMES. -->
+    <div class="panel" role="tabpanel" id="panel-text" aria-labelledby="tab-text" hidden>
+      <label class="field-name" for="text-words">Your text</label>
+      <input type="text" class="text-input" id="text-words" maxlength="100" autocomplete="off" spellcheck="true"
+        enterkeyhint="done" placeholder="Type a line">
+      <p class="small">Short is best: about 8 to 12 words can be read in 3 seconds.</p>
+      <p class="field-name" id="text-place-name">Where</p>
+      <div class="chips three" id="text-places" role="radiogroup" aria-labelledby="text-place-name"></div>
+      <p class="field-name" id="text-time-name">When</p>
+      <div class="chips two" id="text-times" role="radiogroup" aria-labelledby="text-time-name"></div>
+      <button type="button" class="button quiet" id="reset-text">Remove the text</button>
+    </div>
+
+    <!-- Trim: where the clip starts and ends. On this tab the whole video plays, so new points are easy to find;
+         the other tabs play only the trimmed part, over and over. -->
+    <div class="panel" role="tabpanel" id="panel-trim" aria-labelledby="tab-trim" hidden>
+      <p class="length" id="trim-length">8.0 seconds</p>
+      <div class="buttons">
+        <button type="button" class="button quiet" id="start-here">Start here</button>
+        <button type="button" class="button quiet" id="end-here">End here</button>
+      </div>
+      <p class="small">Tap these while it plays, or move the sliders.</p>
+      <div class="slider">
+        <label for="trim-start">Start</label>
+        <output id="trim-start-value" for="trim-start">0:00.0</output>
+        <input type="range" id="trim-start" min="0" max="8" step="0.1" value="0">
+      </div>
+      <div class="slider">
+        <label for="trim-end">End</label>
+        <output id="trim-end-value" for="trim-end">0:08.0</output>
+        <input type="range" id="trim-end" min="0" max="8" step="0.1" value="8">
+      </div>
+      <button type="button" class="button quiet" id="reset-trim">Reset the trim</button>
+    </div>
+
+    <!-- Speed: the sound speeds up or slows down with the video, like a tape (the owner's choice "b") -->
+    <div class="panel" role="tabpanel" id="panel-speed" aria-labelledby="tab-speed" hidden>
+      <!-- app.js adds one button for each speed in SPEEDS -->
+      <div class="chips" id="speeds" role="radiogroup" aria-label="Speed"></div>
+      <p class="length" id="speed-length"></p>
+      <p class="small">The sound speeds up or slows down with the video, like a tape, so faster sounds higher.</p>
     </div>
     <div class="action">
       <p class="problem" id="look-problem" role="alert" hidden></p>
