@@ -13,6 +13,11 @@
 
   Nothing leaves the phone. Mediabunny (lib/mediabunny.min.js, loaded before this file) reads and
   writes the video files; its guide is at https://mediabunny.dev
+
+  The one exception, only for the owner: his AI captions (build step 7; SPEC.md, "AI captions, only
+  for the owner"). Opened once with ?owner, the start screen asks for his passcode and checks it with
+  his own captions server (build step 7a, "The owner's AI captions" below). For everyone else that
+  part stays hidden, and the app never talks to any server.
 */
 
 const MB = window.Mediabunny;
@@ -101,6 +106,16 @@ const OUTPUT = {
 };
 
 const ADDON_URL = 'lib/mediabunny-aac-encoder.min.js?v=1.65.0'; // AAC sound, only if Chrome can't make it
+
+// The owner's AI captions (build step 7). His own server, on his Cloudflare account (server/worker.js;
+// the same account as Living in the Word's server, his "a", November 4, 2026). Its address is also
+// in index.html's safety rule (connect-src): change the two together.
+const CAPTIONS = {
+  server: 'https://video-editor-captions.danyoonsignup.workers.dev',
+  keptAs: 'video-editor-captions-passcode', // the name the passcode is kept under, on his phone only
+  waitSeconds: 30,                          // how long to wait for the server's answer
+  rate: 16000,                              // samples a second: what Whisper listens to
+};
 
 // What the app knows so far
 const state = {
@@ -1132,6 +1147,160 @@ function startOver() {
   history.go(-2); // from "Your video" past "The look" to the start
 }
 
+// ---------- The owner's AI captions: his passcode (build step 7a) ----------
+// Only for the owner (his request, November 3, 2026; SPEC.md, "AI captions, only for the owner").
+// He opens the app once as https://danielyoonwrites.github.io/video-editor/?owner and types his
+// passcode. "Save and check" sends it to his captions server with one second of silence, which the
+// server passes to Cloudflare's AI: so one check shows the passcode, the server and the AI all work.
+// Nothing of his videos is sent. The passcode is kept on his phone only (localStorage). For
+// everyone else this part stays hidden. Build step 7b adds "Make captions," which sends the real
+// sound of the trimmed clip, in pieces.
+
+function savedPasscode() {
+  try { return localStorage.getItem(CAPTIONS.keptAs) || ''; } catch (error) { return ''; }
+}
+function keepPasscode(passcode) {
+  try { localStorage.setItem(CAPTIONS.keptAs, passcode); return true; } catch (error) { return false; }
+}
+function forgetPasscode() {
+  try { localStorage.removeItem(CAPTIONS.keptAs); } catch (error) { /* nothing kept */ }
+}
+
+// A WAV file of sound: one channel, 16 bits a sample, at the given rate (samples a second)
+function wavFile(samples, rate) {
+  const bytes = new Uint8Array(44 + samples.length * 2);
+  const view = new DataView(bytes.buffer);
+  const word = (at, letters) => { for (let i = 0; i < 4; i += 1) bytes[at + i] = letters.charCodeAt(i); };
+  word(0, 'RIFF'); view.setUint32(4, 36 + samples.length * 2, true); word(8, 'WAVE');
+  word(12, 'fmt '); view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);           // plain sound (PCM)
+  view.setUint16(22, 1, true);           // one channel
+  view.setUint32(24, rate, true);
+  view.setUint32(28, rate * 2, true);    // bytes a second
+  view.setUint16(32, 2, true);           // bytes a sample
+  view.setUint16(34, 16, true);          // bits a sample
+  word(36, 'data'); view.setUint32(40, samples.length * 2, true);
+  for (let i = 0; i < samples.length; i += 1) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+  }
+  return bytes;
+}
+
+// Bytes as base64 text: the server passes the sound on to the AI as it is, without decoding it
+function base64(bytes) {
+  let letters = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) letters += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(letters);
+}
+
+// Sends one piece of sound to the captions server and waits up to 30 seconds for its answer.
+// Gives back { status, data, seconds } (status 0 when the server couldn't be reached).
+async function askCaptions(passcode, sound, language) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), CAPTIONS.waitSeconds * 1000);
+  const started = performance.now();
+  const seconds = () => (performance.now() - started) / 1000;
+  try {
+    const response = await fetch(CAPTIONS.server + '/captions?language=' + encodeURIComponent(language), {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + encodeURIComponent(passcode), 'Content-Type': 'text/plain' },
+      body: sound,
+      cache: 'no-store',
+      credentials: 'omit',
+      signal: controller.signal,
+    });
+    let data = null;
+    try { data = await response.json(); } catch (error) { /* not the server's usual answer */ }
+    return { status: response.status, data: data && typeof data === 'object' ? data : {}, seconds: seconds() };
+  } catch (error) {
+    return { status: 0, data: {}, seconds: seconds(), timedOut: controller.signal.aborted };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// When today's free captions come back: Cloudflare starts each day at midnight UTC (4 pm in
+// California in winter, 5 pm in summer), shown in the phone's own time
+function freeCaptionsReturn() {
+  const now = new Date();
+  const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+  return next.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+// What a check's answer means, in plain words. "works": the passcode is right (so it's kept).
+function passcodeVerdict(outcome) {
+  const { status, data } = outcome;
+  const screenshot = ' Send Claude a screenshot of this.';
+  if (!status) {
+    return outcome.timedOut
+      ? { works: false, words: `✗ Your captions server didn't answer within ${CAPTIONS.waitSeconds} seconds. Try again in a minute.` }
+      : { works: false, words: '✗ Couldn\'t reach your captions server. Check that the phone is online. If the server isn\'t made in Cloudflare yet, that comes first. If it keeps happening, send Claude a screenshot of this.' };
+  }
+  if (status === 200) return { works: true, words: `✓ Your passcode works, and the captions AI answered in ${outcome.seconds.toFixed(1)} seconds.` };
+  if (status === 401) return { works: false, words: '✗ That passcode didn\'t work. Check it against the one in Cloudflare (capital letters and extra spaces don\'t matter).' };
+  if (data.error === 'not-set-up') {
+    return (data.missing || []).includes('passcode')
+      ? { works: false, words: '✗ Your captions server isn\'t set up yet: add the passcode in Cloudflare, as the secret CAPTIONS_PASSCODE.' }
+      : { works: false, words: '✗ Your captions server can\'t reach Cloudflare\'s AI yet.' + screenshot };
+  }
+  if (data.error === 'used-up') return { works: true, words: `✓ Your passcode works. Today's free captions are used up; they come back at ${freeCaptionsReturn()}.` };
+  if (data.error === 'busy') return { works: true, words: '✓ Your passcode works, but Cloudflare\'s AI is busy. Tap "Check it again" in a minute.' };
+  if (['timeout', 'ai-failed', 'bad-sound', 'too-big'].includes(data.error)) {
+    return { works: true, words: '✓ Your passcode works, but the captions AI didn\'t answer.' + screenshot };
+  }
+  return { works: false, words: '✗ Your captions server gave an answer the app doesn\'t expect.' + screenshot };
+}
+
+// The "For Claude" line: what the server said, in short
+function captionsTechLine(outcome) {
+  const { status, data } = outcome;
+  const parts = [status ? String(status) : (outcome.timedOut ? 'no answer in time' : 'not reached')];
+  if (data.error) parts.push(data.error + (data.code ? ' ' + data.code : '') + (data.missing ? ' (' + data.missing.join(', ') + ')' : ''));
+  parts.push(outcome.seconds.toFixed(1) + ' s');
+  if (Array.isArray(data.words)) parts.push(`${data.words.length} words in ${data.seconds ?? '?'} s of sound`);
+  parts.push(new URL(CAPTIONS.server).host);
+  return 'For Claude: ' + parts.join(' · ');
+}
+
+// The owner's part of the start screen: the passcode box, or "Your passcode is saved"
+function showOwner() {
+  const saved = Boolean(savedPasscode());
+  el('owner').hidden = false;
+  el('owner-new').hidden = saved;
+  el('owner-saved').hidden = !saved;
+}
+
+function ownerSays(words, works) {
+  el('owner-result').textContent = words;
+  el('owner-result').className = 'ready' + (works === undefined ? '' : works ? ' yes' : ' no');
+  el('owner-result').hidden = false;
+}
+
+// typedNow: the passcode was just typed (it's kept if it works); otherwise it's the one kept already
+async function checkPasscode(passcode, typedNow) {
+  const buttons = ['owner-save', 'owner-check', 'owner-forget'];
+  for (const id of buttons) el(id).disabled = true;
+  el('owner-result').hidden = true;
+  el('owner-tech').hidden = true;
+  el('owner-checking').hidden = false;
+  const silence = base64(wavFile(new Float32Array(CAPTIONS.rate), CAPTIONS.rate)); // one second
+  const outcome = await askCaptions(passcode, silence, 'en');
+  const verdict = passcodeVerdict(outcome);
+  let words = verdict.words;
+  if (verdict.works && typedNow) {
+    el('owner-passcode').value = '';
+    if (!keepPasscode(passcode)) words += ' This phone couldn\'t keep it, so you\'ll type it again next time.';
+  }
+  if (!typedNow && outcome.status === 401) forgetPasscode(); // the kept one doesn't work any more
+  el('owner-checking').hidden = true;
+  ownerSays(words, verdict.works);
+  el('owner-tech').textContent = captionsTechLine(outcome);
+  el('owner-tech').hidden = false;
+  for (const id of buttons) el(id).disabled = false;
+  showOwner();
+}
+
 // ---------- Start ----------
 
 if (!MB) {
@@ -1206,5 +1375,21 @@ window.addEventListener('resize', fitGlowToPreview);
 el('stop').addEventListener('click', stopMaking);
 el('share').addEventListener('click', share);
 el('new-video').addEventListener('click', startOver);
+// The owner's captions passcode (only with ?owner in the address)
+el('owner-save').addEventListener('click', () => {
+  const passcode = el('owner-passcode').value.trim();
+  el('owner-passcode').blur(); // closes the keyboard, so the answer shows
+  if (passcode) checkPasscode(passcode, true);
+  else ownerSays('Type your passcode first.');
+});
+el('owner-passcode').addEventListener('keydown', (event) => { if (event.key === 'Enter') el('owner-save').click(); });
+el('owner-check').addEventListener('click', () => checkPasscode(savedPasscode(), false));
+el('owner-forget').addEventListener('click', () => {
+  forgetPasscode();
+  el('owner-tech').hidden = true;
+  ownerSays('The passcode is gone from this phone.');
+  showOwner();
+});
+if (new URLSearchParams(location.search).has('owner')) showOwner();
 history.replaceState({ screen: 'start' }, '');
 followHistory();

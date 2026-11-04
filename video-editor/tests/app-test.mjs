@@ -9,10 +9,10 @@
 // The test browser isn't the phone: it has no video chip (so it's slower), it makes AAC sound only
 // with the add-on, and it can't share (sharing is stood in for below). The owner's phone checks the rest.
 import { createRequire } from 'node:module';
-import { mkdirSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { spawn, spawnSync } from 'node:child_process';
 import http from 'node:http';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import os from 'node:os';
 import path from 'node:path';
 import {
@@ -861,6 +861,180 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   saved = (await download(page, 'text-chart.mp4')).where;
   spawnSync('ffmpeg', ['-v', 'error', '-y', '-ss', '0.5', '-i', saved, '-frames:v', '1', SHOTS + '15-text-in-the-saved-video.png']);
   check('K no page errors', page.problems.length === 0, page.problems.join('\n'));
+  await context.close();
+}
+
+// ---------- L. The owner's captions passcode (build step 7a) ----------
+// The captions server's own code (server/worker.js) answers inside the test browser, at its real
+// address (so the page's safety rule is tested too), with a stand-in for Cloudflare's AI and a
+// made-up passcode. The test page's own address is 127.0.0.1, so it's swapped for the website's
+// on the way in, and back on the way out.
+{
+  const work = mkdtempSync(path.join(os.tmpdir(), 'video-editor-app-server-'));
+  copyFileSync(path.join(repository, 'video-editor', 'server', 'worker.js'), path.join(work, 'worker.mjs'));
+  const captionsServer = (await import(pathToFileURL(path.join(work, 'worker.mjs')).href)).default;
+  const SERVER = 'https://video-editor-captions.danyoonsignup.workers.dev';
+  const PASSCODE = 'made up words for checks';
+  const server = { secret: PASSCODE, reachable: true, aiProblem: null, asked: [], aiCalls: [] };
+  const env = () => ({
+    CAPTIONS_PASSCODE: server.secret || undefined,
+    AI: {
+      async run(model, input) {
+        server.aiCalls.push({ model, input });
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // the real AI takes a moment too
+        if (server.aiProblem) throw new Error(server.aiProblem);
+        return { text: '', segments: [], transcription_info: { duration: 1 } }; // what silence brings back
+      },
+    },
+  });
+  async function standInServer(route) {
+    const request = route.request();
+    if (!server.reachable) return route.abort('internetdisconnected');
+    const headers = await request.allHeaders();
+    headers.origin = 'https://danielyoonwrites.github.io';
+    const body = ['GET', 'HEAD', 'OPTIONS'].includes(request.method()) ? undefined : request.postData();
+    if (request.method() === 'POST') server.asked.push({ url: request.url(), headers: await request.allHeaders(), body });
+    const response = await captionsServer.fetch(new Request(request.url(), { method: request.method(), headers, body }), env());
+    const back = Object.fromEntries(response.headers);
+    if (back['access-control-allow-origin']) back['access-control-allow-origin'] = 'http://127.0.0.1:8768';
+    return route.fulfill({ status: response.status, headers: back, body: await response.text() });
+  }
+  const kept = (page) => page.evaluate(() => localStorage.getItem('video-editor-captions-passcode'));
+  const result = async (page) => ({ words: await text(page, '#owner-result'), kind: await page.getAttribute('#owner-result', 'class') });
+  async function saveAndCheck(page, passcode) {
+    await page.fill('#owner-passcode', passcode);
+    await page.click('#owner-save');
+    await page.waitForSelector('#owner-result:not([hidden])', { timeout: 40000 });
+  }
+  async function checkAgain(page) {
+    await page.click('#owner-check');
+    await page.waitForSelector('#owner-result:not([hidden])', { timeout: 40000 });
+  }
+
+  const { context, page } = await openPhone();
+  await context.route(SERVER + '/**', standInServer);
+  await page.goto(APP);
+  check('L1 without ?owner, nothing about captions shows', !(await visible(page, 'owner')));
+  await page.evaluate(() => localStorage.setItem('video-editor-captions-passcode', 'kept before'));
+  await page.reload();
+  check('L1 ...even on a phone that keeps a passcode', !(await visible(page, 'owner')));
+  check('L1 ...and the app never talks to the captions server', server.asked.length === 0, String(server.asked.length));
+  await page.evaluate(() => localStorage.clear());
+
+  await page.goto(APP + '?owner');
+  check('L2 with ?owner, the start screen asks for the captions passcode', await visible(page, 'owner') && await visible(page, 'owner-passcode'));
+  check('L2 its title', (await text(page, '#owner-title')) === 'Captions, just for you');
+  check('L2 the passcode box hides what\'s typed, with no capitals or spelling help',
+    await page.evaluate(() => {
+      const box = document.getElementById('owner-passcode');
+      return box.type === 'password' && box.autocapitalize === 'none' && box.spellcheck === false && box.autocomplete === 'off';
+    }));
+  const save = await page.locator('#owner-save').boundingBox();
+  check('L2 "Save and check" is at least 48 by 48', save.width >= 48 && save.height >= 48, JSON.stringify(save));
+  check('L2 nothing wider than the phone', await page.evaluate(() => document.documentElement.scrollWidth <= 360));
+  check('L2 "Choose a video" still comes first', (await page.locator('#choose').boundingBox()).y < save.y);
+  await page.screenshot({ path: SHOTS + '16-owner-passcode.png', fullPage: true });
+
+  await page.click('#owner-save');
+  check('L3 "Save and check" with nothing typed asks for the passcode, without asking the server',
+    (await text(page, '#owner-result')) === 'Type your passcode first.' && server.asked.length === 0);
+
+  await saveAndCheck(page, 'made up words for check');
+  let said = await result(page);
+  check('L4 a wrong passcode: "didn\'t work", in the ✗ color', said.words.startsWith('✗ That passcode didn\'t work') && said.kind === 'ready no', JSON.stringify(said));
+  check('L4 ...it isn\'t kept on the phone', (await kept(page)) === null);
+  check('L4 ...the box still has what was typed, to fix it', (await page.inputValue('#owner-passcode')) === 'made up words for check');
+  check('L4 ...and the AI was never asked', server.aiCalls.length === 0);
+  const sent = server.asked[0];
+  check('L4 the passcode travels in the Authorization header',
+    sent && sent.headers.authorization === 'Bearer ' + encodeURIComponent('made up words for check'), sent && sent.headers.authorization);
+  check('L4 ...to /captions, in English, as plain text', sent && sent.url === SERVER + '/captions?language=en' && /^text\/plain/.test(sent.headers['content-type']));
+  const wav = Buffer.from(sent ? sent.body : '', 'base64');
+  check('L4 the sound is a WAV file: one channel, 16 bits, 16,000 samples a second, 1 second long',
+    wav.toString('latin1', 0, 4) === 'RIFF' && wav.toString('latin1', 8, 12) === 'WAVE' && wav.readUInt16LE(20) === 1
+    && wav.readUInt16LE(22) === 1 && wav.readUInt32LE(24) === 16000 && wav.readUInt16LE(34) === 16 && wav.readUInt32LE(40) === 32000
+    && wav.length === 32044, `${wav.length} bytes`);
+  check('L4 ...of silence (nothing of a video)', wav.subarray(44).every((byte) => byte === 0));
+  const wavFile = path.join(work, 'silence.wav');
+  writeFileSync(wavFile, wav);
+  const read = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'stream=codec_name,sample_rate,channels:format=duration', '-of', 'json', wavFile], { encoding: 'utf8' });
+  const facts = JSON.parse(read.stdout || '{}');
+  check('L4 ...that ffmpeg reads as a WAV file', facts.streams && facts.streams[0].codec_name === 'pcm_s16le'
+    && facts.streams[0].sample_rate === '16000' && facts.streams[0].channels === 1 && Number(facts.format.duration) === 1, read.stdout);
+  await page.screenshot({ path: SHOTS + '17-owner-wrong-passcode.png', fullPage: true });
+
+  await saveAndCheck(page, '  Made UP words   for Checks ');
+  said = await result(page);
+  check('L5 the right passcode (capitals and extra spaces don\'t matter): it works, in the ✓ color',
+    /^✓ Your passcode works, and the captions AI answered in \d+\.\d seconds\.$/.test(said.words) && said.kind === 'ready yes', JSON.stringify(said));
+  check('L5 ...it\'s kept on the phone, as typed', (await kept(page)) === 'Made UP words   for Checks', await kept(page));
+  check('L5 ...the box is emptied, and "Your passcode is saved" shows',
+    (await page.inputValue('#owner-passcode')) === '' && !(await visible(page, 'owner-new')) && await visible(page, 'owner-saved'));
+  check('L5 ...the AI was asked once: Whisper, in English, with the same silence',
+    server.aiCalls.length === 1 && server.aiCalls[0].model === '@cf/openai/whisper-large-v3-turbo'
+    && server.aiCalls[0].input.language === 'en' && server.aiCalls[0].input.audio === sent.body);
+  check('L5 the "For Claude" line says what came back',
+    /^For Claude: 200 · \d+\.\d s · 0 words in 1 s of sound · video-editor-captions\.danyoonsignup\.workers\.dev$/.test(await text(page, '#owner-tech')),
+    await text(page, '#owner-tech'));
+  check('L5 nothing wider than the phone', await page.evaluate(() => document.documentElement.scrollWidth <= 360));
+  await page.screenshot({ path: SHOTS + '18-owner-passcode-works.png', fullPage: true });
+
+  await page.reload();
+  check('L6 opened again: "Your passcode is saved on this phone"', await visible(page, 'owner-saved') && !(await visible(page, 'owner-passcode')));
+  await checkAgain(page);
+  check('L6 "Check it again" works with the kept passcode', (await result(page)).words.startsWith('✓ Your passcode works, and the captions AI answered'));
+
+  server.aiProblem = '3036: You have used up your daily free allocation of 10,000 neurons.';
+  await checkAgain(page);
+  said = await result(page);
+  check('L7 today\'s free captions used up: it says when they come back (in the phone\'s own time)',
+    /^✓ Your passcode works\. Today's free captions are used up; they come back at \d{1,2}:00\s?[AP]M\.$/.test(said.words), said.words);
+  server.aiProblem = '5007: No such model';
+  await checkAgain(page);
+  check('L7 the AI fails: "didn\'t answer," with a screenshot for Claude',
+    (await result(page)).words === '✓ Your passcode works, but the captions AI didn\'t answer. Send Claude a screenshot of this.');
+  check('L7 ...and the "For Claude" line has its number', (await text(page, '#owner-tech')).includes('502 · ai-failed 5007'), await text(page, '#owner-tech'));
+  server.aiProblem = '3040: Capacity temporarily exceeded, please try again.';
+  await checkAgain(page);
+  check('L7 Cloudflare\'s AI is busy: "try again in a minute"', (await result(page)).words.includes('AI is busy'));
+  server.aiProblem = null;
+  check('L7 the passcode stays kept through all of that', (await kept(page)) === 'Made UP words   for Checks');
+
+  server.secret = '';
+  await checkAgain(page);
+  check('L8 the server without its passcode secret: "isn\'t set up yet"',
+    (await result(page)).words === '✗ Your captions server isn\'t set up yet: add the passcode in Cloudflare, as the secret CAPTIONS_PASSCODE.');
+  server.secret = PASSCODE;
+  server.reachable = false;
+  await checkAgain(page);
+  check('L8 the server can\'t be reached: "Couldn\'t reach your captions server"', (await result(page)).words.startsWith('✗ Couldn\'t reach your captions server'));
+  check('L8 ...and the "For Claude" line says so', (await text(page, '#owner-tech')).startsWith('For Claude: not reached'));
+  server.reachable = true;
+  check('L8 the passcode stays kept when the server isn\'t ready', (await kept(page)) === 'Made UP words   for Checks');
+
+  server.secret = 'a new passcode in cloudflare';
+  await checkAgain(page);
+  check('L9 the kept passcode stops working: "didn\'t work," it\'s forgotten, and the box shows again',
+    (await result(page)).words.startsWith('✗ That passcode didn\'t work') && (await kept(page)) === null && await visible(page, 'owner-passcode'));
+  server.secret = PASSCODE;
+  await saveAndCheck(page, PASSCODE);
+  await page.click('#owner-forget');
+  check('L10 "Forget the passcode": it\'s gone from the phone, and the box shows again',
+    (await kept(page)) === null && (await text(page, '#owner-result')) === 'The passcode is gone from this phone.' && await visible(page, 'owner-passcode'));
+  check('L10 the screen never changed (the Back button isn\'t touched)', (await screenShown(page)) === 'start-screen');
+
+  const blocked = await page.evaluate(() => fetch('https://example.com/').then(() => 'reached', () => 'blocked'));
+  check('L11 the page\'s safety rule still blocks any other server', blocked === 'blocked');
+  const unexpected = page.problems.filter((problem) => !/Failed to load resource|Content Security Policy|example\.com/.test(problem));
+  check('L no page errors (besides the server\'s refusals, which Chrome notes)', unexpected.length === 0, unexpected.join('\n'));
+  await context.close();
+}
+{
+  const { context, page } = await openPhone({ viewport: { width: 180, height: 370 } });
+  await page.goto(APP + '?owner');
+  check('L12 at 200% zoom, the passcode box fits the width', await page.evaluate(() => document.documentElement.scrollWidth <= 180));
+  const save = await page.locator('#owner-save').boundingBox();
+  check('L12 ...and "Save and check" stays on the screen', save.x >= 0 && save.x + save.width <= 180, JSON.stringify(save));
   await context.close();
 }
 

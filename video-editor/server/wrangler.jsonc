@@ -1,0 +1,28 @@
+// Video editor: the settings Cloudflare uses to deploy the captions server (worker.js).
+//
+// After each merge to main, Cloudflare deploys worker.js by itself (Workers Builds, which the
+// owner connects once, with build step 7a; see ../PROGRESS.md). At each deploy these settings
+// replace the ones in Cloudflare's dashboard, so change them here, not there.
+// The passcode (the secret CAPTIONS_PASSCODE) stays in the dashboard: deploys never delete it.
+// No secret ever goes in this file: the repository is public.
+{
+  // Must match the Worker's name in Cloudflare, or the deploy stops
+  "name": "video-editor-captions",
+  "main": "worker.js",
+
+  // The same date as Living in the Word's server, which Cloudflare already accepts on this
+  // account. Keep it: a later date can change how Cloudflare runs the code.
+  "compatibility_date": "2026-10-26",
+
+  // The app talks to the server at https://video-editor-captions.danyoonsignup.workers.dev
+  "workers_dev": true,
+  // ...and only there: no extra addresses for each version
+  "preview_urls": false,
+
+  // Cloudflare's AI (Workers AI), which worker.js uses as env.AI, for Whisper
+  "ai": { "binding": "AI" },
+
+  // No logs: the server keeps nothing, not even a note of each request
+  // (new Workers keep logs unless this says otherwise)
+  "observability": { "enabled": false }
+}
