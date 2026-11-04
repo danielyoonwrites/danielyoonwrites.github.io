@@ -23,12 +23,12 @@ A simple video editor, just for the owner, on his Android phone in Chrome: a loo
   - How fast Soft glow is on the phone, and the looks on real faces (Claude's test scene is made up).
   - Text on the phone: the phone's font and Korean letters, the size, and whether Top and Bottom stay clear of the apps' buttons in a real upload.
 - Branch: `ccr-f31dd4eb-gq2mec` (the video editor's session), restarted from main after each merge; everything up to pull request 139 is merged into main.
-- Open pull requests: pull request PULL_REQUEST_NUMBER, the plan for AI captions (notes only).
+- Open pull requests: pull request 140, the plan for AI captions (notes only).
 - Claude's rough estimate: 3 more small pull requests for the plan (shape and crop, several clips, polish), plus AI captions (likely 3 or more: a plan, a server piece if Dan chooses one, the captions screen; a guess until the plan is chosen).
 - Dan's Master Notes (Notion), the page "Simple video editor: how hard to build (Nov 2026)," gets one entry after each merge (what merged, what was checked, what's next).
 
 ## Waiting on Dan
-1. Read and merge the plan for AI captions, pull request PULL_REQUEST_NUMBER (notes only): https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/PULL_REQUEST_NUMBER, Files changed tab, `video-editor/SPEC.md`, the part headed "AI captions, only for the owner"; then the Conversation tab, Merge pull request, Confirm merge. Change anything in it first if he likes.
+1. Read and merge the plan for AI captions, pull request 140 (notes only): https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/140, Files changed tab, `video-editor/SPEC.md`, the part headed "AI captions, only for the owner"; then the Conversation tab, Merge pull request, Confirm merge. Change anything in it first if he likes.
    The text check (pull request 139, merged), on his phone:
    1. Open Chrome and go to https://danielyoonwrites.github.io/video-editor
    2. Tap "Choose a video" and pick a video of yourself talking.

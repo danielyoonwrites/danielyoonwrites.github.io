@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129, 137 and 138 and 139 and PULL_REQUEST_NUMBER)
+## In force (November 3, 2026; pull requests 110 to 112, 116, 125, 129, 137 and 138 and 139 and 140)
 
 Every decision below that still holds, one line each, by date; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -142,7 +142,7 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - AI captions: they change two of Dan's earlier rules, no AI (November 2) and the videos never leaving the phone. He was told, and it's his call. Being researched before he's asked where the speech-to-text runs: on the phone, or on a small server of his own (like Living in the Word's, on Cloudflare) that gets only the sound, when he taps the button; the cost, the privacy, timing for each word or line, and Korean. Nothing about them is built.
 - Not checked yet: text on Dan's phone (its font and Korean letters; the size; Top and Bottom against the apps' real buttons after an upload).
 
-### November 3, 2026: the plan for AI captions (pull request PULL_REQUEST_NUMBER)
+### November 3, 2026: the plan for AI captions (pull request 140)
 - Decision: AI captions, only for Dan, run on his own small server on Cloudflare (a Worker named `video-editor-captions`, with Workers AI's `@cf/openai/whisper-large-v3-turbo`), separate from Living in the Word's server, and show one short line at a time (up to about 5 words) at the bottom. Locked with a passcode he types once on his phone (`?owner`); the sound of the trimmed clip goes to his server in pieces of about 30 seconds, only when he taps "Make captions"; the server keeps nothing. The full plan is in `SPEC.md`, "AI captions, only for the owner." Nothing is built yet.
 - Why: Dan chose "A" each time, November 3, 2026:
   - Where the speech-to-text runs: "A," his own small server on Cloudflare (Claude's recommendation: a large model that times each word and knows Korean; free at his use, about 214 minutes a day; Cloudflare's docs say standard requests aren't kept or trained on; he already has Cloudflare). Turned down: "B," on the phone (nothing leaves it, but a 100 to 220 MB first download, a much smaller model, and no known speed on a phone).
