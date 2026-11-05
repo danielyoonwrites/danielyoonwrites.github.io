@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 5, 2026; pull requests 110 to 112, 116, 125, 129, 137 to 140, 144 and 145)
+## In force (November 5, 2026; pull requests 110 to 112, 116, 125, 129, 137 to 140 and 144 to 146)
 
 Every decision below that still holds, one line each, by date; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -22,7 +22,7 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - November 2, 2026: trim and speed (build step 4): "Start here" and "End here" while it plays, or sliders in tenths of a second; speeds 0.5×, 1×, 1.5× and 2×; the sound follows the speed like a tape, so faster sounds higher (Dan's "b").
 - November 2, 2026: the app makes each new video frame by frame (Mediabunny's `CanvasSink` and `CanvasSource`, the sound through an `OfflineAudioContext`), instead of the one-step `Conversion`, which has no speed setting.
 - November 2, 2026: the filter and lighting question (whole video or each clip) waits for build step 9, several clips.
-- November 2, 2026 (the Sound tab and the tabs' order November 3): the screens: Start, "Edit" (Filter, Lighting, Sound, Text, Trim and Speed tabs, in Dan's order with Text before Trim, opening on Filter; called "The look" until build step 4), "Making the video," "Your video"; Brightness and Contrast from −50 to +50.
+- November 2, 2026 (the Sound tab and the tabs' order November 3): the screens: Start, "Edit" (Filter, Lighting, Sound, Text, Trim and Speed tabs, in Dan's order with Text before Trim, opening on Filter; since November 5, buttons all the same width in a row that slides left and right, his request; called "The look" until build step 4), "Making the video," "Your video"; Brightness and Contrast from −50 to +50.
 - November 3, 2026: better sound, without AI (build step 5): three switches, Cut rumble, Clearer voice and Even out the volume, and a Volume slider from Off to 200% (Dan's "B"); the same steps on the playing video and in the new video, with a safety limit so nothing clips. A steady hiss (like a fan) is left for later.
 - November 3, 2026: text for anyone using the app: one line per video (Dan's "A"), Top, Middle or Bottom, for the new video's first 3 seconds or the whole video; white bold letters on soft dark boxes, drawn by the same code on the playing video and on each frame.
 - November 3, 2026: AI captions only Dan can use (his words): his own small Cloudflare server with Workers AI's Whisper, its own server rather than part of Living in the Word's, one short line at a time (his "A" three times), locked with a passcode; only the sound of the trimmed clip leaves the phone, only when he taps "Make captions." Build step 7a (the server and the passcode) built November 4; making and showing captions (7b) and fixing words (7c) not yet. All off for now (next line).
@@ -188,3 +188,9 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - Why: his words above. Claude's recommendation was "a": turning captions back on later is one small pull request (set `CAPTIONS.on` to `true`, put `connect-src` back, then his one-time setup in Cloudflare: `PROGRESS.md`, "Turning captions back on").
 - Turned down: "b," remove it completely (the passcode box and the server code; GitHub would keep the old code in pull request 144).
 - Kept checked: the saved checks test the real page with captions off (section L0: nothing shows, no server), and the kept-ready code with captions switched on inside the test browser only (the rest of section L), and the server with a stand-in AI (`tests/server-test.mjs`, which also checks that the switch and the safety rule agree).
+
+### November 5, 2026 (the morning, Pacific): the tabs as buttons of one size, in a row that slides sideways (pull request 146)
+- Decision: the Edit screen's six tabs (Filter, Lighting, Sound, Text, Trim, Speed) are bordered buttons, all the same width, in a row that slides left and right. The open tab is filled light with dark words, like the chosen look; the others are outlined. About three and a half show on a phone, so the cut-off one shows there are more; each is never narrower than its longest word, "Lighting"; there's no scroll bar. Choosing a tab slides the row just enough to show it whole (`keepTabInView()` in `app.js`), and a new video opens on Filter with the row back at the start. The tabs' order doesn't change.
+- Why: Dan, with a screenshot from his phone: "For the buttons like filter, lighting, sound I think they look too uneven the space between them and the next button. Make those look more like a button to show that they all take the same size. Also I think we should make this list of buttons scrollable left to right so it is not all cramped into the phone screen." Before, the tabs were words with a line under the open one, filling the row, so words of different lengths looked unevenly spaced.
+- How much shows, the look of the open tab and the no-scroll-bar choice are Claude's, shown to Dan in screenshots; he can change any of it.
+- Replaces: the old tab look (words with a line under the open tab; the tabs filled the row and wrapped onto more rows when zoomed in).
