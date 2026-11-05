@@ -33,26 +33,26 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - What it found: `SPEC.md`, "What two tests taught."
 - Turned down: "A" (start the plan) and "C" (leave it for later).
 
-### November 5, 2026: official calendars first, AI search second (pull request [set when opened])
+### November 5, 2026: official calendars first, AI search second (pull request 148)
 - Decision: the app keeps a list of each area's library, city and park calendars and reads them every morning; the AI sorts what's on (ages, free or paid, good for little ones); then a web search adds one-time events, each with its link. The first list is for the owner's area. The owner's "A."
 - Why: in the second test, search results gave a library storytime's time and place wrong, and the library's own page had them right; one library's calendar could be read whole as a feed. The owner had written: "I wish there was a better way to comb through all the relevant and needed data to make this app useful."
 - Replaces: "finding things with AI search," above (Claude pointed out it changed his earlier choice).
 - Turned down: "B" (AI search only, simpler, but it got that storytime wrong) and "C" (official calendars only: the most accurate and cheapest, but it misses one-time events like a trunk-or-treat).
 
-### November 5, 2026: who it's for (pull request [set when opened])
+### November 5, 2026: who it's for (pull request 148)
 - Decision: just the owner for now, but built so it could work for anyone. His "A."
 - Why: Claude recommended it: he can use it on his own weekends soon, and other parents can come later without a rebuild, the way Idea board was planned.
 - Turned down: "B" (other parents he invites, now: sign-in and invitations from the start), "C" (just him, his area only: simplest, but more rework later) and "D" (not now).
 
-### November 5, 2026: the owner's two ideas (pull request [set when opened])
+### November 5, 2026: the owner's two ideas (pull request 148)
 - How far to look: "maybe the app can have an option to see how many miles outside of your chosen city you are willing to search." The second test showed why: a library just outside the three cities had a toddler program that day.
 - A calendar in the app: "if this app gets built, I think having a calendar built into the app to add and plan a day would be crucial." Whether it also adds to the phone's own calendar is open question 3.
 
-### November 5, 2026: privacy (pull request [set when opened])
+### November 5, 2026: privacy (pull request 148)
 - Decision: the owner's city and his kids' ages stay out of the public repository and the website. The test details, with places and sources, are in his private Notion notes.
 - Why: the repository is public. Claude said so in the chat when it asked for them, and the root `CLAUDE.md` keeps the kids' names, faces and schools out of everything.
 
-### November 5, 2026: Claude's plan choices (pull request [set when opened])
+### November 5, 2026: Claude's plan choices (pull request 148)
 - Its own Cloudflare Worker and D1 database, apart from the other apps, so a problem in one can't break another.
 - A morning job (Cloudflare's Cron Triggers) that reads the calendars and runs the AI once a day for one area, so the AI's cost has a ceiling and visitors can't run it up.
 - Kids' ages, the budget and plans stay on the phone: the server sends every event with its age range, and the phone picks what fits. That way the server never learns anything about the family.
