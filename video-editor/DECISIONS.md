@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 5, 2026; pull requests 110 to 112, 116, 125, 129, 137 to 140 and 144, and captions off for now)
+## In force (November 5, 2026; pull requests 110 to 112, 116, 125, 129, 137 to 140, 144 and 145)
 
 Every decision below that still holds, one line each, by date; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -183,7 +183,7 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - Turned down: the sound inside JSON (more of the server's time); sending the sound as a stream (undocumented); 30-second pieces (too close to the free plan's limit); a separate "check the passcode" address that skips the AI (the AI would stay unchecked until 7b).
 - Not checked yet: the real server and AI on Dan's account (his setup and "Save and check"), and how long the real AI takes.
 
-### November 5, 2026 (the evening of November 4, Pacific): AI captions off for now (after pull request 144)
+### November 5, 2026 (the evening of November 4, Pacific): AI captions off for now (pull request 145)
 - Decision: the AI captions are off for now. Dan's words: "let's actually turn off the captions option for now, just to keep this simple." Asked how far "off" should go, he chose "a": hide it, keep it ready. The passcode box doesn't show any more, even with `?owner` (`CAPTIONS.on` is `false` in `app.js`); the page's safety rule talks to no server again (no `connect-src`); the server code stays in `server/`, unused and not deployed (asked whether he'd started the Cloudflare setup, Dan didn't say he had); build steps 7b and 7c wait, and the next build step is shape and crop (8).
 - Why: his words above. Claude's recommendation was "a": turning captions back on later is one small pull request (set `CAPTIONS.on` to `true`, put `connect-src` back, then his one-time setup in Cloudflare: `PROGRESS.md`, "Turning captions back on").
 - Turned down: "b," remove it completely (the passcode box and the server code; GitHub would keep the old code in pull request 144).
