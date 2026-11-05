@@ -2,7 +2,7 @@
 
 Each decision with its reason, oldest first. Only add to this file; if a decision changes, add a new entry that says which one it replaces.
 
-## In force (November 5, 2026; pull requests 110 to 112, 116, 125, 129, 137 to 140, 144 and 145)
+## In force (November 5, 2026; pull requests 110 to 112, 116, 125, 129, 137 to 140 and 144 to 146)
 
 Every decision below that still holds, one line each, by date; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
@@ -189,7 +189,7 @@ Every decision below that still holds, one line each, by date; it's rewritten at
 - Turned down: "b," remove it completely (the passcode box and the server code; GitHub would keep the old code in pull request 144).
 - Kept checked: the saved checks test the real page with captions off (section L0: nothing shows, no server), and the kept-ready code with captions switched on inside the test browser only (the rest of section L), and the server with a stand-in AI (`tests/server-test.mjs`, which also checks that the switch and the safety rule agree).
 
-### November 5, 2026 (the morning, Pacific): the tabs as buttons of one size, in a row that slides sideways
+### November 5, 2026 (the morning, Pacific): the tabs as buttons of one size, in a row that slides sideways (pull request 146)
 - Decision: the Edit screen's six tabs (Filter, Lighting, Sound, Text, Trim, Speed) are bordered buttons, all the same width, in a row that slides left and right. The open tab is filled light with dark words, like the chosen look; the others are outlined. About three and a half show on a phone, so the cut-off one shows there are more; each is never narrower than its longest word, "Lighting"; there's no scroll bar. Choosing a tab slides the row just enough to show it whole (`keepTabInView()` in `app.js`), and a new video opens on Filter with the row back at the start. The tabs' order doesn't change.
 - Why: Dan, with a screenshot from his phone: "For the buttons like filter, lighting, sound I think they look too uneven the space between them and the next button. Make those look more like a button to show that they all take the same size. Also I think we should make this list of buttons scrollable left to right so it is not all cramped into the phone screen." Before, the tabs were words with a line under the open one, filling the row, so words of different lengths looked unevenly spaced.
 - How much shows, the look of the open tab and the no-scroll-bar choice are Claude's, shown to Dan in screenshots; he can change any of it.
