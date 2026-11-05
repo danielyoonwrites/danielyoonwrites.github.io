@@ -15,9 +15,11 @@
   writes the video files; its guide is at https://mediabunny.dev
 
   The one exception, only for the owner: his AI captions (build step 7; SPEC.md, "AI captions, only
-  for the owner"). Opened once with ?owner, the start screen asks for his passcode and checks it with
-  his own captions server (build step 7a, "The owner's AI captions" below). For everyone else that
-  part stays hidden, and the app never talks to any server.
+  for the owner"). They're off for now (his "a", the evening of November 4, 2026, Pacific: "just to
+  keep this simple"), so the app talks to no server at all. The code stays ready: with CAPTIONS.on
+  set to true (below), opening the app with ?owner shows a box for his passcode, checked with his own
+  captions server (build step 7a, "The owner's AI captions" below). For everyone else that part
+  always stays hidden.
 */
 
 const MB = window.Mediabunny;
@@ -108,9 +110,13 @@ const OUTPUT = {
 const ADDON_URL = 'lib/mediabunny-aac-encoder.min.js?v=1.65.0'; // AAC sound, only if Chrome can't make it
 
 // The owner's AI captions (build step 7). His own server, on his Cloudflare account (server/worker.js;
-// the same account as Living in the Word's server, his "a", November 4, 2026). Its address is also
-// in index.html's safety rule (connect-src): change the two together.
+// the same account as Living in the Word's server, his "a", November 4, 2026).
+// Off for now (his "a", the evening of November 4, 2026, Pacific). To turn them back on: set "on" to
+// true, put the server's address back in index.html's safety rule (connect-src; the saved checks say
+// if the two don't match), and do his one-time setup in Cloudflare (PROGRESS.md, "Turning captions
+// back on").
 const CAPTIONS = {
+  on: false,                                // false: no passcode box, even with ?owner, and no server
   server: 'https://video-editor-captions.danyoonsignup.workers.dev',
   keptAs: 'video-editor-captions-passcode', // the name the passcode is kept under, on his phone only
   waitSeconds: 30,                          // how long to wait for the server's answer
@@ -1148,6 +1154,8 @@ function startOver() {
 }
 
 // ---------- The owner's AI captions: his passcode (build step 7a) ----------
+// Off for now (CAPTIONS.on is false, his "a," the evening of November 4, 2026, Pacific): nothing here
+// runs, and the page's safety rule lets it talk to no server. Kept ready for when he turns them on.
 // Only for the owner (his request, November 3, 2026; SPEC.md, "AI captions, only for the owner").
 // He opens the app once as https://danielyoonwrites.github.io/video-editor/?owner and types his
 // passcode. "Save and check" sends it to his captions server with one second of silence, which the
@@ -1390,6 +1398,6 @@ el('owner-forget').addEventListener('click', () => {
   ownerSays('The passcode is gone from this phone.');
   showOwner();
 });
-if (new URLSearchParams(location.search).has('owner')) showOwner();
+if (CAPTIONS.on && new URLSearchParams(location.search).has('owner')) showOwner(); // captions are off for now
 history.replaceState({ screen: 'start' }, '');
 followHistory();

@@ -38,7 +38,7 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
    Right after opening it, Claude subscribes to the pull request's activity (`subscribe_pr_activity`), so the merge wakes the session. Dan should never have to say "it merged." Claude also sets one backup check-in about 50 minutes later (`send_later`), and cancels it when the merge arrives.
 3. Dan reviews and merges on GitHub (Conversation tab, Merge pull request, Confirm merge).
 4. GitHub Actions publishes the site (workflow `.github/workflows/publish.yml`; GitHub Pages source is set to "GitHub Actions"). It takes a minute or two; check for a green mark next to **main** at https://github.com/danielyoonwrites/danielyoonwrites.github.io/actions
-   Every merge also deploys Living in the Word's server: Cloudflare builds it (Workers Builds; its build watch paths are left at `*`, so it runs on every merge) and shows its own check next to the merge, so Dan no longer pastes `worker.js` into Cloudflare. Once Dan connects it (video editor build step 7a), the video editor's captions server deploys the same way, with its own check (likely "Workers Builds: video-editor-captions").
+   Every merge also deploys Living in the Word's server: Cloudflare builds it (Workers Builds; its build watch paths are left at `*`, so it runs on every merge) and shows its own check next to the merge, so Dan no longer pastes `worker.js` into Cloudflare. If Dan connects it (video editor build step 7a; the captions are off for now, so it isn't connected), the video editor's captions server will deploy the same way, with its own check (likely "Workers Builds: video-editor-captions").
 5. Dan checks on his phone.
 6. When the merge wakes the session, Claude does the follow-up on its own: checks that the publish run on main succeeded, restarts the branch from main, updates the project's page in Dan's Master Notes (Notion), then tells Dan in one short message. Auto mode only skips permission prompts; it doesn't let Claude see GitHub between messages, and each new session has to subscribe again.
 
@@ -66,7 +66,7 @@ When Dan says "do the rest," Claude works through the build plan one pull reques
 
 - Explain every change in plain words a beginner can follow: what changed, why, and how to check it.
 - One small change per pull request.
-- No build tools: no npm, no frameworks, no generators. One exception (Dan chose it, October 29, 2026): Cloudflare runs its own deploy tool, Wrangler, on its computers to deploy Living in the Word's server (`living-in-the-word/server/wrangler.jsonc`), and, since November 4, 2026, the video editor's captions server the same way (`video-editor/server/wrangler.jsonc`, build step 7a). Nothing runs on Dan's computer, and the code stays plain files.
+- No build tools: no npm, no frameworks, no generators. One exception (Dan chose it, October 29, 2026): Cloudflare runs its own deploy tool, Wrangler, on its computers to deploy Living in the Word's server (`living-in-the-word/server/wrangler.jsonc`), and the video editor's captions server the same way once Dan connects it (`video-editor/server/wrangler.jsonc`, build step 7a, November 4, 2026; the captions are off for now, so it isn't connected or deployed). Nothing runs on Dan's computer, and the code stays plain files.
 - Keep the code simple and commented so the owner can edit it later.
 - Every page must look good on a phone first, then on a computer.
 

@@ -864,7 +864,11 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   await context.close();
 }
 
-// ---------- L. The owner's captions passcode (build step 7a) ----------
+// ---------- L. The owner's captions passcode (build step 7a; captions off for now) ----------
+// Captions are off for now (CAPTIONS.on in app.js, Dan's "a," the evening of November 4, 2026,
+// Pacific). L0 checks the real page: nothing shows, even with ?owner, and it talks to no server.
+// The rest switch captions on inside this test browser only (app.js with "on: true," and the page's
+// safety rule with the server's address, as they'd be), so the code kept ready stays checked.
 // The captions server's own code (server/worker.js) answers inside the test browser, at its real
 // address (so the page's safety rule is tested too), with a stand-in for Cloudflare's AI and a
 // made-up passcode. The test page's own address is 127.0.0.1, so it's swapped for the website's
@@ -910,11 +914,47 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
     await page.click('#owner-check');
     await page.waitForSelector('#owner-result:not([hidden])', { timeout: 40000 });
   }
+  // Captions switched on, in this test browser only: app.js with "on: true," and the page's safety
+  // rule with the server's address. Either change fails loudly if the files no longer match.
+  async function captionsOn(context) {
+    await context.route('**/video-editor/app.js*', async (route) => {
+      const response = await route.fetch();
+      const words = await response.text();
+      if (!words.includes('  on: false,')) throw new Error('app.js has no "on: false," to switch on');
+      await route.fulfill({ response, body: words.replace('  on: false,', '  on: true, ') });
+    });
+    await context.route((url) => url.pathname === '/video-editor/', async (route) => {
+      const response = await route.fetch();
+      const words = await response.text();
+      const rule = "img-src 'self' data: blob:; base-uri";
+      if (!words.includes(rule)) throw new Error('index.html\'s safety rule has changed');
+      await route.fulfill({ response, body: words.replace(rule, `img-src 'self' data: blob:; connect-src ${SERVER}; base-uri`) });
+    });
+  }
+
+  // L0. The real page, with captions off: nothing about them, and no server
+  {
+    const { context, page } = await openPhone();
+    await context.route(SERVER + '/**', standInServer);
+    await page.goto(APP + '?owner');
+    check('L0 captions off: even with ?owner, nothing about captions shows', !(await visible(page, 'owner')));
+    await page.evaluate(() => localStorage.setItem('video-editor-captions-passcode', 'kept before'));
+    await page.reload();
+    check('L0 ...even on a phone that kept a passcode', !(await visible(page, 'owner')));
+    const rule = await page.getAttribute('meta[http-equiv="Content-Security-Policy"]', 'content');
+    check('L0 the page\'s safety rule lets it talk to no server', !/connect-src/.test(rule), rule);
+    const reach = await page.evaluate((address) => fetch(address + '/').then(() => 'reached', () => 'blocked'), SERVER);
+    check('L0 ...so even the captions server is out of reach', reach === 'blocked');
+    check('L0 the app never talked to the captions server', server.asked.length === 0, String(server.asked.length));
+    await page.screenshot({ path: SHOTS + '16a-captions-off-with-owner.png' });
+    await context.close();
+  }
 
   const { context, page } = await openPhone();
+  await captionsOn(context);
   await context.route(SERVER + '/**', standInServer);
   await page.goto(APP);
-  check('L1 without ?owner, nothing about captions shows', !(await visible(page, 'owner')));
+  check('L1 captions on (in the test): without ?owner, nothing about captions shows', !(await visible(page, 'owner')));
   await page.evaluate(() => localStorage.setItem('video-editor-captions-passcode', 'kept before'));
   await page.reload();
   check('L1 ...even on a phone that keeps a passcode', !(await visible(page, 'owner')));
@@ -1028,14 +1068,17 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   const unexpected = page.problems.filter((problem) => !/Failed to load resource|Content Security Policy|example\.com/.test(problem));
   check('L no page errors (besides the server\'s refusals, which Chrome notes)', unexpected.length === 0, unexpected.join('\n'));
   await context.close();
-}
-{
-  const { context, page } = await openPhone({ viewport: { width: 180, height: 370 } });
-  await page.goto(APP + '?owner');
-  check('L12 at 200% zoom, the passcode box fits the width', await page.evaluate(() => document.documentElement.scrollWidth <= 180));
-  const save = await page.locator('#owner-save').boundingBox();
-  check('L12 ...and "Save and check" stays on the screen', save.x >= 0 && save.x + save.width <= 180, JSON.stringify(save));
-  await context.close();
+
+  // L12. A phone at 200% zoom (captions switched on in the test)
+  {
+    const { context: zoomed, page: small } = await openPhone({ viewport: { width: 180, height: 370 } });
+    await captionsOn(zoomed);
+    await small.goto(APP + '?owner');
+    check('L12 at 200% zoom, the passcode box fits the width', await small.evaluate(() => document.documentElement.scrollWidth <= 180));
+    const save = await small.locator('#owner-save').boundingBox();
+    check('L12 ...and "Save and check" stays on the screen', save.x >= 0 && save.x + save.width <= 180, JSON.stringify(save));
+    await zoomed.close();
+  }
 }
 
 // ---------- G. A phone with its zoom at 200% (180 wide), and a computer (1280 wide) ----------

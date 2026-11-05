@@ -255,7 +255,15 @@ const send = async (env, options) => answerOf(await worker.fetch(ask(options), e
   const page = readFileSync(here('../index.html'), 'utf8');
   const rule = (page.match(/http-equiv="Content-Security-Policy" content="([^"]*)"/) || [])[1] || '';
   const connect = (rule.match(/connect-src ([^;]*)/) || [])[1] || '';
-  check('S9 the page\'s safety rule lets it talk to this one server, and no other', connect.trim() === address, connect);
+  // CAPTIONS.on in app.js: off for now (Dan's "a," the evening of November 4, 2026, Pacific)
+  const block = (app.match(/const CAPTIONS = \{([\s\S]*?)\n\};/) || [])[1] || '';
+  const on = (block.match(/^\s*on: (true|false),/m) || [])[1];
+  check('S9 app.js says whether captions are on (CAPTIONS.on)', on === 'true' || on === 'false', String(on));
+  if (on === 'true') {
+    check('S9 captions on: the page\'s safety rule lets it talk to this one server, and no other', connect.trim() === address, connect);
+  } else {
+    check('S9 captions off: the page\'s safety rule lets it talk to no server', !/connect-src/.test(rule), rule);
+  }
 }
 
 // ---------- How much of the server's own time the biggest piece takes (a note, not a check) ----------

@@ -5,14 +5,14 @@
   <!-- Makes the page fit phone screens -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <!-- A safety rule for the browser (a "Content-Security-Policy"): this page may only run its own
-       scripts (app.js and the video library in lib/) and its own style sheet. It may talk to one
-       server only (connect-src): the owner's own captions server, used only on his phone after he
-       types his passcode (build step 7; SPEC.md, "AI captions, only for the owner"). For everyone
-       else it talks to no server.
+       scripts (app.js and the video library in lib/) and its own style sheet. It talks to no server.
+       (The owner's AI captions are off for now, his "a," the evening of November 4, 2026, Pacific. To
+       turn them back on, add "connect-src https://video-editor-captions.danyoonsignup.workers.dev;"
+       here, and set CAPTIONS.on to true in app.js: SPEC.md, "AI captions, only for the owner.")
        "blob:" lets it play your video and the new one, and lets the sound add-on start its helper.
        'wasm-unsafe-eval' lets that add-on run its sound encoder, which is compiled code (WebAssembly).
        If you add anything from outside (a font, an image, a server), it has to be added here too. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src blob:; style-src 'self'; media-src blob:; img-src 'self' data: blob:; connect-src https://video-editor-captions.danyoonsignup.workers.dev; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src blob:; style-src 'self'; media-src blob:; img-src 'self' data: blob:; base-uri 'none'; form-action 'none'">
   <title>Video editor</title>
   <meta name="description" content="Make a short video look and sound its best: trim, speed, a filter, lighting and sound, saved on this phone.">
   <!-- The color of the phone's top bar: the same near-black as the app -->
@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="style.css?v=7">
   <!-- Mediabunny, the library that reads and writes video files (see lib/README.md) -->
   <script src="lib/mediabunny.min.js?v=1.65.0" defer></script>
-  <script src="app.js?v=7" defer></script>
+  <script src="app.js?v=8" defer></script>
 </head>
 <body>
 
@@ -140,8 +140,9 @@
       <p class="problem" id="start-problem" role="alert" hidden></p>
 
       <!-- Only with ?owner at the end of the address: the owner's passcode for his AI captions
-           (build step 7a; SPEC.md, "AI captions, only for the owner"). app.js shows it. For everyone
-           else it stays hidden, and the app never talks to the captions server. -->
+           (build step 7a; SPEC.md, "AI captions, only for the owner"). app.js shows it, but only
+           while captions are on (CAPTIONS.on in app.js: off for now). For everyone else it stays
+           hidden, and the app never talks to the captions server. -->
       <div class="owner" id="owner" hidden>
         <h2 id="owner-title">Captions, just for you</h2>
         <div id="owner-new">
