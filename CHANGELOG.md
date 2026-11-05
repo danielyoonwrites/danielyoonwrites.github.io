@@ -101,6 +101,15 @@ Moved from `HANDOFF.md` on October 31, 2026 (pull request 98), word for word, so
 - Dan's Master Notes (Notion) got an entry after each merge: "Living in the Word app (Oct 2026)" and, for the Projects page, "Personal website (Oct 2026)."
 - After five merged pull requests (132, 133, 134, 136, 142), Claude suggested a handoff; Dan ran `/handoff` (pull request 143). Next: `/pickup living in the word`, where Dan chooses what comes next.
 
+### Video editor session 3 (November 4 and 5, 2026)
+
+- Dan ran `/pickup video editor` (the evening of November 3, Pacific) and said "go" for build step 7a. Asked one at a time, he answered that his Cloudflare account is on Workers Free ("a. workers free") and that the captions server goes in the same account as Living in the Word's ("a").
+- Pull request 144: build step 7a, the captions server (`video-editor/server/`, a Worker named `video-editor-captions`) and his passcode box (only with `?owner`, checked with one second of silence through the AI). The free plan gives each request 10 ms of the server's own work, so the plan's 30-second sound pieces became pieces of up to 15. While it waited, another session's pull requests 142 and 143 merged; 142 broke the video editor's Projects page check, which both sessions fixed the same way.
+- Before setting it up in Cloudflare, Dan said: "let's actually turn off the captions option for now, just to keep this simple," and chose "a," hide it, keep it ready (pull request 145): no box even with `?owner`, no server in the page's safety rule, the server code kept unused.
+- With a screenshot from his phone, he asked for the Edit tabs to look like buttons of one size, in a row that scrolls left to right (pull request 146).
+- Learned: workers.dev addresses are blocked from Claude's session too; the merge of 145 didn't wake the session after it had restarted, so Dan had to say "It merged" (both in `CLOUD-NOTES.md`).
+- Three merged pull requests (144 to 146), then Dan asked for a handoff (pull request HANDOFFPR). Waiting on him: his phone checks (the tabs, text, better sound, trim and speed, the looks and private test uploads). Next: `/pickup video editor`, build step 8, shape and crop (first question: which shapes).
+
 ## The handoff notes as of October 28, 2026, before the cleanup
 
 Word for word from `HANDOFF.md`, as it stood after pull request 81. Each project's current status is now in its own `PROGRESS.md`.
