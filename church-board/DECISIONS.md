@@ -16,36 +16,36 @@ Every decision below that still holds, one line each; it's rewritten at each han
 
 ## Log (oldest first)
 
-### November 5, 2026: the idea (pull request [number])
+### November 5, 2026: the idea (pull request 149)
 - The owner, in the chat (the name is left out, see below): "I'm thinking of a web app. It will be a web page like Facebook, call it [the name]. It will be used for social purposes for my church but not social media. The main thing is that people in my church group sign up with their name and just a photo. Then they post like a forum, like if anyone wants to grab food, or watch movie, or hangout. And maybe they can post a picture or something from that event. So like a community forum, friend and hangout finder, and maybe announcements and photos can be posted"
 - Claude's notes in its answer: a name and a photo alone can't keep the app private (anyone could type someone else's name), so it needs a sign-in, like Living in the Word's email code; hangout posts are urgent, so people need to hear about them; and free apps already do this (BAND, by Naver), so whether the group will switch is tested in a small trial first (build step 9).
 
-### November 5, 2026: who can join (pull request [number])
+### November 5, 2026: who can join (pull request 149)
 - Decision: only the owner's church group, invite only, with him approving each person. His "A."
 - Why: Claude recommended it: the smallest and safest choice, and it reuses the invite-only sign-in he already built for Living in the Word.
 - Turned down: "B" (the whole church, with several groups and leaders), "C" (built to work for any church, used by his for now) and "D" (not now: save the idea).
 
-### November 5, 2026: who's in the group (pull request [number])
+### November 5, 2026: who's in the group (pull request 149)
 - Decision: adults only, 18 and up. His "A."
 - Why: Claude recommended it: the simplest and safest, with no special rules for minors.
 - Turned down: "B" (teens and adults, 13 and up, with a parent's OK for each teen and no private messages) and "C" (all ages; a US law, COPPA, covers collecting the names and photos of children under 13, and whether it covers a free church app is unverified).
 
-### November 5, 2026: how people hear about a new post (pull request [number])
+### November 5, 2026: how people hear about a new post (pull request 149)
 - Decision: phone notifications that each person turns on, built as their own step after posting works. His "A."
 - Why: Claude recommended it: free, and in time for "food tonight?" On iPhone, they work only from the Home Screen (Apple's WebKit blog, 2023, seen only in search results).
 - Turned down: "B" (an email for every new post: Resend's free plan sends 100 a day, shared with Living in the Word, and 30 members with three posts would already be 90), "C" (one summary email a day: too slow for same-day hangouts) and "D" (no alerts: posts get missed).
 
-### November 5, 2026: the name (pull request [number])
+### November 5, 2026: the name (pull request 149)
 - Decision: the name he chose is a working name, decided for sure before the app goes on the Projects page. His "B."
 - Why: Claude recommended it, so the plan could start. The name ends in "-book," and Facebook sued a site called Teachbook over that ending in 2010; it settled in 2012 with Teachbook changing its name (news reports seen only in search results). Claude also said that if the name uses the church's name, it may be worth asking the church's leaders.
 - Turned down: "A" (keep it for good), "C" (a name without "-book," which Claude suggested) and "D" (another name).
 
-### November 5, 2026: the church's name stays out of the public code (pull request [number])
+### November 5, 2026: the church's name stays out of the public code (pull request 149)
 - Decision: the folder and the notes use a plain working name, `church-board/` ("Church board"). The app shows the real name only to signed-in members, because it's saved in Cloudflare (`BOARD_NAME`), not in the code. The real name is in his private Notion notes ("Church board app (Nov 2026)," under Master Notes). His "A."
 - Why: the repository is public, and anything pushed stays in its history. His About page doesn't name his church, and the real name would link his website to it, the way his city was kept out of the family activity finder (Claude's reason, asked before anything was pushed).
 - Turned down: "B" (use the real name in the public code and notes).
 
-### November 5, 2026: Claude's plan choices (pull request [number])
+### November 5, 2026: Claude's plan choices (pull request 149)
 - Its own Cloudflare Worker and D1 database, apart from the other apps, so a problem in one can't break another.
 - Signing in with an email code, like Living in the Word's, through Resend; this app's share of the 100 emails a day is open question 9.
 - Notifications: a push with no words in it, and the phone asks the server what's new, so the server needn't encrypt anything (unverified until build step 7).

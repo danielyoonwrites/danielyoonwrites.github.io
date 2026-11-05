@@ -16,6 +16,8 @@ Moved from `HANDOFF.md` on October 28, 2026 (notes cleanup, pull request 82), so
 
 148: the family activity finder's plan (`family-activity-finder/`: the spec, its notes and the build plan; official calendars first and AI search second, built to work for anyone and used just by Dan for now), after two tests in the chat (their details are in Dan's private Notion notes, since this repository is public), with its lines in `CLAUDE.md` and `HANDOFF.md` and a `CLOUD-NOTES.md` line on this repository's own cloud environment.
 
+149: the church board's plan (`church-board/`, a working name: the spec, its notes and the build plan; a private board for Dan's church group, invite only, adults only, with phone notifications), after five questions in the chat, with the app's real name and the church's name kept out of this public repository (they're in Dan's private Notion notes), and its lines in `CLAUDE.md` and `HANDOFF.md`.
+
 ## Session summaries
 
 Moved from `HANDOFF.md` on October 31, 2026 (pull request 98), word for word, so `HANDOFF.md` stays a short index. Each new session's summary goes here.

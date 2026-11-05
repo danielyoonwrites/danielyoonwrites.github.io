@@ -4,12 +4,12 @@ Where it stands and the next step. Rewrite this file instead of adding to it; ke
 
 ## Where it stands (November 5, 2026)
 
-- Planned November 5, 2026: `SPEC.md`, the plan, in pull request [number], waiting on the owner. Nothing is built yet.
+- Planned November 5, 2026: `SPEC.md`, the plan, in pull request 149, waiting on the owner. Nothing is built yet.
 - "Church board" is a working name for this public repository. The real name is kept out of the code (the owner's "A"); it's in his private Notion notes ("Church board app (Nov 2026)," under Master Notes) and, from build step 3, in Cloudflare as the secret `BOARD_NAME`.
 
 ## Waiting on the owner
 
-1. Read the plan, then merge it: pull request [number] (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/[number], Conversation tab, Merge pull request, Confirm merge).
+1. Read the plan, then merge it: pull request 149 (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/149, Conversation tab, Merge pull request, Confirm merge).
 2. Answer open question 1 in `SPEC.md`: replies under a post.
 
 ## Next step
