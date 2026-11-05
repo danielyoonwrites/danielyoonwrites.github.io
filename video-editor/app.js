@@ -317,6 +317,7 @@ function show(name) {
     el('preview').play().catch(() => {});
     fitGlowToPreview();
     startTextLayer();
+    keepTabInView(state.tab); // a new video opens on Filter, so the row slides back to the start
   }
   else el('preview').pause();
   if (name !== 'done') el('result').pause();
@@ -521,7 +522,20 @@ function selectTab(name) {
     el('tab-' + tab).tabIndex = chosen ? 0 : -1;
     el('panel-' + tab).hidden = !chosen;
   }
+  keepTabInView(name);
   keepPreviewInTrim();
+}
+
+// The tabs sit in a row that slides left and right (style.css, "Tabs"): this slides it just enough
+// to show the chosen tab whole, with a little room at the edge. It only slides the row, never the page.
+function keepTabInView(name) {
+  const row = document.querySelector('.tabs');
+  const rowBox = row.getBoundingClientRect();
+  if (!rowBox.width) return; // the Edit screen isn't showing: show('look') calls this again
+  const tabBox = el('tab-' + name).getBoundingClientRect();
+  const room = 16;
+  if (tabBox.left < rowBox.left + room) row.scrollLeft -= rowBox.left + room - tabBox.left;
+  else if (tabBox.right > rowBox.right - room) row.scrollLeft += tabBox.right - (rowBox.right - room);
 }
 
 // Arrow keys move between the filters, and between the tabs (the usual way for these controls)

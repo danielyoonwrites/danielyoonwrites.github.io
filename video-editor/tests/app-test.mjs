@@ -1081,6 +1081,93 @@ const screenShown = (page) => page.evaluate(() => [...document.querySelectorAll(
   }
 }
 
+// ---------- M. The tabs: buttons of one size, in a row that slides left and right ----------
+// Dan's request, the morning of November 5, 2026, Pacific: the tabs looked unevenly spaced and
+// cramped, so they're now bordered buttons, all the same width, in a row that slides sideways.
+async function tabFacts(page) {
+  return page.evaluate(() => {
+    const row = document.querySelector('.tabs');
+    const box = row.getBoundingClientRect();
+    const tabs = [...row.querySelectorAll('.tab')].map((tab) => {
+      const b = tab.getBoundingClientRect();
+      const look = getComputedStyle(tab);
+      return {
+        id: tab.id, left: b.left - box.left, right: box.right - b.right, width: b.width, height: b.height,
+        fits: tab.scrollWidth <= tab.clientWidth, border: parseFloat(look.borderTopWidth), edge: look.borderTopColor,
+        fill: look.backgroundColor, words: look.color, open: tab.getAttribute('aria-selected') === 'true',
+      };
+    });
+    return { tabs, scrollLeft: row.scrollLeft, slides: row.scrollWidth > row.clientWidth, page: document.documentElement.scrollWidth };
+  });
+}
+async function checkTabs(page, label, width) {
+  const facts = await tabFacts(page);
+  const widths = facts.tabs.map((t) => t.width);
+  check(`M ${label}: all six tabs the same width`, facts.tabs.length === 6 && Math.max(...widths) - Math.min(...widths) < 0.5, JSON.stringify(widths));
+  check(`M ${label}: each at least 48 tall, and every word fits inside its tab`, facts.tabs.every((t) => t.height >= 48 && t.fits), JSON.stringify(facts.tabs.map((t) => [t.height, t.fits])));
+  check(`M ${label}: the page itself never gets wider than the screen`, facts.page <= width, String(facts.page));
+  return facts;
+}
+{
+  const { context, page } = await openPhone();
+  await page.goto(APP);
+  await choose(page, clock);
+  let facts = await checkTabs(page, '360 wide', 360);
+  check('M1 they look like buttons: a border all around (gray, or light on the open one)',
+    facts.tabs.every((t) => t.border >= 2 && (t.open || t.edge === 'rgb(138, 138, 138)')),
+    JSON.stringify(facts.tabs.map((t) => [t.border, t.edge])));
+  const open = facts.tabs.filter((t) => t.open);
+  check('M2 the open tab, Filter, is filled light with dark words, like the chosen look',
+    open.length === 1 && open[0].id === 'tab-filter' && open[0].fill === 'rgb(242, 242, 242)' && open[0].words === 'rgb(18, 18, 18)', JSON.stringify(open));
+  check('M2 ...and the others aren\'t filled', facts.tabs.filter((t) => !t.open).every((t) => t.fill === 'rgba(0, 0, 0, 0)'));
+  check('M3 the row slides left and right', facts.slides);
+  const cut = facts.tabs.filter((t) => t.right < 0 && t.width + t.right >= 20);
+  check('M4 one tab is partly showing at the right edge, so there are clearly more', cut.length === 1 && facts.tabs.findIndex((t) => t === cut[0]) === 3,
+    JSON.stringify(facts.tabs.map((t) => Math.round(t.right))));
+  await page.screenshot({ path: SHOTS + '19-tabs.png' });
+
+  await page.focus('#tab-filter');
+  await page.keyboard.press('ArrowLeft'); // Filter ← goes round to Speed, the last tab
+  facts = await tabFacts(page);
+  const speed = facts.tabs.find((t) => t.id === 'tab-speed');
+  check('M5 choosing Speed slides the row to show it whole, with room at the edge', speed.open && speed.right >= 15 && speed.left >= 0, JSON.stringify(speed));
+  await page.screenshot({ path: SHOTS + '20-tabs-speed-chosen.png' });
+  await page.evaluate(() => { document.querySelector('.tabs').scrollLeft = 0; });
+  facts = await tabFacts(page);
+  check('M6 sliding the row by hand doesn\'t change the open tab', facts.scrollLeft === 0 && facts.tabs.find((t) => t.open).id === 'tab-speed');
+  await page.click('#tab-trim');
+  facts = await tabFacts(page);
+  const trim = facts.tabs.find((t) => t.id === 'tab-trim');
+  check('M7 tapping a tab that\'s partly hidden opens it and shows it whole', trim.open && trim.right >= 15 && trim.left >= 0, JSON.stringify(trim));
+  await page.click('#look-back');
+  await page.waitForSelector('#start-screen:not([hidden])');
+  await choose(page, videos.short);
+  facts = await tabFacts(page);
+  check('M8 a new video opens on Filter, with the row back at the start', facts.tabs[0].open && facts.scrollLeft === 0, String(facts.scrollLeft));
+  check('M no page errors', page.problems.length === 0, page.problems.join('\n'));
+  await context.close();
+}
+{
+  const { context, page } = await openPhone({ viewport: { width: 180, height: 370 } });
+  await page.goto(APP);
+  await choose(page, clock);
+  await checkTabs(page, 'at 200% zoom (180 wide)', 180);
+  await page.focus('#tab-filter');
+  await page.keyboard.press('ArrowLeft');
+  const speed = (await tabFacts(page)).tabs.find((t) => t.id === 'tab-speed');
+  check('M9 at 200% zoom, Speed can still be shown whole', speed.open && speed.right >= 15 && speed.left >= 0, JSON.stringify(speed));
+  await context.close();
+}
+{
+  const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const page = await context.newPage();
+  await page.goto(APP);
+  await page.setInputFiles('#pick', clock);
+  await page.waitForSelector('#look-screen:not([hidden])');
+  await checkTabs(page, 'on a computer', 1280);
+  await context.close();
+}
+
 // ---------- G. A phone with its zoom at 200% (180 wide), and a computer (1280 wide) ----------
 {
   const { context, page } = await openPhone({ viewport: { width: 180, height: 370 } });

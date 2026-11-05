@@ -124,31 +124,46 @@ video {
   pointer-events: none;
 }
 
-/* ---------- Tabs: Filter, Lighting, Sound, Text, Trim and Speed ---------- */
+/* ---------- Tabs: Filter, Lighting, Sound, Text, Trim and Speed ----------
+   Buttons all the same size, in a row that slides left and right (the owner's request, the morning
+   of November 5, 2026, Pacific: they looked unevenly spaced and cramped). About three and a half
+   show on a phone, so the cut-off one shows there are more. app.js keeps the chosen one in view
+   (keepTabInView). */
 .tabs {
-  display: flex;
-  flex-wrap: wrap;   /* six tabs in a row on a phone; more rows when zoomed in */
+  display: grid;
+  grid-auto-flow: column;
+  /* Every tab the same width: three and a half fit the row (100% is the row less its 16px sides, and
+     the right side shows tabs too), never narrower than the longest word, "Lighting" */
+  grid-auto-columns: max(5.5em, calc((100% - 8px) / 3.5));
+  gap: 8px;
   width: 100%;
   max-width: 36rem;
   margin: 0 auto;
+  padding: 10px 16px;
+  overflow-x: auto;              /* slide the row left and right */
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;         /* no scroll bar: the cut-off tab shows there are more */
   border-bottom: 1px solid var(--line);
 }
+.tabs::-webkit-scrollbar { display: none; }
 .tab {
-  flex: 1 1 52px;    /* six fit in a row on a phone 360 wide */
   min-height: 48px;
-  padding: 0 2px;
-  border: none;
-  border-bottom: 3px solid transparent;
-  background: none;
-  color: var(--soft);
+  padding: 0 6px;
+  border: 2px solid var(--edge);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
   font: inherit;
   font-size: 16px;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
 }
+/* The open tab: light, like the chosen look */
 .tab[aria-selected="true"] {
-  color: var(--text);
-  border-bottom-color: var(--light);
+  border-color: var(--light);
+  background: var(--light);
+  color: var(--dark-text);
 }
 
 .panel {
