@@ -22,7 +22,7 @@ The video plays at the top of each screen, showing the edits as it plays. One st
 
 1. Clips: "Add videos" picks one or more videos from the phone. They show as a list in order, each with a small picture and its length. ↑ and ↓ move a clip; tap a clip to open it.
 2. A clip, on its own screen: trim (where it starts and ends), speed (0.5×, 1×, 1.5× or 2×) and which part shows in the frame (the crop).
-3. Look, for the whole video: the shape (tall 9:16 for Reels, square or wide), a filter (a few ready-made ones) and lighting (brightness and contrast).
+3. Look, for the whole video: the shape (tall 9:16 for Reels, square or wide; but a wide video isn't a YouTube Short, and every video is made to fit Shorts, so which shapes to offer is the first question of build step 8), a filter (a few ready-made ones) and lighting (brightness and contrast).
 4. Text: type a line, put it at the top, middle or bottom, and choose when it shows.
 5. Make the video: a progress bar, then "Save to phone" and "Share." The screen stays on while it works, and "Stop" cancels.
 
@@ -153,7 +153,7 @@ Not known yet: how long a piece takes to come back (7a's check times one second 
 
 1. This plan, with the folder's `CLAUDE.md`, `PROGRESS.md` and `DECISIONS.md`. Check: read "How it works" and this build plan.
 2. Done (pull request 111, checked on the owner's phone November 2, 2026): the phone test, the riskiest part first (https://danielyoonwrites.github.io/video-editor/phone-test.html): pick a video; the page says what Chrome can do (read it, make H.264 video and AAC sound), then makes a 5-second black-and-white copy, shows how long it took, and offers "Save to phone" and "Share." Check: on your phone, try a short video you filmed, play the copy, and send Claude a screenshot of what the page says.
-3. Done (pull request 112): one clip with a look: open one video, choose a filter and the lighting while it plays, then make the video, check it against Instagram's, TikTok's and YouTube Shorts' rules, save it and share it. Check: make a video with a filter and the lighting, play it, and upload it privately to YouTube, TikTok and Instagram.
+3. Done (pull request 112; checked on the owner's phone November 2, 2026, "it looks good"; the private test uploads are still to come): one clip with a look: open one video, choose a filter and the lighting while it plays, then make the video, check it against Instagram's, TikTok's and YouTube Shorts' rules, save it and share it. Check: make a video with a filter and the lighting, play it, and upload it privately to YouTube, TikTok and Instagram.
    - 3b. Built (pull request 116; the owner's notes still to come): the Korean looks (the owner's "a"). Check: try each look on a video of your own, make one with Soft glow, and see that it looks like the preview.
 4. Built (pull request 125; the owner's phone check still to come): trim and speed; the sound follows the speed like a tape (the owner's "b"). Check: cut the start and end off a clip, speed it up, make the video and play it.
 5. Built (pull request 129; the owner's phone check still to come): better sound (added November 2, 2026, after the owner asked; without AI; three switches and a Volume slider, the owner's "B"): even out the volume, cut low rumble, a clearer voice, the volume up or down. Chrome's sound tools can do these faster than the video plays (OfflineAudioContext, BiquadFilterNode, DynamicsCompressorNode). They can't really remove changing background noise like voices or music. Check: make a video with "better sound" and compare.
@@ -162,7 +162,7 @@ Not known yet: how long a piece takes to come back (7a's check times one second 
    - 7a. Built (pull request 144), then switched off with the captions (his "a"); his setup and check wait until captions are turned back on: the server and the passcode. Check: after his one-time setup in Cloudflare, the app (opened with `?owner`) says his passcode works.
    - 7b. Making and showing captions, and the Projects page line and note updated in the same pull request (the note says "no AI" and that the videos never leave the phone, which stops being true then). Check: captions on a video of himself talking, in English and in Korean, timed to his words.
    - 7c. Fixing words. Check: fix a word, make the video, and see it.
-8. Shape and crop. Check: make a tall video from a wide clip, choosing which part shows.
+8. Shape and crop, with the Projects page line and its note updated in the same pull request (`CLAUDE.md`). Check: make a tall video from a wide clip, choosing which part shows.
 9. Several clips: add more, put them in order, remove one; they join into one video. Check: join three short clips in a new order.
 10. Polish after a week of real use (like keeping an unfinished edit, if wanted). It went on the Projects page early, in pull request 138, at the owner's request (November 3, 2026).
 
