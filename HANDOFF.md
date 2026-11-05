@@ -1,6 +1,6 @@
 # Handoff: where everything stands
 
-Last updated November 2, 2026, at the end of the eleventh session (with pull request 115), Living in the Word's and the website's lines on November 4, 2026, at the end of the thirteenth session (handoff notes, pull request 143), and the video editor's lines on November 5, 2026, at its third session's handoff (pull request 147). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
+Last updated November 2, 2026, at the end of the eleventh session (with pull request 115), Living in the Word's and the website's lines on November 4, 2026, at the end of the thirteenth session (handoff notes, pull request 143), the video editor's lines on November 5, 2026, at its third session's handoff (pull request 147), and the church board's lines on November 5, 2026 (pull request 149). This is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines.
 
 - How to work with Dan, and the rules for every project: `CLAUDE.md`.
 - Each project: its folder's `PROGRESS.md` (where it stands, the next step), `DECISIONS.md` (choices and their reasons) and `SPEC.md`. The website's decisions are in the root `DECISIONS.md`.
@@ -21,6 +21,7 @@ This repository is public. Keep personal details out of this file.
 - **Video editor** (live with one clip: the Korean looks, lighting, better sound, a line of text (pull request 139), trim and speed, the tabs in Dan's order, on the Projects page; AI captions only for Dan planned in pull request 140 and their server and passcode built in 144, then turned off for now, kept ready (his "a," the evening of November 4, Pacific: "just to keep this simple", pull request 145); the Edit tabs as buttons of one size in a row that slides sideways, his request (pull request 146); next shape and crop, build step 8): a simple video editor just for Dan, on his Android phone, with the videos never leaving the phone and every video made to fit Instagram, TikTok and YouTube Shorts, https://danielyoonwrites.github.io/video-editor, `video-editor/PROGRESS.md`.
 - **Photo Filters** (live; choosing a photo merged in pull request 117; build step 3, Warm natural next to the original, in pull request 118): Dan's own looks on his photos, in the browser of his phone and MacBook, with the photos never leaving the device, https://danielyoonwrites.github.io/photo-filters, `photo-filters/PROGRESS.md`.
 - **Family activity finder** (a working name; planned November 5, 2026, after two tests in the chat, in pull request 148; nothing built yet): free and cheap things to do with young kids nearby, from official calendars first and AI search second, with a calendar to plan a day; built to work for anyone, used just by Dan for now. `family-activity-finder/PROGRESS.md`. Keep his city and his kids' ages out of this public repository.
+- **Church board** (a working name; planned November 5, 2026, in pull request 149; nothing built yet): a private board for Dan's church group, to find people to hang out with, share photos and read announcements; invite only, adults only, with phone notifications. `church-board/PROGRESS.md`. Keep the app's real name and the church's name out of this public repository (they're in his Notion notes).
 
 
 ## Where things stand (November 4, 2026)
@@ -38,6 +39,7 @@ This repository is public. Keep personal details out of this file.
 5. Video editor: merge the handoff notes, pull request 147 (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/147, Conversation tab, Merge pull request, Confirm merge). Then the phone checks (the tabs, text, better sound, trim and speed, the looks and private test uploads). Every step is in `video-editor/PROGRESS.md`.
 6. Photo Filters: merge pull request 118, build step 3 (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/118, Conversation tab, Merge pull request, Confirm merge), then the checks on his phone and MacBook. Every step is in `photo-filters/PROGRESS.md`.
 7. Family activity finder: read the plan and merge it, pull request 148 (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/148, Conversation tab, Merge pull request, Confirm merge), then answer its first open question, the name. Every step is in `family-activity-finder/PROGRESS.md`.
+8. Church board: read the plan and merge it, pull request 149 (https://github.com/danielyoonwrites/danielyoonwrites.github.io/pull/149, Conversation tab, Merge pull request, Confirm merge), then answer its first open question, replies under a post. Every step is in `church-board/PROGRESS.md`.
 
 
 ## Parked (raise only when it becomes relevant)
@@ -81,5 +83,7 @@ Open https://claude.ai/code, start a new session with this repository, set the e
   > /pickup photo filters
 - Continue the family activity finder:
   > /pickup family activity finder
+- Continue the church board:
+  > /pickup church board
 - Something new:
   > Read HANDOFF.md first. Then help me plan [the new thing], plan only.

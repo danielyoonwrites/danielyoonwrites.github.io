@@ -80,6 +80,7 @@ When Dan says "do the rest," Claude works through the build plan one pull reques
 - `video-editor/` is a simple video editor, just for the owner, on his Android phone (planned November 2026), with its own `CLAUDE.md` and `SPEC.md`.
 - `photo-filters/` is a little app that puts the owner's own looks on his photos, in the browser of his phone and MacBook (planned November 2026), with its own `CLAUDE.md` and `SPEC.md`.
 - `family-activity-finder/` (a working name) is a little app that finds free and cheap things to do with young kids nearby, from official calendars first and AI search second, with a calendar to plan a day; built to work for anyone and used just by the owner for now (planned November 2026), with its own `CLAUDE.md` and `SPEC.md`. The owner's city and his kids' ages never go in this public repository.
+- `church-board/` (a working name) is a little app for the owner's church group: a private board to find people to hang out with, share photos from those times and read announcements; invite only, adults only, with phone notifications (planned November 2026), with its own `CLAUDE.md` and `SPEC.md`. The app's real name and the church's name never go in this public repository.
 
 ## Privacy
 
