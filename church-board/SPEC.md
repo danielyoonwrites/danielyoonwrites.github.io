@@ -29,7 +29,7 @@ BAND, made by Naver, has private invite-only groups, posts, photo albums and a c
 ## What you do in the app (version 1, a first sketch)
 
 1. **Joining.** The owner invites you by email address, on a page only he can open (like Living in the Word's). The invite email has the app's link and how to sign in. You type your email address, get a 6-digit code by email, and type it in. The first time, the app asks for only two things: your name and a photo of you. The photo is shrunk on your phone before it's sent.
-2. **The board.** Three tabs: Hangouts, Announcements and Photos (the owner's "a," the evening of November 5, 2026, Pacific). Each post shows the person's photo and name, their words, when it was posted, and for a hangout, when and where (if they wrote it).
+2. **The board.** Three tabs: Hangouts, Announcements and Photos (the owner's "a," the evening of November 5, 2026, Pacific). Announcements are posted by the owner and the leaders he picks (his "b"). Each post shows the person's photo and name, their words, when it was posted, and for a hangout, when and where (if they wrote it).
 3. **New post.** One screen: what you want to do ("Anyone want to grab food tonight?"), and, if you like, when, where and a photo. "Post" puts it on the board for everyone signed in.
 4. **A post's own screen.** Tap a post to see it whole, with its photos big (photos from a hangout show under its post and in the Photos tab too; the owner's "a"), and the replies under it: short replies, like a forum (the owner's "a," the evening of November 5, 2026, Pacific). A hangout post has an "I'm in" button, with the photos and names of everyone coming (the owner's "a," the same evening).
 5. **Your own posts.** "Remove" ("Post removed. Undo" for a few seconds). The owner can remove anyone's post.
@@ -46,7 +46,7 @@ BAND, made by Naver, has private invite-only groups, posts, photo albums and a c
 ## Not in version 1 (ideas for later)
 
 - Private messages between members (everything stays in the group's view).
-- Several groups, leaders for each, or other churches.
+- Several groups, or other churches.
 - A calendar of hangouts, or adding one to your phone's calendar.
 - Videos.
 
@@ -85,7 +85,7 @@ BAND, made by Naver, has private invite-only groups, posts, photo albums and a c
 
 1. This plan, with the folder's `CLAUDE.md`, `PROGRESS.md` and `DECISIONS.md`. Check: read "What you do in the app" and this build plan.
 2. The screens, with made-up people and posts, on the phone only (nothing goes to a server yet): signing in (pretend), your name and photo, the three tabs, a new post, a post's own screen. Check: on your phone, try each screen and say what feels slow or odd.
-3. The server and signing in: a one-time setup in Cloudflare (every step given), the email code, your invite page and the real name saved in Cloudflare. Check: invite your second email address and sign in with it on your phone.
+3. The server and signing in: a one-time setup in Cloudflare (every step given), the email code, your invite page (with its "Make a leader" switch) and the real name saved in Cloudflare. Check: invite your second email address and sign in with it on your phone.
 4. Your name and photo, saved to your account. Check: add them on your phone, then see them on your computer.
 5. Posting: hangouts and announcements, seen by everyone signed in; "Remove" for your own posts, and for anyone's when it's you. Check: post from your phone, see it on your computer, then remove it.
 6. Photos in posts, kept on the server. Check: post a photo from your phone and open it on your computer.
@@ -99,7 +99,8 @@ BAND, made by Naver, has private invite-only groups, posts, photo albums and a c
 2. "I'm in": answered the evening of November 5, 2026, Pacific: yes, a button on each hangout post, with the photos and names of everyone coming (the owner's "a").
 3. How the board is arranged: answered the evening of November 5, 2026, Pacific: three tabs, Hangouts, Announcements and Photos (the owner's "a").
 3b. Where an event's photos go: answered the evening of November 5, 2026, Pacific: both, under its hangout post and in the Photos tab (the owner's "a").
-4. Announcements: only you post them, or you and leaders you pick. (Whether they stay at the top mattered less once they got their own tab, question 3.)
+4. Announcements: answered the evening of November 5, 2026, Pacific: you and leaders you pick post them, with a "Make a leader" switch on your invite page (the owner's "b").
+4b. Leaders: can they also remove other people's posts and replies, or only post announcements?
 5. A rule for photos with children in them (members are adults, but church events may have kids): for example, your church's photo policy, or no children's faces.
 6. Which notifications: every new post, only hangouts and announcements, or each person chooses.
 7. How long posts stay: when a hangout moves to "Past," and how long photos are kept.

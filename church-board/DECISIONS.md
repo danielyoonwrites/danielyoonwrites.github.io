@@ -16,6 +16,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 6, 2026 (the evening of November 5, Pacific): "I'm in": a button on each hangout post, with the photos and names of everyone coming (his "a").
 - November 6, 2026 (the evening of November 5, Pacific): the board has three tabs, Hangouts, Announcements and Photos (his "a").
 - November 6, 2026 (the evening of November 5, Pacific): photos from a hangout show both under its post and in the Photos tab (his "a").
+- November 6, 2026 (the evening of November 5, Pacific): announcements are posted by the owner and leaders he picks, with a "Make a leader" switch on his invite page (his "b").
 - November 5, 2026: Claude's plan choices, put to the owner with the plan: its own Worker and D1 database, an email code like Living in the Word's, a push with no words in it, and saved checks with made-up people.
 
 ## Log (oldest first)
@@ -77,3 +78,8 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Decision: both, under the hangout's post and in the Photos tab. His "a."
 - Why: Claude recommended it: the photos stay with the hangout they came from, and the Photos tab still shows them all in one place.
 - Turned down: "B" (only under the post; the Photos tab only for photos posted on their own) and "C" (only in the Photos tab).
+
+### November 6, 2026, the evening of November 5, Pacific: who posts announcements (after pull request 149)
+- Decision: the owner and leaders he picks. His "b." Claude's plan: a "Make a leader" switch on his invite page (build step 3).
+- Claude had recommended "A" (only him: the simplest, and the tab stays official). Whether leaders can also remove other people's posts is a new open question, 4b.
+- Turned down: "A" (only the owner).
