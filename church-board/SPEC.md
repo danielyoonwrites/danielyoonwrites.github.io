@@ -31,7 +31,7 @@ BAND, made by Naver, has private invite-only groups, posts, photo albums and a c
 1. **Joining.** The owner invites you by email address, on a page only he can open (like Living in the Word's). The invite email has the app's link and how to sign in. You type your email address, get a 6-digit code by email, and type it in. The first time, the app asks for only two things: your name and a photo of you. The photo is shrunk on your phone before it's sent.
 2. **The board.** Three tabs (Claude's first sketch; open question 3): Hangouts, Announcements and Photos. Each post shows the person's photo and name, their words, when it was posted, and for a hangout, when and where (if they wrote it).
 3. **New post.** One screen: what you want to do ("Anyone want to grab food tonight?"), and, if you like, when, where and a photo. "Post" puts it on the board for everyone signed in.
-4. **A post's own screen.** Tap a post to see it whole, with its photos big, and the replies under it: short replies, like a forum (the owner's "a," the evening of November 5, 2026, Pacific). "I'm in" is open question 2.
+4. **A post's own screen.** Tap a post to see it whole, with its photos big, and the replies under it: short replies, like a forum (the owner's "a," the evening of November 5, 2026, Pacific). A hangout post has an "I'm in" button, with the photos and names of everyone coming (the owner's "a," the same evening).
 5. **Your own posts.** "Remove" ("Post removed. Undo" for a few seconds). The owner can remove anyone's post.
 6. **Notifications.** "Turn on notifications" (each person chooses; the owner's "A"). On Android it works in Chrome. On iPhone, only after the app is added to the Home Screen (below, "Notifications").
 7. **Me.** Your name and photo (change them), "Sign out" and "Delete my account."
@@ -96,8 +96,9 @@ BAND, made by Naver, has private invite-only groups, posts, photo albums and a c
 ## Open questions (ask one at a time)
 
 1. Replies: answered the evening of November 5, 2026, Pacific: yes, short replies under each post, like a forum (the owner's "a").
-2. "I'm in" on a hangout: a button that shows who's coming, or not.
-3. How the board is arranged: three tabs (Hangouts, Announcements, Photos), one list, or something else; and where an event's photos go (under its hangout post, in Photos, or both).
+2. "I'm in": answered the evening of November 5, 2026, Pacific: yes, a button on each hangout post, with the photos and names of everyone coming (the owner's "a").
+3. How the board is arranged: three tabs (Hangouts, Announcements, Photos), one list, or something else.
+3b. Where an event's photos go: under its hangout post, in Photos, or both (split from question 3 so each answer is one choice).
 4. Announcements: only you post them, or you and leaders you pick; and whether they stay at the top.
 5. A rule for photos with children in them (members are adults, but church events may have kids): for example, your church's photo policy, or no children's faces.
 6. Which notifications: every new post, only hangouts and announcements, or each person chooses.

@@ -13,6 +13,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 5, 2026: the church's name stays out of the public code; the folder and notes say "Church board," and the real name is saved in Cloudflare and his private Notion notes (his "A").
 - November 5, 2026: planned in the website's repository, in `church-board/`, with the usual pull requests.
 - November 6, 2026 (the evening of November 5, Pacific): replies: short replies under each post, like a forum (his "a").
+- November 6, 2026 (the evening of November 5, Pacific): "I'm in": a button on each hangout post, with the photos and names of everyone coming (his "a").
 - November 5, 2026: Claude's plan choices, put to the owner with the plan: its own Worker and D1 database, an email code like Living in the Word's, a push with no words in it, and saved checks with made-up people.
 
 ## Log (oldest first)
@@ -59,3 +60,8 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Decision: people can write short replies under each post, like a forum. His "a."
 - Why: Claude recommended it: he said people "post like a forum," and replies let a group sort out a hangout right there ("What time?").
 - Turned down: "B" (no replies for now; people work out the details in texts or KakaoTalk).
+
+### November 6, 2026, the evening of November 5, Pacific: "I'm in" (after pull request 149)
+- Decision: an "I'm in" button on each hangout post, with the photos and names of everyone coming. His "a."
+- Why: Claude recommended it: the person who posted sees at a glance who's coming, without reading every reply.
+- Turned down: "B" (no button; people reply "I'm in" under the post).
