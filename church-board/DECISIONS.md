@@ -14,6 +14,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 5, 2026: planned in the website's repository, in `church-board/`, with the usual pull requests.
 - November 6, 2026 (the evening of November 5, Pacific): replies: short replies under each post, like a forum (his "a").
 - November 6, 2026 (the evening of November 5, Pacific): "I'm in": a button on each hangout post, with the photos and names of everyone coming (his "a").
+- November 6, 2026 (the evening of November 5, Pacific): the board has three tabs, Hangouts, Announcements and Photos (his "a").
 - November 5, 2026: Claude's plan choices, put to the owner with the plan: its own Worker and D1 database, an email code like Living in the Word's, a push with no words in it, and saved checks with made-up people.
 
 ## Log (oldest first)
@@ -51,7 +52,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Its own Cloudflare Worker and D1 database, apart from the other apps, so a problem in one can't break another.
 - Signing in with an email code, like Living in the Word's, through Resend; this app's share of the 100 emails a day is open question 9.
 - Notifications: a push with no words in it, and the phone asks the server what's new, so the server needn't encrypt anything (unverified until build step 7).
-- Three tabs on the board (Hangouts, Announcements, Photos) as a first sketch (open question 3).
+- Three tabs on the board (Hangouts, Announcements, Photos) as a first sketch (open question 3; the owner chose it, below).
 - Saved checks and screenshots with made-up people and drawn pictures.
 - Claude's reading of "not social media": no likes or counts, newest first, no ads, tracking or AI, nothing public. In `SPEC.md`, "Not social media."
 - The owner can change any of these. They're in `SPEC.md`, "Tech notes."
@@ -65,3 +66,8 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Decision: an "I'm in" button on each hangout post, with the photos and names of everyone coming. His "a."
 - Why: Claude recommended it: the person who posted sees at a glance who's coming, without reading every reply.
 - Turned down: "B" (no button; people reply "I'm in" under the post).
+
+### November 6, 2026, the evening of November 5, Pacific: the board's tabs (after pull request 149)
+- Decision: three tabs, Hangouts, Announcements and Photos. His "a."
+- Why: Claude recommended it: it follows his rule of keeping pages short on a phone with tabs, so each tab stays a short list.
+- Turned down: "B" (one list with everything, newest first).
