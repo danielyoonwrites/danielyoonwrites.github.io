@@ -12,6 +12,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 5, 2026: the name he chose is a working name, decided for sure before the app goes on the Projects page (his "B").
 - November 5, 2026: the church's name stays out of the public code; the folder and notes say "Church board," and the real name is saved in Cloudflare and his private Notion notes (his "A").
 - November 5, 2026: planned in the website's repository, in `church-board/`, with the usual pull requests.
+- November 6, 2026 (the evening of November 5, Pacific): replies: short replies under each post, like a forum (his "a").
 - November 5, 2026: Claude's plan choices, put to the owner with the plan: its own Worker and D1 database, an email code like Living in the Word's, a push with no words in it, and saved checks with made-up people.
 
 ## Log (oldest first)
@@ -53,3 +54,8 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Saved checks and screenshots with made-up people and drawn pictures.
 - Claude's reading of "not social media": no likes or counts, newest first, no ads, tracking or AI, nothing public. In `SPEC.md`, "Not social media."
 - The owner can change any of these. They're in `SPEC.md`, "Tech notes."
+
+### November 6, 2026, the evening of November 5, Pacific: replies (after pull request 149)
+- Decision: people can write short replies under each post, like a forum. His "a."
+- Why: Claude recommended it: he said people "post like a forum," and replies let a group sort out a hangout right there ("What time?").
+- Turned down: "B" (no replies for now; people work out the details in texts or KakaoTalk).
