@@ -3,6 +3,8 @@
 // with its zoom at 200%. Safari isn't tested here (WebKit isn't installed in Claude's cloud
 // sessions): Dan's MacBook test is the check for Safari.
 // Build step 2 (November 2, 2026): choose a photo and see it right side up, with its size.
+// Build step 3 (November 2, 2026): the Warm natural look next to the original (section H), and
+// the looks' math in looks.js, checked in Node without a browser (section I).
 //
 // Run from the repository folder: node photo-filters/tests/app-test.mjs
 // It serves the repository on http://127.0.0.1:8767 (python3), so that port must be free.
@@ -25,6 +27,9 @@ try {
   playwright = require('/opt/node-tools/node_modules/playwright');   // where Claude's cloud sessions keep it
 }
 const { chromium } = playwright;
+
+// The looks' math, the same file the page and its background helper use
+const { LOOKS, applyLook, warmer, moreContrast, saturate, soften, boxSizes } = require('../looks.js');
 
 const PORT = 8767;
 const APP = `http://127.0.0.1:${PORT}/photo-filters/`;
@@ -83,6 +88,22 @@ async function openApp(page) {
 async function choose(page, file) {
   const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.click('#choose')]);
   await chooser.setFiles(file);
+}
+
+// Waits until the look's picture is ready and the "Making…" message is gone
+async function waitForLook(page) {
+  await page.waitForSelector('#look:not(.waiting)');
+  await page.waitForFunction(() => document.getElementById('message').hidden);
+}
+
+// The color steps of a look on one pixel (0 to 255), worked out here with looks.js
+function colorSteps(c, look) {
+  const rgb = [c.r / 255, c.g / 255, c.b / 255];
+  warmer(rgb, look.temperature);
+  moreContrast(rgb, look.contrast);
+  saturate(rgb, look.saturation);
+  const byte = (v) => Math.max(0, Math.min(255, Math.round(v * 255)));
+  return { r: byte(rgb[0]), g: byte(rgb[1]), b: byte(rgb[2]) };
 }
 
 // Waits for the photo to show, and gives back how long that took after choosing it
@@ -166,14 +187,15 @@ function withPhoneDetails(jpeg, orientation) {
 
 const asFile = (name, mimeType, buffer) => ({ name, mimeType, buffer });
 
-// The color of one spot on the photo on the screen, from 0 to 1 across and down
-async function colorAt(page, across, down) {
-  return page.evaluate(([x, y]) => {
-    const canvas = document.getElementById('preview');
+// The color of one spot on a picture on the screen, from 0 to 1 across and down
+// ('original' is the photo as it is; 'look' is the photo in the look)
+async function colorAt(page, across, down, canvasId = 'original') {
+  return page.evaluate(([x, y, id]) => {
+    const canvas = document.getElementById(id);
     const [r, g, b] = canvas.getContext('2d').getImageData(
       Math.floor(x * (canvas.width - 1)), Math.floor(y * (canvas.height - 1)), 1, 1).data;
     return { r, g, b };
-  }, [across, down]);
+  }, [across, down, canvasId]);
 }
 const isSky = (c) => c.b > c.r + 30 && c.b > c.g;          // light blue
 const isHill = (c) => c.g > c.r + 15 && c.g > c.b + 15;    // green
@@ -230,13 +252,14 @@ const browser = await chromium.launch();
   await chooseAndWait(page, asFile('tall.jpg', 'image/jpeg', tall));
   check('B1 the size is the photo as you see it: 1,000 wide and 2,000 tall',
     (await page.textContent('#size')) === '1,000 × 2,000 pixels (2.0 MP)', await page.textContent('#size'));
-  const canvasSize = await page.evaluate(() => [document.getElementById('preview').width, document.getElementById('preview').height]);
+  const canvasSize = await page.evaluate(() => [document.getElementById('original').width, document.getElementById('original').height]);
   check('B2 the copy on the screen is tall too (1000 by 2000: smaller than 1,080 wide, so not shrunk)',
     canvasSize[0] === 1000 && canvasSize[1] === 2000, JSON.stringify(canvasSize));
   const top = await colorAt(page, 0.5, 0.03);
   const bottom = await colorAt(page, 0.5, 0.97);
   check('B3 right side up: sky at the top', isSky(top), JSON.stringify(top));
   check('B3 right side up: the hill at the bottom', isHill(bottom), JSON.stringify(bottom));
+  await waitForLook(page);
   check('B4 the first words and the message are gone', await page.isHidden('#intro') && await page.isHidden('#message'));
   check('B5 the photo stayed on the device: only the page\'s own files were asked for',
     onlyOwnFiles(requests), JSON.stringify(requests.filter((r) => !r.url.startsWith(`http://127.0.0.1:${PORT}/`))));
@@ -256,13 +279,15 @@ const browser = await chromium.launch();
   const took = await chooseAndWait(page, asFile('wide.jpg', 'image/jpeg', wide));
   console.log(`  (a 12 MP photo showed ${took} ms after it was chosen, in Chromium here)`);
   check('C1 the size line', (await page.textContent('#size')) === '4,000 × 3,000 pixels (12.0 MP)', await page.textContent('#size'));
-  const canvasSize = await page.evaluate(() => [document.getElementById('preview').width, document.getElementById('preview').height]);
+  const canvasSize = await page.evaluate(() => [document.getElementById('original').width, document.getElementById('original').height]);
   check('C2 the copy on the screen is 1,080 wide', canvasSize[0] === 1080 && canvasSize[1] === 810, JSON.stringify(canvasSize));
   check('C3 it shows within 8 seconds', took < 8000, `${took} ms`);
-  const shown = await page.locator('#preview').boundingBox();
+  await waitForLook(page);
+  const shown = await page.locator('#original').boundingBox();
+  const shownLook = await page.locator('#look').boundingBox();
   const button = await page.locator('#choose').boundingBox();
-  check('C4 the photo fits the screen, above the button', shown.x >= 0 && shown.x + shown.width <= 360 && shown.y + shown.height <= button.y,
-    JSON.stringify({ shown, button }));
+  check('C4 both pictures fit the screen, above the button', shown.x >= 0 && shown.x + shown.width <= 360 && shownLook.y + shownLook.height <= button.y,
+    JSON.stringify({ shown, shownLook, button }));
   check('C4 right side up: sky at the top, the hill at the bottom', isSky(await colorAt(page, 0.5, 0.03)) && isHill(await colorAt(page, 0.5, 0.97)));
   await page.screenshot({ path: SHOTS + 'phone-3-wide-12mp.png' });
   check('C5 no page errors', errors.length === 0, errors.join('\n'));
@@ -285,6 +310,7 @@ const browser = await chromium.launch();
   check('D2 a broken JPEG: the same message', await page.isHidden('#photo'));
   await page.screenshot({ path: SHOTS + 'phone-4-cannot-open.png' });
   await chooseAndWait(page, asFile('tall.jpg', 'image/jpeg', await testPhoto(page, 1000, 2000, true)));
+  await waitForLook(page);
   check('D3 then a good photo shows, and the message goes', await page.isVisible('#photo') && await page.isHidden('#message'));
   check('D4 no page errors', errors.length === 0, errors.join('\n'));
   await context.close();
@@ -301,7 +327,8 @@ const browser = await chromium.launch();
   check('E1 "Choose photo" is at least 48 high and no wider than 480', button.height >= 48 && button.width <= 480, JSON.stringify(button));
   await page.screenshot({ path: SHOTS + 'computer-1-start.png' });
   await chooseAndWait(page, asFile('tall.jpg', 'image/jpeg', await testPhoto(page, 1000, 2000, true)));
-  const shown = await page.locator('#preview').boundingBox();
+  await waitForLook(page);
+  const shown = await page.locator('#original').boundingBox();
   const buttonNow = await page.locator('#choose').boundingBox();
   check('E2 the tall photo fits the window, above the button', shown.y >= 0 && shown.y + shown.height <= buttonNow.y, JSON.stringify({ shown, buttonNow }));
   check('E2 right side up', isSky(await colorAt(page, 0.5, 0.03)) && isHill(await colorAt(page, 0.5, 0.97)));
@@ -316,6 +343,7 @@ const browser = await chromium.launch();
   const page = await context.newPage();
   await openApp(page);
   await chooseAndWait(page, asFile('tall.jpg', 'image/jpeg', await testPhoto(page, 1000, 2000, true)));
+  await waitForLook(page);
   await page.evaluate(() => {   // show a message too, to measure it
     const message = document.getElementById('message');
     message.textContent = 'A message';
@@ -327,10 +355,10 @@ const browser = await chromium.launch();
       return { color: style.color, background: style.backgroundColor, size: parseFloat(style.fontSize) };
     };
     return { page: getComputedStyle(document.body).backgroundColor, h1: read('h1'), intro: read('#intro'),
-      size: read('#size'), message: read('#message'), button: read('#choose') };
+      size: read('#size'), message: read('#message'), button: read('#choose'), label: read('.tile figcaption') };
   });
   const pageColor = rgb(styles.page);
-  for (const name of ['h1', 'intro', 'size', 'message']) {
+  for (const name of ['h1', 'intro', 'size', 'message', 'label']) {
     const ratio = contrast(rgb(styles[name].color), pageColor);
     check(`F1 ${name}: words at least 4.5 to 1 against the page`, ratio >= 4.5, ratio.toFixed(2));
   }
@@ -338,7 +366,7 @@ const browser = await chromium.launch();
   check('F1 the button\'s words at least 4.5 to 1', buttonRatio >= 4.5, buttonRatio.toFixed(2));
   const buttonEdge = contrast(rgb(styles.button.background), pageColor);
   check('F1 the button stands out from the page, at least 3 to 1', buttonEdge >= 3, buttonEdge.toFixed(2));
-  for (const name of ['h1', 'intro', 'size', 'message', 'button']) {
+  for (const name of ['h1', 'intro', 'size', 'message', 'button', 'label']) {
     check(`F2 ${name}: words at least 13 pixels`, styles[name].size >= 13, String(styles[name].size));
   }
   await context.close();
@@ -378,9 +406,131 @@ const browser = await chromium.launch();
   await chooseAndWait(page, asFile('tall-test-photo.jpg', 'image/jpeg', photoFile));
   check('G3 in the app it shows 3,000 wide and 4,000 tall', (await page.textContent('#size')) === '3,000 × 4,000 pixels (12.0 MP)', await page.textContent('#size'));
   check('G3 right side up', isSky(await colorAt(page, 0.5, 0.03)) && isHill(await colorAt(page, 0.5, 0.97)));
+  await waitForLook(page);
   await page.screenshot({ path: SHOTS + 'computer-4-test-photo-in-app.png' });
   check('G4 no page errors', errors.length === 0, errors.join('\n'));
   await context.close();
+}
+
+// ===== H. The Warm natural look next to the original (build step 3) =====
+{
+  const context = await browser.newContext(PHONE);
+  const page = await context.newPage();
+  const errors = [];
+  const requests = [];
+  watchErrors(page, errors);
+  watchRequests(page, requests);
+  await openApp(page);
+  const started = Date.now();
+  await chooseAndWait(page, asFile('tall.jpg', 'image/jpeg', await testPhoto(page, 1000, 2000, true)));
+  await waitForLook(page);
+  const ready = Date.now() - started;
+  console.log(`  (the Warm natural look was ready ${ready} ms after a 2 MP photo was chosen; the look itself took ${await page.getAttribute('#look', 'data-took')} ms)`);
+  const labels = await page.$$eval('.tile figcaption', (all) => all.map((one) => one.textContent.trim()));
+  check('H1 the two pictures are labeled "Original" and "Warm natural"', JSON.stringify(labels) === '["Original","Warm natural"]', JSON.stringify(labels));
+  const sizes = await page.evaluate(() => ['original', 'look'].map((id) => [document.getElementById(id).width, document.getElementById(id).height]));
+  check('H2 the look\'s picture is the same size as the original\'s', JSON.stringify(sizes[0]) === JSON.stringify(sizes[1]), JSON.stringify(sizes));
+  // On a smooth part of the sky, softness barely changes anything, so the colors should match the
+  // spec's color steps, worked out here in Node with looks.js
+  const before = await colorAt(page, 0.5, 0.2, 'original');
+  const after = await colorAt(page, 0.5, 0.2, 'look');
+  const expected = colorSteps(before, LOOKS['warm-natural']);
+  const near = (a, b) => Math.abs(a - b) <= 3;
+  check('H3 the look matches the spec\'s math', near(after.r, expected.r) && near(after.g, expected.g) && near(after.b, expected.b), JSON.stringify({ before, after, expected }));
+  check('H3 warmer: more red and less blue than the original', after.r > before.r && after.b < before.b, JSON.stringify({ before, after }));
+  check('H4 the background helper did the work (worker.js and looks.js were loaded)',
+    requests.some((r) => r.url.includes('/photo-filters/worker.js')) && requests.some((r) => r.url.includes('/photo-filters/looks.js')));
+  check('H4 the photo stayed on the device', onlyOwnFiles(requests));
+  check('H5 the look is ready within 8 seconds', ready < 8000, `${ready} ms`);
+  const one = await page.locator('#original').boundingBox();
+  const two = await page.locator('#look').boundingBox();
+  const button = await page.locator('#choose').boundingBox();
+  check('H6 on a phone: the look is under the original, and both fit above the button',
+    two.y >= one.y + one.height && two.y + two.height <= button.y, JSON.stringify({ one, two, button }));
+  await page.screenshot({ path: SHOTS + 'phone-5-look-tall.png' });
+  const startedWide = Date.now();
+  await chooseAndWait(page, asFile('wide.jpg', 'image/jpeg', await testPhoto(page, 4000, 3000)));
+  await waitForLook(page);
+  console.log(`  (for a 12 MP photo, the look was ready ${Date.now() - startedWide} ms after it was chosen)`);
+  const oneWide = await page.locator('#original').boundingBox();
+  const twoWide = await page.locator('#look').boundingBox();
+  check('H6 a wide photo on a phone: both fit above the button', twoWide.y + twoWide.height <= button.y && oneWide.x + oneWide.width <= 360,
+    JSON.stringify({ oneWide, twoWide }));
+  await page.screenshot({ path: SHOTS + 'phone-6-look-wide.png' });
+  check('H7 no page errors', errors.length === 0, errors.join('\n'));
+  await context.close();
+}
+{
+  // On a computer: side by side
+  const context = await browser.newContext(COMPUTER);
+  const page = await context.newPage();
+  await openApp(page);
+  await chooseAndWait(page, asFile('tall-test-photo.jpg', 'image/jpeg', readFileSync(path.join(repository, 'photo-filters/tests/tall-test-photo.jpg'))));
+  await waitForLook(page);
+  const one = await page.locator('#original').boundingBox();
+  const two = await page.locator('#look').boundingBox();
+  check('H8 on a computer: side by side, at the same height', Math.abs(one.y - two.y) < 2 && two.x >= one.x + one.width, JSON.stringify({ one, two }));
+  await page.screenshot({ path: SHOTS + 'computer-5-look.png' });
+  await context.close();
+}
+{
+  // If the background helper can't start, the page makes the look itself
+  const context = await browser.newContext(PHONE);
+  const page = await context.newPage();
+  await page.route('**/worker.js*', (route) => route.abort());
+  await openApp(page);
+  await chooseAndWait(page, asFile('tall.jpg', 'image/jpeg', await testPhoto(page, 1000, 2000, true)));
+  await waitForLook(page);
+  const before = await colorAt(page, 0.5, 0.2, 'original');
+  const after = await colorAt(page, 0.5, 0.2, 'look');
+  check('H9 without the helper, the page makes the look itself', after.r > before.r && after.b < before.b, JSON.stringify({ before, after }));
+  await context.close();
+}
+
+// ===== I. The looks' math, in Node (no browser) =====
+{
+  const close = (a, b) => Math.abs(a - b) <= 1e-9;
+  const gray = [0.5, 0.5, 0.5];
+  warmer(gray, 0.05);
+  check('I1 temperature +0.05 on middle gray: red × 1.05, green × 1.0125, blue × 0.95', close(gray[0], 0.525) && close(gray[1], 0.50625) && close(gray[2], 0.475), JSON.stringify(gray));
+  const ramp = [0.25, 0.5, 0.75];
+  moreContrast(ramp, 0.08);
+  check('I2 contrast +0.08: (x − 0.5) × 1.08 + 0.5', close(ramp[0], 0.23) && close(ramp[1], 0.5) && close(ramp[2], 0.77), JSON.stringify(ramp));
+  const color = [0.6, 0.4, 0.2];
+  saturate(color, 1.03);
+  const L = 0.2126 * 0.6 + 0.7152 * 0.4 + 0.0722 * 0.2;
+  check('I3 saturation 1.03: x = L + (x − L) × 1.03', close(color[0], L + (0.6 - L) * 1.03) && close(color[1], L + (0.4 - L) * 1.03) && close(color[2], L + (0.2 - L) * 1.03), JSON.stringify(color));
+  const still = [0.3, 0.3, 0.3];
+  saturate(still, 1.03);
+  check('I3 saturation leaves a gray gray', close(still[0], 0.3) && close(still[1], 0.3) && close(still[2], 0.3), JSON.stringify(still));
+  for (const radius of [2.4, 8.8, 30]) {
+    const spread = Math.sqrt(boxSizes(radius).reduce((sum, w) => sum + (w * w - 1) / 12, 0));
+    check(`I4 three box blurs match a Gaussian blur of radius ${radius} (within 8%)`, Math.abs(spread - radius) / radius < 0.08, spread.toFixed(2));
+  }
+  const flat = new Uint8ClampedArray(20 * 10 * 4).fill(120);
+  soften(flat, 20, 10, 0.35, 2);
+  check('I5 softness leaves a flat picture as it was', flat.every((v) => v === 120));
+  const line = new Uint8ClampedArray(41 * 4);
+  line[80] = 255; line[81] = 255; line[82] = 255;   // one bright pixel in the middle (pixel 20)
+  soften(line, 41, 1, 1, 3);
+  const reds = Array.from({ length: 41 }, (_, x) => line[x * 4]);
+  const total = reds.reduce((sum, v) => sum + v, 0);
+  check('I5 softness spreads a bright pixel to its neighbors', reds[20] < 255 && reds[19] > 0 && reds[21] > 0 && reds[17] > 0, JSON.stringify(reds));
+  check('I5 and keeps about the same total light', Math.abs(total - 255) <= 20, String(total));
+  const look = LOOKS['warm-natural'];
+  const sheet = new Uint8ClampedArray(30 * 20 * 4).fill(128);
+  applyLook(sheet, 30, 20, look);
+  const want = colorSteps({ r: 128, g: 128, b: 128 }, look);
+  let every = true;
+  for (let p = 0; p < sheet.length; p += 4) {
+    if (Math.abs(sheet[p] - want.r) > 1 || Math.abs(sheet[p + 1] - want.g) > 1 || Math.abs(sheet[p + 2] - want.b) > 1) every = false;
+  }
+  check('I6 Warm natural on a flat gray: every pixel gets the color steps\' result', every, JSON.stringify({ got: [sheet[0], sheet[1], sheet[2]], want }));
+  const spec = readFileSync(path.join(repository, 'photo-filters/SPEC.md'), 'utf8');
+  const row = spec.split('\n').find((one) => one.startsWith('| Warm natural (iPhone-ish) |'));
+  const numbers = row ? row.split('|')[2].trim() : '(row not found)';
+  check('I7 Warm natural\'s numbers in looks.js match the table in SPEC.md',
+    numbers === `temperature +${look.temperature}, contrast +${look.contrast}, saturation ${look.saturation}, softness ${look.softness} (r ${look.softnessRadius})`, numbers);
 }
 
 await browser.close();

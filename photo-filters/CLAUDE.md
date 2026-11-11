@@ -37,5 +37,6 @@ Dan wrote the rules below in a claude.ai chat on November 2, 2026, for an app th
 - From build step 2 the page has a Content-Security-Policy near the top of `index.html`, like Idea board: it may only use its own files. Put words into the page with `textContent`, never as HTML, and no inline scripts or `style="..."` attributes.
 - The look: plain, neutral dark gray around the photos, so the background doesn't change how their colors look, and the device's own fonts (Claude's choice in the plan; Dan can change it after seeing it). Details in `SPEC.md`, "The look of the app."
 - Claude's checks run in Chromium only (WebKit isn't installed in the cloud sessions). Safari is checked in the docs first and settled by Dan's MacBook tests; say which is which.
-- Run the saved checks after any change to `app.js` or the page, and add checks for new work: `node photo-filters/tests/app-test.mjs` from the repository folder (it must end "0 failed"). The test photos are made up; never use Dan's.
+- The looks' math lives only in `looks.js`, in the spec's order: the background helper (`worker.js`) uses it, the page uses it if the helper can't start, and the saved checks use it. When `looks.js` changes, raise its `?v=` number in both `index.html` and `worker.js`.
+- Run the saved checks after any change to `app.js`, `looks.js` or the page, and add checks for new work: `node photo-filters/tests/app-test.mjs` from the repository folder (it must end "0 failed"). The test photos are made up; never use Dan's.
 - Raise the `?v=` number on file links whenever a file changes.

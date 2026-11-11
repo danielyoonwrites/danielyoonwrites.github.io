@@ -15,6 +15,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - November 2, 2026: plain HTML, CSS and JavaScript with no build tools; `PROGRESS.md` and `DECISIONS.md` instead of NOTES.md; each step pushed to Claude's work branch as a pull request; hosting on GitHub Pages (Dan's "ok" on the plan).
 - November 2, 2026: a neutral dark gray look with the device's own fonts; the looks worked out in plain JavaScript in a Web Worker (WebGL2 only if that's too slow); a Content-Security-Policy and `noindex`, like Idea board (Claude's choices in the plan, OK'd with it).
 - November 2, 2026: build step 2's screen: "Choose photo" in a bar at the bottom; the photo right side up, about 1,080 pixels wide, with its size in pixels and megapixels; a plain message for a file the browser can't open; a page with a made-up tall test photo for the MacBook (Claude's choices, shown to Dan in screenshots with pull request 117).
+- November 2, 2026: build step 3: the Warm natural look next to the original, one above the other on a phone and side by side on a computer; worked out in a background helper (the page does it itself if the helper can't start); the softness blur's radius is its standard deviation, made with three quick box blurs (Claude's choices, shown to Dan in screenshots with pull request 118).
 
 ## Log (oldest first)
 
@@ -64,3 +65,15 @@ Every decision below that still holds, one line each; it's rewritten at each han
   - A made-up tall test photo (`tests/tall-test-photo.jpg`: 3,000 by 4,000 as you see it, saved turned with rotation tag 6, and a made-up location, 30 degrees north and 140 degrees west, open ocean) on its own page, `tests/test-photos.html`, so the Safari check doesn't depend on having a phone photo on the MacBook. It came earlier than planned: the plan had a test picture arriving with Export (step 4), which will use it too.
   - The saved checks start with this step instead of step 3.
 - Why: the plan's step 2, and Dan's rules: "Phone first," "Show me side-by-side previews," and "Check, don't guess."
+
+### November 2, 2026: build step 3, Warm natural next to the original (pull request 118)
+- Decision (Claude's choices, shown to Dan in screenshots with pull request 118; he can change any of them):
+  - The two pictures are labeled "Original" and "Warm natural." On a phone they're one above the other; on a screen at least 700 pixels wide (a computer), side by side. On a phone 360 pixels wide, each picture of a wide photo shows about 328 pixels wide when they're one above the other, but only about 160 side by side; a tall photo also comes out a little bigger one above the other.
+  - The look is worked out on the screen's smaller copy (about 1,080 pixels wide) by a background helper (`worker.js`), so the screen doesn't freeze. If the helper can't start, the page does the same work itself. "Making the Warm natural look…" shows while it works, and the look's picture is an empty gray box until it's ready.
+  - Only Warm natural's steps are built (temperature, contrast, saturation, softness), in the spec's order; the others come with the other looks in Milestone 2.
+  - The softness blur's "radius" (the spec: "r × image width") is taken as the blur's standard deviation, because that's what the word means in Pillow's GaussianBlur and in CSS's blur() (both opened November 2, 2026; `SPEC.md`, "Checked so far"). The spec doesn't say which it means, and its numbers were tuned by eye, so Dan's eye decides in the end.
+  - The Gaussian blur is made with three quick box blurs in a row, as Pillow's GaussianBlur does ("a sequence of extended box filters"); the saved checks show the three add up to within 8% of the Gaussian's spread.
+  - The page's safety rule allows its own background helper: `worker-src 'self'` and `child-src 'self'` (Safari before 15.5 reads `child-src`; MDN's browser data, November 2, 2026).
+- Measured in Chromium on Claude's cloud computer (not a phone): the look took about 0.4 seconds on a 1,000 by 2,000 copy, and a 12 MP photo's look was ready about 1.2 seconds after choosing it.
+- Why: the plan's step 3, and Dan's rules: "Show me side-by-side previews" and "Phone first."
+- Turned down: WebGL2 for now (harder to read and change by hand; the plan keeps it for when plain JavaScript is too slow).
