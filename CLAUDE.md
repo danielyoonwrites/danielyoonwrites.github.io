@@ -1,7 +1,7 @@
 # Daniel Yoon personal site
 
 A personal website for Daniel Yoon, hosted free on GitHub Pages.
-Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and edits the files by hand.
+The website's own pages are plain HTML and CSS, with JavaScript where it helps. The owner is new to coding and never edits the code by hand (his answer, November 24, 2026): Claude writes and maintains it, and explains each change in plain words.
 
 ## Start here
 
@@ -67,7 +67,7 @@ When Dan says "do the rest," Claude works through the build plan one pull reques
 - Explain every change in plain words a beginner can follow: what changed, why, and how to check it.
 - One small change per pull request.
 - Tools are allowed (Dan's decision, November 24, 2026: "If it is safe and ok to use tools and frameworks and npm, use it"; root `DECISIONS.md`). Use npm, a framework or a build step when it makes an app better or quicker to build, and say in plain words what was used and why. Two things to plan for: GitHub Pages publishes files exactly as they are, so an app that needs a build step or its own server is hosted where that can run (Vercel or Cloudflare, for example) or gets a build step in the publish workflow; and the apps already built as plain files stay that way unless Dan asks to change one. Cloudflare deploys Living in the Word's server with its tool Wrangler on every merge (`living-in-the-word/server/wrangler.jsonc`), and the video editor's captions server the same way once Dan connects it (`video-editor/server/wrangler.jsonc`, build step 7a, November 4, 2026; the captions are off for now, so it isn't connected or deployed).
-- Keep the code simple and commented so the owner can edit it later.
+- Keep the code clear and commented so the next session can pick it up. Dan never edits code by hand (November 24, 2026), so nothing has to be kept hand-editable.
 - Every page must look good on a phone first, then on a computer.
 
 ## Projects in this repository

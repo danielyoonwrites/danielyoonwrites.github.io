@@ -8,6 +8,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 
 **The website**
 - October 24, 2026: the website's own pages are plain HTML and CSS on GitHub Pages, with JavaScript where it helps.
+- November 24, 2026: Dan never edits the code by hand; Claude writes and maintains it and explains each change in plain words.
 - November 24, 2026: tools are allowed: npm, frameworks and build steps where they help (Dan's decision). This replaces "no build tools" (October 24, 2026; kept November 2, 2026). The apps already built as plain files stay that way unless Dan asks.
 - October 24, 2026: phone first; short pages, with tabs and fold-outs instead of long lists.
 - October 24, 2026: the "Moon jar" design: its five colors, Libre Baskerville never bold, left-aligned, square corners, no logo, sentence case.
@@ -193,3 +194,9 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Is it safe: yes. What changes in practice: (1) GitHub Pages only publishes files as they are, so an app with a build step or a server of its own needs a host that runs it (Vercel or Cloudflare, for example) or a build step in the publish workflow; (2) an app's packages need an update now and then; (3) the files on GitHub may no longer be exactly the files that run on the phone.
 - Replaces: "No build tools: no npm, no frameworks, no generators" (October 24, 2026) and "no build tools, kept after Dan asked whether the rule helps" (November 2, 2026).
 - Not decided here: whether Photo Filters, the church board or the family activity finder change how they're built. Ask Dan when each is picked up.
+
+### November 24, 2026: Dan doesn't edit the code by hand
+- Decision: the notes no longer assume the owner edits files by hand. Claude writes and maintains the code and explains each change in plain words; the code stays clear and commented so the next session can pick it up.
+- Why: asked "Do you ever edit the code files by hand yourself?", Dan answered "No, never" (November 24, 2026). That assumption was the reason given for the first decision (October 24, 2026, above) and for keeping "no build tools" on November 2, 2026.
+- Replaces: the reason "the owner is a beginner and edits the files by hand; the code stays simple and commented so the owner can edit it later" (October 24, 2026).
+- Not changed here: `photo-filters/CLAUDE.md` still says "plain HTML, CSS and JavaScript that Dan can open and edit by hand." Photo Filters has its own open pull request, so that line is left for its next session, with the question of how it's built.
