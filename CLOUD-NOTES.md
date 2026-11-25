@@ -1,6 +1,6 @@
-# Cloud notes: Notion prompts, and the limits of Claude's cloud sessions
+# Cloud notes: how the work flows, Notion prompts, and the limits of Claude's cloud sessions
 
-Moved from `HANDOFF.md` on October 28, 2026. Read this before working around a blocked site, testing a live page, or fixing Notion prompts.
+Moved from `HANDOFF.md` on October 28, 2026. Read this before opening a pull request, working around a blocked site, testing a live page, or fixing Notion prompts.
 
 
 ## Notion approval prompts
@@ -57,3 +57,35 @@ Moved from `HANDOFF.md` on October 28, 2026. Read this before working around a b
 - **Rewriting a pushed commit (November 2, 2026):** `git commit --amend` and then a force-push is refused in Auto mode as destructive. Fix things with a new commit, or a merge, instead.
 - **Testing photos (November 2, 2026):** Playwright adds a photo through the file chooser (`page.waitForEvent('filechooser')`, then `setFiles` with a Buffer). The test photos are drawn on a canvas in the page, and `withPhoneDetails()` in `idea-board/tests/app-test.mjs` adds the part a phone's camera writes ("Exif"), with a made-up location and a quarter turn. What Chrome on Android shows for a photo request (photo picker, camera) was read in Chromium's source on raw.githubusercontent.com: `chromium/chromium/main/ui/android/java/src/org/chromium/ui/base/SelectFileDialog.java`.
 - **Accessibility and research (November 2, 2026):** W3C's WCAG rules can be read as their source files on GitHub (raw.githubusercontent.com/w3c/wcag/main/guidelines/sc/..., for example `20/contrast-minimum.html`), since w3.org is blocked. support.apple.com, www.samsung.com and www.sammyfans.com were blocked. axe-core (Deque's accessibility checker) can be installed with npm in a scratch folder (never in the repository) and run in the test browser: `idea-board/tests/axe-check.mjs`. The Canva connector's help tool answers from Canva's Help Center (official); it can't make whiteboards.
+
+
+## How the work flows
+
+Moved from `CLAUDE.md` on November 24, 2026, word for word, so that `CLAUDE.md` stays short (Dan's "A"; root `DECISIONS.md`). `CLAUDE.md` keeps a three-line version. One rule changed the same day: a pull request now covers one finished piece of work, not one small change.
+
+1. Claude works on the branch it's given (each session gets its own; the second session used `ccr-4cf7b8b6-sypqs8`, the third `ccr-c34f8c4c-6bmdd8`) and restarts it from `main` after each merge: `git fetch origin main && git checkout -B <branch> FETCH_HEAD`.
+2. Claude opens a pull request with a plain-words description and a "How to check it" list.
+   Right after opening it, Claude subscribes to the pull request's activity (`subscribe_pr_activity`), so the merge wakes the session. Dan should never have to say "it merged." Claude also sets one backup check-in about 50 minutes later (`send_later`), and cancels it when the merge arrives.
+3. Dan reviews and merges on GitHub (Conversation tab, Merge pull request, Confirm merge).
+4. GitHub Actions publishes the site (workflow `.github/workflows/publish.yml`; GitHub Pages source is set to "GitHub Actions"). It takes a minute or two; check for a green mark next to **main** at https://github.com/danielyoonwrites/danielyoonwrites.github.io/actions
+   Every merge also deploys Living in the Word's server: Cloudflare builds it (Workers Builds; its build watch paths are left at `*`, so it runs on every merge) and shows its own check next to the merge, so Dan no longer pastes `worker.js` into Cloudflare. If Dan connects it (video editor build step 7a; the captions are off for now, so it isn't connected), the video editor's captions server will deploy the same way, with its own check (likely "Workers Builds: video-editor-captions").
+5. Dan checks on his phone.
+6. When the merge wakes the session, Claude does the follow-up on its own: checks that the publish run on main succeeded, restarts the branch from main, updates the project's page in Dan's Master Notes (Notion), then tells Dan in one short message. Auto mode only skips permission prompts; it doesn't let Claude see GitHub between messages, and each new session has to subscribe again.
+
+Only one pull request at a time from the branch: wait for a merge before starting the next one, or the new work lands in the open pull request.
+
+Two or more sessions can work in this repository at the same time, on different projects (November 2, 2026: Idea board, the video editor and Photo Filters). Pull request numbers then jump, so write a number into the notes only after GitHub gives it. When shared notes clash (`HANDOFF.md`, `CHANGELOG.md`), merge main into the branch and keep both projects' lines. Never rewrite history that's already pushed. Before opening a pull request while another session's is open, try merging the two branches in a scratch copy (`git worktree add`, then `git merge --no-commit`): git counts changes on neighboring lines as a clash, so put your note lines where they don't touch the other session's (a changelog entry can start its own line), and then either can merge first (November 3, 2026).
+
+When Dan says "do the rest," Claude works through the build plan one pull request at a time, starting the next one as soon as the last merges.
+
+Cloudflare deploys Living in the Word's server with its tool Wrangler on every merge (`living-in-the-word/server/wrangler.jsonc`), and the video editor's captions server the same way once Dan connects it (`video-editor/server/wrangler.jsonc`, build step 7a, November 4, 2026; the captions are off for now, so it isn't connected or deployed).
+
+
+## Dates, comparing branches, and what a long session costs
+
+Moved from `CLAUDE.md` ("Handoffs and decisions") on November 24, 2026, word for word.
+
+- Dates in the notes are the session's date, and the session's clock runs on UTC: from 4 p.m. Pacific (5 p.m. in summer) it already shows the next day, so Dan's evening can read as tomorrow (his evening of November 3, 2026 shows as November 4). When the day matters, say "the evening of [date], Pacific."
+- `/pickup` in this repository runs `.claude/skills/pickup/SKILL.md` (a project skill, since October 31, 2026), not the copy on Dan's claude.ai account: change the wording there, in a pull request. `/handoff` is still the one on his account.
+- To compare a branch with main, list the changed files first (`git diff --stat`), then read only the parts needed: CHANGELOG.md's pull request list is a few very long lines.
+- Every request sends the whole conversation again, and so do check-ins and pull request wake-ups (Claude Code's docs, checked October 28, 2026). So a fresh session costs less than a long one, and long files like an app's SPEC.md are read only in the parts the task needs.

@@ -27,6 +27,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 **The notes and handoffs**
 - October 24 and 28, 2026: `HANDOFF.md` is a short index read at the start of each session; each app has a `PROGRESS.md` and a `DECISIONS.md`; history is in `CHANGELOG.md`.
 - October 28, 2026: the website's rules live in `.claude/rules/`, loaded only for the files they name.
+- November 24, 2026: `CLAUDE.md` keeps who Dan is, how he likes to work, the rules, the projects and privacy; the mechanics of cloud sessions live in `CLOUD-NOTES.md`, with a three-line version left in `CLAUDE.md` (Dan's "A").
 - October 31, 2026: leaner pickups: each fact keeps one home, nothing deleted; `CLAUDE.md` has "Compact instructions."
 - October 31, 2026: `/pickup` runs the project skill in `.claude/skills/pickup/`, which reads the 3 newest decision entries in full.
 - October 31, 2026: every pattern in the rules' `paths` starts with `/` (the top of the repository): the website's rules load only for its own files, the Moon jar design also for the three apps with that look, and neither for Living in the Word.
@@ -208,3 +209,9 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - Turned down: "B", keeping one small change per pull request (each change is easier to undo on its own, but he merges far more often).
 - Replaces: "One small change per pull request" (in `CLAUDE.md` since October 2026; it had no entry of its own in this file).
 - Not changed here: `photo-filters/CLAUDE.md` still says "one small change per pull request"; that file is left for Photo Filters' next session.
+
+### November 24, 2026: a shorter `CLAUDE.md`; the mechanics of cloud sessions move to `CLOUD-NOTES.md`
+- Decision: `CLAUDE.md` keeps who Dan is, how he likes to work, the rules, the list of projects and privacy. Moved to `CLOUD-NOTES.md`, word for word: "How the work flows" (every step, and working beside other sessions), the note that the session clock runs on UTC, where `/pickup` runs from, how to compare a branch with main, and what a long session costs. `CLAUDE.md` keeps a three-line version of the flow and says to read `CLOUD-NOTES.md` before opening a pull request. It went from about 2,200 words to about 1,600.
+- Why: Dan chose "A" (November 24, 2026) when asked whether to shorten `CLAUDE.md` this way. Claude's reason for suggesting it: every session reads all of `CLAUDE.md`, and the parts about Dan are easier to follow when they aren't mixed in with mechanics.
+- Turned down: "B", leaving it as it was (nothing could get lost in a move, but every session keeps reading all of it).
+- Revisit if: a session opens a pull request without watching for the merge, or Dan has to say "it merged." Then the flow goes back into `CLAUDE.md`.
