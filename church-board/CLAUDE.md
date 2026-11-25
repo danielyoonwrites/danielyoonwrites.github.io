@@ -6,7 +6,7 @@ A little app for the owner's church group, planned November 5, 2026: a private b
 
 ## Rules for working here
 
-- Same rules as the website's `CLAUDE.md`: plain words for a beginner, one small change per pull request with a check the owner does, no build tools, phone first, screenshots before every pull request.
+- Same rules as the website's `CLAUDE.md`: plain words for a beginner, one finished piece of work per pull request with a check the owner does, phone first, screenshots before every pull request.
 - Only the owner's church group, invite only, and he approves each person (his "A," November 5, 2026). Adults only, 18 and up (his "A," the same day).
 - "Social purposes ... but not social media" (the owner's words): no likes or counts, newest first, no ads, tracking or AI, nothing public (Claude's reading, in `SPEC.md`, "Not social media").
 - Privacy: the repository and the website are public. Never put the app's real name, the church's name, any member's name, face or email address, or a key in this folder, in a commit message, in a pull request, in a screenshot or in test data. The real name is saved in Cloudflare as the secret `BOARD_NAME` and in the owner's private Notion notes ("Church board app (Nov 2026)," under Master Notes). Saved checks and screenshots use made-up people and drawn pictures, never real photos.

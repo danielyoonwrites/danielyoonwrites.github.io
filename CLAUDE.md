@@ -1,12 +1,12 @@
 # Daniel Yoon personal site
 
 A personal website for Daniel Yoon, hosted free on GitHub Pages.
-Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and edits the files by hand.
+The website's own pages are plain HTML and CSS, with JavaScript where it helps. The owner is new to coding and never edits the code by hand (his answer, November 24, 2026): Claude writes and maintains it, and explains each change in plain words.
 
 ## Start here
 
 - At the start of a new session, read `HANDOFF.md`: where each project stands and what's waiting on Dan. How Dan likes to work is below, in "Working with Dan."
-- Before working around a blocked site, testing a live page, or fixing Notion prompts, read `CLOUD-NOTES.md`.
+- Before opening a pull request, working around a blocked site, testing a live page, or fixing Notion prompts, read `CLOUD-NOTES.md`.
 - The website's own rules (its pages, publishing and Latest posts, the words already chosen, and its links) are in `.claude/rules/website.md`, and the "Moon jar" design is in `.claude/rules/moon-jar.md`. Claude Code loads them by itself when working on the files they name at the top: the website's pages, and for the design also Fewer spam calls, First step smaller and Quiet room.
 
 ## Working with Dan
@@ -14,7 +14,7 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
 ### Who you're working with
 
 - The owner is Daniel Yoon (writes as "Dan"): a writer and pastor in Southern California, Korean American, new to coding. He's building a series of small apps with AI, each a step harder than the last, and he makes the design decisions: what to build, what to leave out, and why.
-- He learns by doing: explain every change in plain words, one small change per pull request, and give him a check he can do himself before merging.
+- He learns by doing: explain every change in plain words, one finished piece of work per pull request, and give him a check he can do himself before merging.
 - How he likes instructions:
   - Numbered steps, with the full link inside each step (never "the link above") and the exact button or tab to click.
   - Every answer stands on its own (Dan's rule, October 26, 2026, after Claude said "the steps are two messages up"): repeat every step, link, name and value in full each time, even if it was given before. Never "see above" or "as before."
@@ -33,41 +33,28 @@ Plain HTML and CSS, with JavaScript where it helps. The owner is a beginner and 
 
 ### How the work flows
 
-1. Claude works on the branch it's given (each session gets its own; the second session used `ccr-4cf7b8b6-sypqs8`, the third `ccr-c34f8c4c-6bmdd8`) and restarts it from `main` after each merge: `git fetch origin main && git checkout -B <branch> FETCH_HEAD`.
-2. Claude opens a pull request with a plain-words description and a "How to check it" list.
-   Right after opening it, Claude subscribes to the pull request's activity (`subscribe_pr_activity`), so the merge wakes the session. Dan should never have to say "it merged." Claude also sets one backup check-in about 50 minutes later (`send_later`), and cancels it when the merge arrives.
-3. Dan reviews and merges on GitHub (Conversation tab, Merge pull request, Confirm merge).
-4. GitHub Actions publishes the site (workflow `.github/workflows/publish.yml`; GitHub Pages source is set to "GitHub Actions"). It takes a minute or two; check for a green mark next to **main** at https://github.com/danielyoonwrites/danielyoonwrites.github.io/actions
-   Every merge also deploys Living in the Word's server: Cloudflare builds it (Workers Builds; its build watch paths are left at `*`, so it runs on every merge) and shows its own check next to the merge, so Dan no longer pastes `worker.js` into Cloudflare. If Dan connects it (video editor build step 7a; the captions are off for now, so it isn't connected), the video editor's captions server will deploy the same way, with its own check (likely "Workers Builds: video-editor-captions").
-5. Dan checks on his phone.
-6. When the merge wakes the session, Claude does the follow-up on its own: checks that the publish run on main succeeded, restarts the branch from main, updates the project's page in Dan's Master Notes (Notion), then tells Dan in one short message. Auto mode only skips permission prompts; it doesn't let Claude see GitHub between messages, and each new session has to subscribe again.
+The short version. Every step, and how to work beside other sessions, is in `CLOUD-NOTES.md` ("How the work flows"): read it before opening a pull request.
 
-Only one pull request at a time from the branch: wait for a merge before starting the next one, or the new work lands in the open pull request.
-
-Two or more sessions can work in this repository at the same time, on different projects (November 2, 2026: Idea board, the video editor and Photo Filters). Pull request numbers then jump, so write a number into the notes only after GitHub gives it. When shared notes clash (`HANDOFF.md`, `CHANGELOG.md`), merge main into the branch and keep both projects' lines. Never rewrite history that's already pushed. Before opening a pull request while another session's is open, try merging the two branches in a scratch copy (`git worktree add`, then `git merge --no-commit`): git counts changes on neighboring lines as a clash, so put your note lines where they don't touch the other session's (a changelog entry can start its own line), and then either can merge first (November 3, 2026).
-
-When Dan says "do the rest," Claude works through the build plan one pull request at a time, starting the next one as soon as the last merges.
+- Claude works on its own branch and opens one pull request per finished piece of work, with a plain-words description and a "How to check it" list.
+- Dan reviews and merges on GitHub, and the site publishes by itself a minute or two later.
+- Claude watches the pull request so the merge wakes the session: Dan should never have to say "it merged." Claude then does the follow-up on its own and tells him in one short message.
 
 
 ## Handoffs and decisions
 
-- Dates in the notes are the session's date, and the session's clock runs on UTC: from 4 p.m. Pacific (5 p.m. in summer) it already shows the next day, so Dan's evening can read as tomorrow (his evening of November 3, 2026 shows as November 4). When the day matters, say "the evening of [date], Pacific."
 - HANDOFF.md is a short index: where each project stands, what's waiting on Dan, and how to start the next session. Keep it under about 80 lines. It points to each app's PROGRESS.md for what's waiting there instead of copying it, and each session's summary goes to CHANGELOG.md ("Session summaries"), not HANDOFF.md.
 - Each app folder has PROGRESS.md (where it stands and the next step; rewritten, under about 100 lines) and DECISIONS.md (each decision with its reason, in Dan's words when he gave them, and what was turned down; only added to). Website decisions go in the root DECISIONS.md.
 - Every pull request updates its project's PROGRESS.md and adds any new decisions to DECISIONS.md, so nothing depends on the chat.
 - Before changing something a past decision settled, check DECISIONS.md and ask Dan.
 - When Dan switches projects or says he's stepping away, or after about five merged pull requests in one session, suggest /handoff, then /clear and /pickup [project].
 - The full pull request history is in CHANGELOG.md and on GitHub. Read it only when needed.
-- `/pickup` in this repository runs `.claude/skills/pickup/SKILL.md` (a project skill, since October 31, 2026), not the copy on Dan's claude.ai account: change the wording there, in a pull request. `/handoff` is still the one on his account.
-- To compare a branch with main, list the changed files first (`git diff --stat`), then read only the parts needed: CHANGELOG.md's pull request list is a few very long lines.
-- Every request sends the whole conversation again, and so do check-ins and pull request wake-ups (Claude Code's docs, checked October 28, 2026). So a fresh session costs less than a long one, and long files like an app's SPEC.md are read only in the parts the task needs.
 
 ## Rules for working here
 
 - Explain every change in plain words a beginner can follow: what changed, why, and how to check it.
-- One small change per pull request.
-- No build tools: no npm, no frameworks, no generators. One exception (Dan chose it, October 29, 2026): Cloudflare runs its own deploy tool, Wrangler, on its computers to deploy Living in the Word's server (`living-in-the-word/server/wrangler.jsonc`), and the video editor's captions server the same way once Dan connects it (`video-editor/server/wrangler.jsonc`, build step 7a, November 4, 2026; the captions are off for now, so it isn't connected or deployed). Nothing runs on Dan's computer, and the code stays plain files.
-- Keep the code simple and commented so the owner can edit it later.
+- One finished piece of work per pull request, with its notes inside it (Dan's "A", November 24, 2026). A finished piece is something he can check on his phone, or one complete change to the notes. Don't split it into small pull requests that each wait for his merge, and don't open a separate pull request just for notes.
+- Tools are allowed (Dan's decision, November 24, 2026: "If it is safe and ok to use tools and frameworks and npm, use it"; root `DECISIONS.md`). Use npm, a framework or a build step when it makes an app better or quicker to build, and say in plain words what was used and why. Two things to plan for: GitHub Pages publishes files exactly as they are, so an app that needs a build step or its own server is hosted where that can run (Vercel or Cloudflare, for example) or gets a build step in the publish workflow; and the apps already built as plain files stay that way unless Dan asks to change one.
+- Keep the code clear and commented so the next session can pick it up. Dan never edits code by hand (November 24, 2026), so nothing has to be kept hand-editable.
 - Every page must look good on a phone first, then on a computer.
 
 ## Projects in this repository

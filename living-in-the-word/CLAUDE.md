@@ -4,7 +4,7 @@ A little app that turns a Bible passage into discussion questions for a small gr
 
 ## Rules for working here
 
-- Same rules as the website's `CLAUDE.md`: plain words for a beginner, one small change per pull request with a check the owner does, no build tools, phone first.
+- Same rules as the website's `CLAUDE.md`: plain words for a beginner, one finished piece of work per pull request with a check the owner does, phone first.
 - The app has its own look, "Paper and ink" (the owner's choice, October 26, 2026): clean like Kinfolk magazine, not the website's Moon jar design. Colors, fonts and layout are in `SPEC.md` ("The look") and at the top of `style.css`.
 - The owner is a pastor and reviews every question before it's shared. Never share anything automatically.
 - Be careful with Scripture: never invent a quote. The ESV text is on hold (no key; the owner may make the app paid someday, see `SPEC.md`). If it's turned on (`ESV_TEXT` in `app.js`, and the `ESV_API_KEY` secret in Cloudflare), the app shows the ESV text from Crossway's ESV API, under Crossway's rules (`SPEC.md`, "The Bible text"): no more than 500 verses or half a book at a time, never stored, never changed, always with "(ESV)", the copyright notice and a link to esv.org. The AI is never sent the ESV text. Before adding any other translation, check its usage rules.

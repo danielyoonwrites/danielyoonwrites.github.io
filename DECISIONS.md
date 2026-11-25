@@ -7,7 +7,10 @@ Each decision about the website with its reason, oldest first. Each app keeps it
 Every decision below that still holds, one line each; it's rewritten at each handoff. The log under it has each one with its reason, and is only added to.
 
 **The website**
-- October 24, 2026: plain HTML and CSS on GitHub Pages, edited by hand; no build tools (one exception since October 29: Cloudflare's Wrangler deploys Living in the Word's server); JavaScript where it helps. Kept November 2, 2026, after Dan asked whether it helps.
+- October 24, 2026: the website's own pages are plain HTML and CSS on GitHub Pages, with JavaScript where it helps.
+- November 24, 2026: Dan never edits the code by hand; Claude writes and maintains it and explains each change in plain words.
+- November 24, 2026: one finished piece of work per pull request, with its notes inside it (Dan's "A"); this replaces "one small change per pull request."
+- November 24, 2026: tools are allowed: npm, frameworks and build steps where they help (Dan's decision). This replaces "no build tools" (October 24, 2026; kept November 2, 2026). The apps already built as plain files stay that way unless Dan asks.
 - October 24, 2026: phone first; short pages, with tabs and fold-outs instead of long lists.
 - October 24, 2026: the "Moon jar" design: its five colors, Libre Baskerville never bold, left-aligned, square corners, no logo, sentence case.
 - October 24, 2026: never show the kids' faces, names or schools.
@@ -24,6 +27,7 @@ Every decision below that still holds, one line each; it's rewritten at each han
 **The notes and handoffs**
 - October 24 and 28, 2026: `HANDOFF.md` is a short index read at the start of each session; each app has a `PROGRESS.md` and a `DECISIONS.md`; history is in `CHANGELOG.md`.
 - October 28, 2026: the website's rules live in `.claude/rules/`, loaded only for the files they name.
+- November 24, 2026: `CLAUDE.md` keeps who Dan is, how he likes to work, the rules, the projects and privacy; the mechanics of cloud sessions live in `CLOUD-NOTES.md`, with a three-line version left in `CLAUDE.md` (Dan's "A").
 - October 31, 2026: leaner pickups: each fact keeps one home, nothing deleted; `CLAUDE.md` has "Compact instructions."
 - October 31, 2026: `/pickup` runs the project skill in `.claude/skills/pickup/`, which reads the 3 newest decision entries in full.
 - October 31, 2026: every pattern in the rules' `paths` starts with `/` (the top of the repository): the website's rules load only for its own files, the Moon jar design also for the three apps with that look, and neither for Living in the Word.
@@ -185,3 +189,29 @@ Every decision below that still holds, one line each; it's rewritten at each han
 - How the words were chosen (Claude's, put to Dan with the pull request and its screenshots): confident, but every claim true and taken from each project's own notes (for example "a step harder" and "New skill: a small server, so the AI key stays secret" in the video editor's and Living in the Word's specs). "What I set out to learn" fits both "what I was trying to learn" and "try differently." Every line shows whole on a phone 320 pixels wide, with the site's own fonts (the video editor's first wording, "A phone video editor with ...," ran to 4 lines there and was shortened). The learning line uses the small gray style the video editor's iPhone line already used (`post-date`), so `style.css` didn't change. The "How I built it" notes keep their words.
 - Turned down: the first draft's introduction, "Web apps I design and ship with AI as my engineering partner. I make every product decision, and each one takes on something I hadn’t built before." (Dan: "sounds too fake"), and its page summary ("designs and ships"); claims the projects can't back up (like "used by my small group": Living in the Word's group isn't signed in yet); a new style for the learning line (it would change `style.css` and every page's `?v=`).
 - Replaces: "Quiet room is listed as in progress with no link" (October 24, 2026), and, for the Projects page only, the Substack's voice (October 24, 2026). Revisit if: Quiet room works again (it goes back with no link), or a project's abilities change (update its line, its learning line and its note together).
+
+### November 24, 2026: tools are allowed; "no build tools" is removed
+- Decision: npm, frameworks and build steps may be used when they make an app better or quicker to build. Claude says in plain words what was used and why. The apps already built as plain files stay as they are unless Dan asks to change one, and their own `SPEC.md` and `DECISIONS.md` files still describe how each was built.
+- Why: Dan, November 24, 2026: "get rid of those website rules about no build tools no frameworks, i dont even know why that's even in there. If it is safe and ok to use tools and frameworks and npm, use it." It came up when a new app, a shared Bible commentary for his church, was built with npm and the framework Next.js in a session that hadn't yet read this repository's rules. The rule had been in his way before: on November 2, 2026 he asked "why is there a no npm rule? Does that help in any way? If not then use npm" (above), and his own plan for Photo Filters suggested the tools Vite and TypeScript (`photo-filters/CLAUDE.md`). The rule's first reason (October 24, 2026) was that he "edits the files by hand."
+- Is it safe: yes. What changes in practice: (1) GitHub Pages only publishes files as they are, so an app with a build step or a server of its own needs a host that runs it (Vercel or Cloudflare, for example) or a build step in the publish workflow; (2) an app's packages need an update now and then; (3) the files on GitHub may no longer be exactly the files that run on the phone.
+- Replaces: "No build tools: no npm, no frameworks, no generators" (October 24, 2026) and "no build tools, kept after Dan asked whether the rule helps" (November 2, 2026).
+- Not decided here: whether Photo Filters, the church board or the family activity finder change how they're built. Ask Dan when each is picked up.
+
+### November 24, 2026: Dan doesn't edit the code by hand
+- Decision: the notes no longer assume the owner edits files by hand. Claude writes and maintains the code and explains each change in plain words; the code stays clear and commented so the next session can pick it up.
+- Why: asked "Do you ever edit the code files by hand yourself?", Dan answered "No, never" (November 24, 2026). That assumption was the reason given for the first decision (October 24, 2026, above) and for keeping "no build tools" on November 2, 2026.
+- Replaces: the reason "the owner is a beginner and edits the files by hand; the code stays simple and commented so the owner can edit it later" (October 24, 2026).
+- Not changed here: `photo-filters/CLAUDE.md` still says "plain HTML, CSS and JavaScript that Dan can open and edit by hand." Photo Filters has its own open pull request, so that line is left for its next session, with the question of how it's built.
+
+### November 24, 2026: one finished piece of work per pull request
+- Decision: a pull request covers one finished piece of work, with its notes inside it. A finished piece is something Dan can check on his phone, or one complete change to the notes. No separate pull requests just for notes.
+- Why: Dan chose "A" (November 24, 2026) when asked whether a pull request should cover one finished piece of work instead of one small change. Claude's reason for suggesting it: with one small change per pull request, every small step waited on him to merge it, and some pull requests held only notes. He still reviews and merges each one.
+- Turned down: "B", keeping one small change per pull request (each change is easier to undo on its own, but he merges far more often).
+- Replaces: "One small change per pull request" (in `CLAUDE.md` since October 2026; it had no entry of its own in this file).
+- Not changed here: `photo-filters/CLAUDE.md` still says "one small change per pull request"; that file is left for Photo Filters' next session.
+
+### November 24, 2026: a shorter `CLAUDE.md`; the mechanics of cloud sessions move to `CLOUD-NOTES.md`
+- Decision: `CLAUDE.md` keeps who Dan is, how he likes to work, the rules, the list of projects and privacy. Moved to `CLOUD-NOTES.md`, word for word: "How the work flows" (every step, and working beside other sessions), the note that the session clock runs on UTC, where `/pickup` runs from, how to compare a branch with main, and what a long session costs. `CLAUDE.md` keeps a three-line version of the flow and says to read `CLOUD-NOTES.md` before opening a pull request. It went from about 2,200 words to about 1,600.
+- Why: Dan chose "A" (November 24, 2026) when asked whether to shorten `CLAUDE.md` this way. Claude's reason for suggesting it: every session reads all of `CLAUDE.md`, and the parts about Dan are easier to follow when they aren't mixed in with mechanics.
+- Turned down: "B", leaving it as it was (nothing could get lost in a move, but every session keeps reading all of it).
+- Revisit if: a session opens a pull request without watching for the merge, or Dan has to say "it merged." Then the flow goes back into `CLAUDE.md`.
