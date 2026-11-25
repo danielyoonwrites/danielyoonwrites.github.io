@@ -6,7 +6,7 @@ A little app that finds free and cheap things to do with young kids nearby (libr
 
 ## Rules for working here
 
-- Same rules as the website's `CLAUDE.md`: plain words for a beginner, one small change per pull request with a check the owner does, phone first, screenshots before every pull request.
+- Same rules as the website's `CLAUDE.md`: plain words for a beginner, one finished piece of work per pull request with a check the owner does, phone first, screenshots before every pull request.
 - Built to work for anyone, used just by the owner for now (his "A," November 5, 2026).
 - Right before full: official calendars first, AI search second (his "A," November 5, 2026). Every item keeps its source link and when it was read. Check the year on every date, and convert every time to the area's own time. "Cost not stated" is never counted as free. When something can't be confirmed, the app says so.
 - Posts by influencers count only when they're very current and match an official source (the owner's rule, November 5, 2026).

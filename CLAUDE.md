@@ -14,7 +14,7 @@ The website's own pages are plain HTML and CSS, with JavaScript where it helps. 
 ### Who you're working with
 
 - The owner is Daniel Yoon (writes as "Dan"): a writer and pastor in Southern California, Korean American, new to coding. He's building a series of small apps with AI, each a step harder than the last, and he makes the design decisions: what to build, what to leave out, and why.
-- He learns by doing: explain every change in plain words, one small change per pull request, and give him a check he can do himself before merging.
+- He learns by doing: explain every change in plain words, one finished piece of work per pull request, and give him a check he can do himself before merging.
 - How he likes instructions:
   - Numbered steps, with the full link inside each step (never "the link above") and the exact button or tab to click.
   - Every answer stands on its own (Dan's rule, October 26, 2026, after Claude said "the steps are two messages up"): repeat every step, link, name and value in full each time, even if it was given before. Never "see above" or "as before."
@@ -65,7 +65,7 @@ When Dan says "do the rest," Claude works through the build plan one pull reques
 ## Rules for working here
 
 - Explain every change in plain words a beginner can follow: what changed, why, and how to check it.
-- One small change per pull request.
+- One finished piece of work per pull request, with its notes inside it (Dan's "A", November 24, 2026). A finished piece is something he can check on his phone, or one complete change to the notes. Don't split it into small pull requests that each wait for his merge, and don't open a separate pull request just for notes.
 - Tools are allowed (Dan's decision, November 24, 2026: "If it is safe and ok to use tools and frameworks and npm, use it"; root `DECISIONS.md`). Use npm, a framework or a build step when it makes an app better or quicker to build, and say in plain words what was used and why. Two things to plan for: GitHub Pages publishes files exactly as they are, so an app that needs a build step or its own server is hosted where that can run (Vercel or Cloudflare, for example) or gets a build step in the publish workflow; and the apps already built as plain files stay that way unless Dan asks to change one. Cloudflare deploys Living in the Word's server with its tool Wrangler on every merge (`living-in-the-word/server/wrangler.jsonc`), and the video editor's captions server the same way once Dan connects it (`video-editor/server/wrangler.jsonc`, build step 7a, November 4, 2026; the captions are off for now, so it isn't connected or deployed).
 - Keep the code clear and commented so the next session can pick it up. Dan never edits code by hand (November 24, 2026), so nothing has to be kept hand-editable.
 - Every page must look good on a phone first, then on a computer.
